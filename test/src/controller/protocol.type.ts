@@ -67,6 +67,16 @@ export interface PromptsGetResponse {
 	}>;
 }
 
+export interface ToolListItem {
+    name: string;
+    description: string;
+    inputSchema: InputSchema;
+}
+
+export interface ToolsListResponse {
+    tools: ToolListItem[];
+}
+
 // ==================== 请求接口定义 ====================
 export interface BaseRequest {
 	method: string;

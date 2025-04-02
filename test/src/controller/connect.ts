@@ -82,8 +82,10 @@ export class MCPClient {
     }
 
     // 获取提示
-    public async getPrompt(name: string, args: Record<string, any> = {}) {
-        return await this.client.getPrompt({ name }, args);
+    public async getPrompt(name: string, args: Record<string, any> = {}) {        
+        return await this.client.getPrompt({
+            name, arguments: args
+        });
     }
 
     // 列出资源
@@ -101,6 +103,11 @@ export class MCPClient {
         return await this.client.readResource({
             uri
         });
+    }
+
+    // 列出所有工具
+    public async listTools() {
+        return await this.client.listTools();
     }
 
     // 调用工具

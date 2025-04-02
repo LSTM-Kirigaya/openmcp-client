@@ -1,11 +1,11 @@
 <template>
-	<div class="resource-template-container-scrollbar">
+	<div class="prompt-template-container-scrollbar">
 		<el-scrollbar height="500px">
-			<div class="resource-template-container">
+			<div class="prompt-template-container">
 				<div
 					class="item"
-                    :class="{ 'active': tabStorage.currentResourceName === template.name }"
-					v-for="template of resourcesManager.templates"
+                    :class="{ 'active': tabStorage.currentPromptName === template.name }"
+					v-for="template of promptsManager.templates"
 					:key="template.name"
                     @click="handleClick(template)"
 				>
@@ -15,10 +15,10 @@
 			</div>
 		</el-scrollbar>
 	</div>
-    <div class="resource-template-function-container">
+    <div class="prompt-template-function-container">
         <el-button
             type="primary"
-            @click="reloadResources({ first: false })"
+            @click="reloadPrompts({ first: false })"
         >
             {{ t('refresh') }}
         </el-button>
@@ -27,10 +27,10 @@
 
 <script setup lang="ts">
 import { useMessageBridge } from '@/api/message-bridge';
-import { CasualRestAPI, ResourceTemplate, ResourceTemplatesListResponse } from '@/hook/type';
+import { CasualRestAPI, PromptTemplate, PromptsListResponse } from '@/hook/type';
 import { onMounted, onUnmounted, defineProps } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { resourcesManager, ResourceStorage } from './resources';
+import { promptsManager, PromptStorage } from './prompts';
 import { tabs } from '../panel';
 import { ElMessage } from 'element-plus';
 
@@ -45,11 +45,11 @@ const props = defineProps({
 });
 
 const tab = tabs.content[props.tabId];
-const tabStorage = tab.storage as ResourceStorage;
+const tabStorage = tab.storage as PromptStorage;
 
-function reloadResources(option: { first: boolean }) {    
+function reloadPrompts(option: { first: boolean }) {    
     bridge.postMessage({
-        command: 'resources/templates/list'
+        command: 'prompts/list'
     });
 
     if (!option.first) {
@@ -62,26 +62,24 @@ function reloadResources(option: { first: boolean }) {
     }
 }
 
-function handleClick(template: ResourceTemplate) {
-    tabStorage.currentResourceName = template.name;
-    // TODO: 恢复这部分响应？
-    tabStorage.lastResourceReadResponse = undefined;
+function handleClick(template: PromptTemplate) {
+    tabStorage.currentPromptName = template.name;
+    tabStorage.lastPromptGetResponse = undefined;
 }
 
 let commandCancel: (() => void);
 
 onMounted(() => {
-    commandCancel = bridge.addCommandListener('resources/templates/list', (data: CasualRestAPI<ResourceTemplatesListResponse>) => {
-		resourcesManager.templates = data.msg.resourceTemplates || [];
+    commandCancel = bridge.addCommandListener('prompts/list', (data: CasualRestAPI<PromptsListResponse>) => {
+		promptsManager.templates = data.msg.prompts || [];
 
-        if (resourcesManager.templates.length > 0) {
-            tabStorage.currentResourceName = resourcesManager.templates[0].name;
-            // TODO: 恢复这部分响应？
-            tabStorage.lastResourceReadResponse = undefined;
+        if (promptsManager.templates.length > 0) {
+            tabStorage.currentPromptName = promptsManager.templates[0].name;
+            tabStorage.lastPromptGetResponse = undefined;
         }
 	}, { once: false });
 
-    reloadResources({ first: true });
+    reloadPrompts({ first: true });
 });
 
 onUnmounted(() => {
@@ -93,31 +91,31 @@ onUnmounted(() => {
 </script>
 
 <style>
-.resource-template-container-scrollbar {
+.prompt-template-container-scrollbar {
 	background-color: var(--background);
     margin-bottom: 10px;
 	border-radius: .5em;
 }
 
-.resource-template-container {
+.prompt-template-container {
 	height: fit-content;
 	display: flex;
 	flex-direction: column;
 	padding: 10px;
 }
 
-.resource-template-function-container {
+.prompt-template-function-container {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.resource-template-function-container button {
+.prompt-template-function-container button {
     width: 175px;
 }
 
-.resource-template-container > .item {
+.prompt-template-container > .item {
 	margin: 3px;
 	padding: 5px 10px;
 	border-radius: .3em;
@@ -129,24 +127,24 @@ onUnmounted(() => {
 	transition: var(--animation-3s);
 }
 
-.resource-template-container > .item:hover {
+.prompt-template-container > .item:hover {
 	background-color: var(--main-light-color);
 	transition: var(--animation-3s);
 }
 
-.resource-template-container > .item.active {
+.prompt-template-container > .item.active {
 	background-color: var(--main-light-color);
 	transition: var(--animation-3s);
 }
 
-.resource-template-container > .item > span:first-child {
+.prompt-template-container > .item > span:first-child {
 	max-width: 200px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.resource-template-container > .item > span:last-child {
+.prompt-template-container > .item > span:last-child {
 	opacity: 0.6;
 	font-size: 12.5px;
 	max-width: 200px;
@@ -154,5 +152,4 @@ onUnmounted(() => {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
-
 </style>

@@ -183,6 +183,41 @@ export async function readResource(
 }
 
 /**
+ * @description 获取工具列表
+ */
+export async function listTools(
+    client: MCPClient | undefined,
+    webview: VSCodeWebViewLike
+) {
+    if (!client) {
+        const connectResult = {
+            code: 501,
+            msg: 'mcp client 尚未连接'
+        };
+        webview.postMessage({ command: 'tools/list', data: connectResult });
+        return;
+    }
+
+    try {
+        const tools = await client.listTools();
+
+        const result = {
+            code: 200,
+            msg: tools
+        };
+        
+        webview.postMessage({ command: 'tools/list', data: result });
+    } catch (error) {
+        const result = {
+            code: 500,
+            msg: (error as any).toString()
+        };
+        webview.postMessage({ command: 'tools/list', data: result });
+    }
+}
+
+
+/**
  * @description 调用工具
  */
 export async function callTool(
@@ -204,6 +239,7 @@ export async function callTool(
 			name: option.toolName,
 			arguments: option.toolArgs
 		});
+
 		const result = {
 			code: 200,
 			msg: toolResult

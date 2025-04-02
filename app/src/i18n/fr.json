@@ -109,6 +109,9 @@
     "reset": "Réinitialiser",
     "read-resource": "Lire les ressources",
     "enter": "Entrée",
-    "connect.appearance.connect": "Se connecter",
-    "connect.appearance.reconnect": "Reconnecter"
+    "refresh": "Rafraîchir",
+    "finish-refresh": "Actualisation terminée",
+    "response": "Réponse",
+    "read-prompt": "Extraire des mots-clés",
+    "execute-tool": "Exécuter l'outil"
 }

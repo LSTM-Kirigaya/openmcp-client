@@ -69,6 +69,7 @@ function toggleConnectionPanel() {
 }
 
 .connected-status-container {
+    user-select: none;
 	cursor: pointer;
 	display: flex;
 	align-items: center;

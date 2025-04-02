@@ -109,6 +109,9 @@
     "reset": "재설정",
     "read-resource": "리소스 읽기",
     "enter": "입력",
-    "connect.appearance.connect": "연결",
-    "connect.appearance.reconnect": "재연결"
+    "refresh": "새로 고침",
+    "finish-refresh": "새로 고침 완료",
+    "response": "응답",
+    "read-prompt": "키워드 추출",
+    "execute-tool": "도구 실행"
 }

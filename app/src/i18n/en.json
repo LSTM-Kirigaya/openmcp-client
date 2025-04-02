@@ -109,6 +109,9 @@
     "reset": "Reset",
     "read-resource": "Read resources",
     "enter": "Input",
-    "connect.appearance.connect": "Connect",
-    "connect.appearance.reconnect": "Reconnect"
+    "refresh": "Refresh",
+    "finish-refresh": "Refresh completed",
+    "response": "Response",
+    "read-prompt": "Extract keywords",
+    "execute-tool": "Run tool"
 }

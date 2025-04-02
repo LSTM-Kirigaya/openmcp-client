@@ -109,6 +109,9 @@
     "reset": "リセット",
     "read-resource": "リソースを読み込む",
     "enter": "入力",
-    "connect.appearance.connect": "接続",
-    "connect.appearance.reconnect": "再接続"
+    "refresh": "更新",
+    "finish-refresh": "更新が完了しました",
+    "response": "応答",
+    "read-prompt": "キーワードを抽出",
+    "execute-tool": "ツールを実行"
 }

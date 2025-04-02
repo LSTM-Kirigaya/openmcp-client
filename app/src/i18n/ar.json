@@ -109,6 +109,9 @@
     "reset": "إعادة تعيين",
     "read-resource": "قراءة الموارد",
     "enter": "إدخال",
-    "connect.appearance.connect": "اتصال",
-    "connect.appearance.reconnect": "إعادة الاتصال"
+    "refresh": "تحديث",
+    "finish-refresh": "تم التحديث",
+    "response": "الاستجابة",
+    "read-prompt": "استخراج الكلمات الرئيسية",
+    "execute-tool": "تشغيل الأداة"
 }

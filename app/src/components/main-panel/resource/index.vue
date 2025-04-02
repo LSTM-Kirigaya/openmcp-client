@@ -46,11 +46,12 @@ const props = defineProps({
     padding: 20px;
     height: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
 }
 
 .resource-module .left {
     width: 45%;
+    max-width: 410px;
 }
 
 .resource-module .right {

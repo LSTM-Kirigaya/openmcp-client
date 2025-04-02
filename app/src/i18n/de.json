@@ -109,6 +109,9 @@
     "reset": "Zurücksetzen",
     "read-resource": "Ressourcen lesen",
     "enter": "Eingabe",
-    "connect.appearance.connect": "Verbinden",
-    "connect.appearance.reconnect": "Wiederverbinden"
+    "refresh": "Aktualisieren",
+    "finish-refresh": "Aktualisierung abgeschlossen",
+    "response": "Antwort",
+    "read-prompt": "Stichwörter extrahieren",
+    "execute-tool": "Werkzeug ausführen"
 }

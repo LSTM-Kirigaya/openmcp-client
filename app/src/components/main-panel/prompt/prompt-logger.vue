@@ -1,5 +1,5 @@
 <template>
-    <div class="resource-logger">
+    <div class="prompt-logger">
         <span>
             <span>{{ t('response') }}</span>
             <span style="width: 200px;">
@@ -19,8 +19,8 @@
                 contenteditable="false"
             >
                 <template v-if="!showRawJson">
-                    <span v-for="(content, index) of tabStorage.lastResourceReadResponse?.contents || []" :key="index">
-                        {{ content.text }}
+                    <span v-for="(message, index) of tabStorage.lastPromptGetResponse?.messages || []" :key="index">
+                        {{ message.content.text }}
                     </span>
                 </template>
                 <template v-else>
@@ -35,9 +35,9 @@
 import { defineComponent, defineProps, computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { tabs } from '../panel';
-import { ResourceStorage } from './resources';
+import { PromptStorage } from './prompts';
 
-defineComponent({ name: 'resource-logger' });
+defineComponent({ name: 'prompt-logger' });
 const { t } = useI18n();
 
 const props = defineProps({
@@ -48,13 +48,13 @@ const props = defineProps({
 });
 
 const tab = tabs.content[props.tabId];
-const tabStorage = tab.storage as ResourceStorage;
+const tabStorage = tab.storage as PromptStorage;
 
 const showRawJson = ref(false);
 
 const formattedJson = computed(() => {
     try {
-        return JSON.stringify(tabStorage.lastResourceReadResponse, null, 2);
+        return JSON.stringify(tabStorage.lastPromptGetResponse, null, 2);
     } catch {
         return 'Invalid JSON';
     }
@@ -62,32 +62,32 @@ const formattedJson = computed(() => {
 </script>
 
 <style>
-.resource-logger {
+.prompt-logger {
     border-radius: .5em;
     background-color: var(--background);
     padding: 10px;
 }
 
-.resource-logger .el-switch__core {
+.prompt-logger .el-switch__core {
     border: 1px solid var(--main-color) !important;
     width: 60px !important;
 }
 
-.resource-logger .el-switch .el-switch__action {
+.prompt-logger .el-switch .el-switch__action {
     background-color: var(--main-color);
 }
 
-.resource-logger .el-switch.is-checked .el-switch__action {
+.prompt-logger .el-switch.is-checked .el-switch__action {
     background-color: var(--sidebar);
 }
 
-.resource-logger > span:first-child {
+.prompt-logger > span:first-child {
     margin-bottom: 5px;
     display: flex;
     align-items: center;
 }
 
-.resource-logger .output-content {
+.prompt-logger .output-content {
     border-radius: .5em;
     padding: 15px;
     min-height: 300px;

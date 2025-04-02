@@ -109,6 +109,9 @@
     "reset": "Сброс",
     "read-resource": "Чтение ресурсов",
     "enter": "Ввод",
-    "connect.appearance.connect": "Подключиться",
-    "connect.appearance.reconnect": "Переподключиться"
+    "refresh": "Обновить",
+    "finish-refresh": "Обновление завершено",
+    "response": "Ответ",
+    "read-prompt": "Извлечь ключевые слова",
+    "execute-tool": "Запустить инструмент"
 }
