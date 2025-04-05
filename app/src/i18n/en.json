@@ -109,9 +109,12 @@
     "reset": "Reset",
     "read-resource": "Read resources",
     "enter": "Input",
-    "refresh": "Refresh",
-    "finish-refresh": "Refresh completed",
+    "blank-test": "Blank test",
+    "connect.appearance.reconnect": "Reconnect",
+    "connect.appearance.connect": "Connection",
     "response": "Response",
-    "read-prompt": "Extract keywords",
-    "execute-tool": "Run tool"
+    "refresh": "Refresh",
+    "read-prompt": "Read prompt",
+    "execute-tool": "Run",
+    "save": "Save"
 }

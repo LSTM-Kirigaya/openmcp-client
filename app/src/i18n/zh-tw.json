@@ -109,9 +109,12 @@
     "reset": "重置",
     "read-resource": "讀取資源",
     "enter": "輸入",
-    "refresh": "重新整理",
-    "finish-refresh": "刷新完成",
+    "blank-test": "空白測試",
+    "connect.appearance.reconnect": "重新連線",
+    "connect.appearance.connect": "連接",
     "response": "響應",
-    "read-prompt": "提取關鍵詞",
-    "execute-tool": "執行工具"
+    "refresh": "重新整理",
+    "read-prompt": "讀取提示",
+    "execute-tool": "執行",
+    "save": "儲存"
 }

@@ -12,7 +12,7 @@
                     >
                         <span>
                             <span :class="`iconfont ${tab.icon}`"></span>
-                            <span>{{ tab.name }}</span>
+                            <span class="tab-name">{{ tab.name }}</span>
                         </span>
                         <span 
                             class="iconfont icon-close"
@@ -24,7 +24,7 @@
 
 			<span
 				class="add-button iconfont icon-add"
-				@click="addNewTab"
+				@click="pageAddNewTab"
 			>
 			</span>
 		</div>
@@ -33,16 +33,28 @@
 		<div class="main-panel">
 			<router-view />
 		</div>
-
-
 	</div>
 </template>
 
 <script setup lang="ts">
 import { defineComponent } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { addNewTab, tabs, setActiveTab, closeTab } from './panel';
 
 defineComponent({ name: 'main-panel' });
+
+const route = useRoute();
+const router = useRouter();
+
+function pageAddNewTab() {
+	addNewTab();	
+
+	// 如果当前不在 debug 路由，则切换到 debug 路由
+	if (route.name !== 'debug') {
+		router.push('/debug');
+	}
+}
+
 </script>
 
 <style>
@@ -83,6 +95,7 @@ defineComponent({ name: 'main-panel' });
 }
 
 .tabs-container .tab {
+	white-space: nowrap;
 	margin: 5px;
     font-size: 13px;
     width: 120px;
@@ -99,6 +112,12 @@ defineComponent({ name: 'main-panel' });
 .tabs-container .tab > span:first-child {
     display: flex;
     align-items: center;
+}
+
+.tabs-container .tab .tab-name {
+	max-width: 70px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .tabs-container .tab:hover {

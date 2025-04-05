@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 import { debugModes, tabs } from '@/components/main-panel/panel';
-import { defineComponent, markRaw } from 'vue';
+import { defineComponent, markRaw, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { connectionResult } from '../connect/connection';
 import { ElMessage } from 'element-plus';
@@ -33,22 +33,22 @@ const { t } = useI18n();
 const debugOptions = [
 	{
 		icon: 'icon-file',
-		name: t("resources"),
+		name: computed(() => t("resources")),
 		ident: 'resources'
 	},
 	{
 		icon: 'icon-chat',
-		name: t("prompts"),
+		name: computed(() => t("prompts")),
 		ident: 'prompts'
 	},
 	{
 		icon: 'icon-tool',
-		name: t("tools"),
+		name: computed(() => t("tools")),
 		ident: 'tool'
 	},
 	{
 		icon: 'icon-robot',
-		name: t("interaction-test"),
+		name: computed(() => t("interaction-test")),
 		ident: 'interaction'
 	}
 ];
@@ -59,8 +59,11 @@ function chooseDebugMode(index: number) {
 	if (connectionResult.success) {
 		const activeTab = tabs.activeTab;
 		activeTab.component = markRaw(debugModes[index]);
+		activeTab.componentIndex = index;
 		activeTab.icon = debugOptions[index].icon;
-		activeTab.name = debugOptions[index].name;
+
+		// 此处可以这么做是因为这个操作过后 activeTab 绑定的 tab 的 name 就不会再被进行赋值操作了
+		activeTab.name = debugOptions[index].name as any;
 	} else {
 		const message = t('warning.click-to-connect')
 			.replace('$1', t('connect'));

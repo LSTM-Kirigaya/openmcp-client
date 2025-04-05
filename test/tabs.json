@@ -1,0 +1,12 @@
+{
+  "currentIndex": 0,
+  "tabs": [
+    {
+      "name": "交互测试",
+      "icon": "icon-robot",
+      "type": "blank",
+      "componentIndex": 3,
+      "storage": {}
+    }
+  ]
+}

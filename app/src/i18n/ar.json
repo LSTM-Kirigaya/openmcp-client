@@ -109,9 +109,12 @@
     "reset": "إعادة تعيين",
     "read-resource": "قراءة الموارد",
     "enter": "إدخال",
-    "refresh": "تحديث",
-    "finish-refresh": "تم التحديث",
+    "blank-test": "اختبار فارغ",
+    "connect.appearance.reconnect": "إعادة الاتصال",
+    "connect.appearance.connect": "اتصال",
     "response": "الاستجابة",
-    "read-prompt": "استخراج الكلمات الرئيسية",
-    "execute-tool": "تشغيل الأداة"
+    "refresh": "تحديث",
+    "read-prompt": "قراءة المطالبة",
+    "execute-tool": "تشغيل",
+    "save": "حفظ"
 }

@@ -109,9 +109,12 @@
     "reset": "Zurücksetzen",
     "read-resource": "Ressourcen lesen",
     "enter": "Eingabe",
-    "refresh": "Aktualisieren",
-    "finish-refresh": "Aktualisierung abgeschlossen",
+    "blank-test": "Leertest",
+    "connect.appearance.reconnect": "Neuverbindung",
+    "connect.appearance.connect": "Verbindung",
     "response": "Antwort",
-    "read-prompt": "Stichwörter extrahieren",
-    "execute-tool": "Werkzeug ausführen"
+    "refresh": "Aktualisieren",
+    "read-prompt": "Prompt lesen",
+    "execute-tool": "Ausführen",
+    "save": "Speichern"
 }

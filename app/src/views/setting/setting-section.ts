@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 
 import I18n from '@/i18n/index';
 
@@ -13,11 +13,11 @@ export const settingSections = reactive({
 		},
 		{
 			value: 'general',
-			label: t('general-setting')
+			label: computed(() => t('general-setting'))
 		},
 		{
 			value: 'appearance',
-			label: t('appearance-setting')
+			label: computed(() => t('appearance-setting'))
 		}
 	]
 });

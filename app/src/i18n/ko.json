@@ -109,9 +109,12 @@
     "reset": "재설정",
     "read-resource": "리소스 읽기",
     "enter": "입력",
-    "refresh": "새로 고침",
-    "finish-refresh": "새로 고침 완료",
+    "blank-test": "빈 테스트",
+    "connect.appearance.reconnect": "재연결",
+    "connect.appearance.connect": "연결",
     "response": "응답",
-    "read-prompt": "키워드 추출",
-    "execute-tool": "도구 실행"
+    "refresh": "새로 고침",
+    "read-prompt": "프롬프트 읽기",
+    "execute-tool": "실행",
+    "save": "저장"
 }

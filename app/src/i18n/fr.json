@@ -109,9 +109,12 @@
     "reset": "Réinitialiser",
     "read-resource": "Lire les ressources",
     "enter": "Entrée",
-    "refresh": "Rafraîchir",
-    "finish-refresh": "Actualisation terminée",
+    "blank-test": "Test vide",
+    "connect.appearance.reconnect": "Reconnexion",
+    "connect.appearance.connect": "Connexion",
     "response": "Réponse",
-    "read-prompt": "Extraire des mots-clés",
-    "execute-tool": "Exécuter l'outil"
+    "refresh": "Rafraîchir",
+    "read-prompt": "Lire l'invite",
+    "execute-tool": "Exécuter",
+    "save": "Enregistrer"
 }

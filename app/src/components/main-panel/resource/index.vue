@@ -3,7 +3,7 @@
         <div class="left">
             <h2>
                 <span class="iconfont icon-file"></span>
-                资源模块
+                {{ t("resources") + t("module") }}
             </h2>
             <h3><code>resources/templates/list</code></h3>
             
@@ -26,9 +26,12 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue';
+import { useI18n } from 'vue-i18n';
 import ResourceTemplates from './resource-templates.vue';
 import ResourceReader from './resouce-reader.vue';
 import ResourceLogger from './resource-logger.vue';
+
+const { t } = useI18n(); 
 
 const props = defineProps({
     tabId: {

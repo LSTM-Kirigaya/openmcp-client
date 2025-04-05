@@ -109,9 +109,12 @@
     "reset": "Сброс",
     "read-resource": "Чтение ресурсов",
     "enter": "Ввод",
-    "refresh": "Обновить",
-    "finish-refresh": "Обновление завершено",
+    "blank-test": "Пустой тест",
+    "connect.appearance.reconnect": "Переподключение",
+    "connect.appearance.connect": "Соединение",
     "response": "Ответ",
-    "read-prompt": "Извлечь ключевые слова",
-    "execute-tool": "Запустить инструмент"
+    "refresh": "Обновить",
+    "read-prompt": "Чтение подсказки",
+    "execute-tool": "Запуск",
+    "save": "Сохранить"
 }

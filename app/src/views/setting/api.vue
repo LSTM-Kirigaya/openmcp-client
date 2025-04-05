@@ -34,7 +34,9 @@
 					<span class="option-title">{{ t('model') }}</span>
 				</span>
 				<div style="width: 160px;">
-					<el-select name="language-setting" class="language-setting"
+					<el-select
+						v-if="llms[llmManager.currentModelIndex]"
+						name="language-setting" class="language-setting"
 						v-model="llms[llmManager.currentModelIndex].userModel"
 						@change="onmodelchange"
 					>
@@ -54,6 +56,7 @@
 				</span>
 				<div style="width: 240px;">
 					<el-input
+						v-if="llms[llmManager.currentModelIndex]"
 						v-model="llms[llmManager.currentModelIndex].baseUrl"
 						placeholder="https://"
 					/>
@@ -67,11 +70,20 @@
 				</span>
 				<div style="width: 240px;">
 					<el-input
+						v-if="llms[llmManager.currentModelIndex]"
 						v-model="llms[llmManager.currentModelIndex].userToken"
 						show-password
 					/>
 				</div>
 			</div>
+		</div>
+
+		<br>
+
+		<div class="setting-save-container">
+			<el-button type="primary" @click="saveLlmSetting">
+				{{ t('save') }}
+			</el-button>
 		</div>
 	</div>
 
@@ -81,14 +93,25 @@
 import { defineComponent } from 'vue';
 import { llmManager, llms, onmodelchange } from './llm';
 import { useI18n } from 'vue-i18n';
+import { saveSetting } from '@/hook/setting';
+import { ElMessage } from 'element-plus';
 
 defineComponent({ name: 'api' });
 const { t } = useI18n();
 
-
+function saveLlmSetting() {
+	saveSetting(() => {
+		ElMessage({
+			message: '成功保存',
+			type: 'success'
+		});
+	});
+}
 
 </script>
 
 <style>
-
+.setting-save-container {
+	margin: 5px;
+}
 </style>

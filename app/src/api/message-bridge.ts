@@ -13,7 +13,7 @@ export type CommandHandler = (data: any) => void;
 export const acquireVsCodeApi = (window as any)['acquireVsCodeApi'];
 
 interface AddCommandListenerOption {
-    once: boolean // 只调用一次就销毁
+	once: boolean // 只调用一次就销毁
 }
 
 class MessageBridge {
@@ -71,10 +71,10 @@ class MessageBridge {
 			this.isConnected.value = false;
 		};
 
-		this.postMessage = (message) => {			
+		this.postMessage = (message) => {
 			if (this.ws?.readyState === WebSocket.OPEN) {
 				console.log(message);
-				
+
 				this.ws.send(JSON.stringify(message));
 			}
 		};
@@ -95,27 +95,45 @@ class MessageBridge {
 	public postMessage(message: VSCodeMessage) {
 		throw new Error('PostMessage not initialized');
 	}
-	
+
 	/**
-	 * @description 注册一个命令的执行器
-	 * @returns 
+	 * @description 注册一个命令的执行器（支持一次性或持久监听）
+	 * @example
+	 * // 基本用法（持久监听）
+	 * const removeListener = bridge.addCommandListener('message', (data) => {
+	 *   console.log('收到消息:', data.msg.text);
+	 * }, { once: false });
+	 * 
+	 * // 稍后取消监听
+	 * removeListener();
+	 * 
+	 * @example
+	 * // 一次性监听（自动移除）
+	 * bridge.addCommandListener('connect', (data) => {
+	 *   const { code, msg } = data;
+	 *   console.log(`连接结果: ${code === 200 ? '成功' : '失败'}`);
+	 * }, { once: true });
 	 */
-	public addCommandListener(command: string, commandHandler: CommandHandler, option: AddCommandListenerOption) {
+	public addCommandListener(
+		command: string,
+		commandHandler: CommandHandler,
+		option: AddCommandListenerOption
+	): () => boolean {
 		if (!this.handlers.has(command)) {
 			this.handlers.set(command, new Set<CommandHandler>());
 		}
 		const commandHandlers = this.handlers.get(command)!;
 
-        const wrapperCommandHandler = option.once ? (data: any) => {
-            commandHandler(data);
-            commandHandlers.delete(wrapperCommandHandler);
-        } : commandHandler;
+		const wrapperCommandHandler = option.once ? (data: any) => {
+			commandHandler(data);
+			commandHandlers.delete(wrapperCommandHandler);
+		} : commandHandler;
 
 		commandHandlers.add(wrapperCommandHandler);
 		return () => commandHandlers.delete(wrapperCommandHandler);
 	}
 
-	public destroy() {		
+	public destroy() {
 		this.ws?.close();
 		this.handlers.clear();
 	}
