@@ -1,0 +1,119 @@
+@font-face {
+  font-family: "iconfont"; /* Project id 4870215 */
+  src: url('iconfont.woff2?t=1743933179660') format('woff2'),
+       url('iconfont.woff?t=1743933179660') format('woff'),
+       url('iconfont.ttf?t=1743933179660') format('truetype');
+}
+
+.iconfont {
+  font-family: "iconfont" !important;
+  
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-robot1:before {
+  content: "\e644";
+}
+
+.icon-length:before {
+  content: "\e60d";
+}
+
+.icon-web:before {
+  content: "\e935";
+}
+
+.icon-temperature:before {
+  content: "\e62e";
+}
+
+.icon-close:before {
+  content: "\e615";
+}
+
+.icon-blank:before {
+  content: "\e602";
+}
+
+.icon-add:before {
+  content: "\e60c";
+}
+
+.icon-delete:before {
+  content: "\e672";
+}
+
+.icon-company:before {
+  content: "\e6f5";
+}
+
+.icon-token:before {
+  content: "\e68f";
+}
+
+.icon-url-line:before {
+  content: "\ea38";
+}
+
+.icon-llm:before {
+  content: "\e8be";
+}
+
+.icon-bg-colors:before {
+  content: "\e800";
+}
+
+.icon-i18n:before {
+  content: "\e601";
+}
+
+.icon-weixin:before {
+  content: "\e600";
+}
+
+.icon-QQ:before {
+  content: "\e882";
+}
+
+.icon-debug:before {
+  content: "\e76d";
+}
+
+.icon-plugin:before {
+  content: "\e63e";
+}
+
+.icon-about:before {
+  content: "\e6e5";
+}
+
+.icon-setting:before {
+  content: "\e610";
+}
+
+.icon-send:before {
+  content: "\e888";
+}
+
+.icon-robot:before {
+  content: "\e8e8";
+}
+
+.icon-play:before {
+  content: "\e8c2";
+}
+
+.icon-chat:before {
+  content: "\e60b";
+}
+
+.icon-file:before {
+  content: "\e726";
+}
+
+.icon-tool:before {
+  content: "\ea89";
+}
+

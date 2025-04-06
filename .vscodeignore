@@ -12,7 +12,7 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
-app/**
-backend/**
+renderer/**
+service/**
 test/**
 servers/**

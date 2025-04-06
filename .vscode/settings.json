@@ -11,6 +11,6 @@
 	// Turn off tsc task auto detection since we have the necessary tasks as npm scripts
 	"typescript.tsc.autoDetect": "off",
 	
-	"i18n-haru.root": "app/src/i18n",
+	"i18n-haru.root": "renderer/src/i18n",
 	"i18n-haru.main": "zh"
 }
