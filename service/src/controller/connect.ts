@@ -16,6 +16,7 @@ export interface MCPOptions {
     args?: string[];
     // SSE 特定选项
     url?: string;
+    cwd?: string;
     // 通用客户端选项
     clientName?: string;
     clientVersion?: string;
@@ -52,7 +53,8 @@ export class MCPClient {
             case 'STDIO':
                 this.transport = new StdioClientTransport({
                     command: this.options.command || '',
-                    args: this.options.args || []
+                    args: this.options.args || [],
+                    cwd: this.options.cwd || process.cwd()
                 });
                 break;
             case 'SSE':

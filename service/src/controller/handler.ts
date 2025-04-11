@@ -1,4 +1,4 @@
-import { VSCodeWebViewLike } from "../adapter";
+import { PostMessageble } from "../adapter";
 import { MCPClient } from "./connect";
 
 // ==================== 接口定义 ====================
@@ -23,7 +23,7 @@ export interface CallToolOption {
  */
 export async function listPrompts(
 	client: MCPClient | undefined,
-	webview: VSCodeWebViewLike
+	webview: PostMessageble
 ) {
 	if (!client) {
 		const connectResult = {
@@ -56,7 +56,7 @@ export async function listPrompts(
 export async function getPrompt(
 	client: MCPClient | undefined,
 	option: GetPromptOption,
-	webview: VSCodeWebViewLike
+	webview: PostMessageble
 ) {
 	if (!client) {
 		const connectResult = {
@@ -88,7 +88,7 @@ export async function getPrompt(
  */
 export async function listResources(
 	client: MCPClient | undefined,
-	webview: VSCodeWebViewLike
+	webview: PostMessageble
 ) {
 	if (!client) {
 		const connectResult = {
@@ -121,7 +121,7 @@ export async function listResources(
  */
 export async function listResourceTemplates(
 	client: MCPClient | undefined,
-	webview: VSCodeWebViewLike
+	webview: PostMessageble
 ) {
 	if (!client) {
 		const connectResult = {
@@ -155,7 +155,7 @@ export async function listResourceTemplates(
 export async function readResource(
 	client: MCPClient | undefined,
 	option: ReadResourceOption,
-	webview: VSCodeWebViewLike
+	webview: PostMessageble
 ) {
 	if (!client) {
 		const connectResult = {
@@ -187,7 +187,7 @@ export async function readResource(
  */
 export async function listTools(
     client: MCPClient | undefined,
-    webview: VSCodeWebViewLike
+    webview: PostMessageble
 ) {
     if (!client) {
         const connectResult = {
@@ -223,7 +223,7 @@ export async function listTools(
 export async function callTool(
 	client: MCPClient | undefined,
 	option: CallToolOption,
-	webview: VSCodeWebViewLike
+	webview: PostMessageble
 ) {
 	if (!client) {
 		const connectResult = {

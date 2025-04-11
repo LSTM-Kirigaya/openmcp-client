@@ -51,7 +51,7 @@ import { defineComponent, defineProps, watch, ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { tabs } from '../panel';
-import { toolsManager, ToolStorage } from './tools';
+import { callTool, toolsManager, ToolStorage } from './tools';
 import { CasualRestAPI, ToolCallResponse } from '@/hook/type';
 import { useMessageBridge } from '@/api/message-bridge';
 
@@ -111,24 +111,11 @@ const resetForm = () => {
     tabStorage.lastToolCallResponse = undefined;
 };
 
-function handleExecute() {
+async function handleExecute() {
     if (!currentTool.value) return;
-    
-    const bridge = useMessageBridge();
 
-    bridge.addCommandListener('tools/call', (data: CasualRestAPI<ToolCallResponse>) => {
-        console.log(data.msg);
-        
-        tabStorage.lastToolCallResponse = data.msg;
-    }, { once: true });
-
-    bridge.postMessage({
-        command: 'tools/call',
-        data: {
-            toolName: tabStorage.currentToolName,
-            toolArgs: formData.value
-        }
-    });
+    const toolResponse = await callTool(tabStorage.currentToolName, formData.value);
+    tabStorage.lastToolCallResponse = toolResponse;
 }
 
 watch(() => tabStorage.currentToolName, () => {

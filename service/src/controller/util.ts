@@ -1,7 +1,7 @@
-import { VSCodeWebViewLike } from "../adapter";
+import { PostMessageble } from "../adapter";
 import { MCPClient } from "./connect";
 
-export function ping(client: MCPClient | undefined, webview: VSCodeWebViewLike) {
+export function ping(client: MCPClient | undefined, webview: PostMessageble) {
 	if (!client) {
 		const connectResult = {
 			code: 501,

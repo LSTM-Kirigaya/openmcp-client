@@ -109,7 +109,7 @@ function handleSubmit() {
 
     bridge.postMessage({
         command: 'prompts/get',
-        data: { promptId: currentPrompt.value.name, args: formData.value }
+        data: { promptId: currentPrompt.value.name, args: JSON.parse(JSON.stringify(formData.value)) }
     });
 }
 

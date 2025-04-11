@@ -1,0 +1,430 @@
+.vscode-dark code[class*=language-],
+.vscode-dark pre[class*=language-] {
+    color: #abb2bf;
+    font-family: var(--code-font-family);
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+.vscode-dark pre[class*=language-] {
+    position: relative;
+    margin: .5em 0;
+    overflow: visible;
+}
+
+.vscode-dark pre[class*=language-]>code {
+    position: relative;
+    background-size: 3em 3em;
+    background-origin: content-box;
+    background-attachment: local;
+    padding: 0 5px;
+}
+
+.vscode-dark code[class*=language-] {
+    max-height: inherit;
+    height: inherit;
+    display: block;
+    overflow: auto;
+}
+
+.vscode-dark :not(pre)>code[class*=language-],
+.vscode-dark pre[class*=language-] {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 1em;
+}
+
+.vscode-dark :not(pre)>code[class*=language-] {
+    position: relative;
+    padding: .2em;
+    border-radius: .3em;
+    color: #c92c2c;
+    border: 1px solid rgba(0, 0, 0, .1);
+    display: inline;
+    white-space: normal;
+}
+
+.vscode-dark pre[class*=language-]:after,
+.vscode-dark pre[class*=language-]:before {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: .75em;
+    left: .18em;
+    -webkit-transform: rotate(-2deg);
+    -moz-transform: rotate(-2deg);
+    -ms-transform: rotate(-2deg);
+    -o-transform: rotate(-2deg);
+    transform: rotate(-2deg);
+}
+
+.vscode-dark pre[class*=language-]:after {
+    right: .75em;
+    left: auto;
+    -webkit-transform: rotate(2deg);
+    -moz-transform: rotate(2deg);
+    -ms-transform: rotate(2deg);
+    -o-transform: rotate(2deg);
+    transform: rotate(2deg);
+}
+
+.vscode-dark .token.block-comment,
+.vscode-dark .token.cdata,
+.vscode-dark .token.comment,
+.vscode-dark .token.doctype,
+.vscode-dark .token.prolog {
+    color: #7F848E;
+}
+
+.vscode-dark .token.punctuation {
+    color: #D19A66;
+}
+
+.vscode-dark .token.boolean,
+.vscode-dark .token.constant,
+.vscode-dark .token.deleted,
+.vscode-dark .token.function-name,
+.vscode-dark .token.property,
+.vscode-dark .token.symbol,
+.vscode-dark .token.tag {
+    color: #d55f69;
+}
+
+.vscode-dark .token.number {
+    color: #d19a66;
+}
+
+.vscode-dark .token.attr-name,
+.vscode-dark .token.builtin,
+.vscode-dark .token.char,
+.vscode-dark .token.inserted,
+.vscode-dark .token.string {
+    color: #4da736;
+}
+
+.vscode-dark .token.selector {
+    color: #af7137;
+}
+
+.vscode-dark .token.function {
+    color: #61afef;
+}
+
+.vscode-dark .token.entity,
+.vscode-dark .token.operator,
+.vscode-dark .token.url {
+    color: #56B6C2;
+}
+
+.vscode-dark .token.variable {
+    color: #E06C75;
+}
+
+.vscode-dark .token.atrule,
+.vscode-dark .token.attr-value {
+    color: #61AFEF;
+}
+
+.vscode-dark .token.class-name {
+    color: #9e32d4;
+}
+
+.vscode-dark .token.keyword {
+    color: #c586c0;
+}
+
+.vscode-dark .token.important,
+.vscode-dark .token.regex {
+    color: #e90;
+}
+
+.vscode-dark .language-css .token.string,
+.vscode-dark .style .token.string {
+    color: #a67f59;
+}
+
+.vscode-dark .token.important {
+    font-weight: 400;
+}
+
+.vscode-dark .token.bold {
+    font-weight: 700;
+}
+
+.vscode-dark .token.italic {
+    font-style: italic;
+}
+
+.vscode-dark .token.entity {
+    cursor: help;
+}
+
+.vscode-dark .token.namespace {
+    color: #9e32d4;
+    opacity: .7;
+}
+
+@media screen and (max-width:767px) {
+    .vscode-dark pre[class*=language-]:after,
+    .vscode-dark pre[class*=language-]:before {
+        bottom: 14px;
+        box-shadow: none;
+    }
+}
+
+.vscode-dark pre[class*=language-].line-numbers.line-numbers {
+    padding-left: 0;
+}
+
+.vscode-dark pre[class*=language-].line-numbers.line-numbers code {
+    padding-left: 3.8em;
+}
+
+.vscode-dark pre[class*=language-].line-numbers.line-numbers .line-numbers-rows {
+    left: 0;
+}
+
+.vscode-dark pre[class*=language-][data-line] {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.vscode-dark pre[data-line] code {
+    position: relative;
+    padding-left: 4em;
+}
+
+.vscode-dark pre .line-highlight {
+    margin-top: 0;
+}
+
+
+.vscode-light code[class*=language-],
+.vscode-light pre[class*=language-] {
+    color: #383A42;
+    font-family: var(--code-font-family);
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+.vscode-light pre[class*=language-] {
+    position: relative;
+    margin: .5em 0;
+    overflow: visible;
+}
+
+.vscode-light pre[class*=language-]>code {
+    position: relative;
+    background-origin: content-box;
+    background-attachment: local;
+    padding: 0 5px;
+}
+
+.vscode-light code[class*=language-] {
+    max-height: inherit;
+    height: inherit;
+    display: block;
+    overflow: auto;
+}
+
+.vscode-light :not(pre)>code[class*=language-],
+.vscode-light pre[class*=language-] {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 1em;
+}
+
+.vscode-light :not(pre)>code[class*=language-] {
+    position: relative;
+    padding: .2em;
+    border-radius: .3em;
+    color: #c92c2c;
+    border: 1px solid rgba(0, 0, 0, .1);
+    display: inline;
+    white-space: normal;
+}
+
+.vscode-light pre[class*=language-]:after,
+.vscode-light pre[class*=language-]:before {
+    content: '';
+    display: block;
+    position: absolute;
+    bottom: .75em;
+    left: .18em;
+    width: 40%;
+    height: 20%;
+    max-height: 13em;
+    -webkit-transform: rotate(-2deg);
+    -moz-transform: rotate(-2deg);
+    -ms-transform: rotate(-2deg);
+    -o-transform: rotate(-2deg);
+    transform: rotate(-2deg);
+}
+
+.vscode-light pre[class*=language-]:after {
+    right: .75em;
+    left: auto;
+    -webkit-transform: rotate(2deg);
+    -moz-transform: rotate(2deg);
+    -ms-transform: rotate(2deg);
+    -o-transform: rotate(2deg);
+    transform: rotate(2deg);
+}
+
+.vscode-light .token.block-comment,
+.vscode-light .token.cdata,
+.vscode-light .token.comment,
+.vscode-light .token.doctype,
+.vscode-light .token.prolog {
+    color: #7F848E;
+}
+
+.vscode-light .token.punctuation {
+    color: #D19A66;
+}
+
+.vscode-light .token.boolean,
+.vscode-light .token.constant,
+.vscode-light .token.deleted,
+.vscode-light .token.function-name,
+.vscode-light .token.property,
+.vscode-light .token.symbol,
+.vscode-light .token.tag {
+    color: #d55f69;
+}
+
+.vscode-light .token.number {
+    color: #be8550;
+}
+
+.vscode-light .token.attr-name,
+.vscode-light .token.builtin,
+.vscode-light .token.char,
+.vscode-light .token.inserted,
+.vscode-light .token.string {
+    color: #4da736;
+}
+
+.vscode-light .token.selector {
+    color: #af7137;
+}
+
+.vscode-light .token.function {
+    color: #4284f5;
+}
+
+.vscode-light .token.entity,
+.vscode-light .token.operator,
+.vscode-light .token.url {
+    color: #56B6C2;
+}
+
+.vscode-light .token.variable {
+    color: #E06C75;
+}
+
+.vscode-light .token.atrule,
+.vscode-light .token.attr-value {
+    color: #61AFEF;
+}
+
+.vscode-light .token.class-name {
+    color: #9e32d4;
+}
+
+.vscode-light .token.keyword {
+    color: #c37429;
+}
+
+.vscode-light .token.important,
+.vscode-light .token.regex {
+    color: #e90;
+}
+
+.vscode-light .language-css .token.string,
+.vscode-light .style .token.string {
+    color: #a67f59;
+}
+
+.vscode-light .token.important {
+    font-weight: 400;
+}
+
+.vscode-light .token.bold {
+    font-weight: 700;
+}
+
+.vscode-light .token.italic {
+    font-style: italic;
+}
+
+.vscode-light .token.entity {
+    cursor: help;
+}
+
+.vscode-light .token.namespace {
+    color: #9e32d4;
+    opacity: .7;
+}
+
+@media screen and (max-width:767px) {
+    .vscode-light pre[class*=language-]:after,
+    .vscode-light pre[class*=language-]:before {
+        bottom: 14px;
+        box-shadow: none;
+    }
+}
+
+.vscode-light pre[class*=language-].line-numbers.line-numbers {
+    padding-left: 0;
+}
+
+.vscode-light pre[class*=language-].line-numbers.line-numbers code {
+    padding-left: 3.8em;
+}
+
+.vscode-light pre[class*=language-].line-numbers.line-numbers .line-numbers-rows {
+    left: 0;
+}
+
+.vscode-light pre[class*=language-][data-line] {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.vscode-light pre[data-line] code {
+    position: relative;
+    padding-left: 4em;
+}
+
+.vscode-light pre .line-highlight {
+    margin-top: 0;
+}

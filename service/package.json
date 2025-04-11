@@ -1,11 +1,12 @@
 {
 	"name": "openmcp-test-backend",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "",
-	"main": "dist/main.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"serve": "ts-node src/main.ts",
-		"build": "tsc && cp -R src/public dist/ 2> /dev/null || :",
+		"build": "tsc",
 		"build:watch": "tsc --watch",
 		"start": "node dist/main.js",
 		"start:prod": "NODE_ENV=production node dist/main.js",

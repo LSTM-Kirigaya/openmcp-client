@@ -1,9 +1,22 @@
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg t="1742640634061" class="icon" viewBox="0 0 1024 1024" version="1.1"
-	xmlns="http://www.w3.org/2000/svg" p-id="1503" data-darkreader-inline-fill=""
-	xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200">
-	<path
-		d="M768 854.016h-170.016L768 170.016h170.016L768 854.016zM682.016 170.016H512l-170.016 684H512l170.016-684zM86.016 704q0 44 31.008 75.008t75.008 31.008 75.008-31.008T298.048 704t-31.008-75.008-75.008-31.008-75.008 31.008T86.016 704z m0-297.984q0 44 31.008 75.008t75.008 31.008 75.008-31.008 31.008-75.008-31.008-76-75.008-32-75.008 32-31.008 76z"
-		p-id="1504" fill="#CB81DA"></path>
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 824 834" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <path id="path_1" d="M300 0C465.708 0 600 134.292 600 300L600 300C600 465.708 465.708 600 300 600L300 600C134.292 600 0 465.708 0 300L0 300C0 134.292 134.292 0 300 0Z" />
+    <linearGradient id="gradient_2" gradientUnits="userSpaceOnUse" x1="300" y1="0" x2="300" y2="600">
+      <stop offset="0" stop-color="#A1A7F6" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.2" />
+    </linearGradient>
+  </defs>
+  <g>
+    <g transform="translate(186 116)">
+      <use p4:href="#path_1" fill="#5A00FF" xmlns:p4="http://www.w3.org/1999/xlink" />
+      <use p4:href="#path_1" fill="url(#gradient_2)" xmlns:p4="http://www.w3.org/1999/xlink" />
+    </g>
+
+    <path d="M300 0C465.708 0 600 134.292 600 300L600 300C600 465.708 465.708 600 300 600L300 600C134.292 600 0 465.708 0 300L0 300C0 134.292 134.292 0 300 0Z" />
+    <path d="M0 110.5C0 49.4725 49.4725 0 110.5 0C171.527 0 221 49.4725 221 110.5C221 171.527 171.527 221 110.5 221C49.4725 221 0 171.527 0 110.5Z" fill="#FFFFFF" fill-rule="evenodd" fill-opacity="0.431" transform="translate(445 458)" />
+    <path d="M0 55.5C0 24.8482 24.8482 0 55.5 0C86.1518 0 111 24.8482 111 55.5C111 86.1518 86.1518 111 55.5 111C24.8482 111 0 86.1518 0 55.5Z" fill="#FFFFFF" fill-rule="evenodd" fill-opacity="0.431" transform="translate(199 386)" />
+    <path d="M0 182.5C0 81.708 81.708 0 182.5 0C283.292 0 365 81.708 365 182.5C365 283.292 283.292 365 182.5 365C81.708 365 0 283.292 0 182.5Z" fill="#FFFFFF" fill-rule="evenodd" fill-opacity="0.424" transform="translate(339 156)" />
+    <path d="M0 57C0 25.5198 25.5198 0 57 0C88.4802 0 114 25.5198 114 57C114 88.4802 88.4802 114 57 114C25.5198 114 0 88.4802 0 57Z" fill="#FFFFFF" fill-rule="evenodd" fill-opacity="0.431" transform="translate(521 188)" />
+  </g>
 </svg>

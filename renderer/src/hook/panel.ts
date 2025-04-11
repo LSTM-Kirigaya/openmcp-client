@@ -22,28 +22,36 @@ export function loadPanels() {
     const bridge = useMessageBridge();
     
     bridge.addCommandListener('panel/load', data => {
-        const persistTab = data.msg as SaveTab;
+		if (data.code !== 200) {
+			pinkLog('tabs 加载失败');
+			console.log(data.msg);
+			
+		} else {
+			const persistTab = data.msg as SaveTab;
 
-		if (persistTab.tabs.length === 0) {
-			// 空的，直接返回不需要管
-			return;
+			pinkLog('tabs 加载成功');
+	
+			if (persistTab.tabs.length === 0) {
+				// 空的，直接返回不需要管
+				return;
+			}
+			
+			tabs.activeIndex = 0;
+			tabs.content = [];
+	
+			for (const tab of persistTab.tabs || []) {
+				tabs.content.push({
+					name: tab.name,
+					icon: tab.icon,
+					type: tab.type,
+					componentIndex: tab.componentIndex,
+					component: markRaw(debugModes[tab.componentIndex]),
+					storage: tab.storage
+				});
+			}
+	
+			tabs.activeIndex = persistTab.currentIndex;
 		}
-		
-		tabs.activeIndex = 0;
-		tabs.content = [];
-
-		for (const tab of persistTab.tabs || []) {
-			tabs.content.push({
-				name: tab.name,
-				icon: tab.icon,
-				type: tab.type,
-				componentIndex: tab.componentIndex,
-				component: markRaw(debugModes[tab.componentIndex]),
-				storage: tab.storage
-			});
-		}
-
-		tabs.activeIndex = persistTab.currentIndex;
 
     }, { once: true });
 
@@ -52,7 +60,7 @@ export function loadPanels() {
     });
 }
 
-let debounceHandler: number;
+let debounceHandler: NodeJS.Timeout;
 
 export function safeSavePanels() {
 	clearTimeout(debounceHandler);

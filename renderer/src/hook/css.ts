@@ -50,6 +50,34 @@ export function setDefaultCss() {
     } else {
         setExtraDarkColorCss();
     }
+
+    const acquireVsCodeApi = (window as any)['acquireVsCodeApi']
+    const mode = acquireVsCodeApi === undefined ? 'debug' : 'release';
+    if (mode === 'debug') {
+        // 判断颜色深浅，模拟 .vscode-dark 的加入
+        const theme = getThemeColor();
+        const app = document.getElementById('app');
+        
+        app?.classList.add('vscode-' + theme);
+    }
+}
+
+let themeColor: 'light' | 'dark' | undefined = undefined;
+
+export function getThemeColor(): 'light' | 'dark' {
+    if (themeColor) {
+        return themeColor;
+    }
+    const rootStyles = getComputedStyle(document.documentElement);
+    const backgroundColorString = rootStyles.getPropertyValue('--background');
+    const backgroundColor = parseColor(backgroundColorString);
+    if (backgroundColor) {
+        const isLight = isLightColorTheme(backgroundColor.r, backgroundColor.g, backgroundColor.b);
+        themeColor = isLight ? 'light' : 'dark';
+        return themeColor;
+    }
+
+    return 'dark';
 }
 
 function setExtraLightColorCss() {

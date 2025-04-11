@@ -34,7 +34,14 @@ export const tabs = reactive<{
 	],
 	activeIndex: 0,
 	get activeTab() {
-		return this.content[this.activeIndex];
+		return this.content[this.activeIndex] || {
+			name: 'blank',
+			icon: 'icon-blank',
+			type: 'blank',
+			component: undefined,
+			componentIndex: -1,
+			storage: {},
+		};
 	}
 });
 

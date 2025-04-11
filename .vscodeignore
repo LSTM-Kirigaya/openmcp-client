@@ -16,3 +16,5 @@ renderer/**
 service/**
 test/**
 servers/**
+scripts/**
+*.sh

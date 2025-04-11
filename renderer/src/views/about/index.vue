@@ -1,8 +1,7 @@
 <template>
 	<div class="about-container">
 
-        <span>
-            <img src="/images/openmcp.svg" alt="">
+        <span class="openmcp-logo" style="height: 230px; width: 230px;">
         </span>
 
 		<p>
