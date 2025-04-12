@@ -39,7 +39,7 @@
 <script setup lang="ts">
 import { defineComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { addNewTab, tabs, setActiveTab, closeTab } from './panel';
+import { addNewTab, tabs, closeTab } from './panel';
 
 defineComponent({ name: 'main-panel' });
 
@@ -51,7 +51,17 @@ function pageAddNewTab() {
 
 	// 如果当前不在 debug 路由，则切换到 debug 路由
 	if (route.name !== 'debug') {
-		router.push('/debug');
+		router.replace('/debug');
+	}
+}
+
+function setActiveTab(index: number) {
+	if (index >= 0 && index < tabs.content.length) {
+		tabs.activeIndex = index;
+		// 如果不在 debug 路由，则进入
+		if (route.name !== 'debug') {
+			router.replace('/debug');
+		}
 	}
 }
 

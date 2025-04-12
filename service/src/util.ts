@@ -21,13 +21,12 @@ function getTabSavePath() {
     // 如果是 vscode 插件下，则修改为 ~/.vscode/openmcp.json
     if (process.env.VSCODE_PID) {
         // 在 VSCode 插件环境下
-        // const homeDir = os.homedir();
-        // const configDir = path.join(homeDir, '.openmcp');
-        // if (!fs.existsSync(configDir)) {
-        //     fs.mkdirSync(configDir, { recursive: true });
-        // }
-        // return path.join(configDir, 'tabs.json');
-        return 'tabs.json';
+        const homeDir = os.homedir();
+        const configDir = path.join(homeDir, '.openmcp');
+        if (!fs.existsSync(configDir)) {
+            fs.mkdirSync(configDir, { recursive: true });
+        }
+        return path.join(configDir, 'tabs.json');
     }
     return 'tabs.json';
 }
@@ -116,6 +115,8 @@ export function loadConfig(): IConfig {
 export function saveConfig(config: Partial<IConfig>): void {
     const configPath = getConfigurationPath();
     let currentConfig: IConfig = DEFAULT_CONFIG;
+
+    console.log('save to ' + configPath);
     
     try {
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');

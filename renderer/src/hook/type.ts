@@ -33,12 +33,13 @@ export interface CasualRestAPI<T> {
 }
 
 // ==================== 响应接口定义 ====================
+export interface ToolItem {
+	name: string;
+	description: string;
+	inputSchema: InputSchema;
+}
 export interface ToolsListResponse {
-	tools: Array<{
-		name: string;
-		description: string;
-		inputSchema: InputSchema;
-	}>;
+	tools: ToolItem[]
 }
 
 export interface PromptTemplate {

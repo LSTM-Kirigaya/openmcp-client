@@ -63,6 +63,8 @@ function chooseDebugMode(index: number) {
 		activeTab.icon = debugOptions[index].icon;
 
 		// 此处可以这么做是因为这个操作过后 activeTab 绑定的 tab 的 name 就不会再被进行赋值操作了
+		// console.log(debugOptions[index]);
+
 		activeTab.name = debugOptions[index].name as any;
 	} else {
 		const message = t('warning.click-to-connect')

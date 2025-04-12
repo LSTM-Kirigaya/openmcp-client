@@ -6,8 +6,10 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "declaration": true,  // 新增
+        "declarationMap": true // 新增
     },
     "include": ["src/**/*"],
-    "exclude": ["node_modules"]
+    "exclude": ["node_modules", "src/main.ts"] // 排除 main.ts
 }

@@ -10,8 +10,10 @@
     --sidebar-item-margin: 5px;
     --toolbar-height: 50px;
     --toolbar-item-height: 32px;
+    --font-size-xsp: 11px;
+    --md-zoom: 1.12;
 
-    --code-font-family: "Cascadia code";
+    --code-font-family: Consolas, Monaco, "Cascadia code", 'Andale Mono', 'Ubuntu Mono', monospace;
 
     /* css 动画属性 */
     --animation-7s: .7s cubic-bezier(0.23, 1, 0.32, 1);
@@ -37,46 +39,6 @@ body::-webkit-scrollbar {
     width: 0;
 }
 
-* hr {
-    border: none;
-    background-color: var(--main-color);
-    height: 1.5px;
-    width: 95%;
-}
-
-/* 
-::-webkit-scrollbar {
-    width: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--sidebar);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-background);
-    border-radius: .3em;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-hover);
-    border-radius: .3em;
-}
-
-::-webkit-scrollbar-thumb:active {
-    background: var(--scrollbar-active);
-    border-radius: .3em;
-}
-
-::-webkit-scrollbar-button {
-    height: 0;
-    width: 0;
-}
-
-::-webkit-scrollbar-corner {
-    background: none;
-    display: none;
-} */
 
 .el-select__wrapper {
     min-width: 100px;
@@ -134,12 +96,149 @@ a {
 }
 
 .el-textarea__inner::-webkit-scrollbar-thumb {
-    background: #cb81da;
+    background: var(--main-color);
     /* 使用您的主题色 */
     border-radius: 4px;
 }
 
 .el-textarea__inner::-webkit-scrollbar-thumb:hover {
+    background: var(--main-color);
+    /* 深紫色悬停状态 */
+}
+
+* hr {
+    border: none;
+    width: 95%;
+    background-color: var(--background);
+    height: 1px;
+}
+
+.openmcp-code-block {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1em;
+    border: 1px solid var(--main-color);
+    border-radius: 4px;
+    overflow: hidden;
+    font-size: 12px;
+}
+
+.openmcp-code-block pre code {
+    background-color: none;
+}
+
+.openmcp-code-block pre code::-webkit-scrollbar {
+    width: 8px;
+    height: 5px;
+}
+
+.tool-arguments .openmcp-code-block pre code {
+    background: var(--el-fill-color-light);
+    
+}
+
+.openmcp-code-block pre code::-webkit-scrollbar-track {
+    background: transparent;
+    /* 浅紫色背景 */
+    border-radius: 4px;
+}
+
+.openmcp-code-block pre code::-webkit-scrollbar-thumb {
+    background: #cb81da;
+    /* 使用您的主题色 */
+    border-radius: 4px;
+}
+
+.openmcp-code-block pre code::-webkit-scrollbar-thumb:hover {
     background: #a259b5;
     /* 深紫色悬停状态 */
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--sidebar);
+    background-color: var(--main-color);
+    padding: 5px 10px;
+}
+
+.inner .openmcp-code-block {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+.inner .code-header {
+    display: none;
+    color: var(--foreground);
+    background-color: transparent !important;
+    padding: 0;
+}
+
+.inner pre {
+    margin: 0 !important;
+}
+
+.lang-id {
+    font-weight: bold;
+}
+
+.copy-button {
+    cursor: pointer;
+    padding: 0.2em 0.5em;
+    border: none;
+    border-radius: 4px;
+    background-color: transparent;
+    color: var(--sidebar);
+    transition: all 0.3s ease;
+}
+
+.copy-button:hover {
+    background-color: var(--main-color);
+    color: #fff;
+}
+
+.openmcp-logo {
+	background-image: url('./images/openmcp.svg');
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.server-icon {
+    background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+
+.deepseek-icon {
+	background-image: url('./images/deepseek.com.ico');
+}
+
+.openai-icon {
+	background-image: url('./images/openai.com.ico');
+}
+
+.mistral-icon {
+	background-image: url('./images/mistral.ai.ico');
+}
+
+.ollama-icon {
+	background-image: url('./images/ollama.png');
+}
+
+.grop-icon {
+    background-image: url('./images/grok.com.png');
+}
+
+.perplexity-icon {
+    background-image: url('./images/perplexity.ai.ico');
+}
+
+.kimi-icon {
+    background-image: url('./images/kimichat.cn.png');
 }

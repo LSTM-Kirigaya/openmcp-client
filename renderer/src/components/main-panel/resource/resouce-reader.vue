@@ -8,11 +8,13 @@
                 :label="param.name" :prop="param.name">
                 <!-- 根据不同类型渲染不同输入组件 -->
                 <el-input v-if="param.type === 'string'" v-model="formData[param.name]"
-                    :placeholder="param.placeholder || `请输入${param.name}`" />
+                    :placeholder="param.placeholder || `请输入${param.name}`"
+                    @keydown.enter.prevent="handleSubmit" />
 
                 <el-input-number v-else-if="param.type === 'number'" v-model="formData[param.name]"
-                    :placeholder="param.placeholder || `请输入${param.name}`" />
-
+                    :placeholder="param.placeholder || `请输入${param.name}`"
+                    @keydown.enter.prevent="handleSubmit" />
+                    
                 <el-switch v-else-if="param.type === 'boolean'" v-model="formData[param.name]" />
             </el-form-item>
 

@@ -1,18 +1,46 @@
 {
     "name": "openmcp",
     "displayName": "openmcp",
-    "description": "A MCP Client for MCP/OpenMCP",
+    "description": "An all in one MCP Client/TestTool",
     "version": "0.0.1",
+    "author": {
+        "name": "kirigaya",
+        "email": "1193466151@qq.com"
+    },
+    "repository": {
+        "url": "https://github.com/LSTM-Kirigaya/openmcp-client",
+        "type": "git"
+    },
     "engines": {
-        "vscode": "^1.98.0"
+        "vscode": "^1.95.0"
     },
     "categories": [
         "Other"
     ],
-    "activationEvents": [
-    ],
+    "activationEvents": [],
     "main": "./dist/extension.js",
+    "icon": "./icons/openmcp.png",
     "contributes": {
+        "commands": [
+            {
+                "command": "openmcp.showOpenMCP",
+                "title": "展示 OpenMCP",
+                "category": "openmcp",
+                "icon": {
+                    "light": "./icons/protocol.svg",
+                    "dark": "./icons/protocol.svg"
+                }
+            }
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "command": "openmcp.showOpenMCP",
+                    "group": "navigation",
+                    "when": "editorLangId == python || editorLangId == javascript || editorLangId == typescript || editorLangId == java || editorLangId == csharp"
+                }
+            ]
+        },
         "viewsContainers": {
             "activitybar": [
                 {
@@ -32,5 +60,31 @@
                 }
             ]
         }
+    },
+    "scripts": {
+        "vscode:prepublish": "webpack --mode production",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.9.0",
+        "axios": "^1.7.7",
+        "bson": "^6.8.0",
+        "openai": "^4.93.0",
+        "pako": "^2.1.0",
+        "ws": "^8.18.1"
+    },
+    "devDependencies": {
+        "@types/node": "16.x",
+        "@types/pako": "^2.0.3",
+        "@types/showdown": "^2.0.0",
+        "@types/vscode": "^1.72.0",
+        "ts-loader": "^9.5.1",
+        "typescript": "^5.4.2",
+        "webpack": "^5.88.2",
+        "webpack-cli": "^5.1.4"
     }
 }

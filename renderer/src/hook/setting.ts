@@ -5,16 +5,23 @@ import I18n from '@/i18n/index';
 
 export function loadSetting() {
     const bridge = useMessageBridge();
-    
-    bridge.addCommandListener('setting/load', data => {
-        const persistConfig = data.msg;
-        
-        llmManager.currentModelIndex = persistConfig.MODEL_INDEX;
-        I18n.global.locale.value = persistConfig.LANG;
-        
-        persistConfig.LLM_INFO.forEach((element: any) => {
-            llms.push(element);        
-        });
+
+    bridge.addCommandListener('setting/load', data => {        
+        if (data.code !== 200) {
+            pinkLog('配置加载失败');
+            console.log(data.msg);
+
+        } else {
+            const persistConfig = data.msg;
+            pinkLog('配置加载成功');
+
+            llmManager.currentModelIndex = persistConfig.MODEL_INDEX;
+            I18n.global.locale.value = persistConfig.LANG;
+
+            persistConfig.LLM_INFO.forEach((element: any) => {
+                llms.push(element);
+            });
+        }
 
     }, { once: true });
 
@@ -35,7 +42,7 @@ export function saveSetting(saveHandler?: () => void) {
     bridge.addCommandListener('setting/save', data => {
         const saveStatusCode = data.code;
         pinkLog('配置保存状态：' + saveStatusCode);
-        
+
         if (saveHandler) {
             saveHandler();
         }

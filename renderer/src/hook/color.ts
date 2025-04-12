@@ -1,3 +1,5 @@
+import { pinkLog } from "@/views/setting/util";
+
 interface RgbColor {
     r: number;
     g: number;
@@ -170,6 +172,14 @@ export class MacroColor {
         } else {
             this.theme = 'light'; // 默认主题
         }
+
+        // 额外支持 trae 的默认主题
+        const sidebarColorString = this.rootStyles.getPropertyValue('--sidebar');
+        if (sidebarColorString === backgroundColorString) {
+            const newSidebarColor = this.theme === 'dark' ? '#252a38' : '#edeff2';
+            document.documentElement.style.setProperty('--sidebar', newSidebarColor);
+            pinkLog('修改 sidebar 颜色为' + newSidebarColor);
+        }
     }
 
     /**
@@ -225,3 +235,5 @@ export class MacroColor {
         return toRgbCssString(mixedColor);
     }
 }
+
+export const macroColor = new MacroColor();

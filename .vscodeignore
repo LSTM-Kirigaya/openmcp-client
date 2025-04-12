@@ -16,3 +16,6 @@ renderer/**
 service/**
 test/**
 servers/**
+scripts/**
+*.sh
+*.ps1

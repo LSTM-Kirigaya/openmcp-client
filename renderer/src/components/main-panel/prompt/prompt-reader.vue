@@ -7,10 +7,14 @@
             <el-form-item v-for="param in currentPrompt?.params" :key="param.name"
                 :label="param.name" :prop="param.name">
                 <el-input v-if="param.type === 'string'" v-model="formData[param.name]"
-                    :placeholder="param.placeholder || `请输入${param.name}`" />
+                    :placeholder="param.placeholder || `请输入${param.name}`"
+                    @keydown.enter.prevent="handleSubmit"
+                    />
 
                 <el-input-number v-else-if="param.type === 'number'" v-model="formData[param.name]"
-                    :placeholder="param.placeholder || `请输入${param.name}`" />
+                    :placeholder="param.placeholder || `请输入${param.name}`"
+                    @keydown.enter.prevent="handleSubmit"
+                    />
 
                 <el-switch v-else-if="param.type === 'boolean'" v-model="formData[param.name]" />
             </el-form-item>
@@ -51,6 +55,7 @@ const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as PromptStorage;
 
 const formRef = ref<FormInstance>();
+// TODO: 将 formData 装入 tabStorage
 const formData = ref<Record<string, any>>({});
 const loading = ref(false);
 const responseData = ref<PromptsGetResponse>();
@@ -109,7 +114,7 @@ function handleSubmit() {
 
     bridge.postMessage({
         command: 'prompts/get',
-        data: { promptId: currentPrompt.value.name, args: formData.value }
+        data: { promptId: currentPrompt.value.name, args: JSON.parse(JSON.stringify(formData.value)) }
     });
 }
 

@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./app/public/images/openmcp.svg" height="200px"/>
+<img src="./icons/openmcp.png" height="200px"/>
 
 <h3>OpenMCP: 一体化 MCP Server 调试器</h3>
 
@@ -28,31 +28,75 @@
 - [ ] 支持同时调试多个 MCP Server
 - [ ] 支持通过大模型进行在线验证
 - [ ] 支持 completion/complete 协议字段
-- [ ] 支持 对用户对应服务器的调试工作内容进行保存
+- [x] 支持 对用户对应服务器的调试工作内容进行保存
+- [ ] 高危操作权限确认
+- [ ] 对于连接的 mcp server 进行热更新
 
 
 ## Dev
 
-- `app`: 前端 UI 的定义
-- `test`: 测试 `app` 的部分，包含一个简易的转发层
+- `renderer`: 前端 UI 的定义
+- `service`: 测试 `renderer` 的部分，包含一个简易的转发层
 - `src`: vscode 插件端定义
 
-### 初始化环境
+### Renderer & Service Dev
+
+```mermaid
+flowchart LR
+D[renderer] <--> A[Dev Server] <--ws--> B[service]
+B <--mcp--> m(MCP Server)
+```
+
+配置项目
 
 ```bash
 source configure.sh
 ```
 
-### 启动前端
+启动 dev server
 
 ```bash
-cd app
+cd renderer
 npm run serve
 ```
 
-### 启动后端 (Test)
+启动 service
 
 ```bash
-cd test
+cd service
 npm run serve
+```
+
+
+### Extention Dev
+
+```mermaid
+flowchart LR
+D[renderer] <--> A[extention.ts] <--> B[service]
+B <--mcp--> m(MCP Server)
+```
+
+负载部署
+```bash
+## linux 
+./build_service.sh
+
+## windows
+./build_service.ps1
+```
+
+and just press f5, いただきます
+
+## Flowchart
+
+
+```mermaid
+flowchart TB
+    A[用户输入问题] --> B[选择工具]
+    B --> C[大模型处理]
+    C --> D{是否有tool use?}
+    D -- 否 --> E[返回 content]
+    D -- 是 --> F[执行工具]
+    F --> G[返回工具执行结果]
+    G --> C
 ```

@@ -1,21 +1,12 @@
-import { VSCodeWebViewLike } from '../adapter';
+import { PostMessageble } from '../adapter';
 import { loadConfig, saveConfig } from '../util';
 import { MCPClient } from './connect';
 
-export async function settingSaveHandler(client: MCPClient | undefined, data: any, webview: VSCodeWebViewLike) {
-    if (!client) {
-		const connectResult = {
-			code: 501,
-			msg: 'mcp client 尚未连接'
-		};
-		webview.postMessage({ command: 'ping', data: connectResult });
-		return;
-	}
-
-
+export async function settingSaveHandler(client: MCPClient | undefined, data: any, webview: PostMessageble) {
     try {
         // 保存配置
         saveConfig(data);
+        console.log('Settings saved successfully');
         
         webview.postMessage({
             command: 'setting/save',
@@ -25,6 +16,8 @@ export async function settingSaveHandler(client: MCPClient | undefined, data: an
             }
         });
     } catch (error) {
+        console.log('Setting save failed:', error);
+        
         webview.postMessage({
             command: 'setting/save',
             data: {
@@ -35,17 +28,7 @@ export async function settingSaveHandler(client: MCPClient | undefined, data: an
     }
 }
 
-export async function settingLoadHandler(client: MCPClient | undefined, webview: VSCodeWebViewLike) {
-    if (!client) {
-		const connectResult = {
-			code: 501,
-			msg: 'mcp client 尚未连接'
-		};
-		webview.postMessage({ command: 'ping', data: connectResult });
-		return;
-	}
-
-
+export async function settingLoadHandler(client: MCPClient | undefined, webview: PostMessageble) {
     try {
         // 加载配置
         const config = loadConfig();

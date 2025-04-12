@@ -1,4 +1,6 @@
-import { ToolsListResponse, ToolCallResponse } from '@/hook/type';
+import { useMessageBridge } from '@/api/message-bridge';
+import { ToolsListResponse, ToolCallResponse, CasualRestAPI } from '@/hook/type';
+import { pinkLog } from '@/views/setting/util';
 import { reactive } from 'vue';
 
 export const toolsManager = reactive<{
@@ -10,4 +12,31 @@ export const toolsManager = reactive<{
 export interface ToolStorage {
     currentToolName: string;
     lastToolCallResponse?: ToolCallResponse;
+}
+
+const bridge = useMessageBridge();
+
+export function callTool(toolName: string, toolArgs: Record<string, any>) {
+    return new Promise<ToolCallResponse>((resolve, reject) => {
+        bridge.addCommandListener('tools/call', (data: CasualRestAPI<ToolCallResponse>) => {
+            console.log(data.msg);
+
+            if (data.code !== 200) {
+                reject(new Error(data.msg + ''));
+            } else {
+                resolve(data.msg);
+            }
+        }, { once: true });
+
+        pinkLog('callTool');
+        console.log(toolArgs);
+    
+        bridge.postMessage({
+            command: 'tools/call',
+            data: {
+                toolName,
+                toolArgs: JSON.parse(JSON.stringify(toolArgs))
+            }
+        });
+    });
 }

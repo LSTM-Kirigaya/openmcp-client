@@ -77,11 +77,6 @@ export function addNewTab() {
 	tabs.activeIndex = tabs.content.length - 1;
 }
 
-export function setActiveTab(index: number) {
-	if (index >= 0 && index < tabs.content.length) {
-		tabs.activeIndex = index;
-	}
-}
 
 export function closeTab(index: number) {
 	if (tabs.content.length <= 1) return; // 至少保留一个标签页

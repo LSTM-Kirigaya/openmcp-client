@@ -13,6 +13,11 @@ export interface WebSocketResponse {
     error?: string;
 }
 
+export interface PostMessageble {
+    postMessage(message: any): void;
+    onDidReceiveMessage(callback: MessageHandler): { dispose: () => void };
+}
+
 // 监听器回调类型
 export type MessageHandler = (message: any) => void;
 

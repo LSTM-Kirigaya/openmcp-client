@@ -9,25 +9,25 @@ const routes: Array<RouteRecordRaw> = [
 	{
 		path: "/debug",
 		name: "debug",
-		component: () => import("@/views/debug/index.vue"),
+		component: () => import( /* webpackMode: "eager" */ "@/views/debug/index.vue"),
 		meta: { title: "Debug" }
 	},
 	{
 		path: "/connect",
 		name: "connect",
-		component: () => import("@/views/connect/index.vue"),
+		component: () => import( /* webpackMode: "eager" */ "@/views/connect/index.vue"),
 		meta: { title: "Connect" }
 	},
 	{
 		path: "/setting",
 		name: "setting",
-		component: () => import("@/views/setting/index.vue"),
+		component: () => import( /* webpackMode: "eager" */ "@/views/setting/index.vue"),
 		meta: { title: "Setting" }
 	},
 	{
 		path: "/about",
 		name: "about",
-		component: () => import("@/views/about/index.vue"),
+		component: () => import( /* webpackMode: "eager" */ "@/views/about/index.vue"),
 		meta: { title: "Tools" }
 	}
 ];

@@ -1,100 +1,22 @@
 {
-  "currentIndex": 1,
+  "currentIndex": 0,
   "tabs": [
     {
-      "name": "交互测试",
-      "icon": "icon-robot",
+      "name": "工具",
+      "icon": "icon-tool",
       "type": "blank",
-      "componentIndex": 3,
+      "componentIndex": 2,
       "storage": {
-        "settings": {
-          "modelIndex": 0,
-          "enableTools": true,
-          "enableWebSearch": false,
-          "temperature": 0.7,
-          "contextLength": 10,
-          "systemPrompt": "你的名字是 openmcp"
-        },
-        "messages": [
-          {
-            "role": "user",
-            "content": "请问你的名字是什么"
-          },
-          {
-            "role": "assistant",
-            "content": "我的名字是 **OpenMCP**（Open Multi-modal Cognitive Platform）。  \n\n我是由 **深度求索（DeepSeek）** 开发的一款 **多模态认知大模型**，能够处理文本、图像、文档等多种信息，并具备强大的理解和推理能力。  \n\n你可以叫我 **OpenMCP**，或者简称 **MCP**！😊 有什么我可以帮你的吗？"
-          },
-          {
-            "role": "user",
-            "content": "我的上一个问题是什么"
-          },
-          {
-            "role": "assistant",
-            "content": "我的名字是 **OpenMCP**（Open Multi-modal Cognitive Platform），一个基于开源技术的多模态认知智能平台。  \n\n我的设计目标是整合文本、图像、语音等多种交互方式，提供灵活、可扩展的AI服务，支持开发者快速构建智能应用。如果你有具体需求（比如代码生成、数据分析、知识问答等），可以直接告诉我，我会尽力协助！  \n\n（名字中的 **MCP** 也可以理解为 **Modular Cognitive Processor**，强调模块化处理能力 😊）"
-          },
-          {
-            "role": "user",
-            "content": "请问杭州今天的气温是多少度"
-          },
-          {
-            "role": "assistant",
-            "content": "你的名字是 **OpenMCP**（Open Multi-Cloud Platform），一个专注于多云管理和自动化运维的开源平台。  \n\n### 核心功能：  \n1. **多云资源管理**：统一管理AWS、Azure、GCP、阿里云等主流云服务商的资源。  \n2. **自动化运维**：通过策略和脚本实现资源调度、成本优化、监控告警等。  \n3. **DevOps集成**：支持CI/CD工具链，如Jenkins、GitLab CI等。  \n4. **开源开放**：代码公开，社区驱动，支持自定义扩展。  \n\n### 技术栈示例：  \n- **后端**：Go/Python + Kubernetes Operator  \n- **前端**：React/Vue + 可视化仪表盘  \n- **基础设施**：Terraform/Ansible跨云编排  \n\n如果需要具体实现方案或代码片段，可以告诉我你的场景（例如：“如何用OpenMCP自动化部署K8s集群到AWS和Azure？”），我会提供详细建议！  \n\n🚀 **口号**： *\"Simplify Multi-Cloud, Code the Future.\"*"
-          },
-          {
-            "role": "assistant",
-            "content": "\n\nTo determine the number of ways to choose 3 people out of 10, we can use the combination formula. The combination formula is given by:\n\n\\[\nC(n, k) = \\frac{n!}{k!(n - k)!}\n\\]\n\nwhere:\n- \\( n \\) is the total number of items,\n- \\( k \\) is the number of items to choose,\n- \\( ! \\) denotes factorial, which is the product of all positive integers up to that number.\n\n**Applying the formula:**\n\n\\[\nC(10, 3) = \\frac{10!}{3!(10 - 3)!} = \\frac{10!}{3! \\times 7!}\n\\]\n\n**Calculating the factorials:**\n\n\\[\n10! = 10 \\times 9 \\times 8 \\times 7! \\\\\n3! = 3 \\times 2 \\times 1 = 6\n\\]\n\n**Simplifying the expression:**\n\n\\[\nC(10, 3) = \\frac{10 \\times 9 \\times 8 \\times 7!}{6 \\times 7!} = \\frac{10 \\times 9 \\times 8}{6} = \\frac{720}{6} = 120\n\\]\n\n**Final Answer:**\n\n\\[\n\\boxed{120}\n\\]"
-          },
-          {
-            "role": "assistant",
-            "content": "\nTo solve the equation \\( 5^{x} = 3125 \\), we can follow these steps:\n\n1. **Express 3125 as a Power of 5:**\n   \n   First, recognize that 3125 is a power of 5. Let's find the exponent:\n   \\[\n   5^5 = 5 \\times 5 \\times 5 \\times 5 \\times 5 = 3125\n   \\]\n   \n2. **Set the Exponents Equal:**\n   \n   Since the bases are the same, we can set the exponents equal to each other:\n   \\[\n   5^{x} = 5^{5}\n   \\]\n   \\[\n   x = 5\n   \\]\n   \n3. **Final Answer:**\n   \n   Therefore, the solution to the equation is:\n   \\[\n   \\boxed{5}\n   \\]"
-          },
-          {
-            "role": "assistant",
-            "content": "要获取杭州今天的最新气温信息，你可以通过以下几种方式实时查询：\n\n1. **天气应用/网站**  \n   - 打开手机上的天气应用（如苹果天气、墨迹天气等），搜索“杭州”。\n   - 访问中国天气网（[www.weather.com.cn](http://www.weather.com.cn)）或国际服务（如AccuWeather、Weather.com）。\n\n2. **搜索引擎**  \n   在百度、谷歌等搜索“杭州今日天气”，结果页通常会直接显示当前气温和预报。\n\n3. **语音助手**  \n   对手机说“Hey Siri”或“小爱同学，杭州今天多少度？”快速获取答案。\n\n**提示**：气温可能因城区/郊区差异略有不同，建议查看实时更新数据。如果需要更详细的天气信息（如湿度、降水概率），上述方法也可提供。\n\n（由于我无法实时联网，暂不能提供此刻的具体温度，请见谅！）"
-          },
-          {
-            "role": "assistant",
-            "content": "你之前的提问是：“我的上一个问题是什么？”  \n\n不过，由于对话的连续性限制，我无法直接回顾更早的历史记录。如果你指的是在这之前的某个问题，可以告诉我更多关键词或上下文，我会尽力帮你回忆或解答！ 😊"
-          },
-          {
-            "role": "assistant",
-            "content": "你上一个问题是：  \n**“杭州今天的气温如何”**  \n\n而我的回答中已说明，由于无法实时联网，建议你通过天气应用或搜索引擎获取最新数据。需要我帮你回顾其他内容吗？ 😊"
-          }
-        ]
+        "currentToolName": "add"
       }
     },
     {
-      "name": "交互测试",
-      "icon": "icon-robot",
+      "name": "资源",
+      "icon": "icon-file",
       "type": "blank",
-      "componentIndex": 3,
+      "componentIndex": 0,
       "storage": {
-        "messages": [
-          {
-            "role": "user",
-            "content": "杭州今天的气温如何"
-          },
-          {
-            "role": "assistant",
-            "content": "要获取杭州今天的最新气温信息，你可以通过以下几种方式实时查询：\n\n1. **天气应用/网站**  \n   - 打开手机上的天气应用（如苹果天气、墨迹天气等），搜索“杭州”。\n   - 访问中国天气网（[www.weather.com.cn](http://www.weather.com.cn)）或国际服务（如AccuWeather、Weather.com）。\n\n2. **搜索引擎**  \n   在百度、谷歌等搜索“杭州今日天气”，结果页通常会直接显示当前气温和预报。\n\n3. **语音助手**  \n   对手机说“Hey Siri”或“小爱同学，杭州今天多少度？”快速获取答案。\n\n**提示**：气温可能因城区/郊区差异略有不同，建议查看实时更新数据。如果需要更详细的天气信息（如湿度、降水概率），上述方法也可提供。\n\n（由于我无法实时联网，暂不能提供此刻的具体温度，请见谅！）"
-          },
-          {
-            "role": "user",
-            "content": "我的上一个问题是什么"
-          },
-          {
-            "role": "assistant",
-            "content": "你上一个问题是：  \n**“杭州今天的气温如何”**  \n\n而我的回答中已说明，由于无法实时联网，建议你通过天气应用或搜索引擎获取最新数据。需要我帮你回顾其他内容吗？ 😊"
-          }
-        ],
-        "settings": {
-          "modelIndex": 0,
-          "enableTools": true,
-          "enableWebSearch": false,
-          "temperature": 0.7,
-          "contextLength": 10,
-          "systemPrompt": ""
-        }
+        "currentResourceName": "greeting"
       }
     }
   ]
