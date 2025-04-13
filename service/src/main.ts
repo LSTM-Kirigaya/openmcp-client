@@ -35,7 +35,7 @@ wss.on('connection', ws => {
         command: 'hello',
         data: {
             version: '0.0.1',
-            name: 'OpenMCP 测试用中台调度程序'
+            name: '消息桥连接完成'
         }
     });
 

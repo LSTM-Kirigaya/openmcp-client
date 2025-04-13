@@ -1,8 +1,9 @@
 {
     "name": "openmcp",
-    "displayName": "openmcp",
+    "displayName": "OpenMCP",
     "description": "An all in one MCP Client/TestTool",
     "version": "0.0.1",
+    "publisher": "kirigaya",
     "author": {
         "name": "kirigaya",
         "email": "1193466151@qq.com"
@@ -19,7 +20,7 @@
     ],
     "activationEvents": [],
     "main": "./dist/extension.js",
-    "icon": "./icons/openmcp.png",
+    "icon": "icons/openmcp.png",
     "contributes": {
         "commands": [
             {

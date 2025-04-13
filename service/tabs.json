@@ -1,5 +1,5 @@
 {
-  "currentIndex": 0,
+  "currentIndex": 2,
   "tabs": [
     {
       "name": "工具",
@@ -17,6 +17,23 @@
       "componentIndex": 0,
       "storage": {
         "currentResourceName": "greeting"
+      }
+    },
+    {
+      "name": "交互测试",
+      "icon": "icon-robot",
+      "type": "blank",
+      "componentIndex": 3,
+      "storage": {
+        "messages": [],
+        "settings": {
+          "modelIndex": 0,
+          "enableTools": [],
+          "enableWebSearch": false,
+          "temperature": 0.7,
+          "contextLength": 10,
+          "systemPrompt": ""
+        }
       }
     }
   ]

@@ -6,7 +6,7 @@ export const sidebarItems = reactive([
 		ident: 'debug'
 	},
 	{
-		icon: 'icon-plugin',
+		icon: 'icon-connect',
 		ident: 'connect'
 	},
 	{

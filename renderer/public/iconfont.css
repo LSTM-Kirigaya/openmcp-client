@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4870215 */
-  src: url('iconfont.woff2?t=1744289078529') format('woff2'),
-       url('iconfont.woff?t=1744289078529') format('woff'),
-       url('iconfont.ttf?t=1744289078529') format('truetype');
+  src: url('iconfont.woff2?t=1744476757936') format('woff2'),
+       url('iconfont.woff?t=1744476757936') format('woff'),
+       url('iconfont.ttf?t=1744476757936') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-connect:before {
+  content: "\ecda";
 }
 
 .icon-openmcp:before {

@@ -5,7 +5,8 @@ import { MCPClient } from './connect';
 export async function panelSaveHandler(client: MCPClient | undefined, data: any, webview: PostMessageble) {
 	try {
 		// 保存配置
-		saveTabSaveConfig(data);
+		const serverInfo = client?.getServerVersion();
+		saveTabSaveConfig(serverInfo, data);
 		
 		webview.postMessage({
 			command: 'panel/save',
@@ -28,7 +29,8 @@ export async function panelSaveHandler(client: MCPClient | undefined, data: any,
 export async function panelLoadHandler(client: MCPClient | undefined, webview: PostMessageble) {
 	try {
 		// 加载配置
-		const config = loadTabSaveConfig();
+		const serverInfo = client?.getServerVersion();
+		const config = loadTabSaveConfig(serverInfo);
 		
 		webview.postMessage({
 			command: 'panel/load',

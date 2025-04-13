@@ -27,6 +27,12 @@ function getLaunchCWD(context: vscode.ExtensionContext, uri: vscode.Uri) {
 export function activate(context: vscode.ExtensionContext) {
     console.log('activate openmcp');
 
+    // 初始化 OpenMCPService
+    // 获取当前打开的项目的路径
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    const workspace = workspaceFolder?.uri.fsPath || '';
+    OpenMCPService.setVscodeWorkspace(workspace);
+
     // 注册 showOpenMCP 命令
     context.subscriptions.push(
         vscode.commands.registerCommand('openmcp.showOpenMCP', async (uri: vscode.Uri) => {
@@ -51,7 +57,8 @@ export function activate(context: vscode.ExtensionContext) {
 
             // 设置HTML内容
             const html = getWebviewContent(context, panel); 
-            panel.webview.html = html || '';            
+            panel.webview.html = html || '';
+            panel.iconPath = vscode.Uri.file(fspath.join(context.extensionPath, 'resources', 'renderer', 'images', 'openmcp.png'));     
 
             // 处理来自webview的消息
             panel.webview.onDidReceiveMessage(message => {
@@ -89,12 +96,6 @@ export function activate(context: vscode.ExtensionContext) {
             });
         })
     );
-
-    // const provider = new WebviewViewProvider(context);
-
-    // context.subscriptions.push(
-    //     vscode.window.registerWebviewViewProvider('webview-sidebar.view', provider)
-    // );
 }
 
 

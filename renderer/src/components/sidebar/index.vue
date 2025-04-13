@@ -2,8 +2,6 @@
 	<div class="sidebar-container">
 		<div>
 			<McpTitle></McpTitle>
-			<hr>
-			<br>
 			<SidebarItemContainer></SidebarItemContainer>
 		</div>
 
@@ -15,7 +13,6 @@
 
 <script setup lang="ts">
 import { defineComponent } from 'vue';
-import { sidebarItems } from './sidebar';
 
 import McpTitle from './mcp-title.vue';
 import SidebarItemContainer from './sidebar-item-container.vue';
@@ -27,7 +24,7 @@ defineComponent({ name: 'sidebar' });
 
 <style>
 .sidebar-container {
-	width: 300px;
+	width: fit-content;
 	height: 100%;
 	display: flex;
 	flex-direction: column;

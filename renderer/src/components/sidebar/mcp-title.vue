@@ -1,7 +1,7 @@
 <template>
 	<div class="mcp-title">
-		<div class="openmcp-logo" style="width: 48px; height: 48px; margin-right: 10px;"></div>
-		<div>OpenMCP</div>
+		<div class="openmcp-logo" style="width: 48px; height: 48px; margin-top: 10px; margin-bottom: 15px; margin-right: 10px;"></div>
+		<!-- <div>OpenMCP</div> -->
 	</div>
 </template>
 

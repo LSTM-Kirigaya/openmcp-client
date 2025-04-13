@@ -1,9 +1,7 @@
 import { useMessageBridge } from "@/api/message-bridge";
-import { llmManager, llms } from "@/views/setting/llm";
 import { pinkLog } from "@/views/setting/util";
-import I18n from '@/i18n/index';
 import { debugModes, tabs } from "@/components/main-panel/panel";
-import { markRaw, ref } from "vue";
+import { markRaw, ref, nextTick } from "vue";
 
 interface SaveTabItem {
 	name: string;
@@ -53,6 +51,9 @@ export function loadPanels() {
 			}
 	
 			tabs.activeIndex = persistTab.currentIndex;
+			nextTick(() => {
+				tabs.activeIndex = persistTab.currentIndex;
+			});
 		}
 
 		panelLoaded.value = true;
@@ -73,6 +74,11 @@ export function safeSavePanels() {
 }
 
 export function savePanels(saveHandler?: () => void) {
+	// 没有完成 panel 加载就不保存
+	if (!panelLoaded.value) {
+		return;
+	}
+
     const bridge = useMessageBridge();
 
     const saveTabs: SaveTab = {

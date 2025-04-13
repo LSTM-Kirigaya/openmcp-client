@@ -2,11 +2,13 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { Implementation } from "@modelcontextprotocol/sdk/types";
 
 // 定义连接类型
 type ConnectionType = 'STDIO' | 'SSE';
 
 type McpTransport = StdioClientTransport | SSEClientTransport;
+export type IServerVersion = Implementation | undefined;
 
 // 定义命令行参数接口
 export interface MCPOptions {
@@ -27,9 +29,11 @@ export class MCPClient {
     private client: Client;
     private transport?: McpTransport;
     private options: MCPOptions;
+    private serverVersion: IServerVersion;
 
     constructor(options: MCPOptions) {
         this.options = options;
+        this.serverVersion = undefined;
 
         this.client = new Client(
             {
@@ -69,12 +73,23 @@ export class MCPClient {
 
         // 建立连接
         await this.client.connect(this.transport);
-        console.log(`Connected to MCP server via ${this.options.connectionType}`);
+        console.log(`Connected to MCP server via ${this.options.connectionType}`);        
+    }
+
+    public getServerVersion() {
+        if (this.serverVersion) {
+            return this.serverVersion;
+        }
+
+        const version = this.client.getServerVersion();
+        this.serverVersion = version;
+        return version;
     }
 
     // 断开连接
     public async disconnect(): Promise<void> {
         await this.client.close();
+        
         console.log('Disconnected from MCP server');
     }
 

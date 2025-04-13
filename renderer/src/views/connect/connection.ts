@@ -162,5 +162,26 @@ export function doReconnect() {
 
 export const connectionResult = reactive({
     success: false,
-    logString: ''
+    logString: '',
+    serverInfo: {
+        name: '',
+        version: ''
+    }
 });
+
+export function getServerVersion() {
+	return new Promise((resolve, reject) => {
+		const bridge = useMessageBridge();
+		bridge.addCommandListener('server/version', data => {
+			if (data.code === 200) {
+				resolve(data.msg);
+			} else {
+				reject(data.msg);
+			}
+		}, { once: true });
+		
+		bridge.postMessage({
+			command: 'server/version',
+		});
+	});
+}

@@ -1,7 +1,7 @@
 
 import { PostMessageble } from '../adapter';
 import { connect, MCPClient, type MCPOptions } from './connect';
-import { callTool, getPrompt, listPrompts, listResources, listResourceTemplates, listTools, readResource } from './handler';
+import { callTool, getPrompt, getServerVersion, listPrompts, listResources, listResourceTemplates, listTools, readResource } from './handler';
 import { chatCompletionHandler } from './llm';
 import { panelLoadHandler, panelSaveHandler } from './panel';
 import { settingLoadHandler, settingSaveHandler } from './setting';
@@ -41,6 +41,10 @@ export function messageController(command: string, data: any, webview: PostMessa
 		case 'connect':
 			connectHandler(data, webview);
 			break;
+		
+		case 'server/version':
+			getServerVersion(client, webview);
+			break;
 
 		case 'prompts/list':
 			listPrompts(client, webview);
@@ -53,6 +57,7 @@ export function messageController(command: string, data: any, webview: PostMessa
 		case 'resources/list':
 			listResources(client, webview);
 			break;
+
 
 		case 'resources/templates/list':
 			listResourceTemplates(client, webview);

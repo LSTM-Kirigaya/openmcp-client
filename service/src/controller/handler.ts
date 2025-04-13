@@ -253,3 +253,32 @@ export async function callTool(
 		webview.postMessage({ command: 'tools/call', data: result });
 	}
 }
+
+export async function getServerVersion(
+	client: MCPClient | undefined,
+	webview: PostMessageble
+) {
+	if (!client) {
+		const connectResult = {
+			code: 501,
+			msg:'mcp client 尚未连接'
+		};
+		webview.postMessage({ command: 'server/version', data: connectResult });
+		return;
+	}
+
+	try {
+		const version = client.getServerVersion();
+		const result = {
+			code: 200,
+			msg: version
+		};
+		webview.postMessage({ command:'server/version', data: result });
+	} catch (error) {
+		const result = {
+			code: 500,
+			msg: (error as any).toString()
+		};
+		webview.postMessage({ command:'server/version', data: result });
+	}
+}

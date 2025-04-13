@@ -1,5 +1,5 @@
 <template>
-	<div style="height: 100%;" v-if="panelLoaded">
+	<div style="height: 100%;">
 		<Welcome v-show="!haveActiveTab"></Welcome>
 		
 		<!-- 如果存在激活标签页，则根据标签页进行渲染 -->
@@ -27,7 +27,7 @@ defineComponent({ name: 'debug' });
 
 const haveActiveTab = computed(() => {
 	const activeTab = tabs.activeTab;
-	if (activeTab) {
+	if (activeTab && activeTab.component) {
 		return true;
 	}
 	return false;

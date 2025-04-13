@@ -5,7 +5,7 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"serve": "ts-node src/main.ts",
+		"serve": "ts-node-dev --respawn --transpile-only src/main.ts",
 		"build": "tsc",
 		"build:watch": "tsc --watch",
 		"start": "node dist/main.js",
@@ -26,6 +26,7 @@
 		"@types/pako": "^2.0.3",
 		"@types/ws": "^8.18.0",
 		"ts-node": "^10.9.2",
+		"ts-node-dev": "^2.0.0",
 		"typescript": "^5.6.3"
 	},
 	"dependencies": {

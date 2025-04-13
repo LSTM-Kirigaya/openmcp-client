@@ -2,10 +2,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { llms } from './llm';
+import { IServerVersion } from './controller/connect';
+
+export let VSCODE_WORKSPACE = '';
+
+export function setVscodeWorkspace(workspace: string) {
+    VSCODE_WORKSPACE = workspace;
+}
 
 function getConfigurationPath() {
     // 如果是 vscode 插件下，则修改为 ~/.openmcp/config.json
-    if (process.env.VSCODE_PID) {
+    if (VSCODE_WORKSPACE) {
         // 在 VSCode 插件环境下
         const homeDir = os.homedir();
         const configDir = path.join(homeDir, '.openmcp');
@@ -17,18 +24,20 @@ function getConfigurationPath() {
     return 'config.json';
 }
 
-function getTabSavePath() {
+function getTabSavePath(serverInfo: IServerVersion) {
+    const { name = 'untitle', version = '0.0.0' } = serverInfo || {};
+    const tabSaveName = `tabs.${name}.json`;
+
     // 如果是 vscode 插件下，则修改为 ~/.vscode/openmcp.json
-    if (process.env.VSCODE_PID) {
+    if (VSCODE_WORKSPACE) {
         // 在 VSCode 插件环境下
-        const homeDir = os.homedir();
-        const configDir = path.join(homeDir, '.openmcp');
+        const configDir = path.join(VSCODE_WORKSPACE, '.vscode');
         if (!fs.existsSync(configDir)) {
             fs.mkdirSync(configDir, { recursive: true });
         }
-        return path.join(configDir, 'tabs.json');
+        return path.join(configDir, tabSaveName);
     }
-    return 'tabs.json';
+    return tabSaveName;
 }
 
 function getDefaultLanguage() {
@@ -82,8 +91,8 @@ function createConfig(): IConfig {
     return DEFAULT_CONFIG;
 }
 
-function createSaveTabConfig(): SaveTab {
-    const configPath = getTabSavePath();
+function createSaveTabConfig(serverInfo: IServerVersion): SaveTab {
+    const configPath = getTabSavePath(serverInfo);
     const configDir = path.dirname(configPath);
     
     // 确保配置目录存在
@@ -114,8 +123,6 @@ export function loadConfig(): IConfig {
 
 export function saveConfig(config: Partial<IConfig>): void {
     const configPath = getConfigurationPath();
-    let currentConfig: IConfig = DEFAULT_CONFIG;
-
     console.log('save to ' + configPath);
     
     try {
@@ -126,11 +133,11 @@ export function saveConfig(config: Partial<IConfig>): void {
     }
 }
 
-export function loadTabSaveConfig(): SaveTab {
-    const tabSavePath = getTabSavePath();
+export function loadTabSaveConfig(serverInfo: IServerVersion): SaveTab {
+    const tabSavePath = getTabSavePath(serverInfo);
     
     if (!fs.existsSync(tabSavePath)) {
-        return createSaveTabConfig();
+        return createSaveTabConfig(serverInfo);
     }
     
     try {
@@ -138,12 +145,12 @@ export function loadTabSaveConfig(): SaveTab {
         return JSON.parse(configData) as SaveTab;
     } catch (error) {
         console.error('Error loading config file, creating new one:', error);
-        return createSaveTabConfig();
+        return createSaveTabConfig(serverInfo);
     }
 }
 
-export function saveTabSaveConfig(config: Partial<IConfig>): void {
-    const tabSavePath = getTabSavePath();
+export function saveTabSaveConfig(serverInfo: IServerVersion, config: Partial<IConfig>): void {
+    const tabSavePath = getTabSavePath(serverInfo);
     
     try {
         fs.writeFileSync(tabSavePath, JSON.stringify(config, null, 2), 'utf-8');
