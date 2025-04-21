@@ -117,5 +117,11 @@
     "read-prompt": "Lire l'invite",
     "execute-tool": "Exécuter",
     "save": "Enregistrer",
-    "send": "Envoyer"
+    "send": "Envoyer",
+    "server-not-support-statistic": "Le fournisseur que vous utilisez ne prend pas en charge les statistiques temporairement",
+    "answer-at": "Répondu le",
+    "input-token": "Entrée",
+    "output-token": "Sortie",
+    "total": "Total",
+    "cache-hit-ratio": "Taux de réussite du cache"
 }

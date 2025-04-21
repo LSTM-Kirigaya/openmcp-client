@@ -55,6 +55,8 @@ export function activate(context: vscode.ExtensionContext) {
             console.log('current file' + uri.fsPath);
             console.log(`relativePath: ${relativePath}`);
 
+            // 根据 relativePath 先去 setting 中进行选择
+
             // 设置HTML内容
             const html = getWebviewContent(context, panel); 
             panel.webview.html = html || '';
@@ -68,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
                 // 拦截消息，注入额外信息
                 switch (command) {
                     case 'vscode/launch-command':
-                        const commandString = 'uv run mcp run ' + relativePath;
+                        const commandString = 'mcp run ' + relativePath;
                         const launchResult = {
                             code: 200,
                             msg: {

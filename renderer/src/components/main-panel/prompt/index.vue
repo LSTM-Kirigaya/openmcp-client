@@ -1,27 +1,23 @@
 <template>
-    <div class="prompt-module">
-        <div class="left">
-            <h2>
-                <span class="iconfont icon-chat"></span>
-                提示词模块
-            </h2>
-            <h3><code>prompts/list</code></h3>
-            
-            <PromptTemplates
-                :tab-id="props.tabId"
-            ></PromptTemplates>
+    <el-scrollbar height="100%">
+        <div class="prompt-module">
+            <div class="left">
+                <h2>
+                    <span class="iconfont icon-chat"></span>
+                    提示词模块
+                </h2>
+                <h3><code>prompts/list</code></h3>
 
-        </div>
-        <div class="right">
-            <PromptReader
-                :tab-id="props.tabId"
-            ></PromptReader>
+                <PromptTemplates :tab-id="props.tabId"></PromptTemplates>
 
-            <PromptLogger
-                :tab-id="props.tabId"
-            ></PromptLogger>
+            </div>
+            <div class="right">
+                <PromptReader :tab-id="props.tabId"></PromptReader>
+
+                <PromptLogger :tab-id="props.tabId"></PromptLogger>
+            </div>
         </div>
-</div>
+    </el-scrollbar>
 </template>
 
 <script setup lang="ts">

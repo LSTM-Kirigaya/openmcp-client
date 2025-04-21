@@ -1,27 +1,24 @@
 <template>
-    <div class="tool-module">
-        <div class="left">
-            <h2>
-                <span class="iconfont icon-tool"></span>
-                工具模块
-            </h2>
-            <h3><code>tools/list</code></h3>
-            
-            <ToolList
-                :tab-id="props.tabId"
-            ></ToolList>
+    <el-scrollbar height="100%">
+        <div class="tool-module">
+            <div class="left">
+                <h2>
+                    <span class="iconfont icon-tool"></span>
+                    工具模块
+                </h2>
+                <h3><code>tools/list</code></h3>
 
-        </div>
-        <div class="right">
-            <ToolExecutor
-                :tab-id="props.tabId"
-            ></ToolExecutor>
+                <ToolList :tab-id="props.tabId"></ToolList>
 
-            <ToolLogger
-                :tab-id="props.tabId"
-            ></ToolLogger>
+            </div>
+            <div class="right">
+                <ToolExecutor :tab-id="props.tabId"></ToolExecutor>
+
+                <ToolLogger :tab-id="props.tabId"></ToolLogger>
+            </div>
         </div>
-    </div>
+    </el-scrollbar>
+
 </template>
 
 <script setup lang="ts">

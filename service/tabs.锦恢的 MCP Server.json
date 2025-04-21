@@ -2,24 +2,6 @@
   "currentIndex": 0,
   "tabs": [
     {
-      "name": "资源",
-      "icon": "icon-file",
-      "type": "blank",
-      "componentIndex": 0,
-      "storage": {
-        "currentResourceName": "greeting",
-        "lastResourceReadResponse": {
-          "contents": [
-            {
-              "uri": "greeting://12312",
-              "mimeType": "text/plain",
-              "text": "Hello, 12312!"
-            }
-          ]
-        }
-      }
-    },
-    {
       "name": "交互测试",
       "icon": "icon-robot",
       "type": "blank",
@@ -48,6 +30,11 @@
               "name": "capitalize",
               "description": "将字符串首字母大写",
               "enabled": true
+            },
+            {
+              "name": "get_weather_by_city_code",
+              "description": "根据城市天气预报的城市编码 (int)，获取指定城市的天气信息",
+              "enabled": true
             }
           ],
           "enableWebSearch": false,
@@ -55,15 +42,6 @@
           "contextLength": 10,
           "systemPrompt": ""
         }
-      }
-    },
-    {
-      "name": "提词",
-      "icon": "icon-chat",
-      "type": "blank",
-      "componentIndex": 1,
-      "storage": {
-        "currentPromptName": "translate"
       }
     }
   ]

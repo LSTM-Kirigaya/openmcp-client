@@ -117,5 +117,11 @@
     "read-prompt": "프롬프트 읽기",
     "execute-tool": "실행",
     "save": "저장",
-    "send": "보내기"
+    "send": "보내기",
+    "server-not-support-statistic": "사용 중인 공급업체는 일시적으로 통계를 지원하지 않습니다",
+    "answer-at": "답변일",
+    "input-token": "입력",
+    "output-token": "출력",
+    "total": "총계",
+    "cache-hit-ratio": "캐시 적중률"
 }

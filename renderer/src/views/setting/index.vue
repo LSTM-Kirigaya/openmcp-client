@@ -120,10 +120,6 @@ onMounted(() => {
 	background-color: var(--background) !important;
 }
 
-.el-switch__core .el-switch__action {
-	background-color: var(--background) !important;
-}
-
 .el-slider__stop {
 	background-color: var(--vscode-foreground) !important;
 }

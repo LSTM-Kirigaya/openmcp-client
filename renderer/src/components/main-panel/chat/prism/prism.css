@@ -37,6 +37,7 @@
     height: inherit;
     display: block;
     overflow: auto;
+    background-color: unset !important;
 }
 
 .vscode-dark :not(pre)>code[class*=language-],
@@ -251,6 +252,7 @@
     height: inherit;
     display: block;
     overflow: auto;
+    background-color: unset !important;
 }
 
 .vscode-light :not(pre)>code[class*=language-],

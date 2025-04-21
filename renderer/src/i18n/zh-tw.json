@@ -117,5 +117,11 @@
     "read-prompt": "讀取提示",
     "execute-tool": "執行",
     "save": "儲存",
-    "send": "傳送"
+    "send": "傳送",
+    "server-not-support-statistic": "你使用的供應商暫時不支持統計信息",
+    "answer-at": "作答於",
+    "input-token": "輸入",
+    "output-token": "輸出",
+    "total": "總計",
+    "cache-hit-ratio": "緩存命中率"
 }

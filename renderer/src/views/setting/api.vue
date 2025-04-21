@@ -15,7 +15,6 @@
 
 					<el-option v-for="(option, index) in llms" :value="index" :label="option.name" :key="index">
 						<div class="llm-option">
-							<span :class="`${option.id}-icon server-icon`"></span>
 							<span>{{ option.name }}</span>
 						</div>
 					</el-option>

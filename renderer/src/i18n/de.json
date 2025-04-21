@@ -117,5 +117,11 @@
     "read-prompt": "Prompt lesen",
     "execute-tool": "Ausführen",
     "save": "Speichern",
-    "send": "Senden"
+    "send": "Senden",
+    "server-not-support-statistic": "Der von Ihnen verwendete Anbieter unterstützt vorerst keine Statistiken",
+    "answer-at": "Beantwortet am",
+    "input-token": "Eingabe",
+    "output-token": "Ausgabe",
+    "total": "Gesamt",
+    "cache-hit-ratio": "Cache-Trefferquote"
 }

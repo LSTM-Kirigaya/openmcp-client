@@ -1,23 +1,23 @@
-# Create resources directory if it doesn't exist
-New-Item -ItemType Directory -Force -Path .\resources | Out-Null
+# 创建并清理资源目录
+New-Item -ItemType Directory -Path ./resources -Force
+Remove-Item -Recurse -Force ./resources/*
+New-Item -ItemType Directory -Path ./resources -Force
 
-# Start both build tasks in parallel
-$jobs = @(
-    Start-Job -ScriptBlock {
-        Set-Location $using:PWD\renderer
-        npm run build
-        Move-Item -Force -Path .\dist -Destination ..\resources\renderer
-    }
-    Start-Job -ScriptBlock {
-        Set-Location $using:PWD\service
-        npm run build
-        Move-Item -Force -Path .\dist -Destination ..\resources\service
-    }
-)
+# 并行构建 renderer 和 service
+$rendererJob = Start-Job -ScriptBlock {
+    cd ./renderer
+    npm run build
+    mv ./dist ../resources/renderer
+}
 
-# Wait for all jobs to complete
-Wait-Job -Job $jobs | Out-Null
-Receive-Job -Job $jobs
-Remove-Job -Job $jobs
+$serviceJob = Start-Job -ScriptBlock {
+    cd ./service
+    npm run build
+    mv ./dist ../resources/service
+}
 
-Write-Host "finish building services in ./resources"
+# 等待任务完成
+$rendererJob | Wait-Job | Receive-Job
+$serviceJob | Wait-Job | Receive-Job
+
+Write-Output "finish building services in ./resources"

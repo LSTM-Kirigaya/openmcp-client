@@ -6,8 +6,8 @@ import type { OpenAI } from 'openai';
 import { callTool } from "../tool/tools";
 import { llmManager, llms } from "@/views/setting/llm";
 
-type ChatCompletionChunk = OpenAI.Chat.Completions.ChatCompletionChunk;
-type ChatCompletionCreateParamsBase = OpenAI.Chat.Completions.ChatCompletionCreateParams & { id?: string };
+export type ChatCompletionChunk = OpenAI.Chat.Completions.ChatCompletionChunk;
+export type ChatCompletionCreateParamsBase = OpenAI.Chat.Completions.ChatCompletionCreateParams & { id?: string };
 interface TaskLoopOptions {
     maxEpochs: number;
 }
@@ -18,6 +18,7 @@ interface TaskLoopOptions {
 export class TaskLoop {
     private bridge = useMessageBridge();
     private currentChatId = '';
+    private completionUsage: ChatCompletionChunk['usage'] | undefined;
 
     constructor(
         private readonly streamingContent: Ref<string>,
@@ -27,7 +28,9 @@ export class TaskLoop {
         private onDone: () => void = () => {},
         private onEpoch: () => void = () => {},
         private readonly taskOptions: TaskLoopOptions = { maxEpochs: 20 },
-    ) {}
+    ) {
+
+    }
 
     private async handleToolCalls(toolCalls: ToolCall[]) {
         // TODO: 调用多个工具并返回调用结果？
@@ -89,6 +92,13 @@ export class TaskLoop {
         }        
     }
 
+    private handleChunkUsage(chunk: ChatCompletionChunk) {
+        const usage = chunk.usage;
+        if (usage) {
+            this.completionUsage = usage;
+        }
+    }
+
     private doConversation(chatData: ChatCompletionCreateParamsBase) {
 
         return new Promise<void>((resolve, reject) => {
@@ -99,15 +109,16 @@ export class TaskLoop {
                     return;
                 }
                 const { chunk } = data.msg as { chunk: ChatCompletionChunk };
-                
+
                 // 处理增量的 content 和 tool_calls
                 this.handleChunkDeltaContent(chunk);
                 this.handleChunkDeltaToolCalls(chunk);
+                this.handleChunkUsage(chunk);
                 
                 this.onChunk(chunk);
             }, { once: false });
         
-            this.bridge.addCommandListener('llm/chat/completions/done', data => {
+            this.bridge.addCommandListener('llm/chat/completions/done', data => {                
                 this.onDone();
                 chunkHandler();
 
@@ -140,6 +151,7 @@ export class TaskLoop {
         // 如果超出了 tabStorage.settings.contextLength, 则删除最早的消息
         const loadMessages = tabStorage.messages.slice(- tabStorage.settings.contextLength);
         userMessages.push(...loadMessages);
+
         // 增加一个id用于锁定状态
         const id = crypto.randomUUID();
 
@@ -188,7 +200,14 @@ export class TaskLoop {
      */
     public async start(tabStorage: ChatStorage, userMessage: string) {
         // 添加目前的消息
-        tabStorage.messages.push({ role: 'user', content: userMessage });
+        tabStorage.messages.push({
+            role: 'user',
+            content: userMessage,
+            extraInfo: {
+                created: Date.now(),
+                serverName: llms[llmManager.currentModelIndex].id || 'unknown'
+            }
+        });
 
         for (let i = 0; i < this.taskOptions.maxEpochs; ++ i) {
 
@@ -197,6 +216,7 @@ export class TaskLoop {
             // 初始累计清空
             this.streamingContent.value = '';
             this.streamingToolCalls.value = [];
+            this.completionUsage = undefined;
 
             // 构造 chatData
             const chatData = this.makeChatData(tabStorage);
@@ -212,7 +232,11 @@ export class TaskLoop {
                 tabStorage.messages.push({
                     role: 'assistant',
                     content: this.streamingContent.value || '',
-                    tool_calls: this.streamingToolCalls.value
+                    tool_calls: this.streamingToolCalls.value,
+                    extraInfo: {
+                        created: Date.now(),
+                        serverName: llms[llmManager.currentModelIndex].id || 'unknown'
+                    }
                 });
 
                 const toolCallResult = await this.handleToolCalls(this.streamingToolCalls.value);
@@ -222,14 +246,24 @@ export class TaskLoop {
                     tabStorage.messages.push({
                         role: 'tool',
                         tool_call_id: toolCall.id || toolCall.function.name,
-                        content: toolCallResult
+                        content: toolCallResult,
+                        extraInfo: {
+                            created: Date.now(),
+                            serverName: llms[llmManager.currentModelIndex].id || 'unknown',
+                            usage: this.completionUsage
+                        }
                     });
                 }
 
             } else if (this.streamingContent.value) {
                 tabStorage.messages.push({
                     role: 'assistant',
-                    content: this.streamingContent.value
+                    content: this.streamingContent.value,
+                    extraInfo: {
+                        created: Date.now(),
+                        serverName: llms[llmManager.currentModelIndex].id || 'unknown',
+                        usage: this.completionUsage
+                    }
                 });
                 break;
 

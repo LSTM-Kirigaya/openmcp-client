@@ -3,7 +3,7 @@
 		<Welcome v-show="!haveActiveTab"></Welcome>
 		
 		<!-- 如果存在激活标签页，则根据标签页进行渲染 -->
-		<div v-show="haveActiveTab" style="height: 100%;">
+		<div v-show="haveActiveTab" v-if="panelLoaded" style="height: 100%;">
 			<!-- vscode/trae 中，下面存在初始化问题 -->
 			<component
                 v-show="tab === tabs.content[tabs.activeIndex]"

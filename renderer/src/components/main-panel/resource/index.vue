@@ -1,4 +1,5 @@
 <template>
+    <el-scrollbar height="100%">
     <div class="resource-module">
         <div class="left">
             <h2>
@@ -21,7 +22,8 @@
                 :tab-id="props.tabId"
             ></ResourceLogger>
         </div>
-</div>
+    </div>
+    </el-scrollbar>
 </template>
 
 <script setup lang="ts">

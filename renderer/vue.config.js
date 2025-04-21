@@ -36,5 +36,8 @@ module.exports = defineConfig({
     },
     css: {
         extract: false
+    },
+    devServer: {
+        port: 8081
     }
 });

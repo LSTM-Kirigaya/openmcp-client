@@ -1,12 +1,23 @@
 import { ToolItem } from "@/hook/type";
 import { ref } from "vue";
 
+import type { OpenAI } from 'openai';
+type ChatCompletionChunk = OpenAI.Chat.Completions.ChatCompletionChunk;
+
+export interface IExtraInfo {
+    created: number,
+    serverName: string,
+    usage?: ChatCompletionChunk['usage'];
+    [key: string]: any
+}
+
 export interface ChatMessage {
     role: 'user' | 'assistant' | 'system' | 'tool';
     content: string;
     tool_call_id?: string
     name?: string // 工具名称，当 role 为 tool
-    tool_calls?: ToolCall[]
+    tool_calls?: ToolCall[],
+    extraInfo: IExtraInfo
 }
 
 // 新增状态和工具数据

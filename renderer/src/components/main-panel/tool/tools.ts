@@ -35,7 +35,10 @@ export function callTool(toolName: string, toolArgs: Record<string, any>) {
             command: 'tools/call',
             data: {
                 toolName,
-                toolArgs: JSON.parse(JSON.stringify(toolArgs))
+                toolArgs: JSON.parse(JSON.stringify(toolArgs, (key, value) => {
+                    // 确保所有值都保持原始字符串形式
+                    return typeof value === 'number' ? String(value) : value;
+                }))
             }
         });
     });

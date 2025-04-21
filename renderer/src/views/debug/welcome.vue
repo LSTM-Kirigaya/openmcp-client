@@ -59,6 +59,7 @@ function chooseDebugMode(index: number) {
 	if (connectionResult.success) {
 		const activeTab = tabs.activeTab;
 		activeTab.component = markRaw(debugModes[index]);
+
 		activeTab.componentIndex = index;
 		activeTab.icon = debugOptions[index].icon;
 
@@ -66,6 +67,8 @@ function chooseDebugMode(index: number) {
 		// console.log(debugOptions[index]);
 
 		activeTab.name = debugOptions[index].name as any;
+		console.log(tabs);
+
 	} else {
 		const message = t('warning.click-to-connect')
 			.replace('$1', t('connect'));

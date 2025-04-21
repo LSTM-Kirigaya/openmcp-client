@@ -13,7 +13,7 @@
                 />
             </span>
         </span>
-        <el-scrollbar height="300px">
+        <el-scrollbar height="500px">
             <div
                 class="output-content"
                 contenteditable="false"
@@ -95,7 +95,7 @@ const formattedJson = computed(() => {
 .tool-logger .output-content {
     border-radius: .5em;
     padding: 15px;
-    min-height: 300px;
+    min-height: 450px;
     height: fit-content;
     font-family: var(--code-font-family);
     white-space: pre-wrap;

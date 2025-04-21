@@ -1,0 +1,103 @@
+{
+  "currentIndex": 0,
+  "tabs": [
+    {
+      "name": "交互测试",
+      "icon": "icon-robot",
+      "type": "blank",
+      "componentIndex": 3,
+      "storage": {
+        "messages": [
+          {
+            "role": "user",
+            "content": "请帮我找几张明日方舟 m3 的图片",
+            "extraInfo": {
+              "created": 1745169263803,
+              "serverName": "deepseek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "id": "call_0_bdf947d9-41d9-4244-b145-55e5dc4f1bdd",
+                "index": 0,
+                "type": "function",
+                "function": {
+                  "name": "image_crawler",
+                  "arguments": "{\"key_word\":\"明日方舟 m3\",\"image_num\":5}"
+                }
+              }
+            ],
+            "extraInfo": {
+              "created": 1745169269404,
+              "serverName": "deepseek",
+              "usage": {
+                "prompt_tokens": 224,
+                "completion_tokens": 33,
+                "total_tokens": 257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                },
+                "prompt_cache_hit_tokens": 0,
+                "prompt_cache_miss_tokens": 224
+              }
+            }
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "call_0_bdf947d9-41d9-4244-b145-55e5dc4f1bdd",
+            "content": "[{\"type\":\"text\",\"text\":\"[ImageResult(url='https://embed.pixiv.net/decorate.php?illust_id=128971880', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/artwork.php?illust_id=128973165', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/artwork.php?illust_id=128981472', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/decorate.php?illust_id=128933348', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/artwork.php?illust_id=128952894', title='', source='bing')]\"}]",
+            "extraInfo": {
+              "created": 1745169270649,
+              "serverName": "deepseek",
+              "usage": {
+                "prompt_tokens": 224,
+                "completion_tokens": 33,
+                "total_tokens": 257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                },
+                "prompt_cache_hit_tokens": 0,
+                "prompt_cache_miss_tokens": 224
+              }
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "以下是一些关于“明日方舟 m3”的图片：\n\n1. ![Image](https://embed.pixiv.net/decorate.php?illust_id=128971880)\n2. ![Image](https://embed.pixiv.net/artwork.php?illust_id=128973165)\n3. ![Image](https://embed.pixiv.net/artwork.php?illust_id=128981472)\n4. ![Image](https://embed.pixiv.net/decorate.php?illust_id=128933348)\n5. ![Image](https://embed.pixiv.net/artwork.php?illust_id=128952894)\n\n如果需要更多图片或其他帮助，请告诉我！",
+            "extraInfo": {
+              "created": 1745169280218,
+              "serverName": "deepseek",
+              "usage": {
+                "prompt_tokens": 420,
+                "completion_tokens": 142,
+                "total_tokens": 562,
+                "prompt_tokens_details": {
+                  "cached_tokens": 192
+                },
+                "prompt_cache_hit_tokens": 192,
+                "prompt_cache_miss_tokens": 228
+              }
+            }
+          }
+        ],
+        "settings": {
+          "modelIndex": 0,
+          "enableTools": [
+            {
+              "name": "image_crawler",
+              "description": "根据关键词从指定搜索引擎爬取图片",
+              "enabled": true
+            }
+          ],
+          "enableWebSearch": false,
+          "temperature": 0.7,
+          "contextLength": 10,
+          "systemPrompt": "你是一个聪明的机器人，我现在会询问你一些问题，这些问题可能会调用我给你的工具，如果用户的输入的问题内包含的参数不足以发起一次工具调用，那么你应该提醒用户缺失的参数。对于图片，请按照 ![]() 进行渲染，而不是将这个返回到 ``` 的 code 中。"
+        }
+      }
+    }
+  ]
+}

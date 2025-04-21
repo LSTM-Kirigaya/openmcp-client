@@ -40,6 +40,7 @@
 import { defineComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { addNewTab, tabs, closeTab } from './panel';
+import { panelLoaded } from '@/hook/panel';
 
 defineComponent({ name: 'main-panel' });
 

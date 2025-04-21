@@ -117,5 +117,11 @@
     "read-prompt": "Read prompt",
     "execute-tool": "Run",
     "save": "Save",
-    "send": "Send"
+    "send": "Send",
+    "server-not-support-statistic": "The vendor you are using does not support statistics temporarily",
+    "answer-at": "Answered on",
+    "input-token": "Input",
+    "output-token": "Output",
+    "total": "Total",
+    "cache-hit-ratio": "Cache hit rate"
 }

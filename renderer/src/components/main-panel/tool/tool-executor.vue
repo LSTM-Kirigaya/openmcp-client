@@ -5,35 +5,34 @@
     <div class="tool-executor-container">
         <el-form :model="formData" :rules="formRules" ref="formRef" label-position="top">
             <template v-if="currentTool?.inputSchema?.properties">
-                <el-scrollbar height="150px">
-                    <el-form-item 
-                        v-for="[name, property] in Object.entries(currentTool.inputSchema.properties)" 
-                        :key="name"
-                        :label="property.title || name" 
-                        :prop="name"
-                        :required="currentTool.inputSchema.required?.includes(name)"
-                    >
-                        <el-input 
-                            v-if="property.type === 'string'" 
-                            v-model="formData[name]"
-                            :placeholder="t('enter') + ' ' + (property.title || name)"
-                            @keydown.enter.prevent="handleExecute" 
-                        />
+                <el-form-item 
+                    v-for="[name, property] in Object.entries(currentTool.inputSchema.properties)" 
+                    :key="name"
+                    :label="property.title || name" 
+                    :prop="name"
+                    :required="currentTool.inputSchema.required?.includes(name)"
+                >
+                    <el-input 
+                        v-if="property.type === 'string'" 
+                        v-model="formData[name]"
+                        type="text"
+                        :placeholder="t('enter') + ' ' + (property.title || name)"
+                        @keydown.enter.prevent="handleExecute"
+                    />
 
-                        <el-input-number 
-                            v-else-if="property.type === 'number' || property.type === 'integer'" 
-                            v-model="formData[name]"
-                            controls-position="right"
-                            :placeholder="t('enter') + ' ' + (property.title || name)"
-                            @keydown.enter.prevent="handleExecute" 
-                        />
+                    <el-input-number 
+                        v-else-if="property.type === 'number' || property.type === 'integer'" 
+                        v-model="formData[name]"
+                        controls-position="right"
+                        :placeholder="t('enter') + ' ' + (property.title || name)"
+                        @keydown.enter.prevent="handleExecute" 
+                    />
 
-                        <el-switch 
-                            v-else-if="property.type === 'boolean'" 
-                            v-model="formData[name]"
-                        />
-                    </el-form-item>
-                </el-scrollbar>
+                    <el-switch 
+                        v-else-if="property.type === 'boolean'" 
+                        v-model="formData[name]"
+                    />
+                </el-form-item>
             </template>
 
             <el-form-item>
@@ -114,8 +113,7 @@ const resetForm = () => {
 };
 
 async function handleExecute() {
-    if (!currentTool.value) return;
-
+    if (!currentTool.value) return;    
     const toolResponse = await callTool(tabStorage.currentToolName, formData.value);
     tabStorage.lastToolCallResponse = toolResponse;
 }

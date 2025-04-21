@@ -10,7 +10,7 @@
 					type="primary"
 					size="large"
 					:disabled="!connectionResult"
-					@click="doConnect()"
+					@click="suitableConnect()"
 				>
 					{{ t('connect.appearance.connect') }}
 				</el-button>
@@ -38,7 +38,7 @@ import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-import { connectionResult, doConnect, doReconnect } from './connection';
+import { connectionResult, doConnect, doReconnect, launchConnect } from './connection';
 
 import ConnectionMethod from './connection-method.vue';
 import ConnectionArgs from './connection-args.vue';
@@ -46,7 +46,7 @@ import EnvVar from './env-var.vue';
 
 import ConnectionLog from './connection-log.vue';
 
-import { useMessageBridge } from '@/api/message-bridge';
+import { acquireVsCodeApi, useMessageBridge } from '@/api/message-bridge';
 
 defineComponent({ name: 'connect' });
 
@@ -58,6 +58,13 @@ bridge.addCommandListener('connect', data => {
 	connectionResult.logString = msg;
 }, { once: false });
 
+function suitableConnect() {
+	if (acquireVsCodeApi === undefined) {
+		doConnect();
+	} else {
+		launchConnect({ updateCommandString: false });
+	}
+}
 
 </script>
 

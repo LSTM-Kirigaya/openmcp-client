@@ -117,5 +117,11 @@
     "read-prompt": "プロンプトを読み取る",
     "execute-tool": "実行",
     "save": "保存",
-    "send": "送信"
+    "send": "送信",
+    "server-not-support-statistic": "お使いのベンダーは一時的に統計情報をサポートしていません",
+    "answer-at": "解答日",
+    "input-token": "入力",
+    "output-token": "出力",
+    "total": "合計",
+    "cache-hit-ratio": "キャッシュヒット率"
 }

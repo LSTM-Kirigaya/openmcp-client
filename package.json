@@ -2,7 +2,7 @@
     "name": "openmcp",
     "displayName": "OpenMCP",
     "description": "An all in one MCP Client/TestTool",
-    "version": "0.0.1",
+    "version": "0.0.3",
     "publisher": "kirigaya",
     "author": {
         "name": "kirigaya",
@@ -85,7 +85,7 @@
         "@types/vscode": "^1.72.0",
         "ts-loader": "^9.5.1",
         "typescript": "^5.4.2",
-        "webpack": "^5.88.2",
+        "webpack": "^5.99.5",
         "webpack-cli": "^5.1.4"
     }
 }

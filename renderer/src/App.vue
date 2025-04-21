@@ -7,6 +7,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { Connection } from './components/sidebar/sidebar';
 
 import Sidebar from '@/components/sidebar/index.vue';
@@ -26,40 +27,28 @@ bridge.addCommandListener('hello', data => {
 	greenLog(`version: ${data.version}`);
 }, { once: true });
 
-// 监听 connect
-bridge.addCommandListener('connect', async data => {
-	const { code, msg } = data;
-	connectionResult.success = (code === 200);
-	connectionResult.logString = msg;
-
-	const res = await getServerVersion() as { name: string, version: string };
-	connectionResult.serverInfo.name = res.name || '';
-	connectionResult.serverInfo.version = res.version || '';
-
-}, { once: true });
-
-
 
 function initDebug() {
-	connectionArgs.commandString = 'mcp run ../servers/main.py';
+	connectionArgs.commandString = 'uv run mcp run ../servers/bing-picture.py';
 	connectionMethods.current = 'STDIO';
 
-	setTimeout(() => {
+	setTimeout(async () => {
 		// 初始化 设置
 		loadSetting();
+
+		// 尝试连接
+		await doConnect();
 
 		// 初始化 tab
 		loadPanels();
 
-		// 尝试连接
-		doConnect();
-
-		// 200 是我的电脑上的 ws 的连接时间，部署环境中不存在 ws 连接延时的问题，所以
-		// 可以直接不管
 	}, 200);
 }
 
-function initProduce() {
+const route = useRoute();
+const router = useRouter();
+
+async function initProduce() {
 	// TODO: get from vscode
 	connectionArgs.commandString = 'mcp run ../servers/main.py';
 	connectionMethods.current = 'STDIO';
@@ -67,10 +56,16 @@ function initProduce() {
 	// 初始化 设置
 	loadSetting();
 
-	// 初始化 tab
-	loadPanels();
+	// 尝试连接
+	await launchConnect();
 
-	launchConnect();
+	// 初始化 tab
+	await loadPanels();
+	
+	if (route.name !== 'debug') {
+		router.replace('/debug');
+		router.push('/debug');
+	}
 }
 
 onMounted(() => {
@@ -98,4 +93,9 @@ onMounted(() => {
 	display: flex;
 	justify-content: center;
 }
+
+.message-text img {
+    max-width: 98%;
+}
+
 </style>

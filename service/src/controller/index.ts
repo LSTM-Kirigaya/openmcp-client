@@ -7,9 +7,34 @@ import { panelLoadHandler, panelSaveHandler } from './panel';
 import { settingLoadHandler, settingSaveHandler } from './setting';
 import { ping } from './util';
 
+import { spawnSync } from 'node:child_process';
+
 
 // TODO: 支持更多的 client
 let client: MCPClient | undefined = undefined;
+
+function tryGetRunCommandError(command: string, args: string[] = [], cwd?: string): string | null {
+    try {
+		console.log('current command', command);
+		console.log('current args', args);
+		
+        const result = spawnSync(command, args, {
+            cwd: cwd || process.cwd(),
+            stdio: 'pipe',
+            encoding: 'utf-8'
+        });
+
+        if (result.error) {
+            return result.error.message;
+        }
+        if (result.status !== 0) {
+            return result.stderr || `Command failed with code ${result.status}`;
+        }
+        return null;
+    } catch (error) {
+        return error instanceof Error ? error.message : String(error);
+    }
+}
 
 async function connectHandler(option: MCPOptions, webview: PostMessageble) {
 	try {
@@ -27,9 +52,17 @@ async function connectHandler(option: MCPOptions, webview: PostMessageble) {
 		// 比如	error: Failed to spawn: `server.py`
   		//		  Caused by: No such file or directory (os error 2)
 
+		let errorMsg = '';
+
+		if (option.command) {
+			errorMsg += tryGetRunCommandError(option.command, option.args, option.cwd);
+		}
+
+		errorMsg += (error as any).toString();
+		
 		const connectResult = {
 			code: 500,
-			msg: (error as any).toString()
+			msg: errorMsg
 		};
 		webview.postMessage({ command: 'connect', data: connectResult });
 	}

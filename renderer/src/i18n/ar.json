@@ -117,5 +117,11 @@
     "read-prompt": "قراءة المطالبة",
     "execute-tool": "تشغيل",
     "save": "حفظ",
-    "send": "إرسال"
+    "send": "إرسال",
+    "server-not-support-statistic": "موفر الخدمة الذي تستخدمه لا يدعم الإحصائيات مؤقتًا",
+    "answer-at": "تم الإجابة في",
+    "input-token": "إدخال",
+    "output-token": "إخراج",
+    "total": "الإجمالي",
+    "cache-hit-ratio": "معدل ضربات التخزين المؤقت"
 }

@@ -10,4 +10,5 @@ export const llmManager = reactive({
 
 export function onmodelchange() {
 	pinkLog('切换模型到：' + llms[llmManager.currentModelIndex].id);
+	saveSetting();
 }

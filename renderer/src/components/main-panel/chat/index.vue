@@ -1,6 +1,6 @@
 <template>
     <div class="chat-container" :ref="el => chatContainerRef = el">
-        <el-scrollbar ref="scrollbarRef" :height="'90%'" @scroll="handleScroll">
+        <el-scrollbar ref="scrollbarRef" :height="'90%'" @scroll="handleScroll" v-if="renderMessages.length > 0 || isLoading">
             <div class="message-list" :ref="el => messageListRef = el">
                 <div v-for="(message, index) in renderMessages" :key="index"
                     :class="['message-item', message.role.split('/')[0]]">
@@ -22,6 +22,7 @@
                         <div class="message-text">
                             <div v-if="message.content" v-html="markdownToHtml(message.content)"></div>
                         </div>
+                        <MessageMeta :message="message" />
                     </div>
 
                     <!-- 助手调用的工具部分 -->
@@ -81,6 +82,7 @@
                                 </div>
                             </div>
                         </div>
+                        <MessageMeta :message="message" />
                     </div>
                 </div>
 
@@ -105,6 +107,9 @@
                 </div>
             </div>
         </el-scrollbar>
+        <div v-else>
+            
+        </div>
 
         <el-footer class="chat-footer" ref="footerRef">
             <div class="input-area">
@@ -129,12 +134,16 @@ import { ref, onMounted, defineComponent, defineProps, onUnmounted, computed, ne
 import { useI18n } from 'vue-i18n';
 import { ElMessage, ScrollbarInstance } from 'element-plus';
 import { tabs } from '../panel';
-import { ChatMessage, ChatStorage, getToolSchema, ToolCall } from './chat';
+import { ChatMessage, ChatStorage, getToolSchema, IExtraInfo, ToolCall } from './chat';
+
 
 import Setting from './setting.vue';
+import MessageMeta from './message-meta.vue';
+
 // 引入 markdown.ts 中的函数
 import { markdownToHtml, copyToClipboard } from './markdown';
-import { TaskLoop } from './task-loop';
+import { ChatCompletionChunk, TaskLoop } from './task-loop';
+import { llmManager, llms } from '@/views/setting/llm';
 
 defineComponent({ name: 'chat' });
 
@@ -174,6 +183,7 @@ interface IRenderMessage {
     toolResult?: string;
     tool_calls?: ToolCall[];
     showJson?: Ref<boolean>;
+    extraInfo: IExtraInfo;
 }
 
 const renderMessages = computed(() => {
@@ -182,7 +192,8 @@ const renderMessages = computed(() => {
         if (message.role === 'user') {
             messages.push({
                 role: 'user',
-                content: message.content
+                content: message.content,
+                extraInfo: message.extraInfo
             });
         } else if (message.role === 'assistant') {
             if (message.tool_calls) {
@@ -190,12 +201,14 @@ const renderMessages = computed(() => {
                     role: 'assistant/tool_calls',
                     content: message.content,
                     tool_calls: message.tool_calls,
-                    showJson: ref(false)
+                    showJson: ref(false),
+                    extraInfo: message.extraInfo
                 });
             } else {
                 messages.push({
                     role: 'assistant/content',
-                    content: message.content
+                    content: message.content,
+                    extraInfo: message.extraInfo
                 });
             }
 
@@ -204,6 +217,7 @@ const renderMessages = computed(() => {
             const lastAssistantMessage = messages[messages.length - 1];
             if (lastAssistantMessage.role === 'assistant/tool_calls') {
                 lastAssistantMessage.toolResult = message.content;
+                lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
             }
         }
     }
@@ -302,7 +316,11 @@ const handleSend = () => {
 
         tabStorage.messages.push({
             role: 'assistant',
-            content: `错误: ${msg}`
+            content: `错误: ${msg}`,
+            extraInfo: {
+                created: Date.now(),
+                serverName: llms[llmManager.currentModelIndex].id || 'unknown'
+            }
         });
 
         isLoading.value = false;
@@ -361,7 +379,6 @@ const jsonResultToHtml = (jsonString: string) => {
     return html;
 };
 
-// 新增格式化工具参数的方法
 const formatToolArguments = (args: string) => {
     try {
         const parsed = JSON.parse(args);
@@ -510,9 +527,7 @@ const formatToolArguments = (args: string) => {
 </style>
 
 <style scoped>
-/* 原有样式保持不变 */
 
-/* 新增工具调用样式 */
 .tool-calls {
     margin-top: 10px;
 }

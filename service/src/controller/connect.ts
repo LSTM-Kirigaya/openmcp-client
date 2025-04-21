@@ -3,6 +3,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { Implementation } from "@modelcontextprotocol/sdk/types";
+import { Writable, Stream } from "node:stream";
 
 // 定义连接类型
 type ConnectionType = 'STDIO' | 'SSE';
@@ -31,6 +32,8 @@ export class MCPClient {
     private options: MCPOptions;
     private serverVersion: IServerVersion;
 
+    private transportStdErr: string = '';
+
     constructor(options: MCPOptions) {
         this.options = options;
         this.serverVersion = undefined;
@@ -52,6 +55,8 @@ export class MCPClient {
 
     // 连接方法
     public async connect(): Promise<void> {
+        this.transportStdErr = '';
+
         // 根据连接类型创建传输层
         switch (this.options.connectionType) {
             case 'STDIO':
@@ -60,20 +65,26 @@ export class MCPClient {
                     args: this.options.args || [],
                     cwd: this.options.cwd || process.cwd()
                 });
+
                 break;
             case 'SSE':
                 if (!this.options.url) {
                     throw new Error('URL is required for SSE connection');
                 }
-                this.transport = new SSEClientTransport(new URL(this.options.url));
+                this.transport = new SSEClientTransport(
+                    new URL(this.options.url)
+                );
+
                 break;
             default:
                 throw new Error(`Unsupported connection type: ${this.options.connectionType}`);
         }
 
         // 建立连接
-        await this.client.connect(this.transport);
-        console.log(`Connected to MCP server via ${this.options.connectionType}`);        
+        if (this.transport) {
+            await this.client.connect(this.transport);
+            console.log(`Connected to MCP server via ${this.options.connectionType}`);   
+        }
     }
 
     public getServerVersion() {

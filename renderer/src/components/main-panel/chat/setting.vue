@@ -130,6 +130,7 @@ import { allTools, ChatSetting, ChatStorage, getToolSchema } from './chat';
 import { useMessageBridge } from '@/api/message-bridge';
 import { CasualRestAPI, ToolItem, ToolsListResponse } from '@/hook/type';
 import { markdownToHtml } from './markdown';
+import { saveSetting } from '@/hook/setting';
 
 const props = defineProps({
 	tabId: {
@@ -174,7 +175,9 @@ if (!tabStorage.settings) {
 	} as ChatSetting;
 }
 
-const selectedModelIndex = ref(llmManager.currentModelIndex);
+// 代表当前使用的服务商的当前模型的索引
+const currentModel = llms[llmManager.currentModelIndex].userModel;
+const selectedModelIndex = ref(llms[llmManager.currentModelIndex].models.indexOf(currentModel));
 
 const availableModels = computed(() => {
 	return llms[llmManager.currentModelIndex].models;
@@ -203,13 +206,13 @@ const toggleWebSearch = () => {
 };
 
 const confirmModelChange = () => {
-	llmManager.currentModelIndex = selectedModelIndex.value;
 	showModelDialog.value = false;
 };
 
 const onRadioGroupChange = () => {
 	const currentModel = llms[llmManager.currentModelIndex].models[selectedModelIndex.value];
 	llms[llmManager.currentModelIndex].userModel = currentModel;
+	saveSetting();
 };
 
 const bridge = useMessageBridge();
