@@ -1,27 +1,29 @@
 <template>
-	<div class="setting-container">
-		<div>
-			<el-segmented
-				v-model="settingSections.current"
-				:options="settingSections.data"
-				size="large"
-				style="margin: 10px; font-size: 16px; background-color: var(--background);"
-			>
-			<template #default="scope">
-				<div class="setting-section-option">
-					{{ scope.item.label }}
-				</div>
-			</template>
-			</el-segmented>
+	<el-scrollbar height="100%">
+		<div class="setting-container">
 			<div>
+				<el-segmented
+					v-model="settingSections.current"
+					:options="settingSections.data"
+					size="large"
+					style="margin: 10px; font-size: 16px; background-color: var(--background);"
+				>
+				<template #default="scope">
+					<div class="setting-section-option">
+						{{ scope.item.label }}
+					</div>
+				</template>
+				</el-segmented>
+				<div>
 
-				<General v-show="settingSections.current === 'general'"></General>
-				<Api v-show="settingSections.current === 'api'"></Api>
-				<Appearance v-show="settingSections.current === 'appearance'"></Appearance>
+					<General v-show="settingSections.current === 'general'"></General>
+					<Api v-show="settingSections.current === 'api'"></Api>
+					<Appearance v-show="settingSections.current === 'appearance'"></Appearance>
 
+				</div>
 			</div>
 		</div>
-	</div>
+	</el-scrollbar>
 </template>
 
 <script setup lang="ts">

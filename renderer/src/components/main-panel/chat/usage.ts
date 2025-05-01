@@ -20,7 +20,7 @@ export function makeUsageStatistic(extraInfo: IExtraInfo): UsageStatistic | unde
                 input: usage.prompt_tokens,
                 output: usage.completion_tokens,
                 total: usage.prompt_tokens + usage.completion_tokens,
-                cacheHitRatio: Math.ceil(usage.prompt_tokens_details?.cached_tokens || 0 / usage.prompt_tokens * 1000) / 10,
+                cacheHitRatio: Math.ceil((usage.prompt_tokens_details?.cached_tokens || 0) / usage.prompt_tokens * 1000) / 10,
             }
 
         case 'openai':

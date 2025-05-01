@@ -73,7 +73,11 @@ onMounted(() => {
     commandCancel = bridge.addCommandListener('tools/list', (data: CasualRestAPI<ToolsListResponse>) => {
         toolsManager.tools = data.msg.tools || [];
         
-        if (toolsManager.tools.length > 0) {
+        const targetTool = toolsManager.tools.find((tool) => {
+            return tool.name === tabStorage.currentToolName;
+        });
+
+        if (targetTool === undefined) {
             tabStorage.currentToolName = toolsManager.tools[0].name;
             tabStorage.lastToolCallResponse = undefined;
         }

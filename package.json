@@ -2,7 +2,7 @@
     "name": "openmcp",
     "displayName": "OpenMCP",
     "description": "An all in one MCP Client/TestTool",
-    "version": "0.0.3",
+    "version": "0.0.5",
     "publisher": "kirigaya",
     "author": {
         "name": "kirigaya",
@@ -28,9 +28,66 @@
                 "title": "展示 OpenMCP",
                 "category": "openmcp",
                 "icon": {
-                    "light": "./icons/protocol.svg",
-                    "dark": "./icons/protocol.svg"
+                    "light": "./icons/light/protocol.svg",
+                    "dark": "./icons/dark/protocol.svg"
                 }
+            },
+            {
+                "command": "openmcp.sidebar.workspace-connection.revealWebviewPanel",
+                "title": "连接",
+                "category": "openmcp",
+                "icon": {
+                    "light": "./icons/light/protocol.svg",
+                    "dark": "./icons/dark/protocol.svg"
+                }
+            },
+            {
+                "command": "openmcp.sidebar.workspace-connection.deleteConnection",
+                "title": "删除连接",
+                "category": "openmcp",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "openmcp.sidebar.workspace-connection.refresh",
+                "title": "刷新",
+                "category": "openmcp",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "openmcp.sidebar.workspace-connection.addConnection",
+                "title": "添加连接",
+                "category": "openmcp",
+                "icon": "$(add)"
+            },
+            {
+                "command": "openmcp.sidebar.workspace-connection.openConfiguration",
+                "title": "打开配置",
+                "category": "openmcp",
+                "icon": "$(gear)"
+            },
+            {
+                "command": "openmcp.sidebar.installed-connection.deleteConnection",
+                "title": "删除连接",
+                "category": "openmcp",
+                "icon": "$(trash)"
+            },
+            {
+                "command": "openmcp.sidebar.installed-connection.refresh",
+                "title": "刷新",
+                "category": "openmcp",
+                "icon": "$(refresh)"
+            },
+            {
+                "command": "openmcp.sidebar.installed-connection.addConnection",
+                "title": "添加连接",
+                "category": "openmcp",
+                "icon": "$(add)"
+            },
+            {
+                "command": "openmcp.sidebar.installed-connection.openConfiguration",
+                "title": "打开配置",
+                "category": "openmcp",
+                "icon": "$(gear)"
             }
         ],
         "menus": {
@@ -39,6 +96,64 @@
                     "command": "openmcp.showOpenMCP",
                     "group": "navigation",
                     "when": "editorLangId == python || editorLangId == javascript || editorLangId == typescript || editorLangId == java || editorLangId == csharp"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "openmcp.sidebar.workspace-connection.refresh",
+                    "group": "navigation",
+                    "when": "view == openmcp.sidebar.workspace-connection"
+                },
+                {
+                    "command": "openmcp.sidebar.workspace-connection.addConnection",
+                    "group": "navigation",
+                    "when": "view == openmcp.sidebar.workspace-connection"
+                },
+                {
+                    "command": "openmcp.sidebar.workspace-connection.openConfiguration",
+                    "group": "navigation",
+                    "when": "view == openmcp.sidebar.workspace-connection"
+                },
+                {
+                    "command": "openmcp.sidebar.installed-connection.refresh",
+                    "group": "navigation",
+                    "when": "view == openmcp.sidebar.installed-connection"
+                },
+                {
+                    "command": "openmcp.sidebar.installed-connection.addConnection",
+                    "group": "navigation",
+                    "when": "view == openmcp.sidebar.installed-connection"
+                },
+                {
+                    "command": "openmcp.sidebar.installed-connection.openConfiguration",
+                    "group": "navigation",
+                    "when": "view == openmcp.sidebar.installed-connection"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "openmcp.sidebar.workspace-connection.revealWebviewPanel",
+                    "group": "inline@1",
+                    "when": "view == openmcp.sidebar.workspace-connection || view == openmcp.sidebar.installed-connection",
+                    "args": {
+                        "view": "${viewItem}"
+                    }
+                },
+                {
+                    "command": "openmcp.sidebar.workspace-connection.deleteConnection",
+                    "group": "inline@2",
+                    "when": "view == openmcp.sidebar.workspace-connection",
+                    "args": {
+                        "view": "${viewItem}"
+                    }
+                },
+                {
+                    "command": "openmcp.sidebar.installed-connection.deleteConnection",
+                    "group": "inline@2",
+                    "when": "view == openmcp.sidebar.installed-connection",
+                    "args": {
+                        "view": "${viewItem}"
+                    }
                 }
             ]
         },
@@ -54,10 +169,22 @@
         "views": {
             "openmcp-sidebar": [
                 {
-                    "id": "webview-sidebar.view",
+                    "id": "openmcp.sidebar.workspace-connection",
                     "icon": "./icons/protocol.svg",
-                    "name": "chatbot",
-                    "type": "webview"
+                    "name": "MCP 连接 (工作区)",
+                    "type": "tree"
+                },
+                {
+                    "id": "openmcp.sidebar.installed-connection",
+                    "icon": "./icons/protocol.svg",
+                    "name": "安装的 MCP 服务器",
+                    "type": "tree"
+                },
+                {
+                    "id": "openmcp.sidebar.help",
+                    "icon": "./icons/protocol.svg",
+                    "name": "入门与帮助",
+                    "type": "tree"
                 }
             ]
         }
@@ -71,11 +198,14 @@
         "test": "node ./out/test/runTest.js"
     },
     "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.9.0",
+        "@modelcontextprotocol/sdk": "^1.10.2",
+        "@seald-io/nedb": "^4.1.1",
         "axios": "^1.7.7",
         "bson": "^6.8.0",
         "openai": "^4.93.0",
         "pako": "^2.1.0",
+        "tesseract.js": "^6.0.1",
+        "uuid": "^11.1.0",
         "ws": "^8.18.1"
     },
     "devDependencies": {

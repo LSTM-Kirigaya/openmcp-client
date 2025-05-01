@@ -3,7 +3,7 @@
         <h3>{{ currentTool?.name }}</h3>
     </div>
     <div class="tool-executor-container">
-        <el-form :model="formData" :rules="formRules" ref="formRef" label-position="top">
+        <el-form :model="tabStorage.formData" :rules="formRules" ref="formRef" label-position="top">
             <template v-if="currentTool?.inputSchema?.properties">
                 <el-form-item 
                     v-for="[name, property] in Object.entries(currentTool.inputSchema.properties)" 
@@ -14,23 +14,31 @@
                 >
                     <el-input 
                         v-if="property.type === 'string'" 
-                        v-model="formData[name]"
+                        v-model="tabStorage.formData[name]"
                         type="text"
-                        :placeholder="t('enter') + ' ' + (property.title || name)"
+                        :placeholder="property.description || t('enter') + ' ' + (property.title || name)"
                         @keydown.enter.prevent="handleExecute"
                     />
 
                     <el-input-number 
                         v-else-if="property.type === 'number' || property.type === 'integer'" 
-                        v-model="formData[name]"
+                        v-model="tabStorage.formData[name]"
                         controls-position="right"
-                        :placeholder="t('enter') + ' ' + (property.title || name)"
+                        :placeholder="property.description || t('enter') + ' ' + (property.title || name)"
                         @keydown.enter.prevent="handleExecute" 
                     />
 
                     <el-switch 
-                        v-else-if="property.type === 'boolean'" 
-                        v-model="formData[name]"
+                        v-else-if="property.type === 'boolean'"
+                        active-text="true"
+                        inactive-text="false"
+                        v-model="tabStorage.formData[name]"
+                    />
+
+                    <k-input-object
+                        v-else-if="property.type === 'object'"
+                        v-model="tabStorage.formData[name]"
+                        :placeholder="property.description || t('enter') + ' ' + (property.title || name)"
                     />
                 </el-form-item>
             </template>
@@ -53,8 +61,9 @@ import { useI18n } from 'vue-i18n';
 import type { FormInstance, FormRules } from 'element-plus';
 import { tabs } from '../panel';
 import { callTool, toolsManager, ToolStorage } from './tools';
-import { CasualRestAPI, ToolCallResponse } from '@/hook/type';
-import { useMessageBridge } from '@/api/message-bridge';
+import { getDefaultValue, normaliseJavascriptType } from '@/hook/mcp';
+
+import KInputObject from '@/components/k-input-object/index.vue';
 
 defineComponent({ name: 'tool-executor' });
 
@@ -70,13 +79,20 @@ const props = defineProps({
 const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as ToolStorage;
 
+if (!tabStorage.formData) {
+    tabStorage.formData = {};
+}
+
+console.log(tabStorage.formData);
+
+
 const formRef = ref<FormInstance>();
-const formData = ref<Record<string, any>>({});
 const loading = ref(false);
 
 const currentTool = computed(() => {
     return toolsManager.tools.find(tool => tool.name === tabStorage.currentToolName);
 });
+
 
 const formRules = computed<FormRules>(() => {
     const rules: FormRules = {};
@@ -97,24 +113,37 @@ const formRules = computed<FormRules>(() => {
     return rules;
 });
 
+
 const initFormData = () => {
-    formData.value = {};
+    // 初始化，根据输入的 inputSchema 校验
+    // 1. 当前是否存在缺失的 key value，如果有，则根据 schema 给与默认值
+    // 2. 如果有多余的 key value，则删除
+
     if (!currentTool.value?.inputSchema?.properties) return;
+
+    const newSchemaDataForm: Record<string, number | boolean | string | object> = {};
+
+    console.log(currentTool.value.inputSchema.properties);
     
     Object.entries(currentTool.value.inputSchema.properties).forEach(([name, property]) => {
-        formData.value[name] = (property.type === 'number' || property.type === 'integer') ? 0 :
-            property.type === 'boolean' ? false : '';
+        newSchemaDataForm[name] = getDefaultValue(property);
+        const originType = normaliseJavascriptType(typeof tabStorage.formData[name]);        
+
+        if (tabStorage.formData[name] !== undefined && originType === property.type) {
+            newSchemaDataForm[name] = tabStorage.formData[name]; 
+        }
     });
+
+    tabStorage.formData = newSchemaDataForm;
 };
 
 const resetForm = () => {
     formRef.value?.resetFields();
-    tabStorage.lastToolCallResponse = undefined;
 };
 
 async function handleExecute() {
     if (!currentTool.value) return;    
-    const toolResponse = await callTool(tabStorage.currentToolName, formData.value);
+    const toolResponse = await callTool(tabStorage.currentToolName, tabStorage.formData);
     tabStorage.lastToolCallResponse = toolResponse;
 }
 
@@ -131,4 +160,21 @@ watch(() => tabStorage.currentToolName, () => {
     border-radius: .5em;
     margin-bottom: 15px;
 }
+
+.tool-executor-container {
+
+}
+
+.tool-executor-container .el-switch .el-switch__action {
+    background-color: var(--main-color);
+}
+
+.tool-executor-container .el-switch.is-checked .el-switch__action {
+    background-color: var(--sidebar);
+}
+
+.tool-executor-container .el-switch__core {
+    border: 1px solid var(--main-color) !important;
+}
+
 </style>

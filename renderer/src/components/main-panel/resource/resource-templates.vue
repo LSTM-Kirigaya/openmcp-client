@@ -64,7 +64,6 @@ function reloadResources(option: { first: boolean }) {
 
 function handleClick(template: ResourceTemplate) {
     tabStorage.currentResourceName = template.name;
-    // TODO: 恢复这部分响应？
     tabStorage.lastResourceReadResponse = undefined;
 }
 
@@ -74,9 +73,9 @@ onMounted(() => {
     commandCancel = bridge.addCommandListener('resources/templates/list', (data: CasualRestAPI<ResourceTemplatesListResponse>) => {
 		resourcesManager.templates = data.msg.resourceTemplates || [];
 
-        if (resourcesManager.templates.length > 0) {
-            tabStorage.currentResourceName = resourcesManager.templates[0].name;
-            // TODO: 恢复这部分响应？
+		const targetResource = resourcesManager.templates.find(template => template.name === tabStorage.currentResourceName);
+        if (targetResource === undefined) {
+            tabStorage.currentResourceName = resourcesManager.templates[0]?.name;
             tabStorage.lastResourceReadResponse = undefined;
         }
 	}, { once: false });

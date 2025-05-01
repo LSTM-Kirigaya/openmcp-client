@@ -13,6 +13,7 @@ export const resourcesManager = reactive<{
 export interface ResourceStorage {
     currentResourceName: string;
     lastResourceReadResponse?: ResourcesReadResponse;
+    formData: Record<string, any>;
 }
 
 /**
@@ -22,7 +23,7 @@ export interface ResourceStorage {
 */
 export function parseResourceTemplate(template: string): {
     params: string[],
-    fill: (params: Record<string, string>) => string
+    fill: (params: Record<string, number | boolean | string>) => string
 } {
     // 1. 提取所有参数名
     const paramRegex = /\{([^}]+)\}/g;
@@ -36,7 +37,7 @@ export function parseResourceTemplate(template: string): {
     const paramList = Array.from(params);
 
     // 2. 创建填充函数
-    const fill = (values: Record<string, string>): string => {
+    const fill = (values: Record<string, number | boolean | string>): string => {
         let result = template;
 
         // 验证所有必填参数
@@ -48,7 +49,7 @@ export function parseResourceTemplate(template: string): {
 
         // 替换所有参数
         for (const param of paramList) {            
-            result = result.replace(new RegExp(`\\{${param}\\}`, 'g'), values[param]);
+            result = result.replace(new RegExp(`\\{${param}\\}`, 'g'), values[param].toString());
         }
 
         return result;

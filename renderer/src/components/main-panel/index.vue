@@ -6,7 +6,7 @@
                     <span
                         class="tab"
                         v-for="(tab, index) of tabs.content"
-                        :key="index"
+                        :key="tab.id"
                         :class="{ 'active-tab': tabs.activeIndex === index }"
                         @click="setActiveTab(index)"
                     >
@@ -56,7 +56,7 @@ function pageAddNewTab() {
 	}
 }
 
-function setActiveTab(index: number) {
+function setActiveTab(index: number) {	
 	if (index >= 0 && index < tabs.content.length) {
 		tabs.activeIndex = index;
 		// 如果不在 debug 路由，则进入

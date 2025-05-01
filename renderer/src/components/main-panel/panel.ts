@@ -1,5 +1,5 @@
 import { watch, reactive } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { v4 as uuidv4 } from 'uuid';
 
 import Resource from './resource/index.vue';
 import Chat from './chat/index.vue';
@@ -11,6 +11,7 @@ import { safeSavePanels, savePanels } from '@/hook/panel';
 const { t } = I18n.global;
 
 interface Tab {
+	id: string;
 	name: string;
 	icon: string;
 	type: string;
@@ -50,8 +51,9 @@ watch(
 	{ deep: true }
 );
 
-function createTab(type: string, index: number): Tab {
+export function createTab(type: string, index: number): Tab {
 	let customName: string | null = null;
+	const id = uuidv4();
 
 	return {
 		get name() {
@@ -65,6 +67,7 @@ function createTab(type: string, index: number): Tab {
 		},
 		icon: 'icon-blank',
 		type,
+		id,
 		componentIndex: -1,
 		component: undefined,
 		storage: {},
@@ -82,6 +85,8 @@ export function closeTab(index: number) {
 	if (tabs.content.length <= 1) return; // 至少保留一个标签页
 
 	tabs.content.splice(index, 1);
+
+	console.log(tabs.content);
 
 	// 调整活动标签索引
 	if (tabs.activeIndex >= index) {

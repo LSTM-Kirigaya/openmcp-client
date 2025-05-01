@@ -3,31 +3,25 @@ import { llmManager, llms } from "@/views/setting/llm";
 import { pinkLog } from "@/views/setting/util";
 import I18n from '@/i18n/index';
 
-export function loadSetting() {
+export async function loadSetting() {
     const bridge = useMessageBridge();
 
-    bridge.addCommandListener('setting/load', data => {        
-        if (data.code !== 200) {
-            pinkLog('配置加载失败');
-            console.log(data.msg);
+    const data = await bridge.commandRequest('setting/load');
+    if (data.code !== 200) {
+        pinkLog('配置加载失败');
+        console.log(data.msg);
 
-        } else {
-            const persistConfig = data.msg;
-            pinkLog('配置加载成功');
+    } else {
+        const persistConfig = data.msg;
+        pinkLog('配置加载成功');
 
-            llmManager.currentModelIndex = persistConfig.MODEL_INDEX;
-            I18n.global.locale.value = persistConfig.LANG;
+        llmManager.currentModelIndex = persistConfig.MODEL_INDEX;
+        I18n.global.locale.value = persistConfig.LANG;
 
-            persistConfig.LLM_INFO.forEach((element: any) => {
-                llms.push(element);
-            });
-        }
-
-    }, { once: true });
-
-    bridge.postMessage({
-        command: 'setting/load'
-    });
+        persistConfig.LLM_INFO.forEach((element: any) => {
+            llms.push(element);
+        });
+    }
 }
 
 export function saveSetting(saveHandler?: () => void) {

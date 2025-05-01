@@ -3,19 +3,19 @@
         <h3>{{ currentResource.template?.name }}</h3>
     </div>
     <div class="resource-reader-container">
-        <el-form :model="formData" :rules="formRules" ref="formRef" label-position="top">
+        <el-form :model="tabStorage.formData" :rules="formRules" ref="formRef" label-position="top">
             <el-form-item v-for="param in currentResource?.params" :key="param.name"
                 :label="param.name" :prop="param.name">
                 <!-- 根据不同类型渲染不同输入组件 -->
-                <el-input v-if="param.type === 'string'" v-model="formData[param.name]"
+                <el-input v-if="param.type === 'string'" v-model="tabStorage.formData[param.name]"
                     :placeholder="param.placeholder || `请输入${param.name}`"
                     @keydown.enter.prevent="handleSubmit" />
 
-                <el-input-number v-else-if="param.type === 'number'" v-model="formData[param.name]"
+                <el-input-number v-else-if="param.type === 'number'" v-model="tabStorage.formData[param.name]"
                     :placeholder="param.placeholder || `请输入${param.name}`"
                     @keydown.enter.prevent="handleSubmit" />
                     
-                <el-switch v-else-if="param.type === 'boolean'" v-model="formData[param.name]" />
+                <el-switch v-else-if="param.type === 'boolean'" v-model="tabStorage.formData[param.name]" />
             </el-form-item>
 
             <el-form-item>
@@ -38,6 +38,7 @@ import { tabs } from '../panel';
 import { parseResourceTemplate, resourcesManager, ResourceStorage } from './resources';
 import { CasualRestAPI, ResourcesReadResponse } from '@/hook/type';
 import { useMessageBridge } from '@/api/message-bridge';
+import { getDefaultValue, normaliseJavascriptType } from '@/hook/mcp';
 
 defineComponent({ name: 'resource-reader' });
 
@@ -53,9 +54,12 @@ const props = defineProps({
 const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as ResourceStorage;
 
+if (!tabStorage.formData) {
+    tabStorage.formData = {};
+}
+
 // 表单相关状态
 const formRef = ref<FormInstance>();
-const formData = ref<Record<string, any>>({});
 const loading = ref(false);
 const responseData = ref<ResourcesReadResponse>();
 
@@ -94,12 +98,21 @@ const formRules = computed<FormRules>(() => {
 });
 
 
+
+
 // 初始化表单数据
 const initFormData = () => {
-    formData.value = {}
-    currentResource.value?.params.forEach(param => {
-        formData.value[param.name] = param.type === 'number' ? 0 :
-            param.type === 'boolean' ? false : ''
+    if (!currentResource.value?.params) return;
+    
+    const newSchemaDataForm: Record<string, number | boolean | string> = {};
+
+    currentResource.value.params.forEach(param => {
+        newSchemaDataForm[param.name] = getDefaultValue(param);
+        const originType = normaliseJavascriptType(typeof tabStorage.formData[param.name]);
+
+        if (tabStorage.formData[param.name]!== undefined && originType === param.type) {
+            newSchemaDataForm[param.name] = tabStorage.formData[param.name];
+        }
     })
 }
 
@@ -112,7 +125,7 @@ const resetForm = () => {
 // 提交表单
 function handleSubmit() {
     const fillFn = currentResource.value.fill;    
-    const uri = fillFn(formData.value);
+    const uri = fillFn(tabStorage.formData);
 
     const bridge = useMessageBridge();
 

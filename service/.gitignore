@@ -22,3 +22,8 @@ pnpm-debug.log*
 *.sln
 *.sw?
 config.json
+setting.json
+
+*.traineddata
+.env
+tabs.example-servers_puppeteer.json

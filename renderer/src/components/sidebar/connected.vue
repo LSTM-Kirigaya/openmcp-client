@@ -55,11 +55,29 @@ const fullDisplayServerName = computed(() => {
 });
 
 const displayServerName = computed(() => {
-	if (connectionResult.serverInfo.name.length > 20) {
-		return connectionResult.serverInfo.name.substring(0, 20);
-	} else {
-		return connectionResult.serverInfo.name;
-	}
+    const name = connectionResult.serverInfo.name;
+    if (name.length <= 3) return name;
+    
+    // 处理中文混合名称
+    const chineseMatch = name.match(/[\u4e00-\u9fa5]/g);
+    if (chineseMatch && chineseMatch.length >= 2) {
+        return chineseMatch.slice(0, 3).join('');
+    }
+    
+    // 处理各种命名格式
+    const words = name
+        .replace(/([a-z])([A-Z])/g, '$1 $2')  // 驼峰分割
+        .split(/[\s\-_]+/)  // 分割空格、连字符和下划线
+        .filter(word => word.length > 0);
+    
+    if (words.length === 1 && words[0].length > 3) {
+        return words[0].substring(0, 3).toUpperCase();
+    }
+    
+    return words
+        .map(word => word[0].toUpperCase())
+        .slice(0, 3)
+        .join('');
 });
 
 function toggleConnectionPanel() {
@@ -132,7 +150,7 @@ function toggleConnectionPanel() {
 	max-width: 60px;
 	white-space: wrap;
 	background-color: #f39a6d;
-	padding: 5px;
+	padding: 5px 12px;
 	border-radius: .5em;
 	color: #1e1e1e;
 }

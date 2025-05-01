@@ -1,5 +1,5 @@
 {
-	"name": "openmcp-test-backend",
+	"name": "openmcp-service",
 	"version": "0.0.1",
 	"description": "",
 	"main": "dist/index.js",
@@ -25,22 +25,22 @@
 		"@types/node": "^22.7.5",
 		"@types/pako": "^2.0.3",
 		"@types/ws": "^8.18.0",
+		"esbuild": "^0.25.3",
 		"ts-node": "^10.9.2",
 		"ts-node-dev": "^2.0.0",
-		"typescript": "^5.6.3"
+		"typescript": "^5.6.3",
+		"webpack-cli": "^6.0.1",
+		"webpack-node-externals": "^3.0.0"
 	},
 	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.8.0",
-		"body-parser": "^1.20.3",
-		"chalk": "^5.4.1",
-		"cors": "^2.8.5",
-		"debug": "^4.4.0",
-		"express": "^4.21.1",
-		"morgan": "^1.10.0",
-		"openai": "^4.91.1",
+		"@modelcontextprotocol/sdk": "^1.10.2",
+		"@seald-io/nedb": "^4.1.1",
+		"openai": "^4.96.0",
 		"pako": "^2.1.0",
 		"pino": "^9.6.0",
 		"pino-pretty": "^13.0.0",
+		"tesseract.js": "^6.0.1",
+		"uuid": "^11.1.0",
 		"ws": "^8.18.1"
 	}
 }

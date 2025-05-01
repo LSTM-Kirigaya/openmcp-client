@@ -1,7 +1,11 @@
 <template>
 	<div class="mcp-title">
-		<div class="openmcp-logo" style="width: 48px; height: 48px; margin-top: 10px; margin-bottom: 15px; margin-right: 10px;"></div>
-		<!-- <div>OpenMCP</div> -->
+		<div class="simple-logo"
+			@click="clickLogo"
+		>
+			<span class="iconfont icon-openmcp"></span>
+			<span style="font-size: 12px;">openmcp</span>
+		</div>
 	</div>
 </template>
 
@@ -9,15 +13,41 @@
 import { defineComponent } from 'vue';
 
 defineComponent({ name: 'mcp-title' });
+
+
+function clickLogo() {
+	window.open('https://kirigaya.cn/blog/article?seq=311', '_blank');
+}
+
 </script>
 
 <style>
 .mcp-title {
 	display: flex;
 	align-items: center;
+	padding: 5px 10px;
 }
 
-.mcp-title > div {
+.mcp-title>div {
 	font-size: 24px;
 }
+
+.simple-logo {
+	height: 73px;
+	display: flex;
+	flex-direction: column;
+	user-select: none;
+	-webkit-user-drag: none;
+	transition: var(--animation-3s);
+	cursor: pointer;
+}
+
+.simple-logo:hover {
+	color: var(--main-color);
+}
+
+.simple-logo .iconfont {
+	font-size: 48px;
+}
+
 </style>

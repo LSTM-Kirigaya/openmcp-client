@@ -7,8 +7,14 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "outDir": "./dist",
-        "declaration": true,  // 新增
-        "declarationMap": true // 新增
+        "declaration": true,
+        "declarationMap": true,
+        "experimentalDecorators": true
+    },
+    "paths": {
+        "@/*": [
+            "src/*"
+        ]
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "src/main.ts"] // 排除 main.ts

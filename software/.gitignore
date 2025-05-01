@@ -1,0 +1,17 @@
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+.env
+resources
+.DS_Store
+.exe
+
+.idea
+resources
+setting.json
+*.traineddata
+release
+tabs.*
+tabs.example-servers/puppeteer.json

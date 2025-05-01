@@ -14,10 +14,11 @@ import Sidebar from '@/components/sidebar/index.vue';
 import MainPanel from '@/components/main-panel/index.vue';
 import { setDefaultCss } from './hook/css';
 import { greenLog, pinkLog } from './views/setting/util';
-import { acquireVsCodeApi, useMessageBridge } from './api/message-bridge';
-import { connectionArgs, connectionMethods, connectionResult, doConnect, getServerVersion, launchConnect } from './views/connect/connection';
+import { useMessageBridge } from './api/message-bridge';
+import { connectionArgs, connectionMethods, doConnect, loadEnvVar } from './views/connect/connection';
 import { loadSetting } from './hook/setting';
 import { loadPanels } from './hook/panel';
+import { getPlatform } from './api/platform';
 
 const bridge = useMessageBridge();
 
@@ -28,47 +29,10 @@ bridge.addCommandListener('hello', data => {
 }, { once: true });
 
 
-function initDebug() {
-	connectionArgs.commandString = 'uv run mcp run ../servers/bing-picture.py';
-	connectionMethods.current = 'STDIO';
-
-	setTimeout(async () => {
-		// 初始化 设置
-		loadSetting();
-
-		// 尝试连接
-		await doConnect();
-
-		// 初始化 tab
-		loadPanels();
-
-	}, 200);
-}
-
 const route = useRoute();
 const router = useRouter();
 
-async function initProduce() {
-	// TODO: get from vscode
-	connectionArgs.commandString = 'mcp run ../servers/main.py';
-	connectionMethods.current = 'STDIO';
-
-	// 初始化 设置
-	loadSetting();
-
-	// 尝试连接
-	await launchConnect();
-
-	// 初始化 tab
-	await loadPanels();
-	
-	if (route.name !== 'debug') {
-		router.replace('/debug');
-		router.push('/debug');
-	}
-}
-
-onMounted(() => {
+onMounted(async () => {
 	// 初始化 css
 	setDefaultCss();
 
@@ -78,11 +42,36 @@ onMounted(() => {
 
 	pinkLog('OpenMCP Client 启动');
 
-	if (acquireVsCodeApi === undefined) {
-		initDebug();
-	} else {
-		initProduce();
+	const platform = getPlatform();
+
+	// 跳转到首页
+	if (platform !== 'web') {
+		if (route.name !== 'debug') {
+			router.replace('/debug');
+			router.push('/debug');
+		}
 	}
+
+	// 进行桥接
+	await bridge.awaitForWebsockt();
+
+	pinkLog('准备请求设置');
+
+	// 加载全局设置
+	loadSetting();
+
+	// 设置环境变量
+	loadEnvVar();
+
+	// 尝试进行初始化连接
+	await doConnect({
+		namespace: platform,
+		updateCommandString: true
+	});
+
+	// loading panels
+	await loadPanels();
+
 });
 
 </script>
@@ -95,7 +84,11 @@ onMounted(() => {
 }
 
 .message-text img {
-    max-width: 98%;
+    max-width: 300px;
 }
 
+
+.icon-chat:before {
+	font-weight: 1000;
+}
 </style>

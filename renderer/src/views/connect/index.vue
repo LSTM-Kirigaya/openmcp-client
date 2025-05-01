@@ -1,26 +1,16 @@
 <template>
-	<div class="connection-container">
+	<el-scrollbar>
+		<div class="connection-container">
 		<div class="connect-panel-container">
 			<ConnectionMethod></ConnectionMethod>
 			<ConnectionArgs></ConnectionArgs>
 			<EnvVar></EnvVar>
 
 			<div class="connect-action">
-				<el-button
-					type="primary"
-					size="large"
-					:disabled="!connectionResult"
-					@click="suitableConnect()"
-				>
+				<el-button type="primary" size="large" :loading="isLoading" :disabled="!connectionResult"
+					@click="suitableConnect()">
+					<span class="iconfont icon-connect" v-if="!isLoading"></span>
 					{{ t('connect.appearance.connect') }}
-				</el-button>
-
-				<el-button
-					type="primary"
-					size="large"
-					@click="doReconnect()"
-				>
-				{{ t('connect.appearance.reconnect') }}
 				</el-button>
 			</div>
 		</div>
@@ -29,41 +19,37 @@
 			<ConnectionLog></ConnectionLog>
 		</div>
 	</div>
+	</el-scrollbar>
 
 </template>
 
 <script setup lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
 
-import { connectionResult, doConnect, doReconnect, launchConnect } from './connection';
+import { connectionResult, doConnect } from './connection';
 
 import ConnectionMethod from './connection-method.vue';
 import ConnectionArgs from './connection-args.vue';
 import EnvVar from './env-var.vue';
 
 import ConnectionLog from './connection-log.vue';
-
-import { acquireVsCodeApi, useMessageBridge } from '@/api/message-bridge';
+import { getPlatform } from '@/api/platform';
 
 defineComponent({ name: 'connect' });
 
-const bridge = useMessageBridge();
+const isLoading = ref(false);
 
-bridge.addCommandListener('connect', data => {
-	const { code, msg } = data;
-	connectionResult.success = (code === 200);
-	connectionResult.logString = msg;
-}, { once: false });
+async function suitableConnect() {
+	isLoading.value = true;
 
-function suitableConnect() {
-	if (acquireVsCodeApi === undefined) {
-		doConnect();
-	} else {
-		launchConnect({ updateCommandString: false });
-	}
+	const plaform = getPlatform();
+
+	await doConnect({ namespace: plaform, updateCommandString: false })
+
+	isLoading.value = false;
 }
 
 </script>
@@ -106,7 +92,7 @@ function suitableConnect() {
 	padding-bottom: 10px;
 }
 
-.input-env-container > span {
+.input-env-container>span {
 	width: 150px;
 	margin-right: 10px;
 	display: flex;

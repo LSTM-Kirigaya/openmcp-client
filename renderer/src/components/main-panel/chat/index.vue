@@ -3,121 +3,63 @@
         <el-scrollbar ref="scrollbarRef" :height="'90%'" @scroll="handleScroll" v-if="renderMessages.length > 0 || isLoading">
             <div class="message-list" :ref="el => messageListRef = el">
                 <div v-for="(message, index) in renderMessages" :key="index"
-                    :class="['message-item', message.role.split('/')[0]]">
-                    <div class="message-avatar" v-if="message.role.split('/')[0] === 'assistant'">
+                    :class="['message-item', message.role.split('/')[0], message.role.split('/')[1]]"
+                >
+                    <div class="message-avatar" v-if="message.role === 'assistant/content'">
                         <span class="iconfont icon-robot"></span>
+                    </div>
+                    <div class="message-avatar" v-else-if="message.role === 'assistant/tool_calls'">
                     </div>
 
                     <!-- 用户输入的部分 -->
                     <div class="message-content" v-if="message.role === 'user'">
-                        <div class="message-role"></div>
-                        <div class="message-text">
-                            <span>{{ message.content }}</span>
-                        </div>
+                        <Message.User :message="message" :tab-id="props.tabId" />
                     </div>
 
                     <!-- 助手返回的内容部分 -->
                     <div class="message-content" v-else-if="message.role === 'assistant/content'">
-                        <div class="message-role">Agent</div>
-                        <div class="message-text">
-                            <div v-if="message.content" v-html="markdownToHtml(message.content)"></div>
-                        </div>
-                        <MessageMeta :message="message" />
+                        <Message.Assistant :message="message" :tab-id="props.tabId" />
                     </div>
 
                     <!-- 助手调用的工具部分 -->
                     <div class="message-content" v-else-if="message.role === 'assistant/tool_calls'">
-                        <div class="message-role">
-                            Agent
-                            <span class="message-reminder" v-if="!message.toolResult">
-                                正在使用工具
-                                <span class="tool-loading iconfont icon-double-loading">
-                                </span>
-                            </span>
-                        </div>
-                        <div class="message-text tool_calls">
-                            <div v-if="message.content" v-html="markdownToHtml(message.content)"></div>
-                            
-                            <div class="tool-calls">
-                                <div v-for="(call, index) in message.tool_calls" :key="index" class="tool-call-item">
-                                    <div class="tool-call-header">
-                                        <span class="tool-name">{{ call.function.name }}</span>
-                                        <span class="tool-type">{{ call.type }}</span>
-                                    </div>
-                                    <div class="tool-arguments">
-                                        <div class="inner">
-                                            <div v-html="jsonResultToHtml(call.function.arguments)"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 工具调用结果 -->
-                            <div v-if="message.toolResult">
-                                <div class="tool-call-header">
-                                    <span class="tool-name">{{ "响应" }}</span>
-                                    <span style="width: 200px;" class="tools-dialog-container">
-                                        <el-switch
-                                            v-model="message.showJson!.value"
-                                            inline-prompt
-                                            active-text="JSON"
-                                            inactive-text="Text"
-                                            style="margin-left: 10px; width: 200px;"
-                                            :inactive-action-style="'backgroundColor: var(--sidebar)'"
-                                        />
-                                    </span>
-                                </div>
-                                <div class="tool-result" v-if="isValidJSON(message.toolResult)">
-                                    <div v-if="message.showJson!.value" class="tool-result-content">
-                                        <div class="inner">
-                                            <div v-html="jsonResultToHtml(message.toolResult)"></div>
-                                        </div>
-                                    </div>
-                                    <span v-else>
-                                        <div v-for="(item, index) in JSON.parse(message.toolResult)" :key="index">
-                                            <div v-if="item.type === 'text'" class="tool-text">{{ item.text }}</div>
-                                            <div v-else class="tool-other">{{ JSON.stringify(item) }}</div>
-                                        </div>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <MessageMeta :message="message" />
+                        <Message.Toolcall
+                            :message="message" :tab-id="props.tabId"
+                            @update:tool-result="(value, index) => (message.toolResult || [])[index] = value"
+                        />
                     </div>
                 </div>
 
                 <!-- 正在加载的部分实时解析 markdown -->
                 <div v-if="isLoading" class="message-item assistant">
-                    <div class="message-avatar">
-                        <span class="iconfont icon-chat"></span>
-                    </div>
-                    <div class="message-content">
-                        <div class="message-role">
-                            Agent
-                            <span class="message-reminder">
-                                正在生成答案
-                                <span class="tool-loading iconfont icon-double-loading">
-                                </span>
-                            </span>
-                        </div>
-                        <div class="message-text">
-                            <span v-html="waitingMarkdownToHtml(streamingContent)"></span>
-                        </div>
-                    </div>
+                    <Message.StreamingBox :streaming-content="streamingContent" :tab-id="props.tabId" />
                 </div>
             </div>
         </el-scrollbar>
-        <div v-else>
-            
+        <div v-else class="chat-openmcp-icon">
+            <div>
+                <!-- <span class="iconfont icon-openmcp"></span> -->
+                <span>{{ t('press-and-run') }}
+
+                    <span style="padding: 5px 15px; border-radius: .5em; background-color: var(--background);">
+                        <span class="iconfont icon-send"></span>
+                    </span>
+
+                </span>
+            </div>
         </div>
 
-        <el-footer class="chat-footer" ref="footerRef">
+        <footer class="chat-footer" ref="footerRef">
             <div class="input-area">
                 <div class="input-wrapper">
                     <Setting :tabId="tabId" />
 
-                    <el-input v-model="userInput" type="textarea" :rows="inputHeightLines" :maxlength="2000"
-                        placeholder="输入消息..." @keydown.enter="handleKeydown" resize="none" class="chat-input" />
+                    <KCuteTextarea
+                        v-model="userInput"
+                        placeholder="输入消息..."
+                        :customClass="'chat-input'"
+                        @press-enter="handleSend()"
+                    />
 
                     <el-button type="primary" @click="isLoading ? handleAbort() : handleSend()" class="send-button">
                         <span v-if="!isLoading" class="iconfont icon-send"></span>
@@ -125,36 +67,29 @@
                     </el-button>
                 </div>
             </div>
-        </el-footer>
+        </footer>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, defineComponent, defineProps, onUnmounted, computed, nextTick, watch, Ref } from 'vue';
+import { ref, onMounted, defineComponent, defineProps, onUnmounted, computed, nextTick, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, ScrollbarInstance } from 'element-plus';
 import { tabs } from '../panel';
-import { ChatMessage, ChatStorage, getToolSchema, IExtraInfo, ToolCall } from './chat';
+import { ChatMessage, ChatStorage, IRenderMessage, MessageState, ToolCall } from './chat';
 
-
-import Setting from './setting.vue';
-import MessageMeta from './message-meta.vue';
-
-// 引入 markdown.ts 中的函数
-import { markdownToHtml, copyToClipboard } from './markdown';
-import { ChatCompletionChunk, TaskLoop } from './task-loop';
+import { TaskLoop } from './task-loop';
 import { llmManager, llms } from '@/views/setting/llm';
+
+import * as Message from './message';
+import Setting from './options/setting.vue';
+import KCuteTextarea from '@/components/k-cute-textarea/index.vue';
+
+import { provide } from 'vue';
 
 defineComponent({ name: 'chat' });
 
 const { t } = useI18n();
-
-function waitingMarkdownToHtml(content: string) {
-    if (content) {
-        return markdownToHtml(content);
-    }
-    return '<span class="typing-cursor">|</span>';
-}
 
 const props = defineProps({
     tabId: {
@@ -167,23 +102,10 @@ const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as ChatStorage;
 
 const userInput = ref('');
-const inputHeightLines = computed(() => {
-    const currentLines = userInput.value.split('\n').length;
-    return Math.min(12, Math.max(5, currentLines));
-});
 
 // 创建 messages
 if (!tabStorage.messages) {
     tabStorage.messages = [] as ChatMessage[];
-}
-
-interface IRenderMessage {
-    role: 'user' | 'assistant/content' | 'assistant/tool_calls' | 'tool';
-    content: string;
-    toolResult?: string;
-    tool_calls?: ToolCall[];
-    showJson?: Ref<boolean>;
-    extraInfo: IExtraInfo;
 }
 
 const renderMessages = computed(() => {
@@ -202,7 +124,10 @@ const renderMessages = computed(() => {
                     content: message.content,
                     tool_calls: message.tool_calls,
                     showJson: ref(false),
-                    extraInfo: message.extraInfo
+                    extraInfo: {
+                        ...message.extraInfo,
+                        state: MessageState.Unknown
+                    }
                 });
             } else {
                 messages.push({
@@ -217,6 +142,7 @@ const renderMessages = computed(() => {
             const lastAssistantMessage = messages[messages.length - 1];
             if (lastAssistantMessage.role === 'assistant/tool_calls') {
                 lastAssistantMessage.toolResult = message.content;
+                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
                 lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
             }
         }
@@ -242,14 +168,6 @@ const updateScrollHeight = () => {
         const footerHeight = footerRef.value.clientHeight;
         scrollHeight.value = `${containerHeight - footerHeight}px`;
     }
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        handleSend();
-    }
-    // Shift+Enter 允许自然换行
 };
 
 
@@ -297,36 +215,39 @@ watch(streamingToolCalls, () => {
 
 let loop: TaskLoop | undefined = undefined;
 
-const handleSend = () => {
-    if (!userInput.value.trim() || isLoading.value) return;
+const handleSend = (newMessage?: string) => {
+    const userMessage = newMessage || userInput.value.trim();
+    if (!userMessage || isLoading.value) return;
 
     autoScroll.value = true;
     isLoading.value = true;
 
-    const userMessage = userInput.value.trim();
-
     loop = new TaskLoop(streamingContent, streamingToolCalls);
 
-    loop.registerOnError((msg) => {
+    loop.registerOnError((error) => {
+
         ElMessage({
-            message: msg,
+            message: error.msg,
             type: 'error',
             duration: 3000
         });
-
-        tabStorage.messages.push({
-            role: 'assistant',
-            content: `错误: ${msg}`,
-            extraInfo: {
-                created: Date.now(),
-                serverName: llms[llmManager.currentModelIndex].id || 'unknown'
-            }
-        });
+        
+        if (error.state === MessageState.ReceiveChunkError) {
+            tabStorage.messages.push({
+                role: 'assistant',
+                content: error.msg,
+                extraInfo: {
+                    created: Date.now(),
+                    state: error.state,
+                    serverName: llms[llmManager.currentModelIndex].id || 'unknown'
+                }
+            });
+        }
 
         isLoading.value = false;
     });
 
-    loop.registerOnChunk((chunk) => {
+    loop.registerOnChunk(() => {
         scrollToBottom();
     });
 
@@ -353,6 +274,8 @@ const handleAbort = () => {
     }
 };
 
+provide('handleSend', handleSend);
+
 onMounted(() => {
     updateScrollHeight();
     window.addEventListener('resize', updateScrollHeight);
@@ -363,39 +286,38 @@ onUnmounted(() => {
     window.removeEventListener('resize', updateScrollHeight);
 });
 
-// 新增辅助函数检查是否为有效JSON
-const isValidJSON = (str: string) => {
-    try {
-        JSON.parse(str);
-        return true;
-    } catch {
-        return false;
-    }
-};
-
-const jsonResultToHtml = (jsonString: string) => {
-    const formattedJson = JSON.stringify(JSON.parse(jsonString), null, 2);
-    const html = markdownToHtml('```json\n' + formattedJson + '\n```');
-    return html;
-};
-
-const formatToolArguments = (args: string) => {
-    try {
-        const parsed = JSON.parse(args);
-        return JSON.stringify(parsed, null, 2);
-    } catch {
-        return args;
-    }
-};
-
 </script>
 
-<style scoped>
+<style>
 .chat-container {
     height: 100%;
     display: flex;
     position: relative;
     flex-direction: column;
+}
+
+.chat-openmcp-icon {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    opacity: 0.75;
+    padding-top: 70px;
+}
+
+.chat-openmcp-icon > div {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    font-size: 28px;
+}
+
+.chat-openmcp-icon > div > span {
+    margin-bottom: 23px;
+}
+
+.chat-openmcp-icon .iconfont {
+    font-size: 22px;
 }
 
 .message-list {
@@ -412,6 +334,7 @@ const formatToolArguments = (args: string) => {
 
 .message-avatar {
     margin-right: 12px;
+    margin-top: 1px;
 }
 
 .message-content {
@@ -429,17 +352,13 @@ const formatToolArguments = (args: string) => {
     line-height: 1.6;
 }
 
-.message-text.tool_calls {
-    border-left: 3px solid var(--main-color);
-    padding-left: 10px;
-}
-
 .user .message-text {
     margin-top: 10px;
     margin-bottom: 10px;
+    width: 100%;
 }
 
-.user .message-text>span {
+.user .message-text > span {
     border-radius: .9em;
     background-color: var(--main-light-color);
     padding: 10px 15px;
@@ -464,12 +383,16 @@ const formatToolArguments = (args: string) => {
     margin-top: 30px;
 }
 
+.assistant.tool_calls {
+    margin-top: 5px;
+}
+
 .chat-footer {
     padding: 16px;
     border-top: 1px solid var(--el-border-color);
     flex-shrink: 0;
     position: absolute;
-    height: fit-content;
+    height: fit-content !important;
     bottom: 0;
     width: 100%;
 }
@@ -499,7 +422,7 @@ const formatToolArguments = (args: string) => {
     height: auto;
     padding: 8px 12px;
     font-size: 20px;
-    border-radius: .5em;
+    border-radius: 1.2em !important;
 }
 
 :deep(.chat-settings) {
@@ -524,72 +447,7 @@ const formatToolArguments = (args: string) => {
         opacity: 0;
     }
 }
-</style>
 
-<style scoped>
-
-.tool-calls {
-    margin-top: 10px;
-}
-
-.tool-call-item {
-    margin-bottom: 10px;
-}
-
-.tool-call-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.tool-name {
-    font-weight: bold;
-    color: var(--el-color-primary);
-    margin-right: 8px;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    height: 26px;
-}
-
-.tool-type {
-    font-size: 0.8em;
-    color: var(--el-text-color-secondary);
-    background-color: var(--el-fill-color-light);
-    padding: 2px 6px;
-    display: flex;
-    align-items: center;
-    border-radius: 4px;
-}
-
-.tool-arguments {
-    margin: 0;
-    padding: 8px;
-    background-color: var(--el-fill-color-light);
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.9em;
-}
-
-.tool-result {
-    padding: 8px;
-    background-color: var(--el-fill-color-light);
-    border-radius: 4px;
-}
-
-.tool-text {
-    white-space: pre-wrap;
-    line-height: 1.6;
-}
-
-.tool-other {
-    font-family: monospace;
-    font-size: 0.9em;
-    color: var(--el-text-color-secondary);
-    margin-top: 4px;
-}
-
-/* 新增样式来减小行距 */
 .message-text p,
 .message-text h3,
 .message-text ol,
@@ -597,7 +455,6 @@ const formatToolArguments = (args: string) => {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     line-height: 1.4;
-    /* 可以根据需要调整行高 */
 }
 
 .message-text ol li,

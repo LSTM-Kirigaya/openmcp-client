@@ -40,15 +40,73 @@
 |---------|---------|--------|---------|-----------|
 | `all` | 完成最基本的各类基础设施 | `完整版本` | 100% | `Done` |
 | `render` | chat 模式下支持进行成本分析 | `迭代版本` | 100% | `Done` |
-| `ext` | 支持基本的 MCP 项目管理 | `MVP` | 0% | `P0` |
-| `service` | 支持自定义大模型接入 | `MVP` | 20% | `P0` |
+| `ext` | 支持基本的 MCP 项目管理 | `迭代版本` | 100% | `P0` |
+| `service` | 支持自定义支持 openai 接口协议的大模型接入 | `完整版本` | 100% | `Done` |
+| `service` | 支持自定义接口协议的大模型接入 | `MVP` | 0% | `P1` |
 | `all` | 支持同时调试多个 MCP Server | `MVP` | 0% | `P1` |
 | `all` | 支持通过大模型进行在线验证 | `迭代版本` | 100% | `Done` |
-| `all` | 支持 completion/complete 协议字段 | `MVP` | 0% | `P1` |
-| `all` | 支持对用户对应服务器的调试工作内容进行保存 | `MVP` | 80% | `P0` |
+| `all` | 支持对用户对应服务器的调试工作内容进行保存 | `迭代版本` | 100% | `Done` |
 | `render` | 高危操作权限确认 | `MVP` | 0% | `P1` |
 | `service` | 对于连接的 mcp server 进行热更新 | `MVP` | 0% | `P1` |
+| `service` | 系统配置信息云同步 | `MVP` | 0% | `P1` |
+| `all` | 系统提示词管理模块 | `迭代版本` | 100% | `Done` |
+| `service` | 工具 wise 的日志系统 | `MVP` | 0% | `P1` |
+| `service` | 自带 OCR 进行字符识别 | `迭代版本` | 100% | `Done` |
 
+
+## 项目概念
+
+openmcp 采用分层模块化设计，通过组装不同的模块，可以将它实现成不同平台上的不同模式。
+
+```mermaid
+flowchart TD
+    subgraph OpenMCP核心组件
+        renderer[Renderer]
+        openmcpservice[OpenMCPService]
+    end
+
+    subgraph OpenMCP_Web["OpenMCP Web"]
+        renderer
+        openmcpservice
+        nginx[Nginx]
+    end
+
+    subgraph OpenMCP_插件["OpenMCP 插件"]
+        renderer
+        openmcpservice
+        vscode[VSCode 插件代码]
+    end
+
+    subgraph OpenMCP_App["OpenMCP App"]
+        renderer
+        openmcpservice
+        electron[Electron 代码]
+    end
+
+    subgraph QQ机器人["基于 OpenMCP 的 QQ 机器人"]
+        lagrange[Lagrange.OneBot]
+        openmcpservice
+    end
+
+    %% 依赖关系
+    OpenMCP_Web -->|前端渲染| renderer
+    OpenMCP_Web -->|后端服务| openmcpservice
+    OpenMCP_Web -->|反向代理| nginx
+
+    OpenMCP_插件 -->|UI 界面| renderer
+    OpenMCP_插件 -->|核心逻辑| openmcpservice
+    OpenMCP_插件 -->|集成开发| vscode
+
+    OpenMCP_App -->|前端界面| renderer
+    OpenMCP_App -->|本地服务| openmcpservice
+    OpenMCP_App -->|桌面封装| electron
+
+    QQ机器人 -->|协议适配| lagrange
+    QQ机器人 -->|业务逻辑| openmcpservice
+```
+
+
+---
 
 ## Dev
 
@@ -102,17 +160,3 @@ B <--mcp--> m(MCP Server)
 ```
 
 and just press f5, いただきます
-
-## Flowchart
-
-
-```mermaid
-flowchart TB
-    A[用户输入问题] --> B[选择工具]
-    B --> C[大模型处理]
-    C --> D{是否有tool use?}
-    D -- 否 --> E[返回 content]
-    D -- 是 --> F[执行工具]
-    F --> G[返回工具执行结果]
-    G --> C
-```

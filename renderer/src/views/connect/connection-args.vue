@@ -1,23 +1,41 @@
 <template>
     <!-- STDIO 模式下的命令输入 -->
     <div class="connection-option" v-if="connectionMethods.current === 'STDIO'">
-        <span>{{ t('command') }}</span>
+        <span>{{ t('connect-sigature') }}</span>
         <span style="width: 310px;">
             <el-form :model="connectionArgs" :rules="rules" ref="stdioForm">
                 <el-form-item prop="commandString">
-                    <el-input v-model="connectionArgs.commandString"></el-input>
+                    <div class="input-with-label">
+                        <span class="input-label">命令</span>
+                        <el-input v-model="connectionArgs.commandString" placeholder="mcp run <your script>"></el-input>
+                    </div>
+                </el-form-item>
+                <el-form-item prop="cwd">
+                    <div class="input-with-label">
+                        <span class="input-label">执行目录</span>
+                        <el-input v-model="connectionArgs.cwd" placeholder="cwd, 可为空"></el-input>
+                    </div>
                 </el-form-item>
             </el-form>
         </span>
     </div>
 
-    <!-- 其他模式下的URL输入 -->
+    <!-- SSE 模式下的URL输入 -->
     <div class="connection-option" v-else>
-        <span>{{ "URL" }}</span>
+        <span>{{ t('connect-sigature') }}</span>
         <span style="width: 310px;">
             <el-form :model="connectionArgs" :rules="rules" ref="urlForm">
                 <el-form-item prop="urlString">
-                    <el-input v-model="connectionArgs.urlString" placeholder="http://"></el-input>
+                    <div class="input-with-label">
+                        <span class="input-label">URL</span>
+                        <el-input v-model="connectionArgs.urlString" placeholder="http://"></el-input>
+                    </div>
+                </el-form-item>
+                <el-form-item prop="oauth">
+                    <div class="input-with-label">
+                        <span class="input-label">OAuth</span>
+                        <el-input v-model="connectionArgs.oauth" placeholder="认证签名, 可为空"></el-input>
+                    </div>
                 </el-form-item>
             </el-form>
         </span>
@@ -41,6 +59,12 @@ const rules = reactive<FormRules>({
     commandString: [
         { required: true, message: '命令不能为空', trigger: 'blur' }
     ],
+    cwd: [
+        { required: false, trigger: 'blur' }
+    ],
+    oauth: [
+        { required: false, trigger: 'blur' }
+    ],
     urlString: [
         { required: true, message: 'URL不能为空', trigger: 'blur' }
     ]
@@ -62,3 +86,29 @@ const validateForm = async () => {
 }
 
 </script>
+
+<style scoped>
+.input-with-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+}
+
+.input-label {
+    width: 80px;
+    font-size: 14px;
+    color: var(--el-text-color-regular);
+}
+
+.connection-option {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    background-color: var(--el-bg-color);
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+</style>

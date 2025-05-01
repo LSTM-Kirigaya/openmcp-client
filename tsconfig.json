@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
     // 允许访问 resources 目录
     "paths": {
             "@resources/*": ["./resources/*"]

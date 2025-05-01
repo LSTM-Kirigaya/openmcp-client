@@ -1,5 +1,6 @@
-import { pinkLog } from '@/views/setting/util';
-import { onUnmounted, ref } from 'vue';
+import { pinkLog, redLog } from '@/views/setting/util';
+import { acquireVsCodeApi, electronApi, getPlatform } from './platform';
+import { ref } from 'vue';
 
 export interface VSCodeMessage {
 	command: string;
@@ -7,10 +8,13 @@ export interface VSCodeMessage {
 	callbackId?: string;
 }
 
+export interface RestFulResponse {
+	code: number;
+	msg: any;
+}
+
 export type MessageHandler = (message: VSCodeMessage) => void;
 export type CommandHandler = (data: any) => void;
-
-export const acquireVsCodeApi = (window as any)['acquireVsCodeApi'];
 
 interface AddCommandListenerOption {
 	once: boolean // 只调用一次就销毁
@@ -19,27 +23,36 @@ interface AddCommandListenerOption {
 class MessageBridge {
 	private ws: WebSocket | null = null;
 	private handlers = new Map<string, Set<CommandHandler>>();
-	public isConnected = ref(false);
+	private isConnected: Promise<boolean> | null = null;
 
 	constructor(private wsUrl: string = 'ws://localhost:8080') {
-		this.init();
-	}
 
-	private init() {
 		// 环境检测优先级：
 		// 1. VS Code WebView 环境
 		// 2. 浏览器 WebSocket 环境
-		if (typeof acquireVsCodeApi !== 'undefined') {
-			this.setupVSCodeListener();
-			pinkLog('当前模式：release');
-		} else {
-			this.setupWebSocket();
-			pinkLog('当前模式：debug');
+
+		const platform = getPlatform();
+
+		switch (platform) {
+			case 'vscode':
+				this.setupVsCodeListener();
+				pinkLog('当前模式: vscode');
+				break;
+
+			case 'electron':
+				this.setupElectronListener();
+				pinkLog('当前模式: electron');
+				break;
+			
+			case 'web':
+				this.setupWebSocket();
+				pinkLog('当前模式: web');
+				break;
 		}
 	}
 
 	// VS Code 环境监听
-	private setupVSCodeListener() {
+	private setupVsCodeListener() {
 		const vscode = acquireVsCodeApi();
 
 		window.addEventListener('message', (event: MessageEvent<VSCodeMessage>) => {
@@ -47,37 +60,58 @@ class MessageBridge {
 		});
 
 		this.postMessage = (message) => vscode.postMessage(message);
-		this.isConnected.value = true;
 	}
 
 	// WebSocket 环境连接
 	private setupWebSocket() {
 		this.ws = new WebSocket(this.wsUrl);
 
-		this.ws.onopen = () => {
-			this.isConnected.value = true;
-		};
-
 		this.ws.onmessage = (event) => {
-			try {
+			try {				
 				const message = JSON.parse(event.data) as VSCodeMessage;
 				this.dispatchMessage(message);
 			} catch (err) {
 				console.error('Message parse error:', err);
+				console.log(event);
 			}
 		};
 
 		this.ws.onclose = () => {
-			this.isConnected.value = false;
+			redLog('WebSocket connection closed');
 		};
 
 		this.postMessage = (message) => {
 			if (this.ws?.readyState === WebSocket.OPEN) {
-				console.log(message);
-
+				console.log('send', message);
 				this.ws.send(JSON.stringify(message));
 			}
 		};
+
+		const ws = this.ws;
+
+		this.isConnected = new Promise<boolean>((resolve, reject) => {
+			ws.onopen = () => {
+				resolve(true);
+			};
+		});
+	}
+
+	public async awaitForWebsockt() {
+		if (this.isConnected) {
+			await this.isConnected;
+		}
+	}
+
+	private setupElectronListener() {
+		electronApi.onReply((event: MessageEvent<VSCodeMessage>) => {
+			console.log(event);
+			this.dispatchMessage(event.data);
+		});
+
+		this.postMessage = (message) => {
+			console.log(message);
+			electronApi.sendToMain(message);
+		};		
 	}
 
 	/**
@@ -122,6 +156,7 @@ class MessageBridge {
 		if (!this.handlers.has(command)) {
 			this.handlers.set(command, new Set<CommandHandler>());
 		}
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const commandHandlers = this.handlers.get(command)!;
 
 		const wrapperCommandHandler = option.once ? (data: any) => {
@@ -131,6 +166,25 @@ class MessageBridge {
 
 		commandHandlers.add(wrapperCommandHandler);
 		return () => commandHandlers.delete(wrapperCommandHandler);
+	}
+
+	/**
+	 * @description do as axios does
+	 * @param command 
+	 * @param data 
+	 * @returns 
+	 */
+	public commandRequest(command: string, data?: any) {
+		return new Promise<RestFulResponse>((resolve, reject) => {
+			this.addCommandListener(command, (data) => {
+				resolve(data as RestFulResponse);
+			}, { once: true });
+
+			this.postMessage({
+				command,
+				data
+			});
+		});
 	}
 
 	public destroy() {
@@ -149,6 +203,7 @@ export function useMessageBridge() {
 	return {
 		postMessage: bridge.postMessage.bind(bridge),
 		addCommandListener: bridge.addCommandListener.bind(bridge),
-		isConnected: bridge.isConnected
+		commandRequest: bridge.commandRequest.bind(bridge),
+		awaitForWebsockt: bridge.awaitForWebsockt.bind(bridge)
 	};
 }

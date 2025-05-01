@@ -65,7 +65,6 @@ body::-webkit-scrollbar {
 }
 
 .el-textarea__inner {
-    border-radius: .9em !important;
     padding: 10px !important;
     box-shadow: 0 0 0 1px var(--main-color) !important;
 }
@@ -205,39 +204,10 @@ a {
 	background-position: center;
 }
 
-.server-icon {
-    background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
+.el-button:hover {
+    color: var(--foreground) !important;
 }
 
-.deepseek-icon {
-	background-image: url('./images/deepseek.com.ico');
-}
-
-.openai-icon {
-	background-image: url('./images/openai.com.ico');
-}
-
-.mistral-icon {
-	background-image: url('./images/mistral.ai.ico');
-}
-
-.ollama-icon {
-	background-image: url('./images/ollama.png');
-}
-
-.grop-icon {
-    background-image: url('./images/grok.com.png');
-}
-
-.perplexity-icon {
-    background-image: url('./images/perplexity.ai.ico');
-}
-
-.kimi-icon {
-    background-image: url('./images/kimichat.cn.png');
+.el-dropdown-menu__item:hover {
+    background-color: var(--background) !important;
 }

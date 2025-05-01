@@ -1,6 +1,28 @@
 {
-  "currentIndex": 0,
+  "currentIndex": 2,
   "tabs": [
+    {
+      "name": "资源",
+      "icon": "icon-file",
+      "type": "blank",
+      "componentIndex": 0,
+      "storage": {
+        "formData": {}
+      }
+    },
+    {
+      "name": "工具",
+      "icon": "icon-tool",
+      "type": "blank",
+      "componentIndex": 2,
+      "storage": {
+        "currentToolName": "image_crawler",
+        "formData": {
+          "key_word": "",
+          "image_num": 0
+        }
+      }
+    },
     {
       "name": "交互测试",
       "icon": "icon-robot",
@@ -10,10 +32,11 @@
         "messages": [
           {
             "role": "user",
-            "content": "请帮我找几张明日方舟 m3 的图片",
+            "content": "帮我找几张 明日方舟 m3 的图片，渲染出来",
             "extraInfo": {
-              "created": 1745169263803,
-              "serverName": "deepseek"
+              "created": 1745730609368,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
             }
           },
           {
@@ -21,7 +44,7 @@
             "content": "",
             "tool_calls": [
               {
-                "id": "call_0_bdf947d9-41d9-4244-b145-55e5dc4f1bdd",
+                "id": "call_660r5ehyhh86cjtqnako0mnt",
                 "index": 0,
                 "type": "function",
                 "function": {
@@ -31,60 +54,109 @@
               }
             ],
             "extraInfo": {
-              "created": 1745169269404,
-              "serverName": "deepseek",
-              "usage": {
-                "prompt_tokens": 224,
-                "completion_tokens": 33,
-                "total_tokens": 257,
-                "prompt_tokens_details": {
-                  "cached_tokens": 0
-                },
-                "prompt_cache_hit_tokens": 0,
-                "prompt_cache_miss_tokens": 224
-              }
+              "created": 1745730610263,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
             }
           },
           {
             "role": "tool",
-            "tool_call_id": "call_0_bdf947d9-41d9-4244-b145-55e5dc4f1bdd",
-            "content": "[{\"type\":\"text\",\"text\":\"[ImageResult(url='https://embed.pixiv.net/decorate.php?illust_id=128971880', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/artwork.php?illust_id=128973165', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/artwork.php?illust_id=128981472', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/decorate.php?illust_id=128933348', title='', source='bing'), ImageResult(url='https://embed.pixiv.net/artwork.php?illust_id=128952894', title='', source='bing')]\"}]",
-            "extraInfo": {
-              "created": 1745169270649,
-              "serverName": "deepseek",
-              "usage": {
-                "prompt_tokens": 224,
-                "completion_tokens": 33,
-                "total_tokens": 257,
-                "prompt_tokens_details": {
-                  "cached_tokens": 0
-                },
-                "prompt_cache_hit_tokens": 0,
-                "prompt_cache_miss_tokens": 224
+            "tool_call_id": "call_660r5ehyhh86cjtqnako0mnt",
+            "content": [
+              {
+                "type": "text",
+                "text": "[ImageResult(url='https://gd-hbimg.huaban.com/0c97d53a94f333fad66ca70f32601d8c34c2d4db8f53e0-netl2f_fw658', title='', source='bing'), ImageResult(url='https://ts1.tc.mm.bing.net/th/id/R-C.db1a4364345d8b082d4de48cae32ae05?rik=rhE9iKxzhvwzDg', title='', source='bing'), ImageResult(url='https://gd-hbimg.huaban.com/a4b669d3e68da3ee91a12afe7a0bd689038bdc262aece-yasxcI_fw658', title='', source='bing'), ImageResult(url='https://ts1.tc.mm.bing.net/th/id/R-C.d9dc5fcd4b628e805d4b6a0edb0f9a48?rik=RiUbfVRpViaT%2fw', title='', source='bing'), ImageResult(url='https://gd-hbimg.huaban.com/205d12dbf22aec83ff34bd533616575f0939b561136c6-jwF7XH_fw658', title='', source='bing')]"
               }
+            ],
+            "extraInfo": {
+              "created": 1745730610855,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
             }
           },
           {
             "role": "assistant",
-            "content": "以下是一些关于“明日方舟 m3”的图片：\n\n1. ![Image](https://embed.pixiv.net/decorate.php?illust_id=128971880)\n2. ![Image](https://embed.pixiv.net/artwork.php?illust_id=128973165)\n3. ![Image](https://embed.pixiv.net/artwork.php?illust_id=128981472)\n4. ![Image](https://embed.pixiv.net/decorate.php?illust_id=128933348)\n5. ![Image](https://embed.pixiv.net/artwork.php?illust_id=128952894)\n\n如果需要更多图片或其他帮助，请告诉我！",
+            "content": "以下是根据关键词“明日方舟 m3”找到的图片：\n\n1. ![Image 1](https://gd-hbimg.huaban.com/0c97d53a94f333fad66ca70f32601d8c34c2d4db8f53e0-netl2f_fw658)\n2. ![Image 2](https://ts1.tc.mm.bing.net/th/id/R-C.db1a4364345d8b082d4de48cae32ae05?rik=rhE9iKxzhvwzDg)\n3. ![Image 3](https://gd-hbimg.huaban.com/a4b669d3e68da3ee91a12afe7a0bd689038bdc262aece-yasxcI_fw658)\n4. ![Image 4](https://ts1.tc.mm.bing.net/th/id/R-C.d9dc5fcd4b628e805d4b6a0edb0f9a48?rik=RiUbfVRpViaT%2fw)\n5. ![Image 5](https://gd-hbimg.huaban.com/205d12dbf22aec83ff34bd533616575f0939b561136c6-jwF7XH_fw658)\n\n你可以点击链接查看这些图片。",
             "extraInfo": {
-              "created": 1745169280218,
-              "serverName": "deepseek",
-              "usage": {
-                "prompt_tokens": 420,
-                "completion_tokens": 142,
-                "total_tokens": 562,
-                "prompt_tokens_details": {
-                  "cached_tokens": 192
-                },
-                "prompt_cache_hit_tokens": 192,
-                "prompt_cache_miss_tokens": 228
+              "created": 1745730615968,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "user",
+            "content": "图源是哪里",
+            "extraInfo": {
+              "created": 1745730806510,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "这些图片的来源是Bing搜索引擎和Huaban网站。具体来源如下：\n\n1. **Bing**:\n   - [Image 2](https://ts1.tc.mm.bing.net/th/id/R-C.db1a4364345d8b082d4de48cae32ae05?rik=rhE9iKxzhvwzDg)\n   - [Image 4](https://ts1.tc.mm.bing.net/th/id/R-C.d9dc5fcd4b628e805d4b6a0edb0f9a48?rik=RiUbfVRpViaT%2fw)\n\n2. **Huaban**:\n   - [Image 1](https://gd-hbimg.huaban.com/0c97d53a94f333fad66ca70f32601d8c34c2d4db8f53e0-netl2f_fw658)\n   - [Image 3](https://gd-hbimg.huaban.com/a4b669d3e68da3ee91a12afe7a0bd689038bdc262aece-yasxcI_fw658)\n   - [Image 5](https://gd-hbimg.huaban.com/205d12dbf22aec83ff34bd533616575f0939b561136c6-jwF7XH_fw658)\n\n你可以通过点击链接查看图片的详细信息。",
+            "extraInfo": {
+              "created": 1745730812395,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "user",
+            "content": "帮我找几张 明日方舟 白面鸮 的图片，渲染出来",
+            "extraInfo": {
+              "created": 1745730909927,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "id": "call_ho74cop478w5gbfc0jnuo12f",
+                "index": 0,
+                "type": "function",
+                "function": {
+                  "name": "image_crawler",
+                  "arguments": "{\"key_word\":\"明日方舟 白面鸮\",\"image_num\":5}"
+                }
               }
+            ],
+            "extraInfo": {
+              "created": 1745730910906,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "call_ho74cop478w5gbfc0jnuo12f",
+            "content": [
+              {
+                "type": "text",
+                "text": "[ImageResult(url='https://c-ssl.duitang.com/uploads/item/201910/22/20191022190241_dixsc.thumb.1000_0.jpg', title='', source='bing'), ImageResult(url='https://img-baofun.zhhainiao.com/pcwallpaper_ugc_mobile/live/e06866505212ddcce0dabf9afebce225.mp4.jpg', title='', source='bing'), ImageResult(url='https://c-ssl.dtstatic.com/uploads/item/202007/15/20200715183732_iomsj.thumb.1000_0.jpg', title='', source='bing'), ImageResult(url='https://img-baofun.zhhainiao.com/pcwallpaper_ugc_mobile/live/710b67dfa125248f816d63617f551452_preview.jpg', title='', source='bing'), ImageResult(url='https://n.sinaimg.cn/sinacn10122/670/w400h270/20200104/db75-imrkkfx7540303.jpg', title='', source='bing')]"
+              }
+            ],
+            "extraInfo": {
+              "created": 1745730911376,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "以下是根据关键词“明日方舟 白面鸮”找到的图片：\n\n1. ![Image 1](https://c-ssl.duitang.com/uploads/item/201910/22/20191022190241_dixsc.thumb.1000_0.jpg)\n2. ![Image 2](https://img-baofun.zhhainiao.com/pcwallpaper_ugc_mobile/live/e06866505212ddcce0dabf9afebce225.mp4.jpg)\n3. ![Image 3](https://c-ssl.dtstatic.com/uploads/item/202007/15/20200715183732_iomsj.thumb.1000_0.jpg)\n4. ![Image 4](https://img-baofun.zhhainiao.com/pcwallpaper_ugc_mobile/live/710b67dfa125248f816d63617f551452_preview.jpg)\n5. ![Image 5](https://n.sinaimg.cn/sinacn10122/670/w400h270/20200104/db75-imrkkfx7540303.jpg)\n\n你可以点击链接查看这些图片。",
+            "extraInfo": {
+              "created": 1745730916072,
+              "state": "success",
+              "serverName": "Huoshan DeepSeek"
             }
           }
         ],
         "settings": {
-          "modelIndex": 0,
+          "modelIndex": 8,
           "enableTools": [
             {
               "name": "image_crawler",
@@ -95,7 +167,7 @@
           "enableWebSearch": false,
           "temperature": 0.7,
           "contextLength": 10,
-          "systemPrompt": "你是一个聪明的机器人，我现在会询问你一些问题，这些问题可能会调用我给你的工具，如果用户的输入的问题内包含的参数不足以发起一次工具调用，那么你应该提醒用户缺失的参数。对于图片，请按照 ![]() 进行渲染，而不是将这个返回到 ``` 的 code 中。"
+          "systemPrompt": ""
         }
       }
     }

@@ -1,0 +1,81 @@
+{
+	"name": "openmcp-electron",
+	"version": "0.0.1",
+	"description": "",
+	"main": "dist/main.js",
+	"scripts": {
+		"dev": "tsc && electron .",
+		"watch": "webpack --watch --config webpack.config.js",
+		"build": "tsc && electron-builder"
+	},
+	"author": {
+		"name": "LSTM-Kirigaya",
+		"email": "1193466151@qq.com"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.10.2",
+		"@seald-io/nedb": "^4.1.1",
+		"axios": "^1.7.7",
+		"bson": "^6.8.0",
+		"openai": "^4.93.0",
+		"pako": "^2.1.0",
+		"tesseract.js": "^6.0.1",
+		"uuid": "^11.1.0",
+		"ws": "^8.18.1"
+	},
+	"devDependencies": {
+		"@types/ws": "^8.18.1",
+		"electron": "35.0.0",
+    	"electron-builder": "^24.13.3",
+		"typescript": "^5.6.3"
+	},
+	"build": {
+		"appId": "com.electron.openmcp",
+		"productName": "OpenMCP Desktop",
+		"asar": true,
+		"asarUnpack": "*.node",
+		"directories": {
+			"output": "release"
+		},
+		"files": [
+			"dist/**/*",
+			"resources/**/*",
+			"icons/**/*"
+		],
+		"dmg": {
+			"contents": [
+				{
+					"x": 130,
+					"y": 220
+				},
+				{
+					"x": 410,
+					"y": 220,
+					"type": "link",
+					"path": "/Applications"
+				}
+			]
+		},
+		"mac": {
+			"notarize": false,
+			"target": {
+				"target": "default",
+				"arch": [
+					"arm64",
+					"x64"
+				]
+			},
+			"type": "distribution",
+			"hardenedRuntime": true,
+			"icon": "icons/icon.icns"
+		},
+		"win": {
+			"target": "nsis",
+			"icon": "icons/icon.ico"
+		},
+		"linux": {
+			"target": "AppImage",
+			"icon": "icons/icon.png"
+		}
+	}
+}

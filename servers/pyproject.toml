@@ -7,5 +7,6 @@ requires-python = ">=3.11"
 dependencies = [
     "bs4>=0.0.2",
     "mcp[cli]>=1.5.0",
+    "openai>=1.76.0",
     "requests>=2.32.3",
 ]

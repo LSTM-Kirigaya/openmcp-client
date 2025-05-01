@@ -1,5 +1,5 @@
 {
-  "currentIndex": 0,
+  "currentIndex": 1,
   "tabs": [
     {
       "name": "交互测试",
@@ -7,7 +7,126 @@
       "type": "blank",
       "componentIndex": 3,
       "storage": {
-        "messages": [],
+        "messages": [
+          {
+            "role": "user",
+            "content": "请问杭州的天气",
+            "extraInfo": {
+              "created": 1745258229256,
+              "serverName": "deepseek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "id": "call_0_57ad3eab-cd9d-4403-bdf0-31d00b83b98c",
+                "index": 0,
+                "type": "function",
+                "function": {
+                  "name": "get_weather_by_city_code",
+                  "arguments": "{\"city_code\":101210101}"
+                }
+              }
+            ],
+            "extraInfo": {
+              "created": 1745258234470,
+              "serverName": "deepseek",
+              "usage": {
+                "prompt_tokens": 570,
+                "completion_tokens": 26,
+                "total_tokens": 596,
+                "prompt_tokens_details": {
+                  "cached_tokens": 512
+                },
+                "prompt_cache_hit_tokens": 512,
+                "prompt_cache_miss_tokens": 58
+              }
+            }
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "call_0_57ad3eab-cd9d-4403-bdf0-31d00b83b98c",
+            "content": "[{\"type\":\"text\",\"text\":\"CityWeather(city_name_en='hangzhou', city_name_cn='杭州', city_code='101210101', temp='21', wd='', ws='', sd='92%', aqi='13', weather='阴')\"}]",
+            "extraInfo": {
+              "created": 1745258234522,
+              "serverName": "deepseek",
+              "usage": {
+                "prompt_tokens": 570,
+                "completion_tokens": 26,
+                "total_tokens": 596,
+                "prompt_tokens_details": {
+                  "cached_tokens": 512
+                },
+                "prompt_cache_hit_tokens": 512,
+                "prompt_cache_miss_tokens": 58
+              }
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "杭州的天气信息如下：\n\n- 城市：杭州\n- 温度：21°C\n- 天气状况：阴\n- 湿度：92%\n- 空气质量指数 (AQI)：13（优秀）\n\n天气较为舒适，适合出行！",
+            "extraInfo": {
+              "created": 1745258240571,
+              "serverName": "deepseek",
+              "usage": {
+                "prompt_tokens": 660,
+                "completion_tokens": 52,
+                "total_tokens": 712,
+                "prompt_tokens_details": {
+                  "cached_tokens": 576
+                },
+                "prompt_cache_hit_tokens": 576,
+                "prompt_cache_miss_tokens": 84
+              }
+            }
+          },
+          {
+            "role": "user",
+            "content": "再试一次",
+            "extraInfo": {
+              "created": 1745495349299,
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "",
+            "tool_calls": [
+              {
+                "id": "call_jpm4v1e92v4nq650wlqkhm56",
+                "index": 0,
+                "type": "function",
+                "function": {
+                  "name": "get_weather_by_city_code",
+                  "arguments": "{\"city_code\":101210101}"
+                }
+              }
+            ],
+            "extraInfo": {
+              "created": 1745495350097,
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "tool",
+            "tool_call_id": "call_jpm4v1e92v4nq650wlqkhm56",
+            "content": "[{\"type\":\"text\",\"text\":\"CityWeather(city_name_en='hangzhou', city_name_cn='杭州', city_code='101210101', temp='18.3', wd='', ws='', sd='89%', aqi='57', weather='阴')\"}]",
+            "extraInfo": {
+              "created": 1745495350319,
+              "serverName": "Huoshan DeepSeek"
+            }
+          },
+          {
+            "role": "assistant",
+            "content": "杭州的最新天气信息如下：\n\n- 城市：杭州\n- 温度：18.3°C\n- 天气状况：阴\n- 湿度：89%\n- 空气质量指数 (AQI)：57（良好）\n\n天气较为凉爽，适合外出活动！",
+            "extraInfo": {
+              "created": 1745495352693,
+              "serverName": "Huoshan DeepSeek"
+            }
+          }
+        ],
         "settings": {
           "modelIndex": 0,
           "enableTools": [
@@ -41,6 +160,27 @@
           "temperature": 0.7,
           "contextLength": 10,
           "systemPrompt": ""
+        }
+      }
+    },
+    {
+      "name": "工具",
+      "icon": "icon-tool",
+      "type": "tool",
+      "componentIndex": 2,
+      "storage": {
+        "currentToolName": "get_weather_by_city_code",
+        "formData": {
+          "city_code": 0
+        },
+        "lastToolCallResponse": {
+          "content": [
+            {
+              "type": "text",
+              "text": "CityWeather(city_name_en='hangzhou', city_name_cn='杭州', city_code='101210101', temp='20.3', wd='', ws='', sd='89%', aqi='38', weather='阴')"
+            }
+          ],
+          "isError": false
         }
       }
     }

@@ -11,7 +11,8 @@ export const toolsManager = reactive<{
 
 export interface ToolStorage {
     currentToolName: string;
-    lastToolCallResponse?: ToolCallResponse;
+    lastToolCallResponse?: ToolCallResponse | string;
+    formData: Record<string, any>;
 }
 
 const bridge = useMessageBridge();
@@ -22,7 +23,7 @@ export function callTool(toolName: string, toolArgs: Record<string, any>) {
             console.log(data.msg);
 
             if (data.code !== 200) {
-                reject(new Error(data.msg + ''));
+                resolve(data.msg);
             } else {
                 resolve(data.msg);
             }
@@ -35,10 +36,7 @@ export function callTool(toolName: string, toolArgs: Record<string, any>) {
             command: 'tools/call',
             data: {
                 toolName,
-                toolArgs: JSON.parse(JSON.stringify(toolArgs, (key, value) => {
-                    // 确保所有值都保持原始字符串形式
-                    return typeof value === 'number' ? String(value) : value;
-                }))
+                toolArgs: JSON.parse(JSON.stringify(toolArgs))
             }
         });
     });

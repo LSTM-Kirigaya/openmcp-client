@@ -17,5 +17,9 @@ service/**
 test/**
 servers/**
 scripts/**
+software/**
 *.sh
 *.ps1
+
+.editorconfig
+.gitattributes

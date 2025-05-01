@@ -5,3 +5,7 @@ node_modules
 *.vsix
 .env
 resources
+.DS_Store
+.exe
+
+.idea

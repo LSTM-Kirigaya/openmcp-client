@@ -8,7 +8,7 @@
 			<component
                 v-show="tab === tabs.content[tabs.activeIndex]"
                 v-for="(tab, index) of tabs.content"
-				:key="index"
+				:key="tab.id"
 				:is="tab.component"
                 :tab-id="index"
 			/>

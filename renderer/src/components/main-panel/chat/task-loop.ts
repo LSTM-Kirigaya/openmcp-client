@@ -1,15 +1,21 @@
 /* eslint-disable */
 import { Ref } from "vue";
-import { ToolCall, ChatStorage, getToolSchema } from "./chat";
+import { ToolCall, ChatStorage, getToolSchema, MessageState } from "./chat";
 import { useMessageBridge } from "@/api/message-bridge";
 import type { OpenAI } from 'openai';
 import { callTool } from "../tool/tools";
 import { llmManager, llms } from "@/views/setting/llm";
+import { pinkLog, redLog } from "@/views/setting/util";
 
 export type ChatCompletionChunk = OpenAI.Chat.Completions.ChatCompletionChunk;
 export type ChatCompletionCreateParamsBase = OpenAI.Chat.Completions.ChatCompletionCreateParams & { id?: string };
 interface TaskLoopOptions {
     maxEpochs: number;
+}
+
+interface IErrorMssage {
+    state: MessageState,
+    msg: string
 }
 
 /**
@@ -23,7 +29,7 @@ export class TaskLoop {
     constructor(
         private readonly streamingContent: Ref<string>,
         private readonly streamingToolCalls: Ref<ToolCall[]>,
-        private onError: (msg: string) => void = (msg) => {},
+        private onError: (error: IErrorMssage) => void = (msg) => {},
         private onChunk: (chunk: ChatCompletionChunk) => void = (chunk) => {},
         private onDone: () => void = () => {},
         private onEpoch: () => void = () => {},
@@ -35,19 +41,77 @@ export class TaskLoop {
     private async handleToolCalls(toolCalls: ToolCall[]) {
         // TODO: 调用多个工具并返回调用结果？
         const toolCall = toolCalls[0];
+
+        let toolName: string;
+        let toolArgs: Record<string, any>;
+
         try {
-            const toolName = toolCall.function.name;
-            const toolArgs = JSON.parse(toolCall.function.arguments);
+            toolName = toolCall.function.name;
+            toolArgs = JSON.parse(toolCall.function.arguments);
+        } catch (error) {
+            return {
+                content: [{
+                    type: 'error',
+                    text: this.parseErrorObject(error)
+                }],
+                state: MessageState.ParseJsonError
+            };
+        }
+
+
+        try {
             const toolResponse = await callTool(toolName, toolArgs);
-            if (!toolResponse.isError) {
-                const content = JSON.stringify(toolResponse.content);
-                return content;
+
+            console.log(toolResponse);
+
+            if (typeof toolResponse === 'string') {
+                console.log(toolResponse);
+                
+                return {
+                    content: [{
+                        type: 'error',
+                        text: toolResponse
+                    }],
+                    state: MessageState.ToolCall
+                }
+            } else if (!toolResponse.isError) {
+
+                return {
+                    content: toolResponse.content,
+                    state: MessageState.Success
+                };
             } else {
-                this.onError(`工具调用失败: ${toolResponse.content}`);
+
+                return {
+                    content: toolResponse.content,
+                    state: MessageState.ToolCall
+                }
             }
 
         } catch (error) {
-            this.onError(`工具调用失败: ${(error as Error).message}`);
+            this.onError({
+                state: MessageState.ToolCall,
+                msg: `工具调用失败: ${(error as Error).message}`
+            });
+            console.error(error);
+
+            return {
+                content: [{
+                    type: 'error',
+                    text: this.parseErrorObject(error)
+                }],
+                state: MessageState.ToolCall
+            }
+        }
+    }
+
+    private parseErrorObject(error: any): string {
+        if (typeof error === 'string') {
+            return error;
+        } else if (typeof error === 'object') {
+            return JSON.stringify(error, null, 2);   
+        } else {
+            return error.toString();
         }
     }
 
@@ -60,6 +124,7 @@ export class TaskLoop {
 
     private handleChunkDeltaToolCalls(chunk: ChatCompletionChunk) {
         const toolCall = chunk.choices[0]?.delta?.tool_calls?.[0];
+        
         if (toolCall) {
             const currentCall = this.streamingToolCalls.value[toolCall.index];
 
@@ -104,8 +169,11 @@ export class TaskLoop {
         return new Promise<void>((resolve, reject) => {
             const chunkHandler = this.bridge.addCommandListener('llm/chat/completions/chunk', data => {
                 if (data.code !== 200) {
-                    this.onError(data.msg || '请求模型服务时发生错误');
-                    reject(new Error(data.msg || '请求模型服务时发生错误'));
+                    this.onError({
+                        state: MessageState.ReceiveChunkError,
+                        msg: data.msg || '请求模型服务时发生错误'
+                    });
+                    resolve();
                     return;
                 }
                 const { chunk } = data.msg as { chunk: ChatCompletionChunk };
@@ -131,7 +199,6 @@ export class TaskLoop {
             });
         });
     }
-
 
     public makeChatData(tabStorage: ChatStorage): ChatCompletionCreateParamsBase {
         const baseURL = llms[llmManager.currentModelIndex].baseUrl;
@@ -179,7 +246,7 @@ export class TaskLoop {
         this.streamingToolCalls.value = [];
     }
 
-    public registerOnError(handler: (msg: string) => void) {
+    public registerOnError(handler: (msg: IErrorMssage) => void) {
         this.onError = handler;
     }
 
@@ -205,6 +272,7 @@ export class TaskLoop {
             content: userMessage,
             extraInfo: {
                 created: Date.now(),
+                state: MessageState.Success,
                 serverName: llms[llmManager.currentModelIndex].id || 'unknown'
             }
         });
@@ -235,20 +303,51 @@ export class TaskLoop {
                     tool_calls: this.streamingToolCalls.value,
                     extraInfo: {
                         created: Date.now(),
+                        state: MessageState.Success,
                         serverName: llms[llmManager.currentModelIndex].id || 'unknown'
                     }
                 });
+                
+                pinkLog('调用工具数量：' + this.streamingToolCalls.value.length);
 
                 const toolCallResult = await this.handleToolCalls(this.streamingToolCalls.value);
-                if (toolCallResult) {
+
+                console.log('toolCallResult', toolCallResult);
+
+                if (toolCallResult.state === MessageState.ParseJsonError) {
+                    // 如果是因为解析 JSON 错误，则重新开始
+                    tabStorage.messages.pop();
+                    redLog('解析 JSON 错误 ' + this.streamingToolCalls.value[0]?.function?.arguments);
+                    continue;
+                }
+
+                if (toolCallResult.state === MessageState.Success) {
                     const toolCall = this.streamingToolCalls.value[0];
 
                     tabStorage.messages.push({
                         role: 'tool',
                         tool_call_id: toolCall.id || toolCall.function.name,
-                        content: toolCallResult,
+                        content: toolCallResult.content,
                         extraInfo: {
                             created: Date.now(),
+                            state: toolCallResult.state,
+                            serverName: llms[llmManager.currentModelIndex].id || 'unknown',
+                            usage: this.completionUsage
+                        }
+                    });
+                }
+
+
+                if (toolCallResult.state === MessageState.ToolCall) {
+                    const toolCall = this.streamingToolCalls.value[0];
+
+                    tabStorage.messages.push({
+                        role: 'tool',
+                        tool_call_id: toolCall.id || toolCall.function.name,
+                        content: toolCallResult.content,
+                        extraInfo: {
+                            created: Date.now(),
+                            state: toolCallResult.state,
                             serverName: llms[llmManager.currentModelIndex].id || 'unknown',
                             usage: this.completionUsage
                         }
@@ -261,6 +360,7 @@ export class TaskLoop {
                     content: this.streamingContent.value,
                     extraInfo: {
                         created: Date.now(),
+                        state: MessageState.Success,
                         serverName: llms[llmManager.currentModelIndex].id || 'unknown',
                         usage: this.completionUsage
                     }

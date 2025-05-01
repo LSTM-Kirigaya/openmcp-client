@@ -9,5 +9,9 @@ npm i
 node patch-mcp-sdk.js
 Set-Location ..
 
+Set-Location servers
+uv sync
+Set-Location ..
+
 # 安装根目录依赖
 npm i

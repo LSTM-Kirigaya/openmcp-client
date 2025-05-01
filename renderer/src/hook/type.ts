@@ -2,6 +2,7 @@
 export interface SchemaProperty {
 	title: string;
 	type: string;
+	description?: string;
 }
 
 export interface InputSchema {
@@ -80,6 +81,7 @@ export interface PromptsGetResponse {
 export interface ToolCallContent {
     type: string;
     text: string;
+	[key: string]: any;
 }
 
 export interface ToolCallResponse {
@@ -134,3 +136,38 @@ export type APIRequest =
 	| ResourcesReadRequest
 	| PromptsGetRequest
     | ToolCallRequest;
+
+export interface IStdioConnectionItem {
+	type: 'stdio';
+	name: string;
+	command: string;
+	args: string[];
+	cwd?: string;
+	env?: { [key: string]: string };
+	filePath?: string;
+}
+
+export interface ISSEConnectionItem {
+	type: 'sse';
+	name: string;
+	url: string;
+	oauth?: string;
+	env?: { [key: string]: string };
+	filePath?: string;
+}
+
+
+export interface IStdioLaunchSignature {
+	type: 'stdio';
+	commandString: string;
+	cwd: string;
+}
+
+export interface ISSELaunchSignature {
+	type:'sse';
+	url: string;
+	oauth: string;
+}
+
+export type IConnectionItem = IStdioConnectionItem | ISSEConnectionItem;
+export type ILaunchSigature = IStdioLaunchSignature | ISSELaunchSignature;

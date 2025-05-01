@@ -25,6 +25,7 @@ export function setDefaultCss() {
     document.body.style.setProperty('--el-color-primary-light-5', 'var(--button-disabled)');
     document.body.style.setProperty('--el-bg-color', 'var(--background)');
     document.body.style.setProperty('--el-text-color-primary', 'var(--foreground)');
+    document.body.style.setProperty('--el-button-hover-text-color', 'var(--background)');
 
     // document.body.style.setProperty('--el-color-white', 'var(--background)');
     

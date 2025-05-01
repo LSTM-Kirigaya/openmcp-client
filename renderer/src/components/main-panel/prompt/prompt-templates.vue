@@ -73,7 +73,9 @@ onMounted(() => {
     commandCancel = bridge.addCommandListener('prompts/list', (data: CasualRestAPI<PromptsListResponse>) => {
 		promptsManager.templates = data.msg.prompts || [];
 
-        if (promptsManager.templates.length > 0) {
+		const targetPrompt = promptsManager.templates.find(template => template.name === tabStorage.currentPromptName);
+
+        if (targetPrompt === undefined) {
             tabStorage.currentPromptName = promptsManager.templates[0].name;
             tabStorage.lastPromptGetResponse = undefined;
         }

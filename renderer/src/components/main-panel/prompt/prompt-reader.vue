@@ -3,20 +3,20 @@
         <h3>{{ currentPrompt.name }}</h3>
     </div>
     <div class="prompt-reader-container">
-        <el-form :model="formData" :rules="formRules" ref="formRef" label-position="top">
+        <el-form :model="tabStorage.formData" :rules="formRules" ref="formRef" label-position="top">
             <el-form-item v-for="param in currentPrompt?.params" :key="param.name"
                 :label="param.name" :prop="param.name">
-                <el-input v-if="param.type === 'string'" v-model="formData[param.name]"
+                <el-input v-if="param.type === 'string'" v-model="tabStorage.formData[param.name]"
                     :placeholder="param.placeholder || `请输入${param.name}`"
                     @keydown.enter.prevent="handleSubmit"
                     />
 
-                <el-input-number v-else-if="param.type === 'number'" v-model="formData[param.name]"
+                <el-input-number v-else-if="param.type === 'number'" v-model="tabStorage.formData[param.name]"
                     :placeholder="param.placeholder || `请输入${param.name}`"
                     @keydown.enter.prevent="handleSubmit"
                     />
 
-                <el-switch v-else-if="param.type === 'boolean'" v-model="formData[param.name]" />
+                <el-switch v-else-if="param.type === 'boolean'" v-model="tabStorage.formData[param.name]" />
             </el-form-item>
 
             <el-form-item>
@@ -39,6 +39,7 @@ import { tabs } from '../panel';
 import { parsePromptTemplate, promptsManager, PromptStorage } from './prompts';
 import { CasualRestAPI, PromptsGetResponse } from '@/hook/type';
 import { useMessageBridge } from '@/api/message-bridge';
+import { getDefaultValue, normaliseJavascriptType } from '@/hook/mcp';
 
 defineComponent({ name: 'prompt-reader' });
 
@@ -54,9 +55,11 @@ const props = defineProps({
 const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as PromptStorage;
 
+if (!tabStorage.formData) {
+    tabStorage.formData = {};
+}
+
 const formRef = ref<FormInstance>();
-// TODO: 将 formData 装入 tabStorage
-const formData = ref<Record<string, any>>({});
 const loading = ref(false);
 const responseData = ref<PromptsGetResponse>();
 
@@ -93,11 +96,19 @@ const formRules = computed<FormRules>(() => {
 });
 
 const initFormData = () => {
-    formData.value = {}
-    currentPrompt.value?.params.forEach(param => {
-        formData.value[param.name] = param.type === 'number' ? 0 :
-            param.type === 'boolean' ? false : ''
-    })
+    
+    if (!currentPrompt.value?.params) return;
+
+    const newSchemaDataForm: Record<string, number | boolean | string> = {};
+
+    currentPrompt.value.params.forEach(param => {
+        newSchemaDataForm[param.name] = getDefaultValue(param);
+        const originType = normaliseJavascriptType(typeof tabStorage.formData[param.name]);
+        if (tabStorage.formData[param.name]!== undefined && originType === param.type) {
+            newSchemaDataForm[param.name] = tabStorage.formData[param.name];
+        }
+    });
+
 }
 
 const resetForm = () => {
@@ -114,7 +125,7 @@ function handleSubmit() {
 
     bridge.postMessage({
         command: 'prompts/get',
-        data: { promptId: currentPrompt.value.name, args: JSON.parse(JSON.stringify(formData.value)) }
+        data: { promptId: currentPrompt.value.name, args: JSON.parse(JSON.stringify(tabStorage.formData)) }
     });
 }
 
