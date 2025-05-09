@@ -15,6 +15,10 @@ export const connectionMethods = reactive({
         {
             value: 'SSE',
             label: 'SSE'
+        },
+        {
+            value: 'StreamableHTTP',
+            label: 'Streamable HTTP'
         }
     ]
 });
