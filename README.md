@@ -145,10 +145,7 @@ B <--mcp--> m(MCP Server)
 启动 dev server
 
 ```bash
-## linux
-./dev.sh
-## windows
-./dev.ps1
+npm run dev
 ```
 
 > 端口占用： 8080 (renderer) + 8081 (service)
@@ -163,11 +160,7 @@ B <--mcp--> m(MCP Server)
 
 负载部署
 ```bash
-## linux 
-./build_service.sh
-
-## windows
-./build_service.ps1
+npm run build
 ```
 
 and just press f5, いただきます

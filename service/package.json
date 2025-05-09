@@ -1,13 +1,16 @@
 {
-	"name": "openmcp-service",
+	"name": "@openmcp/service",
 	"version": "0.0.1",
 	"description": "",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
+    "type": "commonjs",
 	"scripts": {
-		"serve": "ts-node-dev --respawn --transpile-only src/main.ts",
+        "postinstall": "npm run build",
+		"dev": "ts-node-dev --respawn --transpile-only src/main.ts",
 		"build": "tsc",
 		"build:watch": "tsc --watch",
+        "postbuild": "node ./scripts/post-build.mjs",
 		"start": "node dist/main.js",
 		"start:prod": "NODE_ENV=production node dist/main.js",
 		"debug": "node --inspect -r ts-node/register src/main.ts",

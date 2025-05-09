@@ -14,3 +14,4 @@ resources/ocr/*.wasm
 resources/renderer
 resources/service
 *.traineddata
+.turbo

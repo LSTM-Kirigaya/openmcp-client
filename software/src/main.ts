@@ -33,7 +33,7 @@ function createWindow(): void {
     const option = getInitConnectionOption();
 
     // 注册消息接受的管线
-    webview.onDidReceiveMessage((message: any) => {        
+    webview.onDidReceiveMessage((message: any) => {
         console.info(`command: [${message.command || 'No Command'}]`);
 
         const { command, data } = message;
@@ -51,7 +51,7 @@ function createWindow(): void {
                         url: option.url,
                         oauth: option.oauth || ''
                     };
-            
+
                 const launchResult = {
                     code: 200,
                     msg: launchResultMessage
@@ -63,11 +63,11 @@ function createWindow(): void {
                 });
 
                 break;
-            
+
             case 'electron/update-connection-sigature':
                 updateConnectionOption(data);
                 break;
-        
+
             default:
                 OpenMCPService.routeMessage(command, data, webview);
                 break;

@@ -1,0 +1,22 @@
+{
+    "$schema": "https://turborepo.com/schema.json",
+    "tasks": {
+        "dev": {
+            "persistent": true,
+            "cache": false
+        },
+        "build": {
+            "dependsOn": ["^build"],
+            "outputs": ["dist/**"]
+        },
+        "@openmcp/electron#dev": {
+            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build"],
+            "persistent": true,
+            "cache": false
+        },
+        "@openmcp/electron#build": {
+            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build"],
+            "outputs": ["dist/**"]
+        }
+    }
+}

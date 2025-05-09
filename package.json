@@ -212,7 +212,18 @@
             ]
         }
     },
+    "workspaces": [
+        "service",
+        "renderer",
+        "software"
+    ],
     "scripts": {
+        "dev": "turbo dev --filter=!@openmcp/electron",
+        "dev:electron": "turbo dev --filter=@openmcp/electron",
+        "dev:all": "turbo dev",
+        "build": "turbo build --filter=!@openmcp/electron",
+        "build:electron": "turbo build --filter=@openmcp/electron",
+        "build:all": "turbo build",
         "vscode:prepublish": "webpack --mode production",
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
@@ -223,6 +234,7 @@
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.10.2",
+        "@openmcp/service": "*",
         "@seald-io/nedb": "^4.1.1",
         "axios": "^1.7.7",
         "bson": "^6.8.0",
@@ -239,8 +251,10 @@
         "@types/vscode": "^1.72.0",
         "copy-webpack-plugin": "^13.0.0",
         "ts-loader": "^9.5.1",
+        "turbo": "^2.5.3",
         "typescript": "^5.4.2",
         "webpack": "^5.99.5",
         "webpack-cli": "^5.1.4"
-    }
+    },
+    "packageManager": "npm@10.0.0"
 }

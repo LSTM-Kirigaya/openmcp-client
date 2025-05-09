@@ -2,18 +2,18 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as fspath from 'path';
 import { IConnectionItem, ILaunchSigature, panels, updateInstalledConnectionConfig, updateWorkspaceConnectionConfig } from '../global';
-import * as OpenMCPService from '../../openmcp-sdk/service';
+import * as OpenMCPService from '@openmcp/service';
 
 export function getWebviewContent(context: vscode.ExtensionContext, panel: vscode.WebviewPanel): string | undefined {
     const viewRoot = fspath.join(context.extensionPath, 'openmcp-sdk', 'renderer');
     const htmlIndexPath = fspath.join(viewRoot, 'index.html');
     const html = fs.readFileSync(htmlIndexPath, { encoding: 'utf-8' })?.replace(/(<link.+?href="|<script.+?src="|<img.+?src="|url\()(.+?)(\)|")/g, (m, $1, $2) => {
-        const absLocalPath = fspath.resolve(viewRoot, $2);        
+        const absLocalPath = fspath.resolve(viewRoot, $2);
         const webviewUri = panel.webview.asWebviewUri(vscode.Uri.file(absLocalPath));
 
         const replaceHref = $1 + webviewUri?.toString() + '"';
         return replaceHref;
-    });    
+    });
     return html;
 }
 
@@ -56,9 +56,9 @@ export function revealOpenMcpWebviewPanel(
 
 
     // 设置HTML内容
-    const html = getWebviewContent(context, panel); 
+    const html = getWebviewContent(context, panel);
     panel.webview.html = html || '';
-    panel.iconPath = vscode.Uri.file(fspath.join(context.extensionPath, 'openmcp-sdk', 'renderer', 'images', 'openmcp.png'));     
+    panel.iconPath = vscode.Uri.file(fspath.join(context.extensionPath, 'openmcp-sdk', 'renderer', 'images', 'openmcp.png'));
 
     // 处理来自webview的消息
     panel.webview.onDidReceiveMessage(message => {
@@ -79,7 +79,7 @@ export function revealOpenMcpWebviewPanel(
                         url: option.url,
                         oauth: option.oauth || ''
                     };
-            
+
                 const launchResult = {
                     code: 200,
                     msg: launchResultMessage
@@ -91,7 +91,7 @@ export function revealOpenMcpWebviewPanel(
                 });
 
                 break;
-            
+
             case 'vscode/update-connection-sigature':
                 if (type === 'installed') {
                     updateInstalledConnectionConfig(panelKey, data);
@@ -101,7 +101,7 @@ export function revealOpenMcpWebviewPanel(
                 break;
 
             default:
-                OpenMCPService.routeMessage(command, data, panel.webview);                
+                OpenMCPService.routeMessage(command, data, panel.webview);
                 break;
         }
 

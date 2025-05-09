@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as OpenMCPService from '../openmcp-sdk/service';
+import * as OpenMCPService from '@openmcp/service';
 import { launch } from './common/entry';
 
 export function activate(context: vscode.ExtensionContext) {

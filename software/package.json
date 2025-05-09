@@ -1,5 +1,5 @@
 {
-	"name": "openmcp-electron",
+	"name": "@openmcp/electron",
 	"version": "0.0.1",
 	"description": "",
 	"main": "dist/main.js",
@@ -13,6 +13,7 @@
 		"email": "1193466151@qq.com"
 	},
 	"dependencies": {
+        "@openmcp/service": "*",
 		"@modelcontextprotocol/sdk": "^1.10.2",
 		"@seald-io/nedb": "^4.1.1",
 		"axios": "^1.7.7",
