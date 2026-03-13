@@ -21,7 +21,7 @@
     --vscode-scrollbarSlider-hoverBackground: rgba(100, 100, 100, 0.7);
     --vscode-scrollbarSlider-activeBackground: rgba(191, 191, 191, 0.4);
     --vscode-progressBar-background: #0e70c0;
-    --vscode-editor-background: #1e1e1e;
+    --vscode-editor-background: #1b1b1f;
     --vscode-editor-foreground: #d4d4d4;
     --vscode-editorStickyScroll-background: #1e1e1e;
     --vscode-editorStickyScrollHover-background: #2a2d2e;
@@ -347,7 +347,7 @@
     --vscode-editorGroup-dropIntoPromptBackground: #252526;
     --vscode-sideBySideEditor-horizontalBorder: #444444;
     --vscode-sideBySideEditor-verticalBorder: #444444;
-    --vscode-panel-background: #1e1e1e;
+    --vscode-panel-background: #1b1b1f;
     --vscode-panel-border: rgba(128, 128, 128, 0.35);
     --vscode-panelTitle-activeForeground: #e7e7e7;
     --vscode-panelTitle-inactiveForeground: rgba(231, 231, 231, 0.6);

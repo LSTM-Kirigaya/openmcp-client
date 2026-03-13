@@ -200,6 +200,35 @@ flowchart TD
     QQBot -->|Business Logic| openmcpservice
 ```
 
+## OpenMCP CLI
+
+Quickly setup and run OpenMCP development environment with a single command:
+
+```bash
+# Install CLI globally
+npm install -g openmcp-cli
+
+# Create a new project
+openmcp-cli init my-project
+cd my-project
+
+# Start development servers (service + renderer)
+openmcp-cli dev
+```
+
+### CLI Commands
+
+| Command | Description |
+|---------|-------------|
+| `openmcp-cli init <project-name>` | Initialize a new OpenMCP project |
+| `openmcp-cli dev` | Start development mode (backend + frontend) |
+| `openmcp-cli dev --service-only` | Start only the backend service |
+| `openmcp-cli dev --renderer-only` | Start only the frontend renderer |
+| `openmcp-cli start` | Start production mode |
+| `openmcp-cli update` | Update to the latest version |
+
+[📖 Full CLI Documentation](./cli/README.md)
+
 ## Development
 - renderer : Frontend UI definitions
 - service : Test components for renderer , including a simple forwarding layer

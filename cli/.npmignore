@@ -1,0 +1,30 @@
+# Source files
+src/
+tsconfig.json
+
+# Development files
+node_modules/
+*.log
+.DS_Store
+
+# Test files
+*.test.ts
+__tests__/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build artifacts (keep dist)
+# dist/  <- keep this
+
+# Temporary files
+tmp/
+temp/
+*.tmp

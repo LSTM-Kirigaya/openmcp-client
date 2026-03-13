@@ -1,7 +1,7 @@
 <template>
 	<el-tooltip content="访问 OpenMCP 官网" placement="right" effect="light">
 		<div class="mcp-title" @click="clickLogo">
-			<span class="iconfont icon-openmcp"></span>
+			<img src="/favicon.svg" alt="OpenMCP" class="mcp-logo-icon" />
 		</div>
 	</el-tooltip>
 </template>
@@ -20,26 +20,30 @@ function clickLogo() {
 
 <style>
 .mcp-title {
-	height: 44px;
+	height: 52px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-bottom: 1px solid var(--sidebar-border);
 	user-select: none;
 	-webkit-user-drag: none;
 	transition: var(--animation-3s);
 	cursor: pointer;
-    margin-bottom: 100px;
-	color: var(--foreground);
+	background: transparent;
+	border: none;
 }
 
 .mcp-title:hover {
-	color: var(--main-color);
+	opacity: 0.8;
 }
 
-.mcp-title .iconfont {
-    margin-top: 10px;
-	font-size: 50px;
+.mcp-title .mcp-logo-icon {
+	width: 32px;
+	height: 32px;
+	object-fit: contain;
+	transition: var(--animation-3s);
 }
 
+.mcp-title:hover .mcp-logo-icon {
+	transform: scale(1.05);
+}
 </style>

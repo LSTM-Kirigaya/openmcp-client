@@ -248,7 +248,8 @@
     },
     "workspaces": [
         "service",
-        "renderer"
+        "renderer",
+        "cli"
     ],
     "scripts": {
         "setup": "yarn install && yarn prepare:ocr",
@@ -273,7 +274,14 @@
         "publish:update": "npx tsx scripts/publish.mts --update",
         "publish:vsce": "npx tsx scripts/publish.mts --publish-vsce",
         "publish:github": "npx tsx scripts/publish.mts --publish-github",
-        "publish:all": "npx tsx scripts/publish.mts --all"
+        "publish:all": "npx tsx scripts/publish.mts --all",
+        "build:cli": "cd cli && npm run build",
+        "publish:cli": "npx tsx scripts/publish-cli.mts",
+        "publish:cli:check": "npx tsx scripts/publish-cli.mts --check-only",
+        "publish:sdk": "npx tsx scripts/publish-sdk.mts",
+        "publish:sdk:check": "npx tsx scripts/publish-sdk.mts --check-only",
+        "build:cli:full": "npx tsx scripts/build-cli.mts",
+        "test:cli": "npx tsx scripts/test-cli.mts"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.18.2",

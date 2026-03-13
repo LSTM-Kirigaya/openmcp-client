@@ -1,0 +1,57 @@
+{
+  "name": "openmcp-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "openmcp-cli": "./bin/openmcp-cli"
+  },
+  "files": [
+    "bin/",
+    "dist/",
+    "templates/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "openmcp",
+    "mcp",
+    "cli",
+    "model-context-protocol",
+    "development",
+    "vscode-extension"
+  ],
+  "author": "kirigaya",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LSTM-Kirigaya/openmcp-client.git",
+    "directory": "cli"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "chalk": "^5.3.0",
+    "ora": "^8.1.0",
+    "inquirer": "^12.1.0",
+    "fs-extra": "^11.2.0",
+    "cross-spawn": "^7.0.6",
+    "tar": "^7.4.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/cross-spawn": "^6.0.6",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.10.0",
+    "@types/tar": "^6.1.13",
+    "typescript": "^5.7.2"
+  }
+}

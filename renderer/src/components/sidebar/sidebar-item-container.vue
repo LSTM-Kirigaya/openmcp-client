@@ -44,9 +44,9 @@ function gotoOption(ident: string) {
 	align-items: center;
 	gap: 4px;
 	padding: 6px 4px;
-	border-radius: 8px;
+	border-radius: 10px;
     background-color: var(--sidebar);
-    border: 1px solid var(--window-button-active);
+    border: 1px solid var(--border);
 }
 
 .sidebar-option-item {
@@ -68,6 +68,7 @@ function gotoOption(ident: string) {
 
 .sidebar-option-item:hover {
 	background-color: var(--sidebar-item-hover);
+	border-color: var(--main-light-color-20);
 	color: var(--foreground);
 	transition: var(--animation-3s);
 }
@@ -80,9 +81,16 @@ function gotoOption(ident: string) {
 	font-size: 16px;
 }
 
+/* 优化高亮效果：使用品牌色替代白色 */
 .sidebar-option-item.active {
-	background-color: var(--foreground);
-	color: var(--background);
+	background-color: var(--main-light-color-20);
+	color: var(--main-color);
+	border-color: var(--main-light-color-40);
 	transition: var(--animation-3s);
+}
+
+.sidebar-option-item.active:hover {
+	background-color: var(--main-light-color-30);
+	border-color: var(--main-light-color-50);
 }
 </style>

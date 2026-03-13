@@ -199,6 +199,35 @@ flowchart TD
 ```
 
 
+## OpenMCP CLI
+
+使用一条命令快速搭建和运行 OpenMCP 开发环境：
+
+```bash
+# 全局安装 CLI
+npm install -g openmcp-cli
+
+# 创建新项目
+openmcp-cli init my-project
+cd my-project
+
+# 启动开发服务器（前后端）
+openmcp-cli dev
+```
+
+### CLI 命令
+
+| 命令 | 描述 |
+|---------|-------------|
+| `openmcp-cli init <project-name>` | 初始化一个新的 OpenMCP 项目 |
+| `openmcp-cli dev` | 启动开发模式（后端 + 前端） |
+| `openmcp-cli dev --service-only` | 只启动后端服务 |
+| `openmcp-cli dev --renderer-only` | 只启动前端渲染器 |
+| `openmcp-cli start` | 启动生产模式 |
+| `openmcp-cli update` | 更新到最新版本 |
+
+[📖 CLI 完整文档](./cli/README.md)
+
 ---
 
 ## Dev

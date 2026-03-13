@@ -66,10 +66,8 @@ function setActiveTab(index: number) {
 }
 
 .main-panel {
-    border-radius: 16px;
     width: 100%;
     height: calc(100% - 46px);
-    border: 1px solid var(--sidebar-border);
     overflow: hidden;
 }
 
@@ -89,7 +87,7 @@ function setActiveTab(index: number) {
     user-select: none;
     margin-bottom: 8px;
     padding: 4px 8px;
-    border-radius: 16px;
+    border-radius: 12px;
 }
 
 .tabs-container .el-scrollbar {
@@ -134,12 +132,14 @@ function setActiveTab(index: number) {
 
 .tabs-container .tab:hover {
     background-color: var(--sidebar-item-hover);
+    border-color: var(--main-light-color-20);
 }
 
+/* 优化高亮效果：使用品牌色替代白色 */
 .tabs-container .tab.active-tab {
-    background-color: var(--foreground);
-    color: var(--background);
-    border-color: var(--foreground);
+    background-color: var(--main-light-color-20);
+    color: var(--main-color);
+    border-color: var(--main-light-color-40);
 }
 
 .tabs-container .tab .iconfont {
@@ -158,7 +158,8 @@ function setActiveTab(index: number) {
 }
 
 .tabs-container .icon-close:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--main-light-color-30);
+    color: var(--main-color);
 }
 
 .tabs-container .add-button {
@@ -176,8 +177,8 @@ function setActiveTab(index: number) {
 }
 
 .tabs-container .add-button:hover {
-    color: var(--background);
-    background-color: var(--foreground);
+    color: var(--main-color);
+    background-color: var(--main-light-color-20);
     transition: var(--animation-3s);
 }
 

@@ -1,0 +1,152 @@
+:root {
+    --font-monospace-family: var(--vscode-editor-font-family);
+    --font-monospace-weight: var(--vscode-editor-font-weight);
+    --font-monospace-size: var(--vscode-editor-font-size);
+    
+    --link-foreground: #818cf8;
+    --link-active: #a5b4fc;
+
+    /* UI & Control */
+    --input-active-background: #4a4a4a;
+    --input-active-border: #6366f1;
+    --input-active-foreground: #ffffff;
+
+    --input-error-background: rgba(244, 67, 54, 0.15);
+    --input-error-border: #f44336;
+    --input-error-foreground: #f44336;
+
+    --input-foreground: #ffffff;
+    --input-background: #3c3c3c;
+    --input-border: rgba(99, 102, 241, 0.3);
+    --input-hover: #4a4a4a;
+    --input-placeholder: rgba(255, 255, 255, 0.5);
+    --input-radius: 0px;
+
+    --scrollbar-background: rgba(99, 102, 241, 0.3);
+    --scrollbar-hover: rgba(99, 102, 241, 0.5);
+    --scrollbar-active: rgba(99, 102, 241, 0.6);
+
+    /* Window - Matching openmcp-document dark theme style (vp-c-bg: #1b1b1f) */
+    --title-bar: #1b1b1f;
+    --title-color: #ffffff;
+    --foreground: #ffffff;
+    --foreground-muted: rgba(255, 255, 255, 0.6);
+    --background: #1b1b1f;
+    --label: rgba(255, 255, 255, 0.8);
+    --shadow: #000000;
+    --border: rgba(107, 107, 107, 0.15);
+    --window-button-hover: rgba(99, 102, 241, 0.2);
+    --window-button-active: rgba(255, 255, 255, 0.1);
+    --window-blur-background: rgba(0, 0, 0, 0.4);
+
+    --window-title-foreground: var(--foreground);
+    --window-background: var(--sidebar);
+    --window-border: transparent;
+    --window-radius: 0px;
+
+    /* Sidebar - Matching openmcp-document style (vp-c-bg-alt: #161618) */
+    --sidebar: #161618;
+    --sidebar-border: rgba(99, 102, 241, 0.12);
+    --sidebar-min-width: 280px;
+
+    --sidebar-item-text: rgba(255, 255, 255, 0.85);
+    --sidebar-item-border: rgba(99, 102, 241, 0.3);
+    --sidebar-item-background: transparent;
+    --sidebar-item-selected: rgba(99, 102, 241, 0.15);
+    --sidebar-item-hover: rgba(99, 102, 241, 0.1);
+    --sidebar-item-max-height: 40px;
+    --sidebar-item-radix-background: #1b1b1f;
+
+    --sidebar-group-text: rgba(255, 255, 255, 0.7);
+    --sidebar-group-border: rgba(255, 255, 255, 0.08);
+    --sidebar-group-background: transparent;
+    --sidebar-hover: rgba(99, 102, 241, 0.1);
+
+    /* Labels */
+    --signalSize-background: rgba(0,0,0,0.5);
+    --signalSize-border: rgba(255,255,255,0.2);
+    --signalSize-color: var(--foreground);
+
+    /* Color Picker */
+    --picker-swatch-size: 15px;
+    --picker-swatch-cols: 8;
+    --picker-background: #161618;
+    --picker-border: rgba(255, 255, 255, 0.1);
+    
+    /* Search */
+    --search-background: #161618;
+    --search-border: var(--border);
+    --search-panel-background: transparent;
+    --search-panel-border: rgba(99, 102, 241, 0.3);
+    --search-panel-text: #ffffff;
+    --search-label: var(--foreground);
+    --search-selected-background: rgba(99, 102, 241, 0.15);
+
+    /* Properties */
+    --properties-background: #161618;
+    --properties-border: var(--border);
+
+    /* Navbar */
+    --navBar-background: var(--sidebar);
+    --navBar-height: 32px;
+    --navBar-button: transparent;
+    --navBar-button-text: var(--foreground);
+    --navBar-group-background: var(--background);
+    --navBar-preview-background: rgba(99, 102, 241, 0.3);
+    --navBar-slider-border: var(--foreground);
+
+    /* Buttons */
+    --button: #6366f1;
+    --button-text: #ffffff;
+    --button-hover: #4f46e5;
+    --button-active: #4f46e5;
+    --button-disabled: #3c3c3c;
+    --button-disabled-text: rgba(255, 255, 255, 0.4);
+
+    /* Grid Lines */
+    --grid-dash: 2;
+    --grid-space: 4;
+    --grid-line: rgba(255, 255, 255, 0.1);
+    --grid-tick: rgba(99, 102, 241, 0.5);
+
+    /* Cursor */
+    --cursor: #ffffff;
+    --cursor-ghost: rgba(255, 255, 255, 0.2);
+    --cursor-width: 2;
+
+    /* X-Axis */
+    --axis-height: 38px;
+    --axis-line: var(--border);
+    --axis-background: #161618;
+    --axis-foreground: var(--foreground);
+
+    /* Signals */
+    --signal-highlight: rgba(99, 102, 241, 0.2);
+    --signal-default-color: #4CAF50;
+
+    /* Colors - Indigo/Purple theme matching openmcp-document */
+    --accent: #6366f1;
+    --accent-dim: rgba(99, 102, 241, 0.3);
+    --accent-bright: #818cf8;
+    --accent-hover: #4f46e5;
+
+    --color-red: #ff5252;
+    --color-pink: #ff4081;
+    --color-purple: #e040fb;
+    --color-deepPurple: #7c4dff;
+    --color-indigo: #536dfe;
+    --color-blue: #448aff;
+    --color-lightBlue: #40c4ff;
+    --color-cyan: #18ffff;
+    --color-teal: #64ffda;
+    --color-green: #69f0ae;
+    --color-lightGreen: #b2ff59;
+    --color-lime: #eeff41;
+    --color-yellow: #ffff00;
+    --color-amber: #ffd740;
+    --color-orange: #ffab40;
+    --color-deepOrange: #ff6e40;
+
+    /* Settings */
+    --settings-action-background: var(--background);
+}

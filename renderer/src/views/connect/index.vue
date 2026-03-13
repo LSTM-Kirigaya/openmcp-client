@@ -139,9 +139,9 @@ function deleteServer(index: number) {
 }
 
 .server-list-panel .list-item {
-	margin: 3px;
-	padding: 10px 12px;
-	border-radius: 0.3em;
+	margin: 2px 4px;
+	padding: 10px 14px;
+	border-radius: 8px;
 	user-select: none;
 	cursor: pointer;
 	display: flex;
@@ -149,15 +149,22 @@ function deleteServer(index: number) {
 	align-items: center;
 	gap: 8px;
 	transition: var(--animation-3s);
+	border: 1px solid transparent;
 }
 
 .server-list-panel .list-item:hover {
-	background-color: var(--el-fill-color-light);
+	background-color: var(--sidebar-item-hover);
+	border-color: var(--main-light-color-20);
 }
 
 .server-list-panel .list-item.active {
-	background-color: var(--el-fill-color-light);
-	border-left: 3px solid var(--el-color-primary-light-5);
+	background-color: var(--main-light-color-10);
+	border: 1px solid var(--main-light-color-30);
+}
+
+.server-list-panel .list-item.active .item-title {
+	color: var(--main-color);
+	font-weight: 600;
 }
 
 .server-list-panel .list-item-content {

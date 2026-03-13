@@ -2,16 +2,16 @@
 <svg width="600" height="674" viewBox="0 0 600 674" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="gradient_1" gradientUnits="userSpaceOnUse" x1="300" y1="0" x2="300" y2="600">
-      <stop offset="0" stop-color="#A1A7F6" />
+      <stop offset="0" stop-color="#818cf8" />
       <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.2" />
     </linearGradient>
     <linearGradient id="gradient_2" gradientUnits="userSpaceOnUse" x1="110.5" y1="0" x2="110.5" y2="221">
-      <stop offset="0.441" stop-color="#A8A3FF" />
+      <stop offset="0.441" stop-color="#a5b4fc" />
       <stop offset="1" stop-color="#FFFFFF" />
     </linearGradient>
     <linearGradient id="gradient_3" gradientUnits="userSpaceOnUse" x1="55.5" y1="0" x2="55.5" y2="111">
       <stop offset="0" stop-color="#FFFFFF" />
-      <stop offset="1" stop-color="#A489FB" />
+      <stop offset="1" stop-color="#818cf8" />
     </linearGradient>
     <linearGradient id="gradient_5" gradientUnits="userSpaceOnUse" x1="126" y1="0" x2="126" y2="647">
       <stop offset="0" stop-color="#FFF2B0" />
@@ -21,7 +21,7 @@
   <g>
     <g>
       <g transform="translate(0 74)">
-        <path d="M300 0C465.708 0 600 134.292 600 300C600 300 600 300 600 300C600 465.708 465.708 600 300 600C300 600 300 600 300 600C134.292 600 0 465.708 0 300C0 300 0 300 0 300C0 134.292 134.292 0 300 0Z" fill="#5A00FF" fill-rule="evenodd" />
+        <path d="M300 0C465.708 0 600 134.292 600 300C600 300 600 300 600 300C600 465.708 465.708 600 300 600C300 600 300 600 300 600C134.292 600 0 465.708 0 300C0 300 0 300 0 300C0 134.292 134.292 0 300 0Z" fill="#6366f1" fill-rule="evenodd" />
         <path d="M300 0C465.708 0 600 134.292 600 300C600 300 600 300 600 300C600 465.708 465.708 600 300 600C300 600 300 600 300 600C134.292 600 0 465.708 0 300C0 300 0 300 0 300C0 134.292 134.292 0 300 0Z" fill="url(#gradient_1)" fill-rule="evenodd" />
       </g>
       <path d="M0 110.5C0 49.4725 49.4725 0 110.5 0C171.527 0 221 49.4725 221 110.5C221 171.527 171.527 221 110.5 221C49.4725 221 0 171.527 0 110.5Z" fill="url(#gradient_2)" fill-rule="evenodd" transform="translate(284 417)" />

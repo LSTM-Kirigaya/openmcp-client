@@ -424,33 +424,33 @@ onBeforeUnmount(() => {
 }
 
 .api-man-dialog .el-button--primary {
-	border-radius: 16px !important;
-	background-color: var(--foreground) !important;
-	color: var(--background) !important;
-	border-color: var(--foreground) !important;
+	border-radius: 8px !important;
+	background-color: var(--main-color) !important;
+	color: #ffffff !important;
+	border-color: var(--main-color) !important;
+	transition: var(--animation-3s);
 }
 
 .api-man-dialog .el-button--primary:hover,
 .api-man-dialog .el-button--primary:focus {
-	background-color: var(--foreground) !important;
-	color: var(--background) !important;
-	border-color: var(--foreground) !important;
-	opacity: 0.9;
+	background-color: var(--main-light-color-90) !important;
+	border-color: var(--main-light-color-90) !important;
+	opacity: 1;
 }
 
 .setting-popover .el-button--primary {
-	border-radius: 16px !important;
-	background-color: var(--foreground) !important;
-	color: var(--background) !important;
-	border-color: var(--foreground) !important;
+	border-radius: 8px !important;
+	background-color: var(--main-color) !important;
+	color: #ffffff !important;
+	border-color: var(--main-color) !important;
+	transition: var(--animation-3s);
 }
 
 .setting-popover .el-button--primary:hover,
 .setting-popover .el-button--primary:focus {
-	background-color: var(--foreground) !important;
-	color: var(--background) !important;
-	border-color: var(--foreground) !important;
-	opacity: 0.9;
+	background-color: var(--main-light-color-90) !important;
+	border-color: var(--main-light-color-90) !important;
+	opacity: 1;
 }
 
 /* 与工具调试页 executor-actions 一致：右对齐 + 按钮组样式 */
@@ -531,22 +531,21 @@ onBeforeUnmount(() => {
 
 
 .setting-save-container .el-button-group button:last-child {
-    border: 1px solid var(--main-light-color-70);
+    border: 1px solid var(--main-light-color-50);
 }
 
-/* 保存按钮与工具调试页「执行」按钮一致：强调色 */
+/* 保存按钮使用半透明品牌色 */
 .setting-save-container .el-button-group .btn-save {
 	background-color: var(--main-light-color-20) !important;
-	color: var(--el-text-color-primary) !important;
+	color: var(--main-color) !important;
 	border-color: var(--main-light-color-50) !important;
 	font-weight: 600;
 }
 
 .setting-save-container .el-button-group .btn-save:hover,
 .setting-save-container .el-button-group .btn-save:focus {
-	background-color: var(--main-light-color-50) !important;
-	color: var(--el-text-color-primary) !important;
-	border-color: var(--main-light-color-90) !important;
+	background-color: var(--main-light-color-40) !important;
+	border-color: var(--main-light-color-70) !important;
 }
 
 /* 测试/保存按钮右侧快捷键提示，与工具调试执行按钮一致 */

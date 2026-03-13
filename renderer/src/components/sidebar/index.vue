@@ -93,10 +93,12 @@ const { t } = useI18n();
 	color: var(--sidebar-item-text);
 	transition: var(--animation-3s);
 	text-decoration: none;
+	border: 1px solid transparent;
 }
 
 .sidebar-external-links .sidebar-link:hover {
 	background-color: var(--sidebar-item-hover);
+	border-color: var(--main-light-color-20);
 	color: var(--foreground);
 }
 

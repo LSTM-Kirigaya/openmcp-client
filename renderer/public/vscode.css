@@ -3,64 +3,64 @@
     --font-monospace-weight: var(--vscode-editor-font-weight);
     --font-monospace-size: var(--vscode-editor-font-size);
     
-    --link-foreground: var(--vscode-textLink-foreground);
-    --link-active: var(--vscode-textLink-activeForeground);
+    --link-foreground: #818cf8;
+    --link-active: #a5b4fc;
 
     /* UI & Control */
-    --input-active-background: var(--vscode-input-background);
-    --input-active-border: var(--vscode-focusBorder);
-    --input-active-foreground: var(--vscode-input-foreground);
+    --input-active-background: #4a4a4a;
+    --input-active-border: #6366f1;
+    --input-active-foreground: #ffffff;
 
-    --input-error-background: var(--vscode-inputValidation-errorBackground);
-    --input-error-border: var(--vscode-inputValidation-errorBorder);
-    --input-error-foreground: var(--vscode-inputValidation-errorForeground);
+    --input-error-background: rgba(244, 67, 54, 0.15);
+    --input-error-border: #f44336;
+    --input-error-foreground: #f44336;
 
-    --input-foreground: var(--vscode-input-foreground);
-    --input-background: var(--vscode-input-background);
-    --input-border: var(--vscode-input-border);
-    --input-hover: var(--vscode-input-background);
-    --input-placeholder: var(--vscode-input-placeholderForeground);
+    --input-foreground: #ffffff;
+    --input-background: #3c3c3c;
+    --input-border: rgba(99, 102, 241, 0.3);
+    --input-hover: #4a4a4a;
+    --input-placeholder: rgba(255, 255, 255, 0.5);
     --input-radius: 0px;
 
-    --scrollbar-background: var(--vscode-scrollbarSlider-background);
-    --scrollbar-hover: var(--vscode-scrollbarSlider-hoverBackground);
-    --scrollbar-active: var(--vscode-scrollbarSlider-activeBackground);
+    --scrollbar-background: rgba(99, 102, 241, 0.3);
+    --scrollbar-hover: rgba(99, 102, 241, 0.5);
+    --scrollbar-active: rgba(99, 102, 241, 0.6);
 
-    /* Window */
-    --title-bar: #1f1f1f;
-    --title-color: #fff;
-    --foreground: var(--vscode-editor-foreground);
-    --foreground-muted: var(--vscode-list-inactiveSelectionBackground);
-    --background: var(--vscode-editor-background);
-    --label: rgb(189, 189, 189);
-    --shadow: #000;
-    --border: var(--vscode-input-border);
-    --window-button-hover: rgba(255,255,255,0.1);
-    --window-button-active: rgba(255,255,255,0.2);
-    --window-blur-background: rgba(0,0,0,0.25);
+    /* Window - Matching openmcp-document dark theme style (vp-c-bg: #1b1b1f) */
+    --title-bar: #1b1b1f;
+    --title-color: #ffffff;
+    --foreground: #ffffff;
+    --foreground-muted: rgba(255, 255, 255, 0.6);
+    --background: #1b1b1f;
+    --label: rgba(255, 255, 255, 0.8);
+    --shadow: #000000;
+    --border: rgba(99, 102, 241, 0.15);
+    --window-button-hover: rgba(99, 102, 241, 0.2);
+    --window-button-active: rgba(255, 255, 255, 0.1);
+    --window-blur-background: rgba(0, 0, 0, 0.4);
 
     --window-title-foreground: var(--foreground);
     --window-background: var(--sidebar);
     --window-border: transparent;
     --window-radius: 0px;
 
-    /* Sidebar */
-    --sidebar: var(--vscode-sideBar-background);
-    --sidebar-border: var(--vscode-sideBar-border);
+    /* Sidebar - Matching openmcp-document style (vp-c-bg-alt: #161618) */
+    --sidebar: #161618;
+    --sidebar-border: rgba(99, 102, 241, 0.12);
     --sidebar-min-width: 280px;
 
-    --sidebar-item-text: var(--vscode-list-inactiveSelectionForeground);
-    --sidebar-item-border: var(--vscode-input-border);
-    --sidebar-item-background: var(--sidebar);
-    --sidebar-item-selected: var(--vscode-list-inactiveSelectionBackground);
-    --sidebar-item-hover: var(--vscode-list-hoverBackground);
+    --sidebar-item-text: rgba(255, 255, 255, 0.85);
+    --sidebar-item-border: rgba(99, 102, 241, 0.3);
+    --sidebar-item-background: transparent;
+    --sidebar-item-selected: rgba(99, 102, 241, 0.15);
+    --sidebar-item-hover: rgba(99, 102, 241, 0.1);
     --sidebar-item-max-height: 40px;
-    --sidebar-item-radix-background: var(--vscode-breadcrumb-background);
+    --sidebar-item-radix-background: #1b1b1f;
 
-    --sidebar-group-text: var(--vscode-sideBarSectionHeader-foreground);
-    --sidebar-group-border: var(--vscode-sideBarSectionHeader-border);
-    --sidebar-group-background: var(--vscode-sideBarSectionHeader-background);
-    --sidebar-hover: var(--vscode-list-hoverBackground);
+    --sidebar-group-text: rgba(255, 255, 255, 0.7);
+    --sidebar-group-border: rgba(255, 255, 255, 0.08);
+    --sidebar-group-background: transparent;
+    --sidebar-hover: rgba(99, 102, 241, 0.1);
 
     /* Labels */
     --signalSize-background: rgba(0,0,0,0.5);
@@ -70,20 +70,20 @@
     /* Color Picker */
     --picker-swatch-size: 15px;
     --picker-swatch-cols: 8;
-    --picker-background: var(--vscode-breadcrumbPicker-background);
-    --picker-border: var(--vscode-dropdown-border);
+    --picker-background: #161618;
+    --picker-border: rgba(255, 255, 255, 0.1);
     
     /* Search */
-    --search-background: var(--vscode-quickInput-background);
+    --search-background: #161618;
     --search-border: var(--border);
     --search-panel-background: transparent;
-    --search-panel-border: var(--vscode-pickerGroup-border);
-    --search-panel-text: var(--vscode-quickInput-foreground);
+    --search-panel-border: rgba(99, 102, 241, 0.3);
+    --search-panel-text: #ffffff;
     --search-label: var(--foreground);
-    --search-selected-background: var(--vscode-list-inactiveSelectionBackground);
+    --search-selected-background: rgba(99, 102, 241, 0.15);
 
     /* Properties */
-    --properties-background: var(--vscode-breadcrumb-background);
+    --properties-background: #161618;
     --properties-border: var(--border);
 
     /* Navbar */
@@ -92,43 +92,43 @@
     --navBar-button: transparent;
     --navBar-button-text: var(--foreground);
     --navBar-group-background: var(--background);
-    --navBar-preview-background: var(--vscode-scrollbarSlider-background);
+    --navBar-preview-background: rgba(99, 102, 241, 0.3);
     --navBar-slider-border: var(--foreground);
 
     /* Buttons */
-    --button: var(--vscode-button-background);
-    --button-text: var(--vscode-button-foreground);
-    --button-hover: var(--vscode-button-hoverBackground);
-    --button-active: var(--vscode-button-hoverBackground);
-    --button-disabled: var(--vscode-activityBar-background);
-    --button-disabled-text: var(--vscode-activityBar-inactiveForeground);
+    --button: #6366f1;
+    --button-text: #ffffff;
+    --button-hover: #4f46e5;
+    --button-active: #4f46e5;
+    --button-disabled: #3c3c3c;
+    --button-disabled-text: rgba(255, 255, 255, 0.4);
 
     /* Grid Lines */
     --grid-dash: 2;
     --grid-space: 4;
-    --grid-line: var(--vscode-editorIndentGuide-background);
-    --grid-tick: var(--vscode-editorIndentGuide-activeBackground);
+    --grid-line: rgba(255, 255, 255, 0.1);
+    --grid-tick: rgba(99, 102, 241, 0.5);
 
     /* Cursor */
-    --cursor: var(--vscode-editorCursor-foreground);
+    --cursor: #ffffff;
     --cursor-ghost: rgba(255, 255, 255, 0.2);
     --cursor-width: 2;
 
     /* X-Axis */
     --axis-height: 38px;
     --axis-line: var(--border);
-    --axis-background: var(--vscode-sideBar-background);
+    --axis-background: #161618;
     --axis-foreground: var(--foreground);
 
     /* Signals */
-    --signal-highlight: var(--vscode-list-inactiveSelectionBackground);
-    --signal-default-color: var(--vscode-testing-iconPassed, #4CAF50);
+    --signal-highlight: rgba(99, 102, 241, 0.2);
+    --signal-default-color: #4CAF50;
 
-    /* Colors */
-    --accent: var(--vscode-button-background);
-    --accent-dim: #234175;
-    --accent-bright: #24c5f7;
-    --accent-hover: var(--vscode-button-hoverBackground);
+    /* Colors - Indigo/Purple theme matching openmcp-document */
+    --accent: #6366f1;
+    --accent-dim: rgba(99, 102, 241, 0.3);
+    --accent-bright: #818cf8;
+    --accent-hover: #4f46e5;
 
     --color-red: #ff5252;
     --color-pink: #ff4081;

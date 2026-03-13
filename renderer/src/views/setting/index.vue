@@ -87,8 +87,7 @@ onMounted(() => {
 .setting-list-panel {
 	width: 100%;
 	height: 100%;
-	border-right: 1px solid var(--el-border-color-light);
-	background-color: var(--el-bg-color);
+	border-right: 1px solid var(--border);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -104,13 +103,13 @@ onMounted(() => {
 }
 
 .setting-list-panel .list-inner {
-	padding: 10px;
+	padding: 12px 10px;
 }
 
 .setting-list-panel .list-item {
-	margin: 3px;
-	padding: 10px 12px;
-	border-radius: 0.3em;
+	margin: 2px 4px;
+	padding: 10px 14px;
+	border-radius: 8px;
 	user-select: none;
 	cursor: pointer;
 	display: flex;
@@ -118,15 +117,24 @@ onMounted(() => {
 	align-items: center;
 	gap: 8px;
 	transition: var(--animation-3s);
+	border: 1px solid transparent;
 }
 
 .setting-list-panel .list-item:hover {
-	background-color: var(--el-fill-color-light);
+	background-color: var(--sidebar-item-hover);
+	border-color: var(--main-light-color-20);
 }
 
+/* 优化高亮效果：使用品牌色替代白色 */
 .setting-list-panel .list-item.active {
-	background-color: var(--el-fill-color-light);
-	border-left: 3px solid var(--el-color-primary-light-5);
+	background-color: var(--main-light-color-10);
+	border: 1px solid var(--main-light-color-30);
+}
+
+/* 活跃项的标题使用品牌色 */
+.setting-list-panel .list-item.active .item-title {
+	color: var(--main-color);
+	font-weight: 600;
 }
 
 .setting-list-panel .list-item-content {
@@ -138,12 +146,23 @@ onMounted(() => {
 }
 
 .setting-list-panel .item-title {
-	font-weight: bold;
+	font-weight: 500;
 	font-size: 13px;
 	max-width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	color: var(--foreground);
+	transition: var(--animation-3s);
+}
+
+/* 非活跃项标题使用更柔和的颜色 */
+.setting-list-panel .list-item:not(.active) .item-title {
+	color: var(--foreground-muted);
+}
+
+.setting-list-panel .list-item:hover .item-title {
+	color: var(--foreground);
 }
 
 .setting-detail-panel {
@@ -151,7 +170,7 @@ onMounted(() => {
 	min-width: 0;
 	width: 100%;
 	height: 100%;
-	background-color: var(--el-bg-color);
+	background-color: var(--background);
 	overflow: hidden;
 }
 
@@ -175,11 +194,12 @@ onMounted(() => {
 	box-sizing: border-box;
 }
 
+/* 设置卡片：优化边框为更 subtle 的风格 */
 .setting-section {
 	padding: 20px 24px;
 	margin: 0;
     width: 550px;
-	border-radius: 16px;
+	border-radius: 12px;
 	min-height: 50px;
 }
 
@@ -188,11 +208,9 @@ onMounted(() => {
 	font-weight: 600;
 	margin: 0 0 16px 0;
 	padding-bottom: 12px;
-	border-bottom: 1px solid var(--sidebar-border);
-	color: var(--foreground);
 }
 
-/* 选项列表包装器：仅包含 .setting-option，便于首尾圆角与边框 */
+/* 选项列表包装器：与 connect 页面一致 */
 .setting-section .setting-options .setting-option {
 	border-top: 1px solid var(--window-button-active);
 	border-left: 1px solid var(--window-button-active);
@@ -203,6 +221,19 @@ onMounted(() => {
 .setting-section .setting-options .setting-option .el-input__wrapper,
 .setting-section .setting-options .setting-option .el-select__wrapper {
     border: 1px solid var(--window-button-active);
+	transition: var(--animation-3s);
+}
+
+/* 输入框聚焦时使用品牌色 */
+.setting-section .setting-options .setting-option .el-input__wrapper:hover,
+.setting-section .setting-options .setting-option .el-select__wrapper:hover {
+	border-color: var(--main-light-color-50);
+}
+
+.setting-section .setting-options .setting-option .el-input__wrapper.is-focus,
+.setting-section .setting-options .setting-option .el-select__wrapper.is-focused {
+	border-color: var(--main-color);
+	box-shadow: 0 0 0 1px var(--main-light-color-20);
 }
 
 .setting-section .setting-options .setting-option:first-child {
@@ -219,7 +250,7 @@ onMounted(() => {
 .setting-option {
 	padding: 14px 18px;
 	min-height: 44px;
-	background-color: var(--background);
+	background-color: var(--sidebar);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -246,28 +277,29 @@ onMounted(() => {
 .setting-option .el-select,
 .setting-option .el-input,
 .setting-option .el-input__wrapper {
-	border-radius: 12px;
+	border-radius: 8px;
 }
 
+/* 按钮样式优化 */
 .setting-section .el-button--primary {
-	border-radius: 16px !important;
-	background-color: var(--foreground) !important;
-	color: var(--background) !important;
-	border-color: var(--foreground) !important;
+	border-radius: 8px !important;
+	background-color: var(--main-color) !important;
+	color: #ffffff !important;
+	border-color: var(--main-color) !important;
+	transition: var(--animation-3s);
 }
 
 .setting-section .el-button--primary:hover,
 .setting-section .el-button--primary:focus {
-	background-color: var(--foreground) !important;
-	color: var(--background) !important;
-	border-color: var(--foreground) !important;
-	opacity: 0.9;
+	background-color: var(--main-light-color-90) !important;
+	border-color: var(--main-light-color-90) !important;
+	opacity: 1;
 }
 
 .el-checkbox-button.is-checked:first-child .el-checkbox-button__inner,
 .el-checkbox-button__inner {
 	font-size: 13px !important;
-	border-radius: 16px !important;
+	border-radius: 8px !important;
 }
 
 .el-slider__button {

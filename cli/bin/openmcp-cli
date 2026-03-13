@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+
+const path = require('path');
+const fs = require('fs');
+
+// 检查 Node.js 版本
+const nodeVersion = process.version;
+const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0], 10);
+
+if (majorVersion < 18) {
+  console.error('❌ Error: OpenMCP CLI requires Node.js 18 or higher.');
+  console.error('   Current version: ' + nodeVersion);
+  console.error('   Please upgrade your Node.js version.');
+  process.exit(1);
+}
+
+// 确定 CLI 目录路径
+// 当作为全局包安装时，__dirname 是 bin/ 目录
+const cliDir = path.resolve(__dirname, '..');
+const distPath = path.join(cliDir, 'dist', 'index.js');
+
+// 检查编译后的文件是否存在
+if (fs.existsSync(distPath)) {
+  // 生产模式：运行编译后的 JavaScript
+  require(distPath);
+} else {
+  // 找不到编译后的文件
+  console.error('❌ Error: Cannot find OpenMCP CLI entry point.');
+  console.error('   Looked for: ' + distPath);
+  console.error('');
+  console.error('This could mean:');
+  console.error('  1. The package is not properly built');
+  console.error('  2. You are running from source without building');
+  console.error('');
+  console.error('To fix this:');
+  console.error('  1. If you are developing:');
+  console.error('     cd ' + cliDir);
+  console.error('     npm install && npm run build');
+  console.error('');
+  console.error('  2. If you installed from npm:');
+  console.error('     npm uninstall -g openmcp-cli');
+  console.error('     npm install -g openmcp-cli');
+  process.exit(1);
+}

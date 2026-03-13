@@ -84,8 +84,9 @@ function toggleConnectionPanel() {
 	width: calc(100% - 16px);
 	margin: 8px;
 	padding: 6px 4px;
-	border-radius: 8px;
+	border-radius: 10px;
 	background-color: var(--main-light-color-10);
+	border: 1px solid var(--main-light-color-20);
 	cursor: pointer;
 	user-select: none;
 	transition: var(--animation-3s);
@@ -94,6 +95,7 @@ function toggleConnectionPanel() {
 
 .connection-status:hover {
 	background-color: var(--sidebar-item-hover);
+	border-color: var(--main-light-color-40);
 }
 
 .connection-status.disconnected {
@@ -116,7 +118,7 @@ function toggleConnectionPanel() {
 
 .status-dot.connected {
 	background-color: var(--main-color);
-	box-shadow: 0 0 0 2px var(--main-light-color-30);
+	box-shadow: 0 0 0 3px var(--main-light-color-20);
 }
 
 .status-dot.disconnected {
