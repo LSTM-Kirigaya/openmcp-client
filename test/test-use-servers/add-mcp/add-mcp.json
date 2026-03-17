@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "namespace": "openmcp",
+  "mcpServers": {
+    "my-browser": {
+      "command": "npx",
+      "args": [
+        "tsx",
+        "K:\\code\\jinhui\\openmcp\\openmcp-client\\test\\test-use-servers\\add-mcp\\add-server.mts"
+      ],
+      "description": "A MCP for long-term memory support",
+      "prompts": [
+        "add_prompt"
+      ]
+    }
+  }
+}

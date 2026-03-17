@@ -25,3 +25,4 @@ resources/changelog/**
 **/AGENTS.md
 **/openmcp/*
 **/dataset/*
+test/sdk/.yarn

@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { routeMessage, loadSetting, saveSetting, OmdbStore } from '@openmcp/service';
+import { routeMessage, loadSetting, saveSetting, OmdbStore, setForbiddenMonitor, setRefluxHome } from '@openmcp/service';
 import * as fs from 'fs';
 
 // 定义简化类型以避免循环依赖
@@ -78,10 +78,6 @@ interface WebSocketMessage {
 }
 
 type ConnectionType = 'STDIO' | 'SSE' | 'STREAMABLE_HTTP';
-
-declare const FORBIDDEN_MONITOR: boolean;
-declare function setForbiddenMonitor(flag: boolean): void;
-declare function setRefluxHome(path: string): void;
 
 // TaskLoop is imported dynamically at runtime from '@openmcp/service/dist/task-loop.js'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

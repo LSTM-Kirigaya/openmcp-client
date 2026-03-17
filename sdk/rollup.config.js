@@ -43,6 +43,7 @@ export default {
     ],
     external: [
         'ws', 'pino', 'events', 'path', 'fs', 'os', 'util',
+        'tesseract.js',
         /.*task-loop\.js$/
     ]
 };
