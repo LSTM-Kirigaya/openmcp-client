@@ -248,6 +248,8 @@
     },
     "workspaces": [
         "cli",
+        "gateway",
+        "sdk",
         "service",
         "renderer"
     ],
@@ -334,5 +336,5 @@
         "webpack": "^5.99.5",
         "webpack-cli": "^5.1.4"
     },
-    "packageManager": "yarn@1.22.22"
+    "packageManager": "yarn@4.13.0"
 }

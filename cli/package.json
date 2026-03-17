@@ -5,8 +5,8 @@
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "openmcp-cli": "./bin/openmcp-cli.js",
-    "openmcp": "./bin/openmcp-cli.js"
+    "openmcp": "./bin/openmcp-cli.js",
+    "openmcp-cli": "./bin/openmcp-cli.js"
   },
   "scripts": {
     "build": "tsc",

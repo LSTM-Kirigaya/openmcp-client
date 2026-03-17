@@ -15,7 +15,7 @@ import {
     type ToolCall
 } from '../../task-loop.js';
 import { IConnectionArgs, MessageHandler, WebSocketMessage } from './adapter.js';
-import { ConnectionType } from 'src/mcp/client.dto.js';
+import { ConnectionType } from '../mcp/client.dto.js';
 import { FORBIDDEN_MONITOR, setForbiddenMonitor, setRefluxHome } from './setting.js';
 
 // sdk 模式禁用 monitor

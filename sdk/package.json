@@ -1,0 +1,17 @@
+{
+	"name": "@openmcp/sdk",
+	"version": "0.0.1",
+	"description": "OpenMCP SDK - Embeddable MCP Client for Node.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"clean": "rm -rf dist"
+	},
+	"author": "LSTM-Kirigaya",
+	"license": "MIT",
+	"dependencies": {
+		"@openmcp/service": "workspace:*"
+	}
+}

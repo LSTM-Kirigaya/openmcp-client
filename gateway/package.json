@@ -1,7 +1,7 @@
 {
-	"name": "@openmcp/service",
+	"name": "@openmcp/gateway",
 	"version": "0.0.1",
-	"description": "",
+	"description": "OpenMCP Gateway - WebSocket entry point",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
@@ -10,47 +10,26 @@
 		"dev": "nodemon --watch src --ext ts --exec \"tsx src/main.ts\"",
 		"build": "tsc",
 		"build:watch": "tsc --watch",
-		"postbuild": "node ./scripts/post-build.mjs",
 		"start": "node dist/main.js",
 		"start:prod": "NODE_ENV=production node dist/main.js",
 		"debug": "tsx --inspect src/main.ts",
 		"clean": "rm -rf dist",
 		"lint": "eslint src --ext .ts,.tsx",
-		"typecheck": "tsc --noEmit",
-		"test:storage": "tsx src/common/json-archive-store.test.ts"
+		"typecheck": "tsc --noEmit"
 	},
 	"author": "LSTM-Kirigaya",
 	"license": "MIT",
 	"devDependencies": {
-		"@types/cors": "^2.8.17",
-		"@types/debug": "^4.1.12",
-		"@types/express": "^5.0.0",
-		"@types/morgan": "^1.9.9",
 		"@types/node": "^22.7.5",
-		"@types/pako": "^2.0.3",
 		"@types/ws": "^8.18.0",
-		"esbuild": "^0.25.3",
 		"nodemon": "^3.1.10",
-		"tsconfig-paths": "^4.2.0",
 		"tsx": "^4.19.4",
-		"typescript": "^5.8.3",
-		"webpack-cli": "^6.0.1",
-		"webpack-node-externals": "^3.0.0"
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"rotating-file-stream": "^3.2.0",
-		"@modelcontextprotocol/sdk": "^1.18.2",
-		"@seald-io/nedb": "^4.1.1",
-		"axios": "^1.9.0",
-		"cli-table3": "^0.6.5",
-		"https-proxy-agent": "^7.0.6",
-		"open": "^10.1.2",
-		"openai": "^5.0.1",
-		"pako": "^2.1.0",
+		"@openmcp/service": "workspace:*",
 		"pino": "^9.6.0",
 		"pino-pretty": "^13.0.0",
-		"tesseract.js": "^6.0.1",
-		"uuid": "^11.1.0",
 		"ws": "^8.18.1"
 	}
 }

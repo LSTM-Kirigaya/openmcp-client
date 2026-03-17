@@ -105,7 +105,7 @@ function doStartService(port: number, detached: boolean = false): { pid: number 
   if (detached) {
     // 后台运行：创建一个新的进程组
     const child = spawn('node', ['dist/main.js'], {
-      cwd: path.join(__dirname, '..', 'service'),
+      cwd: path.join(__dirname, '..', 'gateway'),
       env,
       detached: true,
       stdio: 'ignore'
@@ -122,7 +122,7 @@ function doStartService(port: number, detached: boolean = false): { pid: number 
   } else {
     // 前台运行
     foregroundProcess = spawn('node', ['dist/main.js'], {
-      cwd: path.join(__dirname, '..', 'service'),
+      cwd: path.join(__dirname, '..', 'gateway'),
       env,
       stdio: 'inherit',
       shell: true

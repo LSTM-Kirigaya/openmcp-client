@@ -1,6 +1,6 @@
-import { Controller } from "../common/index.js";
-import { PostMessageble } from "../hook/adapter.js";
-import { RequestData } from "../common/index.dto.js";
+import { Controller } from "./common/index.js";
+import { PostMessageble } from "./hook/adapter.js";
+import { RequestData } from "./common/index.dto.js";
 import {
     login as apiLogin,
     logout as apiLogout,
@@ -10,7 +10,7 @@ import {
     setToken,
     clearToken,
     isLoggedIn
-} from "../web/auth.js";
+} from "./web/auth.js";
 
 export class AuthController {
 

@@ -2,8 +2,9 @@ import { WebSocketServer } from 'ws';
 import { pino } from 'pino';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { routeMessage, VSCodeWebViewLike, setRunningCWD } from '@openmcp/service';
-import fs from 'fs/promises';
+import { routeMessage } from './common/router.js';
+import { VSCodeWebViewLike } from './hook/adapter.js';
+import fs from 'fs/promises'; // 使用 Promise API 替代回调
 import chalk from 'chalk';
 
 export interface VSCodeMessage {
@@ -19,7 +20,9 @@ const devHome = join(__dirname, '..', '..');
 const serverPath = join(devHome, 'servers');
 const envPath = join(__dirname, '..', '.env');
 
-const logger = pino({});
+const logger = pino({
+  
+});
 
 export type MessageHandler = (message: VSCodeMessage) => void;
 
@@ -49,7 +52,7 @@ async function acquireConnectionOption() {
         }
 
         // 按照前端的规范，整理成 commandString 样式
-        option.items = option.items.map((item: any) => {
+        option.items = option.items.map((item: { connectionType: string; commandString: string; command: any; args: any; url: any; }) => {
             if (item.connectionType === 'STDIO') {
                 item.commandString = [item.command, ...item.args]?.join(' ');
             } else {
@@ -75,7 +78,18 @@ async function updateConnectionOption(data: any) {
 }
 
 // 设置运行时路径
+import { setRunningCWD } from './hook/setting.js';
+import { loadDebuggerMcpConfig } from './debugger-mcp/debugger-mcp-storage.service.js';
+import { ensureDebuggerMcpServer } from './debugger-mcp/debugger-mcp.service.js';
 setRunningCWD(devHome);
+
+// 若配置开启，则启动 OpenMCP Debugger MCP 服务
+const debuggerConfig = loadDebuggerMcpConfig();
+if (debuggerConfig.enabled) {
+    ensureDebuggerMcpServer(debuggerConfig).then(r => {
+        if (r) console.log('[main] OpenMCP Debugger MCP started on port', r.port);
+    });
+}
 
 // 启动 WebSocket 服务器
 const wss = new WebSocketServer({ port: 8282 });
@@ -93,13 +107,13 @@ wss.on('connection', (ws) => {
     });
 
     acquireConnectionOption().then(option => {
-        webview.onDidReceiveMessage(async (message: VSCodeMessage) => {
+        webview.onDidReceiveMessage(async (message) => {
             console.log(
                 chalk.white('receive command') + 
                 chalk.blue(` [${message.command || '未定义'}]`)
             );
 
-            const { command, data } = message as { command: string; data: any };
+            const { command, data } = message;
 
             switch (command) {
                 case 'web/launch-signature':

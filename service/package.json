@@ -1,0 +1,40 @@
+{
+	"name": "@openmcp/service",
+	"version": "0.0.1",
+	"description": "OpenMCP Service - Core business logic for MCP clients",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"build:watch": "tsc --watch",
+		"clean": "rm -rf dist",
+		"lint": "eslint src --ext .ts,.tsx",
+		"typecheck": "tsc --noEmit",
+		"test:storage": "tsx src/common/json-archive-store.test.ts"
+	},
+	"author": "LSTM-Kirigaya",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/debug": "^4.1.12",
+		"@types/node": "^22.7.5",
+		"@types/pako": "^2.0.3",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.18.2",
+		"@seald-io/nedb": "^4.1.1",
+		"axios": "^1.9.0",
+		"cli-table3": "^0.6.5",
+		"https-proxy-agent": "^7.0.6",
+		"open": "^10.1.2",
+		"openai": "^5.0.1",
+		"pako": "^2.1.0",
+		"pino": "^9.6.0",
+		"pino-pretty": "^13.0.0",
+		"rotating-file-stream": "^3.2.0",
+		"tesseract.js": "^6.0.1",
+		"uuid": "^11.1.0"
+	}
+}
