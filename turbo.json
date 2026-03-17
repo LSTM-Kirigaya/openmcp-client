@@ -5,7 +5,7 @@
             "cache": false
         },
         "build": {
-            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build", "//#build:task-loop"],
+            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build", "@openmcp/cli#build", "//#build:task-loop"],
             "cache": false
         },
         "//#build:task-loop": {
@@ -31,6 +31,9 @@
             "cache": false
         },
         "@openmcp/service#build": {
+            "cache": false
+        },
+        "@openmcp/cli#build": {
             "cache": false
         }
     }

@@ -1,0 +1,39 @@
+{
+  "name": "@openmcp/cli",
+  "version": "0.1.0",
+  "description": "OpenMCP CLI - MCP Server Gateway & Debug Tool",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "openmcp-cli": "./bin/openmcp-cli.js",
+    "openmcp": "./bin/openmcp-cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "cli",
+    "gateway",
+    "openmcp"
+  ],
+  "author": "kirigaya",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "open": "^10.1.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/uuid": "^9.0.0",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -247,6 +247,7 @@
         }
     },
     "workspaces": [
+        "cli",
         "service",
         "renderer"
     ],

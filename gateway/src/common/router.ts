@@ -10,6 +10,7 @@ import { RefluxController } from "../feedback/reflux.controller.js";
 import { SkillController } from "../skill/skill.controller.js";
 import { BatchValidationController } from "../batch-validation/batch-validation.controller.js";
 import { DebuggerMcpController } from "../debugger-mcp/debugger-mcp.controller.js";
+import { AuthController } from "../auth.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
 
 export const ModuleControllers = [
@@ -22,7 +23,8 @@ export const ModuleControllers = [
     RefluxController,
     SkillController,
     BatchValidationController,
-    DebuggerMcpController
+    DebuggerMcpController,
+    AuthController
 ];
 
 export async function routeMessage(command: string, data: any, webview: PostMessageble) {
