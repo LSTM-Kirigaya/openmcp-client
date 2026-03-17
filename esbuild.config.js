@@ -13,7 +13,9 @@ build({
     '@mapbox/node-pre-gyp',
     'mock-aws-s3',
     'aws-sdk',
-    'nock'
+    'nock',
+    '@openmcp/service',
+    'task-loop.js'
   ], 
   target: ['node22'],   
   loader: {

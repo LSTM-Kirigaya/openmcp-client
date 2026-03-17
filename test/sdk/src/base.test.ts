@@ -1,6 +1,6 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { OmAgent } from '../../../openmcp-sdk/service/sdk.js';
+import { OmAgent } from '../../../openmcp-sdk/src/index.js';
 import { useMcpConfig } from './global.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

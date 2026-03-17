@@ -1404,7 +1404,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@openmcp/gateway@workspace:gateway"
   dependencies:
-    "@openmcp/service": "workspace:*"
+    "@openmcp/service": "file:../service"
     "@types/node": "npm:^22.7.5"
     "@types/ws": "npm:^8.18.0"
     nodemon: "npm:^3.1.10"
@@ -1483,11 +1483,79 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@openmcp/sdk@workspace:sdk"
   dependencies:
-    "@openmcp/service": "workspace:*"
+    "@openmcp/service": "file:../service"
+    "@rollup/plugin-commonjs": "npm:^29.0.2"
+    "@rollup/plugin-node-resolve": "npm:^16.0.3"
+    "@rollup/plugin-typescript": "npm:^12.3.0"
+    rollup: "npm:^4.59.0"
+    typescript: "npm:^5.9.3"
   languageName: unknown
   linkType: soft
 
-"@openmcp/service@workspace:*, @openmcp/service@workspace:service":
+"@openmcp/service@file:../service::locator=%40openmcp%2Fgateway%40workspace%3Agateway":
+  version: 0.0.1
+  resolution: "@openmcp/service@file:../service#../service::hash=3d7db0&locator=%40openmcp%2Fgateway%40workspace%3Agateway"
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:^1.18.2"
+    "@seald-io/nedb": "npm:^4.1.1"
+    axios: "npm:^1.9.0"
+    cli-table3: "npm:^0.6.5"
+    https-proxy-agent: "npm:^7.0.6"
+    open: "npm:^10.1.2"
+    openai: "npm:^5.0.1"
+    pako: "npm:^2.1.0"
+    pino: "npm:^9.6.0"
+    pino-pretty: "npm:^13.0.0"
+    rotating-file-stream: "npm:^3.2.0"
+    tesseract.js: "npm:^6.0.1"
+    uuid: "npm:^11.1.0"
+  checksum: 10c0/95d3dcc50c0d6e70c532355ed610e76506324cab4a7fb953252063d46e59e01eeac2b5e0fe9b3e57eb904b0a0708cbf720d2c48f04b8df5a25fd7cc5104a8a31
+  languageName: node
+  linkType: hard
+
+"@openmcp/service@file:../service::locator=%40openmcp%2Fsdk%40workspace%3Asdk":
+  version: 0.0.1
+  resolution: "@openmcp/service@file:../service#../service::hash=3d7db0&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:^1.18.2"
+    "@seald-io/nedb": "npm:^4.1.1"
+    axios: "npm:^1.9.0"
+    cli-table3: "npm:^0.6.5"
+    https-proxy-agent: "npm:^7.0.6"
+    open: "npm:^10.1.2"
+    openai: "npm:^5.0.1"
+    pako: "npm:^2.1.0"
+    pino: "npm:^9.6.0"
+    pino-pretty: "npm:^13.0.0"
+    rotating-file-stream: "npm:^3.2.0"
+    tesseract.js: "npm:^6.0.1"
+    uuid: "npm:^11.1.0"
+  checksum: 10c0/95d3dcc50c0d6e70c532355ed610e76506324cab4a7fb953252063d46e59e01eeac2b5e0fe9b3e57eb904b0a0708cbf720d2c48f04b8df5a25fd7cc5104a8a31
+  languageName: node
+  linkType: hard
+
+"@openmcp/service@file:./service::locator=openmcp%40workspace%3A.":
+  version: 0.0.1
+  resolution: "@openmcp/service@file:./service#./service::hash=3d7db0&locator=openmcp%40workspace%3A."
+  dependencies:
+    "@modelcontextprotocol/sdk": "npm:^1.18.2"
+    "@seald-io/nedb": "npm:^4.1.1"
+    axios: "npm:^1.9.0"
+    cli-table3: "npm:^0.6.5"
+    https-proxy-agent: "npm:^7.0.6"
+    open: "npm:^10.1.2"
+    openai: "npm:^5.0.1"
+    pako: "npm:^2.1.0"
+    pino: "npm:^9.6.0"
+    pino-pretty: "npm:^13.0.0"
+    rotating-file-stream: "npm:^3.2.0"
+    tesseract.js: "npm:^6.0.1"
+    uuid: "npm:^11.1.0"
+  checksum: 10c0/95d3dcc50c0d6e70c532355ed610e76506324cab4a7fb953252063d46e59e01eeac2b5e0fe9b3e57eb904b0a0708cbf720d2c48f04b8df5a25fd7cc5104a8a31
+  languageName: node
+  linkType: hard
+
+"@openmcp/service@workspace:service":
   version: 0.0.0-use.local
   resolution: "@openmcp/service@workspace:service"
   dependencies:
@@ -1588,6 +1656,26 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@rollup/plugin-commonjs@npm:^29.0.2":
+  version: 29.0.2
+  resolution: "@rollup/plugin-commonjs@npm:29.0.2"
+  dependencies:
+    "@rollup/pluginutils": "npm:^5.0.1"
+    commondir: "npm:^1.0.1"
+    estree-walker: "npm:^2.0.2"
+    fdir: "npm:^6.2.0"
+    is-reference: "npm:1.2.1"
+    magic-string: "npm:^0.30.3"
+    picomatch: "npm:^4.0.2"
+  peerDependencies:
+    rollup: ^2.68.0||^3.0.0||^4.0.0
+  peerDependenciesMeta:
+    rollup:
+      optional: true
+  checksum: 10c0/a2ef65014ed9b9b1daa51c9ae845ec2a935754539f6557c760b142855ce03a70fa67e2bd1bace3c947c9c14b4edd22020e51033a400d9291d30dfa46dc94f374
+  languageName: node
+  linkType: hard
+
 "@rollup/plugin-inject@npm:^5.0.5":
   version: 5.0.5
   resolution: "@rollup/plugin-inject@npm:5.0.5"
@@ -1618,7 +1706,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-node-resolve@npm:^16.0.1":
+"@rollup/plugin-node-resolve@npm:^16.0.1, @rollup/plugin-node-resolve@npm:^16.0.3":
   version: 16.0.3
   resolution: "@rollup/plugin-node-resolve@npm:16.0.3"
   dependencies:
@@ -1636,7 +1724,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rollup/plugin-typescript@npm:^12.1.2":
+"@rollup/plugin-typescript@npm:^12.1.2, @rollup/plugin-typescript@npm:^12.3.0":
   version: 12.3.0
   resolution: "@rollup/plugin-typescript@npm:12.3.0"
   dependencies:
@@ -2183,10 +2271,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/body-parser@npm:*":
+  version: 1.19.6
+  resolution: "@types/body-parser@npm:1.19.6"
+  dependencies:
+    "@types/connect": "npm:*"
+    "@types/node": "npm:*"
+  checksum: 10c0/542da05c924dce58ee23f50a8b981fee36921850c82222e384931fda3e106f750f7880c47be665217d72dbe445129049db6eb1f44e7a06b09d62af8f3cca8ea7
+  languageName: node
+  linkType: hard
+
 "@types/chance@npm:^1.1.7":
   version: 1.1.7
   resolution: "@types/chance@npm:1.1.7"
   checksum: 10c0/896288f0a0f87a738c873dfd8cb0893154225bfda11b1fac36842f4722bc4d73c3933bb986217a59873ad5bc97861ca8939dad370a09ecc32723a928534938bd
+  languageName: node
+  linkType: hard
+
+"@types/connect@npm:*":
+  version: 3.4.38
+  resolution: "@types/connect@npm:3.4.38"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/2e1cdba2c410f25649e77856505cd60223250fa12dff7a503e492208dbfdd25f62859918f28aba95315251fd1f5e1ffbfca1e25e73037189ab85dd3f8d0a148c
   languageName: node
   linkType: hard
 
@@ -2498,6 +2605,29 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/express-serve-static-core@npm:^5.0.0":
+  version: 5.1.1
+  resolution: "@types/express-serve-static-core@npm:5.1.1"
+  dependencies:
+    "@types/node": "npm:*"
+    "@types/qs": "npm:*"
+    "@types/range-parser": "npm:*"
+    "@types/send": "npm:*"
+  checksum: 10c0/ee88216e114368ef06bcafeceb74a7e8671b90900fb0ab1d49ff41542c3a344231ef0d922bf63daa79f0585f3eebe2ce5ec7f83facc581eff8bcdb136a225ef3
+  languageName: node
+  linkType: hard
+
+"@types/express@npm:^5.0.6":
+  version: 5.0.6
+  resolution: "@types/express@npm:5.0.6"
+  dependencies:
+    "@types/body-parser": "npm:*"
+    "@types/express-serve-static-core": "npm:^5.0.0"
+    "@types/serve-static": "npm:^2"
+  checksum: 10c0/f1071e3389a955d4f9a38aae38634121c7cd9b3171ba4201ec9b56bd534aba07866839d278adc0dda05b942b05a901a02fd174201c3b1f70ce22b10b6c68f24b
+  languageName: node
+  linkType: hard
+
 "@types/fs-extra@npm:^8.0.1":
   version: 8.1.5
   resolution: "@types/fs-extra@npm:8.1.5"
@@ -2521,6 +2651,13 @@ __metadata:
     "@types/minimatch": "npm:*"
     "@types/node": "npm:*"
   checksum: 10c0/a8eb5d5cb5c48fc58c7ca3ff1e1ddf771ee07ca5043da6e4871e6757b4472e2e73b4cfef2644c38983174a4bc728c73f8da02845c28a1212f98cabd293ecae98
+  languageName: node
+  linkType: hard
+
+"@types/http-errors@npm:*":
+  version: 2.0.5
+  resolution: "@types/http-errors@npm:2.0.5"
+  checksum: 10c0/00f8140fbc504f47356512bd88e1910c2f07e04233d99c88c854b3600ce0523c8cd0ba7d1897667243282eb44c59abb9245959e2428b9de004f93937f52f7c15
   languageName: node
   linkType: hard
 
@@ -2666,6 +2803,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/qs@npm:*":
+  version: 6.15.0
+  resolution: "@types/qs@npm:6.15.0"
+  checksum: 10c0/1b104cac50e655fc41d7fc1de2c2aba2908c4cf833a555b6808fb4c96752662b439238f2392a15d2590a7a6ca75dbd40e42d9378ac2be0d548ee484954363688
+  languageName: node
+  linkType: hard
+
+"@types/range-parser@npm:*":
+  version: 1.2.7
+  resolution: "@types/range-parser@npm:1.2.7"
+  checksum: 10c0/361bb3e964ec5133fa40644a0b942279ed5df1949f21321d77de79f48b728d39253e5ce0408c9c17e4e0fd95ca7899da36841686393b9f7a1e209916e9381a3c
+  languageName: node
+  linkType: hard
+
 "@types/resolve@npm:1.20.2":
   version: 1.20.2
   resolution: "@types/resolve@npm:1.20.2"
@@ -2677,6 +2828,25 @@ __metadata:
   version: 2.1.7
   resolution: "@types/sarif@npm:2.1.7"
   checksum: 10c0/983d593735c42b288c3d95bb1655b036652438d267eecb2cd5d0f8c613ac98ae198eb7828dc171776e64a6ebe93e88c920ec9b80cf3c780e015e081ac5d26c01
+  languageName: node
+  linkType: hard
+
+"@types/send@npm:*":
+  version: 1.2.1
+  resolution: "@types/send@npm:1.2.1"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10c0/7673747f8c2d8e67f3b1b3b57e9d4d681801a4f7b526ecf09987bb9a84a61cf94aa411c736183884dc762c1c402a61681eb1ef200d8d45d7e5ec0ab67ea5f6c1
+  languageName: node
+  linkType: hard
+
+"@types/serve-static@npm:^2":
+  version: 2.2.0
+  resolution: "@types/serve-static@npm:2.2.0"
+  dependencies:
+    "@types/http-errors": "npm:*"
+    "@types/node": "npm:*"
+  checksum: 10c0/a3c6126bdbf9685e6c7dc03ad34639666eff32754e912adeed9643bf3dd3aa0ff043002a7f69039306e310d233eb8e160c59308f95b0a619f32366bbc48ee094
   languageName: node
   linkType: hard
 
@@ -8603,6 +8773,7 @@ __metadata:
   resolution: "openmcp@workspace:."
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
+    "@openmcp/service": "file:./service"
     "@rollup/plugin-babel": "npm:^6.0.4"
     "@rollup/plugin-commonjs": "npm:^28.0.5"
     "@rollup/plugin-inject": "npm:^5.0.5"
@@ -8610,6 +8781,7 @@ __metadata:
     "@rollup/plugin-node-resolve": "npm:^16.0.1"
     "@rollup/plugin-typescript": "npm:^12.1.2"
     "@seald-io/nedb": "npm:^4.1.1"
+    "@types/express": "npm:^5.0.6"
     "@types/glob": "npm:^7.2.0"
     "@types/node": "npm:^22.15.29"
     "@types/node-fetch": "npm:^2.6.4"
@@ -9565,7 +9737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rollup@npm:^4.34.9, rollup@npm:^4.41.0, rollup@npm:^4.43.0":
+"rollup@npm:^4.34.9, rollup@npm:^4.41.0, rollup@npm:^4.43.0, rollup@npm:^4.59.0":
   version: 4.59.0
   resolution: "rollup@npm:4.59.0"
   dependencies:
@@ -10791,7 +10963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.4.0, typescript@npm:^5.4.2, typescript@npm:^5.8.3":
+"typescript@npm:^5.4.0, typescript@npm:^5.4.2, typescript@npm:^5.8.3, typescript@npm:^5.9.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -10821,7 +10993,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.4.0#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A^5.4.0#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.4.2#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.8.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
@@ -11729,8 +11901,8 @@ __metadata:
   linkType: hard
 
 "zod@npm:^3.25 || ^4.0":
-  version: 4.3.6
-  resolution: "zod@npm:4.3.6"
-  checksum: 10c0/860d25a81ab41d33aa25f8d0d07b091a04acb426e605f396227a796e9e800c44723ed96d0f53a512b57be3d1520f45bf69c0cb3b378a232a00787a2609625307
+  version: 3.25.76
+  resolution: "zod@npm:3.25.76"
+  checksum: 10c0/5718ec35e3c40b600316c5b4c5e4976f7fee68151bc8f8d90ec18a469be9571f072e1bbaace10f1e85cf8892ea12d90821b200e980ab46916a6166a4260a983c
   languageName: node
   linkType: hard

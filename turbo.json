@@ -41,7 +41,7 @@
             "cache": false
         },
         "@openmcp/sdk#build": {
-            "dependsOn": ["@openmcp/service#build"],
+            "dependsOn": ["@openmcp/service#build", "//#build:task-loop"],
             "cache": false
         }
     }

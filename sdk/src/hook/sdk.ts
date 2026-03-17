@@ -1,25 +1,99 @@
 import { EventEmitter } from 'events';
-import { routeMessage } from '../common/router.js';
+import { routeMessage, loadSetting, saveSetting, OmdbStore } from '@openmcp/service';
 import * as fs from 'fs';
-import { loadSetting, saveSetting } from '../setting/setting.service.js';
-import { OmdbStore } from '../common/omdb-store.js';
 
-import {
-    MessageState,
-    type TaskLoopOptions,
-    type ChatMessage,
-    type ChatSetting,
-    type TaskLoop,
-    type TextMessage,
-    type ToolCallResult,
-    type ToolCall
-} from '../../task-loop.js';
-import { IConnectionArgs, MessageHandler, WebSocketMessage } from './adapter.js';
-import { ConnectionType } from '../mcp/client.dto.js';
-import { FORBIDDEN_MONITOR, setForbiddenMonitor, setRefluxHome } from './setting.js';
+// 定义简化类型以避免循环依赖
+// 使用 const 对象代替 enum，以便导出
+const MessageState = {
+    None: 'none',
+    Success: 'success',
+    ServerError: 'server internal error',
+    ReceiveChunkError: 'receive chunk error',
+    Timeout: 'timeout',
+    MaxEpochs: 'max epochs',
+    Unknown: 'unknown error',
+    Abort: 'abort',
+    ToolCall: 'tool call failed',
+    ParseJsonError: 'parse json error',
+    NoToolFunction: 'no tool function',
+    InvalidXml: 'invalid xml'
+} as const;
+
+type MessageStateType = typeof MessageState[keyof typeof MessageState];
+
+interface TaskLoopOptions {
+    maxEpochs?: number;
+    maxJsonParseRetry?: number;
+    adapter?: any;
+    verbose?: 0 | 1 | 2 | 3;
+}
+
+interface TextMessage {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+    extraInfo?: Record<string, any>;
+}
+
+type ChatMessage = TextMessage;
+
+interface ChatSetting {
+    [key: string]: any;
+}
+
+interface ToolCall {
+    id?: string;
+    type: 'function';
+    function: {
+        name: string;
+        arguments: string;
+    };
+}
+
+interface ToolCallResult {
+    id?: string;
+    type: 'function';
+    function: {
+        name: string;
+        arguments: string;
+        result?: any;
+    };
+}
+
+interface IConnectionArgs {
+    commandString?: string;
+    cwd?: string;
+    connectionType?: 'STDIO' | 'SSE' | 'STREAMABLE_HTTP';
+    env?: Record<string, string>;
+    url?: string;
+    description?: string;
+    prompts?: string[];
+    resources?: string[];
+}
+
+type MessageHandler = (message: any) => void;
+
+interface WebSocketMessage {
+    command: string;
+    data?: any;
+}
+
+type ConnectionType = 'STDIO' | 'SSE' | 'STREAMABLE_HTTP';
+
+declare const FORBIDDEN_MONITOR: boolean;
+declare function setForbiddenMonitor(flag: boolean): void;
+declare function setRefluxHome(path: string): void;
+
+// TaskLoop is imported dynamically at runtime from '@openmcp/service/dist/task-loop.js'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TaskLoop = any;
 
 // sdk 模式禁用 monitor
 setForbiddenMonitor(true);
+
+// 导出 MessageState 和类型
+export { MessageState };
+export type { MessageStateType };
+export type { TaskLoopOptions, TextMessage, ChatMessage, ChatSetting, ToolCall, ToolCallResult, IConnectionArgs, MessageHandler, WebSocketMessage, ConnectionType };
 
 export class TaskLoopAdapter {
     public emitter: EventEmitter;
@@ -84,15 +158,9 @@ export class TaskLoopAdapter {
 
     /**
      * @description 连接到 mcp 服务端
-     * @param mcpOption 
+     * @param mcpOption
      */
     public addMcp(mcpOption: IConnectionArgs) {
-
-        // 0.1.4 新版本开始，此处修改为懒加载连接
-        // 实际的连接移交给前端 mcpAdapter 中进行统一的调度
-        // 调度步骤如下：
-        // getLaunchSignature 先获取访问签名，访问签名通过当前函数 push 到 class 中
-
         this.connectionOptions.push(mcpOption);
     }
 }
@@ -299,10 +367,11 @@ export class OmAgent {
         } = loopOption || {}
 
         const adapter = this._adapter;
-        const { TaskLoop } = await import('../../task-loop.js');
+        // 动态导入 TaskLoop（从 service 的 dist/task-loop.js）
+        const { TaskLoop } = await import('@openmcp/service/dist/task-loop.js');
 
         this._loop = new TaskLoop({ adapter, verbose, maxEpochs, maxJsonParseRetry });
-        await this._loop.waitConnection();        
+        await this._loop.waitConnection();
 
         return this._loop;
     }
@@ -312,10 +381,10 @@ export class OmAgent {
     }
 
     public async getPrompt(promptId: string, args: Record<string, any>) {
-        const loop = await this.getLoop();
+        const loop = await this.getLoop() as any;
 
         const prompt = await loop.getPrompt(promptId, JSON.parse(JSON.stringify(args)));
-                
+
         return prompt;
     }
 
@@ -323,7 +392,7 @@ export class OmAgent {
      * @description Asynchronous invoking agent by string or messages
      * @param messages Chat message or string
      * @param settings Chat setting and task loop options
-     * @returns 
+     * @returns
      */
     private async _ainvoke(
         { messages, settings, reflux }: AinvokeConfig
@@ -339,7 +408,7 @@ export class OmAgent {
             verbose = 1
         } = settings || {};
 
-        const loop = await this.getLoop({ maxEpochs, maxJsonParseRetry, verbose });
+        const loop = await this.getLoop({ maxEpochs, maxJsonParseRetry, verbose }) as any;
         const storage = await loop.createStorage(settings);
 
         // set input message
@@ -351,7 +420,7 @@ export class OmAgent {
         } else {
             // 获取messages数组
             const messagesArray = Array.isArray(messages) ? messages : [messages];
-            
+
             // 将最后一个消息赋值给lastMessage
             const lastMessage = messagesArray.at(-1);
             if (lastMessage && typeof lastMessage.content === 'string') {
@@ -359,7 +428,7 @@ export class OmAgent {
             } else {
                 throw new Error('last message content is undefined');
             }
-            
+
             // 将剩余消息存入storage.messages
             if (messagesArray.length > 1) {
                 storage.messages = messagesArray.slice(0, -1);
@@ -416,11 +485,11 @@ export class OmAgent {
             return this._ainvoke({ messages, settings, reflux });
         }
 
-        const loop = await this.getLoop();
-        
+        const loop = await this.getLoop() as any;
+
         if (needCall) {
             let returnToolCallResult: ToolCallResult | undefined;
-            loop.registerOnToolCalled(toolCallResult => {
+            loop.registerOnToolCalled((toolCallResult: any) => {
                 if (toolCallResult.function?.name === toolName) {
                     returnToolCallResult = toolCallResult;
                     loop.abort();
@@ -434,7 +503,7 @@ export class OmAgent {
 
         } else {
             let returnToolCall: ToolCall | undefined;
-            loop.registerOnToolCall(toolCall => {
+            loop.registerOnToolCall((toolCall: any) => {
                 if (toolCall.function.name === toolName) {
                     returnToolCall = toolCall;
                     loop.abort();
