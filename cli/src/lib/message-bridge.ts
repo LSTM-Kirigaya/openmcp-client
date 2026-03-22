@@ -1,5 +1,6 @@
 import WebSocket from 'ws';
 import { v4 as uuidv4 } from 'uuid';
+import { buildGatewayUnreachableError } from './gateway-errors.js';
 
 export interface VSCodeMessage {
   command: string;
@@ -19,9 +20,16 @@ export class MessageBridge {
   private ws: WebSocket | null = null;
   private handlers = new Map<string, Set<CommandHandler>>();
   private isConnected: Promise<boolean> | null = null;
-  private resolveConnected: ((value: boolean) => void) | null = null;
+  /** 是否曾成功 open（用于区分「从未连上」与「用后断开」） */
+  private socketEverOpened = false;
+  /** 首次连接失败时底层错误信息 */
+  private connectErrorDetail: string | undefined;
 
   constructor(private wsUrl: string) {}
+
+  public getConnectErrorDetail(): string | undefined {
+    return this.connectErrorDetail;
+  }
 
   public connect(): Promise<boolean> {
     if (this.isConnected) {
@@ -29,12 +37,21 @@ export class MessageBridge {
     }
 
     this.isConnected = new Promise<boolean>((resolve) => {
-      this.resolveConnected = resolve;
+      let settled = false;
+      const finish = (value: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        resolve(value);
+      };
+
       this.ws = new WebSocket(this.wsUrl);
 
       this.ws.on('open', () => {
+        this.socketEverOpened = true;
         console.log(`✅ Connected to ${this.wsUrl}`);
-        resolve(true);
+        finish(true);
       });
 
       this.ws.on('message', (data) => {
@@ -46,14 +63,24 @@ export class MessageBridge {
         }
       });
 
-      this.ws.on('error', (err) => {
-        console.error('❌ WebSocket error:', err.message);
-        resolve(false);
+      this.ws.on('error', (err: Error & { code?: string }) => {
+        const detail =
+          err?.message ||
+          (err as { code?: string })?.code ||
+          String(err) ||
+          '连接被拒绝或网络不可达';
+        this.connectErrorDetail = detail;
+        if (this.socketEverOpened) {
+          console.error('❌ WebSocket error:', detail);
+        }
+        finish(false);
       });
 
       this.ws.on('close', () => {
-        console.log('🔌 Connection closed');
-        resolve(false);
+        if (this.socketEverOpened) {
+          console.log('🔌 Connection closed');
+        }
+        finish(false);
       });
     });
 
@@ -127,6 +154,9 @@ export class MessageBridge {
 
 export async function createMessageBridge(wsUrl: string): Promise<MessageBridge> {
   const bridge = new MessageBridge(wsUrl);
-  await bridge.connect();
+  const ok = await bridge.connect();
+  if (!ok) {
+    throw buildGatewayUnreachableError(wsUrl, bridge.getConnectErrorDetail());
+  }
   return bridge;
 }

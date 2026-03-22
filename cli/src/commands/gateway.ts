@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { runService, startService, stopService, restartService, statusService } from '../lib/index.js';
+import { HELP_GATEWAY } from '../lib/help-text.js';
 
 export const gatewayCommand = new Command('gateway')
   .description('Manage OpenMCP Gateway (service)')
@@ -20,7 +21,8 @@ OpenMCP Gateway 管理命令：
   openmcp-cli gateway restart      # 重启
   openmcp-cli gateway status       # 查看状态
   openmcp-cli gateway start -p 9000  # 自定义端口
-  `);
+  `)
+  .addHelpText('after', HELP_GATEWAY);
 
 gatewayCommand
   .command('run')

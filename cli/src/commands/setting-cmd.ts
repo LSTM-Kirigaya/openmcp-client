@@ -1,11 +1,14 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_SETTING } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
 }
 
-export const settingCmd = new Command('setting').description('应用设置（对应 SettingController）');
+export const settingCmd = new Command('setting')
+  .description('读写全局应用设置与引导状态（SettingController）。')
+  .addHelpText('after', HELP_SETTING);
 
 gw(
   settingCmd

@@ -1,11 +1,14 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_DEBUGGER } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
 }
 
-export const debuggerCmd = new Command('debugger-mcp').description('调试器 MCP（对应 DebuggerMcpController）');
+export const debuggerCmd = new Command('debugger-mcp')
+  .description('OpenMCP 调试器 MCP 子进程配置（DebuggerMcpController）。')
+  .addHelpText('after', HELP_DEBUGGER);
 
 gw(
   debuggerCmd

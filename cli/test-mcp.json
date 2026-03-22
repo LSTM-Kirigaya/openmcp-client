@@ -1,0 +1,9 @@
+{
+    "connectionType": "STDIO",
+    "command": "npx",
+    "args": [
+        "-y",
+        "@modelcontextprotocol/server-everything"
+    ],
+    "description": "用于测试 MCP 所有核心功能的参考服务器（工具、资源、提示词等）"
+}

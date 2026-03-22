@@ -1,17 +1,21 @@
 import { Command } from 'commander';
 import { SERVICE_COMMANDS } from '../lib/service-commands.js';
 import { parseJsonData, readJsonFile, printJson, withGateway, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
+import { HELP_RPC } from '../lib/help-text.js';
 
 export const rpcCommand = new Command('rpc')
   .alias('call')
-  .description('通过 Gateway WebSocket 调用任意 service 命令（与 VSCode / Web UI 同源路由）')
-  .argument('[command]', '例如 tools/list、connect、setting/load')
+  .description(
+    '通过 Gateway WebSocket 调用任意 service 命令（与 VSCode / Web UI 同源 routeMessage）。<command> 为后端注册名，请求体为 data。'
+  )
+  .argument('[command]', '后端命令名，如 connect、tools/list、setting/load（见 --list）')
   .option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY)
-  .option('-d, --data <json>', '请求 JSON（会与 _id 合并后发送）')
-  .option('-f, --file <path>', '从文件读取 JSON 作为请求体（与 -d 合并，file 优先覆盖同名字段）')
+  .option('-d, --data <json>', '请求体 JSON 字符串（会与内部 _id 合并）')
+  .option('-f, --file <path>', '从文件读 JSON 作为请求体（与 -d 合并，同名键以文件为准）')
   .option('-t, --timeout <ms>', '超时毫秒', '300000')
   .option('--list', '列出已知的 service 命令名', false)
   .option('-q, --quiet', '仅输出 msg 字段（失败仍打印完整响应）', false)
+  .addHelpText('after', HELP_RPC)
   .action(async (command: string | undefined, options) => {
     if (options.list) {
       console.log('Service commands (see service/src/**/*.controller.ts):\n');

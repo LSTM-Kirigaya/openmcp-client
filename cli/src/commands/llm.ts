@@ -1,11 +1,14 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_LLM } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
 }
 
-export const llmCommand = new Command('llm').description('LLM 相关（对应 LlmController）');
+export const llmCommand = new Command('llm')
+  .description('LLM 模型列表与同步补全（LlmController）；流式对话请用 Web UI。')
+  .addHelpText('after', HELP_LLM);
 
 gw(
   llmCommand

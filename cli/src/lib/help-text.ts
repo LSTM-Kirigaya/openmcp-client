@@ -1,0 +1,166 @@
+/**
+ * Commander addHelpText('after', ...) 用的说明与示例（中文）。
+ */
+
+export const HELP_GATEWAY = `
+提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/rpc/auth 等命令时加 -g ws://127.0.0.1:9000。
+`;
+
+export const HELP_PROGRAM_AFTER = `
+常用示例:
+  openmcp-cli gateway start
+  openmcp-cli mcp connect --help
+  openmcp-cli mcp connect --config ./mcp-options.json
+  openmcp-cli rpc tools/list -d "{\\"clientId\\":\\"<uuid>\\"}"
+  openmcp-cli rpc --list
+
+说明: 多数子命令需 Gateway 已启动（默认 ws://localhost:8282），详见各命令 --help。
+`;
+
+export const HELP_MCP_ROOT = `
+子命令概览:
+  connect              建立 MCP 连接（需 --config 或 --type 等）
+  disconnect / ping    断开或探测连接
+  lookup-env           解析环境变量
+  server-version       服务端版本
+  prompts-* / resources-* / tools-*  需先有 clientId（connect 成功返回）
+
+获取 clientId: 先执行 connect，响应 JSON 中 msg.clientId 即为后续 --client-id。
+`;
+
+export const HELP_MCP_CONNECT = `
+--config <path> 文件要求:
+  · UTF-8 编码的 JSON 文件，内容为 **一条** McpOptions 对象（与 service/src/mcp/client.dto.ts 一致）
+  · 不是 Cursor / VSCode 设置里那种外层带 mcpServers / version 的配置；若只有那份，请手抄出 command/args/url 写成扁平 JSON
+
+STDIO 示例 mcp-stdio.json:
+  {
+    "connectionType": "STDIO",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-everything"],
+    "cwd": "C:/path/to/workdir"
+  }
+
+SSE 示例 mcp-sse.json:
+  {
+    "connectionType": "SSE",
+    "url": "http://127.0.0.1:3000/sse"
+  }
+
+Streamable HTTP 示例:
+  {
+    "connectionType": "STREAMABLE_HTTP",
+    "url": "http://127.0.0.1:8080/mcp"
+  }
+
+命令行等价（无配置文件时，--args-json 建议整体用单引号包住 JSON）:
+  openmcp-cli mcp connect --type STDIO --command npx --args-json '["-y","@modelcontextprotocol/server-everything"]' --cwd .
+  openmcp-cli mcp connect --type SSE --url http://127.0.0.1:3000/sse
+`;
+
+export const HELP_RPC = `
+说明:
+  <command> 与后端 @Controller 注册名一致，如 connect、tools/list、setting/load。
+
+示例:
+  openmcp-cli rpc --list
+  openmcp-cli rpc connect -f ./mcp-options.json
+  openmcp-cli rpc tools/list -d "{\\"clientId\\":\\"YOUR_UUID\\"}"
+  openmcp-cli rpc tools/call -d "{\\"clientId\\":\\"...\\",\\"toolName\\":\\"echo\\",\\"toolArgs\\":{\\"msg\\":\\"hi\\"}}"
+  openmcp-cli rpc setting/load -d "{}"
+  openmcp-cli rpc batch-validation/run -f ./payload.json -t 600000 -q
+`;
+
+export const HELP_AUTH = `
+示例:
+  openmcp-cli auth login -u myuser -p mypass
+  openmcp-cli auth status
+  openmcp-cli auth refresh
+  openmcp-cli auth set-token -t eyJ...
+  openmcp-cli auth get-token
+  openmcp-cli auth clear-token
+`;
+
+export const HELP_LLM = `
+示例:
+  openmcp-cli llm models --base-url https://api.openai.com/v1 --api-key sk-...
+  openmcp-cli llm models-openrouter
+  openmcp-cli llm chat-sync -f ./chat-body.json
+  openmcp-cli llm abort --session-id <id>
+
+chat-sync 的 JSON 需含: baseURL, apiKey, model, messages（OpenAI 格式数组）, 可选 temperature。
+`;
+
+export const HELP_SETTING = `
+示例:
+  openmcp-cli setting load
+  openmcp-cli setting save -f ./settings.json
+  openmcp-cli setting set-tour --user-has-read-guide true
+  openmcp-cli setting get-tour
+`;
+
+export const HELP_PANEL = `
+多数子命令需 -c / --client-id；大块数据用 -f JSON 文件（结构与 Web 面板导出一致）。
+
+示例:
+  openmcp-cli panel load -c <clientId>
+  openmcp-cli panel variables-load -c <clientId>
+  openmcp-cli panel variables-save -c <clientId> -f ./variables.json
+`;
+
+export const HELP_SKILLS = `
+示例:
+  openmcp-cli skills list
+  openmcp-cli skills load --skill-name myskill
+  openmcp-cli skills read-file --skill-name myskill --file-path README.md
+`;
+
+export const HELP_FEEDBACK = `
+示例:
+  openmcp-cli feedback save --name mystore -f ./storage.json
+  openmcp-cli feedback count --name mystore
+  openmcp-cli feedback list-data --name mystore --page 1 --page-size 20
+`;
+
+export const HELP_BATCH_VALIDATION = `
+示例:
+  openmcp-cli batch-validation run -f ./batch-body.json
+
+body 需含 messages、testCases、llmConfig（baseURL, apiKey, model）等，见 service BatchValidationController。
+`;
+
+export const HELP_DEBUGGER = `
+示例:
+  openmcp-cli debugger-mcp load
+  openmcp-cli debugger-mcp save -f ./debugger-mcp.json
+  openmcp-cli debugger-mcp connection-info
+  openmcp-cli debugger-mcp toggle-tool --tool-name openmcp_debugger_list_all_tools --enabled true
+`;
+
+export const HELP_OCR = `
+示例:
+  openmcp-cli ocr get-image --filename <disk-name>
+  openmcp-cli ocr start -f ./image-payload.json
+  openmcp-cli ocr start --image-file ./shot.png --mime-type image/png
+`;
+
+export const HELP_WEB = `
+说明: 会在本机启动 Renderer（Vite website 模式），可选同时后台启动 Gateway。
+
+示例:
+  openmcp-cli web -p 8283 -g 8282
+  openmcp-cli web --no-gateway -p 8283
+`;
+
+export const HELP_START = `
+说明: 同时启动 Gateway 与 Web UI，并可打开浏览器。
+
+示例:
+  openmcp-cli start --gateway-port 8282 --port 8283
+`;
+
+/** 子命令无单独示例时用一行说明 */
+export const HELP_GENERIC_CLIENT = `
+示例:
+  openmcp-cli mcp <子命令> --client-id <从 connect 得到的 UUID> [-g ws://127.0.0.1:8282]
+`;

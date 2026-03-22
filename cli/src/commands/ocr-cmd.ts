@@ -1,12 +1,15 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_OCR } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
 }
 
-export const ocrCmd = new Command('ocr').description('OCR（对应 OcrController）');
+export const ocrCmd = new Command('ocr')
+  .description('内置 OCR 图片读写（OcrController）。')
+  .addHelpText('after', HELP_OCR);
 
 gw(
   ocrCmd

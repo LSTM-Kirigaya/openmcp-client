@@ -1,22 +1,37 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_GENERIC_CLIENT, HELP_MCP_CONNECT, HELP_MCP_ROOT } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
-  return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
+  return cmd.option(
+    '-g, --gateway <url>',
+    'Gateway WebSocket URL（需已 openmcp-cli gateway start）',
+    DEFAULT_GATEWAY
+  );
 }
 
-export const mcpCommand = new Command('mcp').description('MCP 连接与协议操作（对应 ConnectController / ClientController）');
+export const mcpCommand = new Command('mcp')
+  .description(
+    'MCP 连接与协议操作（ConnectController / ClientController）。须先启动 Gateway；connect 成功后用返回的 clientId 调用其它子命令。'
+  )
+  .addHelpText('after', HELP_MCP_ROOT);
 
 gw(
   mcpCommand
     .command('connect')
-    .description('连接 MCP 服务器（body 为 McpOptions）')
-    .option('-c, --config <path>', 'JSON 配置文件（完整 McpOptions）')
-    .option('--type <type>', 'STDIO | SSE | STREAMABLE_HTTP（无 --config 时必填）')
-    .option('--command <bin>', 'STDIO 可执行文件')
-    .option('--args-json <json>', 'STDIO 参数 JSON 数组，如 [\"main.py\"]')
-    .option('--url <url>', 'SSE / Streamable HTTP URL')
-    .option('--cwd <dir>', '工作目录')
+    .description(
+      '连接 MCP 服务器：发送 McpOptions 到 service「connect」。务必使用 --config 指向 JSON 文件，或 --type + 对应参数。'
+    )
+    .option(
+      '-c, --config <path>',
+      'JSON 文件路径：内容为扁平 McpOptions（见下方示例），不要用 Cursor mcpServers 外层包装格式'
+    )
+    .option('--type <type>', '无 --config 时必填：STDIO | SSE | STREAMABLE_HTTP')
+    .option('--command <bin>', '仅 STDIO：可执行文件，如 npx、node、uvx')
+    .option('--args-json <json>', '仅 STDIO：参数 JSON 数组，建议整体用单引号包裹，如 \'["-y","pkg"]\'')
+    .option('--url <url>', 'SSE / STREAMABLE_HTTP：服务端 URL')
+    .option('--cwd <dir>', '工作目录（STDIO 常用）')
+    .addHelpText('after', HELP_MCP_CONNECT)
     .action(async (options) => {
       let payload: Record<string, unknown>;
       if (options.config) {
@@ -24,7 +39,13 @@ gw(
       } else {
         const type = options.type as string | undefined;
         if (!type) {
-          console.error('请使用 --config，或提供 --type（以及对应参数）。');
+          console.error(
+            `请指定配置文件或连接类型：
+  openmcp-cli mcp connect --config ./mcp-options.json
+或
+  openmcp-cli mcp connect --type STDIO --command ... 
+（--config 文件格式见） openmcp-cli mcp connect --help`
+          );
           process.exitCode = 1;
           return;
         }
@@ -59,8 +80,9 @@ gw(
 gw(
   mcpCommand
     .command('disconnect')
-    .description('断开连接')
-    .requiredOption('--client-id <id>', 'clientId（connect 返回）')
+    .description('断开连接（disconnect）')
+    .requiredOption('--client-id <id>', 'connect 成功响应中的 msg.clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('disconnect', { clientId: options.clientId });
@@ -73,8 +95,9 @@ gw(
 gw(
   mcpCommand
     .command('ping')
-    .description('检测 client 是否仍在线')
-    .requiredOption('--client-id <id>', 'clientId')
+    .description('检测 MCP 会话是否仍在线')
+    .requiredOption('--client-id <id>', 'connect 返回的 clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('ping', { clientId: options.clientId });
@@ -87,8 +110,12 @@ gw(
 gw(
   mcpCommand
     .command('lookup-env')
-    .description('解析环境变量键（lookup-env-var）')
-    .requiredOption('--keys <keys>', '逗号分隔，如 USER,HOME')
+    .description('按 key 列表解析当前进程环境（lookup-env-var），用于前端展示等')
+    .requiredOption('--keys <keys>', '逗号分隔，如 USER,HOME,PATH')
+    .addHelpText(
+      'after',
+      '\n示例:\n  openmcp-cli mcp lookup-env --keys USER,HOME\n'
+    )
     .action(async (options) => {
       const keys = String(options.keys)
         .split(',')
@@ -105,8 +132,9 @@ gw(
 gw(
   mcpCommand
     .command('server-version')
-    .description('获取 MCP server 版本信息')
-    .requiredOption('--client-id <id>', 'clientId')
+    .description('获取已连接 MCP Server 的实现信息（server/version）')
+    .requiredOption('--client-id <id>', 'connect 返回的 clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('server/version', { clientId: options.clientId });
@@ -119,8 +147,9 @@ gw(
 gw(
   mcpCommand
     .command('prompts-list')
-    .description('列出 prompts')
-    .requiredOption('--client-id <id>', 'clientId')
+    .description('列出 prompts（prompts/list）')
+    .requiredOption('--client-id <id>', 'connect 返回的 clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('prompts/list', { clientId: options.clientId });
@@ -133,10 +162,14 @@ gw(
 gw(
   mcpCommand
     .command('prompts-get')
-    .description('获取单个 prompt')
+    .description('获取单个 prompt 内容（prompts/get）')
     .requiredOption('--client-id <id>', 'clientId')
-    .requiredOption('--prompt-id <id>', 'promptId')
-    .option('-d, --data <json>', '额外参数 JSON（args 对象）', '{}')
+    .requiredOption('--prompt-id <id>', 'MCP 中的 prompt 名称/ id')
+    .option('-d, --data <json>', '传给 getPrompt 的 args 对象 JSON', '{}')
+    .addHelpText(
+      'after',
+      '\n示例:\n  openmcp-cli mcp prompts-get -c <clientId> --prompt-id my_prompt -d "{}"\n'
+    )
     .action(async (options) => {
       const args = parseJsonData(options.data);
       await withGateway(options.gateway, async (bridge) => {
@@ -154,8 +187,9 @@ gw(
 gw(
   mcpCommand
     .command('resources-list')
-    .description('列出 resources')
+    .description('列出 resources（resources/list）')
     .requiredOption('--client-id <id>', 'clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('resources/list', { clientId: options.clientId });
@@ -168,8 +202,9 @@ gw(
 gw(
   mcpCommand
     .command('resource-templates-list')
-    .description('列出 resource templates')
+    .description('列出 resource templates（resources/templates/list）')
     .requiredOption('--client-id <id>', 'clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('resources/templates/list', { clientId: options.clientId });
@@ -182,9 +217,13 @@ gw(
 gw(
   mcpCommand
     .command('resources-read')
-    .description('读取 resource')
+    .description('按 URI 读取 resource 内容（resources/read）')
     .requiredOption('--client-id <id>', 'clientId')
-    .requiredOption('--uri <uri>', 'resourceUri')
+    .requiredOption('--uri <uri>', 'MCP resource URI')
+    .addHelpText(
+      'after',
+      '\n示例:\n  openmcp-cli mcp resources-read -c <clientId> --uri "file:///..."\n'
+    )
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('resources/read', {
@@ -200,8 +239,9 @@ gw(
 gw(
   mcpCommand
     .command('tools-list')
-    .description('列出 tools')
+    .description('列出 tools（tools/list）')
     .requiredOption('--client-id <id>', 'clientId')
+    .addHelpText('after', HELP_GENERIC_CLIENT)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('tools/list', { clientId: options.clientId });
@@ -214,10 +254,14 @@ gw(
 gw(
   mcpCommand
     .command('tools-call')
-    .description('调用 tool')
+    .description('调用指定 tool（tools/call）')
     .requiredOption('--client-id <id>', 'clientId')
-    .requiredOption('--name <name>', 'toolName')
-    .option('-a, --args <json>', 'toolArgs JSON 对象', '{}')
+    .requiredOption('--name <name>', '工具名称（与 tools-list 中一致）')
+    .option('-a, --args <json>', '传给工具的参数对象 JSON', '{}')
+    .addHelpText(
+      'after',
+      `\n示例:\n  openmcp-cli mcp tools-call -c <clientId> --name echo -a '{"message":"hi"}'\n`
+    )
     .action(async (options) => {
       const toolArgs = parseJsonData(options.args);
       await withGateway(options.gateway, async (bridge) => {

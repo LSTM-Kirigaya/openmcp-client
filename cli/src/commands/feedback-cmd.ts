@@ -1,11 +1,14 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_FEEDBACK } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
 }
 
-export const feedbackCmd = new Command('feedback').description('反馈 / Reflux（对应 RefluxController）');
+export const feedbackCmd = new Command('feedback')
+  .description('反馈数据 Reflux 存储与查询（RefluxController）。')
+  .addHelpText('after', HELP_FEEDBACK);
 
 gw(
   feedbackCmd

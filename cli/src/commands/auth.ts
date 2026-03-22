@@ -1,8 +1,11 @@
 import { Command } from 'commander';
 import { createMessageBridge } from '../lib/message-bridge.js';
 import { printJson, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
+import { HELP_AUTH } from '../lib/help-text.js';
 
-export const authCommand = new Command('auth').description('认证（对应 AuthController）');
+export const authCommand = new Command('auth')
+  .description('认证与本地 Token（AuthController），多数子命令需 Gateway 已启动。')
+  .addHelpText('after', HELP_AUTH);
 
 authCommand
   .command('login')

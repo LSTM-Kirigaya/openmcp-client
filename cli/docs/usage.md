@@ -31,6 +31,12 @@ openmcp-cli gateway run -p 8282
 
 ### 2. 建立连接并拿到 clientId
 
+`--config` 指向的必须是 **扁平的 McpOptions JSON**（字段如 `connectionType`、`command`、`args`、`url`），与 `service/src/mcp/client.dto.ts` 一致；**不是** Cursor/VSCode 里带 `mcpServers` 外层包装的那份。完整示例见：
+
+```bash
+openmcp-cli mcp connect --help
+```
+
 **方式 A：使用 `mcp connect`**
 
 ```bash

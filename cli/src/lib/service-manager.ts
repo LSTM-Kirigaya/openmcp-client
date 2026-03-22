@@ -5,8 +5,28 @@ import fs from 'fs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// PID 文件路径
+/** 当前 Node 可执行文件（避免 Windows 上 spawn('node') 因 PATH 找不到而 ENOENT） */
+const NODE = process.execPath;
+
+/** cli/dist/lib -> 上三级为 monorepo 根目录 */
+const REPO_ROOT = path.join(__dirname, '..', '..', '..');
+const GATEWAY_DIR = path.join(REPO_ROOT, 'gateway');
+const RENDERER_DIR = path.join(REPO_ROOT, 'renderer');
+const GATEWAY_ENTRY = path.join(GATEWAY_DIR, 'dist', 'main.js');
+
+// PID 文件路径（位于 cli 包根下）
 const PID_FILE = path.join(__dirname, '..', '..', '.gateway.pid');
+
+function attachSpawnErrorHandler(proc: ChildProcess, label: string): void {
+  proc.on('error', (err: NodeJS.ErrnoException) => {
+    console.error(`❌ 无法启动 ${label}：${err.message}`);
+    if (err.code === 'ENOENT') {
+      console.error(
+        `   常见于找不到可执行文件。Gateway 使用当前 Node（${NODE}）启动；若仍失败请检查 gateway 目录与构建产物是否存在。`
+      );
+    }
+  });
+}
 
 // 当前前台运行的服务进程
 let foregroundProcess: ChildProcess | null = null;
@@ -100,40 +120,49 @@ async function killProcess(pid: number): Promise<boolean> {
  * 启动 Gateway 服务
  */
 function doStartService(port: number, detached: boolean = false): { pid: number } {
+  if (!fs.existsSync(GATEWAY_ENTRY)) {
+    console.error(`❌ 找不到 Gateway 构建产物：${GATEWAY_ENTRY}`);
+    console.error('   请在仓库中先构建 gateway 包（生成 dist/main.js），例如在 gateway 目录执行：yarn build');
+    return { pid: 0 };
+  }
+
   const env = { ...process.env, PORT: String(port) };
-  
+
   if (detached) {
-    // 后台运行：创建一个新的进程组
-    const child = spawn('node', ['dist/main.js'], {
-      cwd: path.join(__dirname, '..', 'gateway'),
+    const child = spawn(NODE, ['dist/main.js'], {
+      cwd: GATEWAY_DIR,
       env,
       detached: true,
       stdio: 'ignore'
     });
-    
-    // 不等待子进程，直接返回
+
+    attachSpawnErrorHandler(child, 'Gateway');
+
     child.unref();
-    
-    // 保存 PID
+
     const pid = child.pid || 0;
-    savePid(pid);
-    
-    return { pid };
-  } else {
-    // 前台运行
-    foregroundProcess = spawn('node', ['dist/main.js'], {
-      cwd: path.join(__dirname, '..', 'gateway'),
-      env,
-      stdio: 'inherit',
-      shell: true
-    });
-    
-    // 保存 PID
-    const pid = foregroundProcess.pid || 0;
-    savePid(pid);
-    
+    if (pid) {
+      savePid(pid);
+    }
+
     return { pid };
   }
+
+  foregroundProcess = spawn(NODE, ['dist/main.js'], {
+    cwd: GATEWAY_DIR,
+    env,
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
+
+  attachSpawnErrorHandler(foregroundProcess, 'Gateway');
+
+  const pid = foregroundProcess.pid || 0;
+  if (pid) {
+    savePid(pid);
+  }
+
+  return { pid };
 }
 
 /**
@@ -259,11 +288,17 @@ export async function statusService(): Promise<{ running: boolean; pid: number |
 export function startRenderer(port: number = 8283): ChildProcess {
   console.log(`🚀 Starting OpenMCP Web UI on port ${port}...`);
 
-  currentRenderer = spawn('npm', ['run', 'serve:website'], {
-    cwd: path.join(__dirname, '..', 'renderer'),
+  const env = { ...process.env, PORT: String(port) };
+
+  const yarnCmd = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
+  currentRenderer = spawn(yarnCmd, ['run', 'serve:website'], {
+    cwd: RENDERER_DIR,
+    env,
     stdio: 'inherit',
     shell: true
   });
+
+  attachSpawnErrorHandler(currentRenderer, 'Web UI (renderer)');
 
   return currentRenderer;
 }

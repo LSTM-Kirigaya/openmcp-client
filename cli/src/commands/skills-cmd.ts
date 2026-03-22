@@ -1,11 +1,14 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
+import { HELP_SKILLS } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
 }
 
-export const skillsCmd = new Command('skills').description('技能包（对应 SkillController）');
+export const skillsCmd = new Command('skills')
+  .description('内置技能包列表与文件读取（SkillController）。')
+  .addHelpText('after', HELP_SKILLS);
 
 gw(
   skillsCmd

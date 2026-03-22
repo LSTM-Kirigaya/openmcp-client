@@ -29,9 +29,6 @@ export async function withGateway<T>(
 ): Promise<T> {
   const bridge = await createMessageBridge(gatewayUrl);
   try {
-    if (!bridge.isSocketConnected()) {
-      throw new Error(`Cannot connect to gateway: ${gatewayUrl}`);
-    }
     return await fn(bridge);
   } finally {
     await bridge.close();

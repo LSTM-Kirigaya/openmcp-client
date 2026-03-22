@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
+import { HELP_PANEL } from '../lib/help-text.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
@@ -13,7 +14,9 @@ function mergeBody(options: { data?: string; file?: string; clientId?: string })
   return body;
 }
 
-export const panelCmd = new Command('panel').description('面板与本地配置（对应 PanelController）');
+export const panelCmd = new Command('panel')
+  .description('面板状态与按 MCP 服务端区分的本地 JSON 配置（PanelController）。')
+  .addHelpText('after', HELP_PANEL);
 
 const clientOpts = (cmd: Command) =>
   cmd
