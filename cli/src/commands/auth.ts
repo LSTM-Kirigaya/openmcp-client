@@ -1,15 +1,15 @@
 import { Command } from 'commander';
-import { createMessageBridge } from '../lib/index.js';
+import { createMessageBridge } from '../lib/message-bridge.js';
+import { printJson, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
 
-export const authCommand = new Command('auth')
-  .description('Authentication commands');
+export const authCommand = new Command('auth').description('认证（对应 AuthController）');
 
 authCommand
   .command('login')
-  .description('Login to OpenMCP')
-  .requiredOption('-u, --username <username>', 'Username')
-  .requiredOption('-p, --password <password>', 'Password')
-  .option('-g, --gateway <url>', 'Gateway URL', 'ws://localhost:8282')
+  .description('登录 OpenMCP')
+  .requiredOption('-u, --username <username>', '用户名')
+  .requiredOption('-p, --password <password>', '密码')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
   .action(async (options) => {
     console.log(`🔐 Logging in as ${options.username}...`);
 
@@ -21,10 +21,10 @@ authCommand
 
     if (result.code === 200) {
       console.log(`✅ Login successful!`);
-      console.log(`   Token: ${result.msg.token}`);
-      // Save token to config file (future feature)
+      printJson(result.msg);
     } else {
-      console.error(`❌ Login failed: ${result.msg}`);
+      console.error(`❌ Login failed:`, result.msg);
+      process.exitCode = 1;
     }
 
     await bridge.close();
@@ -32,8 +32,8 @@ authCommand
 
 authCommand
   .command('logout')
-  .description('Logout from OpenMCP')
-  .option('-g, --gateway <url>', 'Gateway URL', 'ws://localhost:8282')
+  .description('登出')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
   .action(async (options) => {
     console.log(`🔐 Logging out...`);
 
@@ -44,6 +44,7 @@ authCommand
       console.log(`✅ Logged out successfully!`);
     } else {
       console.error(`❌ Logout failed: ${result.msg}`);
+      process.exitCode = 1;
     }
 
     await bridge.close();
@@ -51,8 +52,8 @@ authCommand
 
 authCommand
   .command('status')
-  .description('Check login status')
-  .option('-g, --gateway <url>', 'Gateway URL', 'ws://localhost:8282')
+  .description('查看登录状态')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
   .action(async (options) => {
     console.log(`🔍 Checking auth status...`);
 
@@ -60,15 +61,60 @@ authCommand
     const result = await bridge.commandRequest('auth/status');
 
     if (result.code === 200) {
-      if (result.msg.loggedIn) {
-        console.log(`✅ Logged in as: ${result.msg.username}`);
-        console.log(`   Expires: ${result.msg.expiresAt}`);
-      } else {
-        console.log(`📭 Not logged in`);
-      }
+      printJson(result.msg);
     } else {
       console.error(`❌ Failed to check status: ${result.msg}`);
+      process.exitCode = 1;
     }
 
+    await bridge.close();
+  });
+
+authCommand
+  .command('refresh')
+  .description('刷新 Token')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
+  .action(async (options) => {
+    const bridge = await createMessageBridge(options.gateway);
+    const result = await bridge.commandRequest('auth/refresh');
+    printJson(result);
+    if (result.code !== 200) process.exitCode = 1;
+    await bridge.close();
+  });
+
+authCommand
+  .command('set-token')
+  .description('手动设置 Token（auth/set-token）')
+  .requiredOption('-t, --token <token>', 'Token 字符串')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
+  .action(async (options) => {
+    const bridge = await createMessageBridge(options.gateway);
+    const result = await bridge.commandRequest('auth/set-token', { token: options.token });
+    printJson(result);
+    if (result.code !== 200) process.exitCode = 1;
+    await bridge.close();
+  });
+
+authCommand
+  .command('get-token')
+  .description('查看本地 Token 摘要（auth/get-token）')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
+  .action(async (options) => {
+    const bridge = await createMessageBridge(options.gateway);
+    const result = await bridge.commandRequest('auth/get-token');
+    printJson(result);
+    if (result.code !== 200) process.exitCode = 1;
+    await bridge.close();
+  });
+
+authCommand
+  .command('clear-token')
+  .description('清除本地 Token（auth/clear-token）')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
+  .action(async (options) => {
+    const bridge = await createMessageBridge(options.gateway);
+    const result = await bridge.commandRequest('auth/clear-token');
+    printJson(result);
+    if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });

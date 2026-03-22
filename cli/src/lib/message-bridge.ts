@@ -89,13 +89,15 @@ export class MessageBridge {
 
   public async commandRequest<T = any>(
     command: string,
-    data?: any
+    data?: any,
+    timeoutMs: number = 30000
   ): Promise<RestFulResponse<T>> {
     const _id = uuidv4();
 
     return new Promise<RestFulResponse>((resolve, reject) => {
       const handler = this.addCommandListener(command, (responseData: any) => {
         if (responseData._id === _id) {
+          clearTimeout(timer);
           handler();
           resolve(responseData as RestFulResponse<T>);
         }
@@ -106,11 +108,10 @@ export class MessageBridge {
         data: { _id, ...data }
       });
 
-      // Timeout after 30 seconds
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         handler();
-        reject(new Error(`Command ${command} timeout`));
-      }, 30000);
+        reject(new Error(`Command ${command} timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
     });
   }
 

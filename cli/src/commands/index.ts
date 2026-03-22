@@ -1,5 +1,14 @@
 export { gatewayCommand } from './gateway.js';
 export { webCommand } from './web.js';
 export { startCommand } from './start.js';
-export { projectCommand } from './project.js';
 export { authCommand } from './auth.js';
+export { rpcCommand } from './rpc.js';
+export { mcpCommand } from './mcp.js';
+export { llmCommand } from './llm.js';
+export { settingCmd } from './setting-cmd.js';
+export { panelCmd } from './panel-cmd.js';
+export { skillsCmd } from './skills-cmd.js';
+export { feedbackCmd } from './feedback-cmd.js';
+export { batchValidationCmd } from './batch-validation-cmd.js';
+export { debuggerCmd } from './debugger-cmd.js';
+export { ocrCmd } from './ocr-cmd.js';
