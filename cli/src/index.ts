@@ -2,18 +2,7 @@ import { Command } from 'commander';
 import {
   gatewayCommand,
   webCommand,
-  startCommand,
-  authCommand,
-  rpcCommand,
-  mcpCommand,
-  llmCommand,
-  settingCmd,
-  panelCmd,
-  skillsCmd,
-  feedbackCmd,
-  batchValidationCmd,
-  debuggerCmd,
-  ocrCmd
+  mcpCommand
 } from './commands/index.js';
 import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
 
@@ -26,17 +15,6 @@ program
   .addHelpText('after', HELP_PROGRAM_AFTER)
   .addCommand(gatewayCommand)
   .addCommand(webCommand)
-  .addCommand(startCommand)
-  .addCommand(authCommand)
-  .addCommand(rpcCommand)
-  .addCommand(mcpCommand)
-  .addCommand(llmCommand)
-  .addCommand(settingCmd)
-  .addCommand(panelCmd)
-  .addCommand(skillsCmd)
-  .addCommand(feedbackCmd)
-  .addCommand(batchValidationCmd)
-  .addCommand(debuggerCmd)
-  .addCommand(ocrCmd);
+  .addCommand(mcpCommand);
 
 program.parse();

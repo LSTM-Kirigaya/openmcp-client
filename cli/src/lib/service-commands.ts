@@ -1,5 +1,5 @@
 /**
- * 与 service/src 各 *Controller 中 @Controller 注册的命令对齐（用于 rpc --list 与文档）。
+ * 与 service/src 各 *Controller 中 @Controller 注册的命令对齐（用于内部映射与文档）。
  * 新增后端命令时请同步更新此列表。
  */
 export const SERVICE_COMMANDS: { command: string; hint: string }[] = [

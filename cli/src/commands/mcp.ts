@@ -2,6 +2,82 @@ import { Command } from 'commander';
 import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../lib/cli-helpers.js';
 import { HELP_GENERIC_CLIENT, HELP_MCP_CONNECT, HELP_MCP_ROOT } from '../lib/help-text.js';
 
+function normalizeConnectionType(type?: string): 'STDIO' | 'SSE' | 'STREAMABLE_HTTP' | undefined {
+  if (!type) return undefined;
+  const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+  if (normalized === 'STDIO') return 'STDIO';
+  if (normalized === 'SSE') return 'SSE';
+  if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+  return undefined;
+}
+
+type ConnectPayload = Record<string, unknown>;
+type McpServerEntry = Record<string, unknown>;
+
+function resolveConnectionTypeFromServer(server: McpServerEntry): 'STDIO' | 'SSE' | 'STREAMABLE_HTTP' {
+  const rawType = typeof server.type === 'string' ? server.type : (typeof server.transport === 'string' ? server.transport : '');
+  const normalized = normalizeConnectionType(rawType);
+  if (normalized) return normalized;
+
+  if (typeof server.command === 'string' && server.command.trim() !== '') {
+    return 'STDIO';
+  }
+  if (typeof server.url === 'string' && server.url.trim() !== '') {
+    return 'SSE';
+  }
+  return 'STDIO';
+}
+
+function mapMcpServerToPayload(server: McpServerEntry): ConnectPayload {
+  const payload: ConnectPayload = {
+    connectionType: resolveConnectionTypeFromServer(server)
+  };
+  if (typeof server.command === 'string') payload.command = server.command;
+  if (Array.isArray(server.args)) payload.args = server.args;
+  if (typeof server.url === 'string') payload.url = server.url;
+  if (typeof server.cwd === 'string') payload.cwd = server.cwd;
+  if (server.env && typeof server.env === 'object') payload.env = server.env;
+  return payload;
+}
+
+function resolvePayloadFromConfig(config: ConnectPayload, serverName?: string): ConnectPayload {
+  const mcpServers = config.mcpServers;
+  if (mcpServers && typeof mcpServers === 'object' && !Array.isArray(mcpServers)) {
+    const servers = mcpServers as Record<string, McpServerEntry>;
+    const names = Object.keys(servers);
+    if (names.length === 0) {
+      throw new Error('配置文件为 mcpServers 格式，但未包含任何 server。');
+    }
+
+    let pickedName = serverName;
+    if (!pickedName) {
+      if (names.length === 1) {
+        pickedName = names[0];
+      } else {
+        throw new Error(
+          `检测到 mcpServers 聚合配置，包含多个 server。请使用 --mcp-server 指定目标。\n可选值: ${names.join(', ')}`
+        );
+      }
+    }
+
+    const server = servers[pickedName];
+    if (!server) {
+      throw new Error(
+        `未找到 mcpServer "${pickedName}"。\n可选值: ${names.join(', ')}`
+      );
+    }
+    return mapMcpServerToPayload(server);
+  }
+
+  if (serverName) {
+    throw new Error('当前配置文件是扁平 McpOptions 格式，不支持 --mcp-server。');
+  }
+
+  const fileType = normalizeConnectionType(config.connectionType as string | undefined);
+  if (fileType) config.connectionType = fileType;
+  return config;
+}
+
 function gw(cmd: Command): Command {
   return cmd.option(
     '-g, --gateway <url>',
@@ -20,33 +96,39 @@ gw(
   mcpCommand
     .command('connect')
     .description(
-      '连接 MCP 服务器：发送 McpOptions 到 service「connect」。务必使用 --config 指向 JSON 文件，或 --type + 对应参数。'
+      '连接 MCP 服务器：发送 McpOptions 到 service「connect」。务必使用 --config-file 指向 JSON 文件，或 --type + 对应参数。'
     )
     .option(
-      '-c, --config <path>',
-      'JSON 文件路径：内容为扁平 McpOptions（见下方示例），不要用 Cursor mcpServers 外层包装格式'
+      '-c, --config-file <path>',
+      'JSON 文件路径：支持扁平 McpOptions 和 mcpServers 聚合格式（见下方示例）'
     )
-    .option('--type <type>', '无 --config 时必填：STDIO | SSE | STREAMABLE_HTTP')
+    .option('--mcp-server <name>', '当 --config-file 为 mcpServers 聚合格式时，指定要连接的 server 名称')
+    .option('--type <type>', '无 --config-file 时必填：STDIO | SSE | STREAMABLE_HTTP（大小写不敏感）')
     .option('--command <bin>', '仅 STDIO：可执行文件，如 npx、node、uvx')
     .option('--args-json <json>', '仅 STDIO：参数 JSON 数组，建议整体用单引号包裹，如 \'["-y","pkg"]\'')
     .option('--url <url>', 'SSE / STREAMABLE_HTTP：服务端 URL')
     .option('--cwd <dir>', '工作目录（STDIO 常用）')
     .addHelpText('after', HELP_MCP_CONNECT)
-    .action(async (options) => {
+    .action(async function (this: Command, options) {
       let payload: Record<string, unknown>;
-      if (options.config) {
-        payload = readJsonFile(options.config);
-      } else {
-        const type = options.type as string | undefined;
-        if (!type) {
-          console.error(
-            `请指定配置文件或连接类型：
-  openmcp-cli mcp connect --config ./mcp-options.json
-或
-  openmcp-cli mcp connect --type STDIO --command ... 
-（--config 文件格式见） openmcp-cli mcp connect --help`
-          );
+      if (options.configFile) {
+        try {
+          const config = readJsonFile(options.configFile);
+          payload = resolvePayloadFromConfig(config, options.mcpServer as string | undefined);
+        } catch (error) {
+          console.error(error instanceof Error ? error.message : String(error));
           process.exitCode = 1;
+          return;
+        }
+      } else {
+        if (options.mcpServer) {
+          console.error('--mcp-server 仅在 --config-file 模式下可用');
+          process.exitCode = 1;
+          return;
+        }
+        const type = normalizeConnectionType(options.type as string | undefined);
+        if (!type) {
+          this.help({ error: true });
           return;
         }
         payload = {

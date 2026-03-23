@@ -2,7 +2,7 @@ import { exec, execSync, spawnSync } from 'node:child_process';
 import { RequestClientType, RequestData } from '../common/index.dto.js';
 import { connect } from './client.service.js';
 import { RestfulResponse } from '../common/index.dto.js';
-import { McpOptions } from './client.dto.js';
+import { ConnectionType, McpOptions } from './client.dto.js';
 import { McpServerConnectMonitor } from './connect-monitor.service.js';
 import * as crypto from 'node:crypto';
 import path from 'node:path';
@@ -13,6 +13,15 @@ import chalk from 'chalk';
 import { FORBIDDEN_MONITOR } from '../hook/setting.js';
 
 export const clientMap: Map<string, RequestClientType> = new Map();
+function normalizeConnectionType(type?: string): ConnectionType | undefined {
+    if (!type) return undefined;
+    const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+    if (normalized === 'STDIO') return 'STDIO';
+    if (normalized === 'SSE') return 'SSE';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+    return undefined;
+}
+
 export function getClient(clientId?: string): RequestClientType | undefined {
     return clientMap.get(clientId || '');
 }
@@ -149,7 +158,8 @@ async function preprocessCommand(option: McpOptions, webview?: PostMessageble) {
         option.cwd = option.cwd.replace('~', process.env.HOME || '');
     }
 
-    if (option.connectionType === 'SSE' || option.connectionType === 'STREAMABLE_HTTP') {
+    const connectionType = normalizeConnectionType(option.connectionType);
+    if (connectionType === 'SSE' || connectionType === 'STREAMABLE_HTTP') {
         return;
     }
 
@@ -287,6 +297,10 @@ export async function connectService(
     webview?: PostMessageble
 ): Promise<RestfulResponse> {
     try {
+        const normalizedType = normalizeConnectionType(option.connectionType);
+        if (normalizedType) {
+            option.connectionType = normalizedType;
+        }
 
         // 预处理字符串
         await preprocessCommand(option, webview);
@@ -311,7 +325,7 @@ export async function connectService(
         clientMap.set(uuid, client);
         
         // 只有 stdio 才需要监听        
-        if (option.connectionType === 'STDIO' && !FORBIDDEN_MONITOR) {
+        if (normalizeConnectionType(option.connectionType) === 'STDIO' && !FORBIDDEN_MONITOR) {
             clientMonitorMap.set(uuid, new McpServerConnectMonitor(uuid, option, updateClientMap, webview));
         }
 

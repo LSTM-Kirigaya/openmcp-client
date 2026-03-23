@@ -3,23 +3,21 @@
  */
 
 export const HELP_GATEWAY = `
-提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/rpc/auth 等命令时加 -g ws://127.0.0.1:9000。
+提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/auth 等命令时加 -g ws://127.0.0.1:9000。
 `;
 
 export const HELP_PROGRAM_AFTER = `
 常用示例:
   openmcp-cli gateway start
   openmcp-cli mcp connect --help
-  openmcp-cli mcp connect --config ./mcp-options.json
-  openmcp-cli rpc tools/list -d "{\\"clientId\\":\\"<uuid>\\"}"
-  openmcp-cli rpc --list
+  openmcp-cli mcp connect --config-file ./mcp-options.json
 
 说明: 多数子命令需 Gateway 已启动（默认 ws://localhost:8282），详见各命令 --help。
 `;
 
 export const HELP_MCP_ROOT = `
 子命令概览:
-  connect              建立 MCP 连接（需 --config 或 --type 等）
+  connect              建立 MCP 连接（需 --config-file 或 --type 等）
   disconnect / ping    断开或探测连接
   lookup-env           解析环境变量
   server-version       服务端版本
@@ -29,9 +27,11 @@ export const HELP_MCP_ROOT = `
 `;
 
 export const HELP_MCP_CONNECT = `
---config <path> 文件要求:
-  · UTF-8 编码的 JSON 文件，内容为 **一条** McpOptions 对象（与 service/src/mcp/client.dto.ts 一致）
-  · 不是 Cursor / VSCode 设置里那种外层带 mcpServers / version 的配置；若只有那份，请手抄出 command/args/url 写成扁平 JSON
+--config-file <path> 文件要求:
+  · UTF-8 编码 JSON，支持两种格式：
+    1) 扁平 McpOptions（connectionType/command/args/url/cwd/env 等字段）
+    2) 外层含 mcpServers 的聚合配置（Cursor / VSCode 常见格式）
+  · 若是第 2 种且含多个 server，请额外传 --mcp-server <name>
 
 STDIO 示例 mcp-stdio.json:
   {
@@ -53,22 +53,25 @@ Streamable HTTP 示例:
     "url": "http://127.0.0.1:8080/mcp"
   }
 
+mcpServers 聚合示例 mcp-servers.json:
+  {
+    "version": "1.0.0",
+    "mcpServers": {
+      "my-browser": {
+        "command": "npx",
+        "args": ["tsx", "./add-server.mts"]
+      },
+      "remote-http": {
+        "type": "http",
+        "url": "http://127.0.0.1:8080/mcp"
+      }
+    }
+  }
+
 命令行等价（无配置文件时，--args-json 建议整体用单引号包住 JSON）:
   openmcp-cli mcp connect --type STDIO --command npx --args-json '["-y","@modelcontextprotocol/server-everything"]' --cwd .
   openmcp-cli mcp connect --type SSE --url http://127.0.0.1:3000/sse
-`;
-
-export const HELP_RPC = `
-说明:
-  <command> 与后端 @Controller 注册名一致，如 connect、tools/list、setting/load。
-
-示例:
-  openmcp-cli rpc --list
-  openmcp-cli rpc connect -f ./mcp-options.json
-  openmcp-cli rpc tools/list -d "{\\"clientId\\":\\"YOUR_UUID\\"}"
-  openmcp-cli rpc tools/call -d "{\\"clientId\\":\\"...\\",\\"toolName\\":\\"echo\\",\\"toolArgs\\":{\\"msg\\":\\"hi\\"}}"
-  openmcp-cli rpc setting/load -d "{}"
-  openmcp-cli rpc batch-validation/run -f ./payload.json -t 600000 -q
+  openmcp-cli mcp connect --config-file ./mcp-servers.json --mcp-server my-browser
 `;
 
 export const HELP_AUTH = `

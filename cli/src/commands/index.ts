@@ -2,7 +2,6 @@ export { gatewayCommand } from './gateway.js';
 export { webCommand } from './web.js';
 export { startCommand } from './start.js';
 export { authCommand } from './auth.js';
-export { rpcCommand } from './rpc.js';
 export { mcpCommand } from './mcp.js';
 export { llmCommand } from './llm.js';
 export { settingCmd } from './setting-cmd.js';

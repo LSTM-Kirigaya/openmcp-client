@@ -10,6 +10,15 @@ import { OAuthClient } from "./auth.service.js";
 import { UnauthorizedError } from '@modelcontextprotocol/sdk/client/auth.js';
 import { OAuthClientProvider } from '@modelcontextprotocol/sdk/client/auth.js';
 
+function normalizeConnectionType(type?: string): 'STDIO' | 'SSE' | 'STREAMABLE_HTTP' | undefined {
+    if (!type) return undefined;
+    const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+    if (normalized === 'STDIO') return 'STDIO';
+    if (normalized === 'SSE') return 'SSE';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+    return undefined;
+}
+
 // 增强的客户端类
 export class McpClient {
     private client: Client;
@@ -47,9 +56,10 @@ export class McpClient {
         }
 
         const env = { ...process.env, ...this.options.env } as Record<string, string>;        
+        const connectionType = normalizeConnectionType(this.options.connectionType);
 
         // 根据连接类型创建传输层
-        switch (this.options.connectionType) {
+        switch (connectionType) {
             case 'STDIO':
                 this.transport = new StdioClientTransport({
                     command: this.options.command || '',

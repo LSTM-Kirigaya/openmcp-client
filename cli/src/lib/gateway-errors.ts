@@ -38,7 +38,7 @@ export function buildGatewayUnreachableError(gatewayUrl: string, underlying?: st
 
   lines.push('');
   lines.push('若 Gateway 已启动但使用了其它端口，请为子命令指定 -g，例如：');
-  lines.push(`  openmcp-cli mcp connect --config ./mcp.json -g ws://127.0.0.1:9000`);
+  lines.push(`  openmcp-cli mcp connect --config-file ./mcp.json -g ws://127.0.0.1:9000`);
 
   if (underlying && underlying.trim()) {
     lines.push('');
