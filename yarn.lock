@@ -1382,29 +1382,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openmcp/cli@workspace:cli":
-  version: 0.0.0-use.local
-  resolution: "@openmcp/cli@workspace:cli"
-  dependencies:
-    "@types/node": "npm:^20.11.0"
-    "@types/uuid": "npm:^9.0.0"
-    "@types/ws": "npm:^8.5.10"
-    commander: "npm:^11.1.0"
-    open: "npm:^10.1.0"
-    typescript: "npm:^5.4.0"
-    uuid: "npm:^9.0.0"
-    ws: "npm:^8.18.0"
-  bin:
-    openmcp: ./bin/openmcp-cli.js
-    openmcp-cli: ./bin/openmcp-cli.js
-  languageName: unknown
-  linkType: soft
-
-"@openmcp/gateway@workspace:gateway":
+"@openmcp/gateway@npm:^0.0.1, @openmcp/gateway@workspace:gateway":
   version: 0.0.0-use.local
   resolution: "@openmcp/gateway@workspace:gateway"
   dependencies:
-    "@openmcp/service": "file:../service"
+    "@openmcp/service": "npm:^0.0.1"
     "@types/node": "npm:^22.7.5"
     "@types/ws": "npm:^8.18.0"
     nodemon: "npm:^3.1.10"
@@ -1492,30 +1474,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@openmcp/service@file:../service::locator=%40openmcp%2Fgateway%40workspace%3Agateway":
-  version: 0.0.1
-  resolution: "@openmcp/service@file:../service#../service::hash=3d7db0&locator=%40openmcp%2Fgateway%40workspace%3Agateway"
-  dependencies:
-    "@modelcontextprotocol/sdk": "npm:^1.18.2"
-    "@seald-io/nedb": "npm:^4.1.1"
-    axios: "npm:^1.9.0"
-    cli-table3: "npm:^0.6.5"
-    https-proxy-agent: "npm:^7.0.6"
-    open: "npm:^10.1.2"
-    openai: "npm:^5.0.1"
-    pako: "npm:^2.1.0"
-    pino: "npm:^9.6.0"
-    pino-pretty: "npm:^13.0.0"
-    rotating-file-stream: "npm:^3.2.0"
-    tesseract.js: "npm:^6.0.1"
-    uuid: "npm:^11.1.0"
-  checksum: 10c0/95d3dcc50c0d6e70c532355ed610e76506324cab4a7fb953252063d46e59e01eeac2b5e0fe9b3e57eb904b0a0708cbf720d2c48f04b8df5a25fd7cc5104a8a31
-  languageName: node
-  linkType: hard
-
 "@openmcp/service@file:../service::locator=%40openmcp%2Fsdk%40workspace%3Asdk":
   version: 0.0.1
-  resolution: "@openmcp/service@file:../service#../service::hash=3d7db0&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
+  resolution: "@openmcp/service@file:../service#../service::hash=696fc6&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
     "@seald-io/nedb": "npm:^4.1.1"
@@ -1530,13 +1491,13 @@ __metadata:
     rotating-file-stream: "npm:^3.2.0"
     tesseract.js: "npm:^6.0.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/95d3dcc50c0d6e70c532355ed610e76506324cab4a7fb953252063d46e59e01eeac2b5e0fe9b3e57eb904b0a0708cbf720d2c48f04b8df5a25fd7cc5104a8a31
+  checksum: 10c0/ad7471bbd0eb8791e6228a7de92e4e362574645bcefddd08c7c915e18178a2cfe4d2e6ffe2607b54480e806edd824e9f9ea5d13648b1ed1e8708ffda9e9df536
   languageName: node
   linkType: hard
 
 "@openmcp/service@file:./service::locator=openmcp%40workspace%3A.":
   version: 0.0.1
-  resolution: "@openmcp/service@file:./service#./service::hash=3d7db0&locator=openmcp%40workspace%3A."
+  resolution: "@openmcp/service@file:./service#./service::hash=696fc6&locator=openmcp%40workspace%3A."
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
     "@seald-io/nedb": "npm:^4.1.1"
@@ -1551,11 +1512,11 @@ __metadata:
     rotating-file-stream: "npm:^3.2.0"
     tesseract.js: "npm:^6.0.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/95d3dcc50c0d6e70c532355ed610e76506324cab4a7fb953252063d46e59e01eeac2b5e0fe9b3e57eb904b0a0708cbf720d2c48f04b8df5a25fd7cc5104a8a31
+  checksum: 10c0/ad7471bbd0eb8791e6228a7de92e4e362574645bcefddd08c7c915e18178a2cfe4d2e6ffe2607b54480e806edd824e9f9ea5d13648b1ed1e8708ffda9e9df536
   languageName: node
   linkType: hard
 
-"@openmcp/service@workspace:service":
+"@openmcp/service@npm:^0.0.1, @openmcp/service@workspace:service":
   version: 0.0.0-use.local
   resolution: "@openmcp/service@workspace:service"
   dependencies:
@@ -8767,6 +8728,26 @@ __metadata:
   checksum: 10c0/8a0104a218bc1afaae943f0af378461eeb2836f9848bad872bbd067ec5d1d9791636f307454ab77d0746f10341366f295384656a340ebdb87a2585058e8567e5
   languageName: node
   linkType: hard
+
+"openmcp-cli@workspace:cli":
+  version: 0.0.0-use.local
+  resolution: "openmcp-cli@workspace:cli"
+  dependencies:
+    "@openmcp/gateway": "npm:^0.0.1"
+    "@openmcp/service": "npm:^0.0.1"
+    "@types/node": "npm:^20.11.0"
+    "@types/uuid": "npm:^9.0.0"
+    "@types/ws": "npm:^8.5.10"
+    commander: "npm:^11.1.0"
+    open: "npm:^10.1.0"
+    typescript: "npm:^5.4.0"
+    uuid: "npm:^9.0.0"
+    ws: "npm:^8.18.0"
+  bin:
+    openmcp: ./bin/openmcp-cli.js
+    openmcp-cli: ./bin/openmcp-cli.js
+  languageName: unknown
+  linkType: soft
 
 "openmcp@workspace:.":
   version: 0.0.0-use.local

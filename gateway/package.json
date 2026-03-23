@@ -5,6 +5,9 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"serve": "nodemon --watch src --ext ts --exec \"tsx src/main.ts\"",
 		"dev": "nodemon --watch src --ext ts --exec \"tsx src/main.ts\"",
@@ -15,7 +18,8 @@
 		"debug": "tsx --inspect src/main.ts",
 		"clean": "rm -rf dist",
 		"lint": "eslint src --ext .ts,.tsx",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "npm run build"
 	},
 	"author": "LSTM-Kirigaya",
 	"license": "MIT",
@@ -27,7 +31,7 @@
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
-		"@openmcp/service": "file:../service",
+		"@openmcp/service": "^0.0.1",
 		"pino": "^9.6.0",
 		"pino-pretty": "^13.0.0",
 		"ws": "^8.18.1"

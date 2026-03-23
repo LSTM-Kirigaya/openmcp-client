@@ -27,9 +27,10 @@ export const startCommand = new Command('start')
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Start renderer
-    startRenderer(webPort);
+    startRenderer(webPort, gatewayPort);
 
-    const url = `http://localhost:${webPort}`;
+    // renderer 在 `mode=website` 时 base 为 `/mcp/`，因此需要打开该路径
+    const url = `http://localhost:${webPort}/mcp/`;
 
     console.log(`
 🌐 Web UI:     ${url}
@@ -48,15 +49,15 @@ export const startCommand = new Command('start')
     }, 3000);
 
     // Handle graceful shutdown
-    process.on('SIGINT', () => {
+    process.on('SIGINT', async () => {
       console.log('\n🛑 Stopping all services...');
-      stopAll();
+      await stopAll();
       process.exit(0);
     });
 
-    process.on('SIGTERM', () => {
+    process.on('SIGTERM', async () => {
       console.log('\n🛑 Stopping all services...');
-      stopAll();
+      await stopAll();
       process.exit(0);
     });
   });

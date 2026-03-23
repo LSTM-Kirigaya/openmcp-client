@@ -26,3 +26,4 @@ resources/changelog/**
 **/openmcp/*
 **/dataset/*
 test/sdk/.yarn
+_npm_try

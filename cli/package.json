@@ -1,8 +1,12 @@
 {
-  "name": "@openmcp/cli",
+  "name": "openmcp-cli",
   "version": "0.1.0",
   "description": "OpenMCP CLI - MCP Server Gateway & Debug Tool",
   "type": "module",
+  "files": [
+    "dist",
+    "bin"
+  ],
   "main": "dist/index.js",
   "bin": {
     "openmcp": "./bin/openmcp-cli.js",
@@ -22,6 +26,7 @@
   "author": "kirigaya",
   "license": "MIT",
   "dependencies": {
+    "@openmcp/gateway": "^0.0.1",
     "commander": "^11.1.0",
     "open": "^10.1.0",
     "uuid": "^9.0.0",

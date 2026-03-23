@@ -276,7 +276,8 @@
         "publish:update": "npx tsx scripts/publish.mts --update",
         "publish:vsce": "npx tsx scripts/publish.mts --publish-vsce",
         "publish:github": "npx tsx scripts/publish.mts --publish-github",
-        "publish:all": "npx tsx scripts/publish.mts --all"
+        "publish:all": "npx tsx scripts/publish.mts --all",
+        "pack:npm-test": "node scripts/pack-npm-test.mjs"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.18.2",

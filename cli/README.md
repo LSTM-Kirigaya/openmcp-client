@@ -1,4 +1,4 @@
-# OpenMCP CLI（`@openmcp/cli`）
+# OpenMCP CLI（`openmcp-cli`）
 
 命令行入口，用于**启动 Gateway / Web UI**、以及通过 **WebSocket** 调用与 VSCode 扩展、Web 前端相同的 **service 路由**（`routeMessage`），便于脚本化与本地调试。
 
@@ -7,7 +7,34 @@
 - Node.js **≥ 18**
 - 多数子命令依赖 **Gateway 已启动**（默认 `ws://localhost:8282`）
 
-## 安装与本地运行
+## 从 npm 安装
+
+发布到 npm 后，全局安装即可使用（命令名为 `openmcp-cli` 或 `openmcp`）：
+
+```bash
+npm install -g openmcp-cli
+openmcp-cli --help
+```
+
+依赖里的 `@openmcp/gateway` 使用 **semver**（`^0.0.1`），以便发布到 npm 后能被正常解析；`workspace:*` 仅适用于仓库内 Yarn。
+
+**尚未发布到 npm 时，用 tarball 试装（推荐）**：`openmcp-cli` 依赖 `@openmcp/gateway`，单独 `npm install -g openmcp-cli-0.1.0.tgz` 会从 registry 拉 gateway，**会 404**。请一次性安装三个本地包（npm 会从本地 tarball 满足依赖）：
+
+```bash
+# 在仓库根目录：构建并打三个包
+node scripts/pack-npm-test.mjs
+
+# 在任意空目录（路径按你本机调整）
+mkdir omcp-try && cd omcp-try && npm init -y
+npm install ../service/openmcp-service-0.0.1.tgz ../gateway/openmcp-gateway-0.0.1.tgz ../cli/openmcp-cli-0.1.0.tgz
+npx openmcp-cli --help
+```
+
+仓库根目录也可执行：`yarn pack:npm-test`。
+
+**已发布到 npm 后**：`npm install -g openmcp-cli` 即可；或用 **Verdaccio** 在本地 registry 演练发布顺序（service → gateway → cli）。
+
+## 安装与本地运行（本仓库开发）
 
 文档以 **Yarn** 为例（经典 Yarn 1 或 Yarn Berry 均可）。在仓库根目录安装依赖后，进入 `cli` 目录构建：
 

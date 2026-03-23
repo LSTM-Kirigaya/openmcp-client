@@ -70,14 +70,16 @@ gatewayCommand
 gatewayCommand
   .command('stop')
   .description('Stop the running Gateway')
-  .action(async () => {
+  .option('-p, --port <port>', 'Gateway port', '8282')
+  .action(async (options) => {
+    const port = parseInt(options.port, 10);
     console.log(`
 ╔═══════════════════════════════════════╗
 ║      Stopping Gateway                 ║
 ╚═══════════════════════════════════════╝
     `);
 
-    await stopService();
+    await stopService(port);
   });
 
 gatewayCommand
@@ -104,16 +106,19 @@ gatewayCommand
 gatewayCommand
   .command('status')
   .description('Check Gateway status')
-  .action(async () => {
-    const status = await statusService();
+  .option('-p, --port <port>', 'Gateway port', '8282')
+  .action(async (options) => {
+    const port = parseInt(options.port, 10);
+    const status = await statusService(port);
 
     if (status.running) {
+      const pidText = status.pid === null ? '(external/unknown)' : String(status.pid);
       console.log(`
 ╔═══════════════════════════════════════╗
 ║      Gateway Status                   ║
 ╠═══════════════════════════════════════╣
 ║  Status:    ✅ Running               ║
-║  PID:       ${String(status.pid).padEnd(27)}║
+║  PID:       ${pidText.padEnd(27)}║
 ║  Port:      ${String(status.port).padEnd(27)}║
 ║  WebSocket: ws://localhost:${status.port}         ║
 ╚═══════════════════════════════════════╝

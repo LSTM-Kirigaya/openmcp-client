@@ -145,11 +145,23 @@ export const HELP_OCR = `
 `;
 
 export const HELP_WEB = `
-说明: 会在本机启动 Renderer（Vite website 模式），可选同时后台启动 Gateway。
+说明:
+  - 默认是生产模式（静态托管 renderer/dist）
+  - 设置环境变量 OPENMCP_WEB_DEV=1 后，切换到开发模式（Vite）
+  - 不会启动/停止 Gateway；只在启动 Web UI 前做 WebSocket 握手检查 Gateway 是否可达
+  - 支持子命令:
+      run     前台运行（阻塞，Ctrl+C 退出）
+      start   后台运行（立即返回）
+      status  检查 Gateway 可达性 + Renderer 状态
+      stop    停止后台运行的 Web UI（只停 Renderer）
+
 
 示例:
-  openmcp-cli web -p 8283 -g 8282
-  openmcp-cli web --no-gateway -p 8283
+  openmcp-cli web run -p 8283 -g 8282
+  openmcp-cli web start -p 8283 -g 8282
+  OPENMCP_WEB_DEV=1 openmcp-cli web run -p 8283 -g 8282
+  openmcp-cli web status
+  openmcp-cli web stop
 `;
 
 export const HELP_START = `
