@@ -86,8 +86,8 @@ yarn openmcp-cli --help
 | 分组 | 说明 |
 |------|------|
 | `gateway` | 前台/后台启停 Gateway、查看状态 |
-| `web` / `start` | 拉起 Web UI（及可选 Gateway） |
-| `auth` | 登录、登出、Token 与状态 |
+| `webui` / `start` | 拉起 Web UI（及可选 Gateway） |
+| `cloud` | 云能力入口（当前仅 `auth` 认证登录） |
 | `rpc`（别名 `call`） | **任意** service 命令 + JSON 请求体 |
 | `mcp` | 连接、断开、ping、环境变量、tools/prompts/resources |
 | `llm` | 模型列表、同步聊天等 |

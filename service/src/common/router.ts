@@ -60,5 +60,14 @@ export async function routeMessage(command: string, data: any, webview: PostMess
             return payload;
         }
     }
-    return
+    // 未注册命令也返回明确错误，避免客户端一直等待直到超时
+    const payload = {
+        _id: data?._id,
+        code: 404,
+        msg: `Command not found: ${command}`
+    };
+    webview.postMessage({
+        command, data: payload
+    });
+    return payload;
 }

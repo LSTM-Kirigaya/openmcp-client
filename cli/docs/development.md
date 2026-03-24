@@ -53,7 +53,7 @@ yarn dev
 |----|------|
 | **`gateway/`** | CLI 的 `gateway` 子命令启动的是 **gateway** 包构建产物（`gateway/dist/main.js`），不是直接启动 `service/src/main.ts`。Gateway 依赖 `@openmcp/service` 做路由。 |
 | **`service/`** | 全部 `rpc` 命令字符串与 `service/src/**/*controller.ts` 中 `@Controller('...')` 一致。 |
-| **`renderer/`** | `web` / `start` 通过 `service-manager` 在 `renderer` 目录执行 `yarn run serve:website`（脚本名含 `:` 时建议带 `run`）。 |
+| **`renderer/`** | `webui` / `start` 通过 `service-manager` 在 `renderer` 目录执行 `yarn run serve:website`（脚本名含 `:` 时建议带 `run`）。 |
 
 修改 **service 路由或控制器** 后，需重新构建 **service** 与 **gateway**（按仓库根目录 `turbo` / `yarn build` 流程），再重启 Gateway，CLI 侧无需改代码即可调用新命令（记得更新 `service-commands.ts` 与文档）。
 

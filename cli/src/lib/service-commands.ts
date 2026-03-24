@@ -55,6 +55,7 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'debugger-mcp/connection-info', hint: '连接信息' },
   { command: 'debugger-mcp/toggle-tool', hint: 'body: { toolName, enabled }' },
   { command: 'auth/login', hint: 'body: { username, password }' },
+  { command: 'auth/oauth', hint: 'body: { channel, redirectUri? }' },
   { command: 'auth/logout', hint: '' },
   { command: 'auth/status', hint: '' },
   { command: 'auth/refresh', hint: '' },

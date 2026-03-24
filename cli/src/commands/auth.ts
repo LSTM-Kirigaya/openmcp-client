@@ -1,15 +1,19 @@
 import { Command } from 'commander';
+import open from 'open';
 import { createMessageBridge } from '../lib/message-bridge.js';
 import { printJson, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
-import { HELP_AUTH } from '../lib/help-text.js';
+import { HELP_CLOUD } from '../lib/help-text.js';
 
-export const authCommand = new Command('auth')
-  .description('认证与本地 Token（AuthController），多数子命令需 Gateway 已启动。')
-  .addHelpText('after', HELP_AUTH);
+export const cloudCommand = new Command('cloud')
+  .description('OpenMCP Cloud 相关能力（当前仅认证登录）。')
+  .addHelpText('after', HELP_CLOUD);
+
+const authCommand = new Command('auth')
+  .description('认证相关命令');
 
 authCommand
   .command('login')
-  .description('登录 OpenMCP')
+  .description('账号密码登录（AuthController: auth/login）')
   .requiredOption('-u, --username <username>', '用户名')
   .requiredOption('-p, --password <password>', '密码')
   .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
@@ -34,90 +38,40 @@ authCommand
   });
 
 authCommand
-  .command('logout')
-  .description('登出')
+  .command('oauth')
+  .description('获取 OAuth 授权链接（AuthController: auth/oauth）')
+  .argument('<channel>', 'OAuth 渠道，如 github / google')
+  .option('-r, --redirect-uri <uri>', '可选回调地址')
+  .option('-o, --open', '自动打开浏览器进行 OAuth 认证')
   .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
-  .action(async (options) => {
-    console.log(`🔐 Logging out...`);
-
+  .action(async (channel, options) => {
     const bridge = await createMessageBridge(options.gateway);
-    const result = await bridge.commandRequest('auth/logout');
+    const result = await bridge.commandRequest('auth/oauth', {
+      channel,
+      redirectUri: options.redirectUri
+    });
 
     if (result.code === 200) {
-      console.log(`✅ Logged out successfully!`);
+      const authUrl = result.msg?.authUrl || result.msg?.url;
+      if (typeof authUrl === 'string') {
+        console.log(authUrl);
+        if (options.open) {
+          try {
+            await open(authUrl);
+          } catch (error: any) {
+            console.error(`❌ 自动打开浏览器失败: ${error?.message || error}`);
+            process.exitCode = 1;
+          }
+        }
+      } else {
+        printJson(result.msg);
+      }
     } else {
-      console.error(`❌ Logout failed: ${result.msg}`);
+      console.error(`❌ OAuth URL 获取失败:`, result.msg);
       process.exitCode = 1;
     }
 
     await bridge.close();
   });
 
-authCommand
-  .command('status')
-  .description('查看登录状态')
-  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
-  .action(async (options) => {
-    console.log(`🔍 Checking auth status...`);
-
-    const bridge = await createMessageBridge(options.gateway);
-    const result = await bridge.commandRequest('auth/status');
-
-    if (result.code === 200) {
-      printJson(result.msg);
-    } else {
-      console.error(`❌ Failed to check status: ${result.msg}`);
-      process.exitCode = 1;
-    }
-
-    await bridge.close();
-  });
-
-authCommand
-  .command('refresh')
-  .description('刷新 Token')
-  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
-  .action(async (options) => {
-    const bridge = await createMessageBridge(options.gateway);
-    const result = await bridge.commandRequest('auth/refresh');
-    printJson(result);
-    if (result.code !== 200) process.exitCode = 1;
-    await bridge.close();
-  });
-
-authCommand
-  .command('set-token')
-  .description('手动设置 Token（auth/set-token）')
-  .requiredOption('-t, --token <token>', 'Token 字符串')
-  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
-  .action(async (options) => {
-    const bridge = await createMessageBridge(options.gateway);
-    const result = await bridge.commandRequest('auth/set-token', { token: options.token });
-    printJson(result);
-    if (result.code !== 200) process.exitCode = 1;
-    await bridge.close();
-  });
-
-authCommand
-  .command('get-token')
-  .description('查看本地 Token 摘要（auth/get-token）')
-  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
-  .action(async (options) => {
-    const bridge = await createMessageBridge(options.gateway);
-    const result = await bridge.commandRequest('auth/get-token');
-    printJson(result);
-    if (result.code !== 200) process.exitCode = 1;
-    await bridge.close();
-  });
-
-authCommand
-  .command('clear-token')
-  .description('清除本地 Token（auth/clear-token）')
-  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
-  .action(async (options) => {
-    const bridge = await createMessageBridge(options.gateway);
-    const result = await bridge.commandRequest('auth/clear-token');
-    printJson(result);
-    if (result.code !== 200) process.exitCode = 1;
-    await bridge.close();
-  });
+cloudCommand.addCommand(authCommand);

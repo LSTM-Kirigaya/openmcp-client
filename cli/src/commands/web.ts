@@ -203,7 +203,7 @@ async function startWebBackground(options: any) {
 🌐 Web UI:     ${url}
 🔌 Gateway:    ${wsUrlForPort(gatewayPort)}
 🧩 Mode:       ${devMode ? 'development (vite)' : 'production (static)'}
-📝 Use 'openmcp-cli web status' to check
+📝 Use 'openmcp-cli webui status' to check
   `);
 
   setTimeout(() => {
@@ -240,7 +240,7 @@ async function showWebStatus(options: any) {
   `);
 }
 
-export const webCommand = new Command('web')
+export const webCommand = new Command('webui')
   .description('OpenMCP Web UI（Renderer）')
   .summary('Web management: run|start|status|stop')
   .addHelpText('after', HELP_WEB);

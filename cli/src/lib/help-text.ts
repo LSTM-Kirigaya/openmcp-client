@@ -3,7 +3,7 @@
  */
 
 export const HELP_GATEWAY = `
-提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/auth 等命令时加 -g ws://127.0.0.1:9000。
+提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/cloud 等命令时加 -g ws://127.0.0.1:9000。
 `;
 
 export const HELP_PROGRAM_AFTER = `
@@ -74,14 +74,12 @@ mcpServers 聚合示例 mcp-servers.json:
   openmcp-cli mcp connect --config-file ./mcp-servers.json --mcp-server my-browser
 `;
 
-export const HELP_AUTH = `
+export const HELP_CLOUD = `
 示例:
-  openmcp-cli auth login -u myuser -p mypass
-  openmcp-cli auth status
-  openmcp-cli auth refresh
-  openmcp-cli auth set-token -t eyJ...
-  openmcp-cli auth get-token
-  openmcp-cli auth clear-token
+  openmcp-cli cloud auth login -u myuser -p mypass
+  openmcp-cli cloud auth oauth github
+  openmcp-cli cloud auth oauth github --redirect-uri http://localhost:3000/callback
+  openmcp-cli cloud auth oauth github --open
 `;
 
 export const HELP_LLM = `
@@ -160,11 +158,11 @@ export const HELP_WEB = `
 
 
 示例:
-  openmcp-cli web run -p 8283 -g 8282
-  openmcp-cli web start -p 8283 -g 8282
-  OPENMCP_WEB_DEV=1 openmcp-cli web run -p 8283 -g 8282
-  openmcp-cli web status
-  openmcp-cli web stop
+  openmcp-cli webui run -p 8283 -g 8282
+  openmcp-cli webui start -p 8283 -g 8282
+  OPENMCP_WEB_DEV=1 openmcp-cli webui run -p 8283 -g 8282
+  openmcp-cli webui status
+  openmcp-cli webui stop
 `;
 
 export const HELP_START = `

@@ -29,7 +29,7 @@ openmcp-cli -V
 
 ---
 
-## `web`
+## `webui`
 
 启动 Web UI（Renderer），可选同时启动 Gateway。
 
@@ -43,19 +43,14 @@ openmcp-cli -V
 
 ---
 
-## `auth`
+## `cloud`
 
-认证与 Token（对应 `AuthController`）。
+云能力入口（当前仅认证登录，对应 `AuthController`）。
 
 | 子命令 | 说明 |
 |--------|------|
-| `login` | `-u` / `-p`，登录 |
-| `logout` | 登出 |
-| `status` | 状态 |
-| `refresh` | 刷新 Token |
-| `set-token` | 手动写入 Token |
-| `get-token` | 查看本地 Token 摘要 |
-| `clear-token` | 清除本地 Token |
+| `auth login` | `-u` / `-p`，账号密码登录 |
+| `auth oauth <channel>` | 获取 OAuth 授权链接（如 `github`，支持 `--open` 自动打开浏览器） |
 
 默认 `-g ws://localhost:8282`。
 

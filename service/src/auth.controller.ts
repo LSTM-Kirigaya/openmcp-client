@@ -3,6 +3,7 @@ import { PostMessageble } from "./hook/adapter.js";
 import { RequestData } from "./common/index.dto.js";
 import {
     login as apiLogin,
+    getOAuthAuthorizeUrl as apiGetOAuthAuthorizeUrl,
     logout as apiLogout,
     checkAuthStatus as apiCheckAuthStatus,
     refreshToken as apiRefreshToken,
@@ -12,8 +13,33 @@ import {
     isLoggedIn
 } from "./web/auth.js";
 
-export class AuthController {
+function extractErrorMessage(error: any, fallback: string): string {
+    const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        error?.code ||
+        error?.cause?.code;
+    if (typeof message === 'string' && message.trim()) {
+        return message;
+    }
+    return fallback;
+}
 
+function buildOAuthFriendlyError(error: any): string {
+    const method = String(error?.config?.method || 'GET').toUpperCase();
+    const baseURL = String(error?.config?.baseURL || '').replace(/\/+$/, '');
+    const path = String(error?.config?.url || '');
+    const requestUrl = baseURL ? `${baseURL}${path}` : path;
+    const code = error?.code || error?.cause?.code || '';
+    const message = extractErrorMessage(error, 'OAuth authorize URL fetch failed');
+
+    if (requestUrl) {
+        return `请求 ${method} ${requestUrl} 失败（${code || message}），请检查后端服务是否启动、网络连通性，以及 OPENMCP_API_BASE_URL 配置是否正确。`;
+    }
+    return `${message}，请检查后端服务是否启动、网络连通性，以及 OPENMCP_API_BASE_URL 配置是否正确。`;
+}
+
+export class AuthController {
     @Controller('auth/login')
     async login(data: RequestData, webview: PostMessageble) {
         const { username, password } = data;
@@ -39,6 +65,29 @@ export class AuthController {
             return {
                 code: error.response?.status || 500,
                 msg: error.response?.data?.message || error.message || 'Login failed'
+            };
+        }
+    }
+
+    @Controller('auth/oauth')
+    async oauth(data: RequestData, webview: PostMessageble) {
+        const { channel, redirectUri } = data;
+        if (!channel) {
+            return {
+                code: 400,
+                msg: 'OAuth channel is required'
+            };
+        }
+        try {
+            const result = await apiGetOAuthAuthorizeUrl(channel, redirectUri);
+            return {
+                code: 200,
+                msg: result
+            };
+        } catch (error: any) {
+            return {
+                code: error.response?.status || 500,
+                msg: buildOAuthFriendlyError(error)
             };
         }
     }

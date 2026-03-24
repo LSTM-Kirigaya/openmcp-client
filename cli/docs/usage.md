@@ -70,10 +70,10 @@ openmcp-cli rpc --list
 
 ## Web UI 与一键启动
 
-- **`openmcp-cli web`**：可选启动 Gateway，并启动 Renderer（网站模式），浏览器打开本地 Web UI。
+- **`openmcp-cli webui`**：可选启动 Gateway，并启动 Renderer（网站模式），浏览器打开本地 Web UI。
 - **`openmcp-cli start`**：同时启动 Gateway 与 Web UI。
 
-具体端口与选项见 `openmcp-cli web --help`、`openmcp-cli start --help`。
+具体端口与选项见 `openmcp-cli webui --help`、`openmcp-cli start --help`。
 
 ## 大 JSON 与超时
 

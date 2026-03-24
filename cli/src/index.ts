@@ -2,7 +2,8 @@ import { Command } from 'commander';
 import {
   gatewayCommand,
   webCommand,
-  mcpCommand
+  mcpCommand,
+  cloudCommand
 } from './commands/index.js';
 import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
 
@@ -15,6 +16,7 @@ program
   .addHelpText('after', HELP_PROGRAM_AFTER)
   .addCommand(gatewayCommand)
   .addCommand(webCommand)
-  .addCommand(mcpCommand);
+  .addCommand(mcpCommand)
+  .addCommand(cloudCommand);
 
 program.parse();
