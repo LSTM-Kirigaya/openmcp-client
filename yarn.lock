@@ -1476,7 +1476,7 @@ __metadata:
 
 "@openmcp/service@file:../service::locator=%40openmcp%2Fsdk%40workspace%3Asdk":
   version: 0.0.1
-  resolution: "@openmcp/service@file:../service#../service::hash=696fc6&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
+  resolution: "@openmcp/service@file:../service#../service::hash=58ee11&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
     "@seald-io/nedb": "npm:^4.1.1"
@@ -1491,13 +1491,13 @@ __metadata:
     rotating-file-stream: "npm:^3.2.0"
     tesseract.js: "npm:^6.0.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/ad7471bbd0eb8791e6228a7de92e4e362574645bcefddd08c7c915e18178a2cfe4d2e6ffe2607b54480e806edd824e9f9ea5d13648b1ed1e8708ffda9e9df536
+  checksum: 10c0/e350f09233fa9da6bce7824674586440c78016ea5ca55e118ed9d784cc7f1a7c611213f9bbc3b8503edd6832b75457cca477cb19b147c3778c5279e78cb51771
   languageName: node
   linkType: hard
 
 "@openmcp/service@file:./service::locator=openmcp%40workspace%3A.":
   version: 0.0.1
-  resolution: "@openmcp/service@file:./service#./service::hash=696fc6&locator=openmcp%40workspace%3A."
+  resolution: "@openmcp/service@file:./service#./service::hash=58ee11&locator=openmcp%40workspace%3A."
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
     "@seald-io/nedb": "npm:^4.1.1"
@@ -1512,7 +1512,7 @@ __metadata:
     rotating-file-stream: "npm:^3.2.0"
     tesseract.js: "npm:^6.0.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/ad7471bbd0eb8791e6228a7de92e4e362574645bcefddd08c7c915e18178a2cfe4d2e6ffe2607b54480e806edd824e9f9ea5d13648b1ed1e8708ffda9e9df536
+  checksum: 10c0/e350f09233fa9da6bce7824674586440c78016ea5ca55e118ed9d784cc7f1a7c611213f9bbc3b8503edd6832b75457cca477cb19b147c3778c5279e78cb51771
   languageName: node
   linkType: hard
 
@@ -8734,7 +8734,6 @@ __metadata:
   resolution: "openmcp-cli@workspace:cli"
   dependencies:
     "@openmcp/gateway": "npm:^0.0.1"
-    "@openmcp/service": "npm:^0.0.1"
     "@types/node": "npm:^20.11.0"
     "@types/uuid": "npm:^9.0.0"
     "@types/ws": "npm:^8.5.10"

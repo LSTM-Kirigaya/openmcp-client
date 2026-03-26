@@ -18,7 +18,13 @@ const REPO_ROOT = path.join(__dirname, '..', '..', '..');
 function resolveGatewayDir(): string {
   try {
     const pkg = nodeRequire.resolve('@openmcp/gateway/package.json');
-    return path.dirname(pkg);
+    const dir = path.dirname(pkg);
+    const entry = path.join(dir, 'dist', 'main.js');
+    // 如果安装包缺少产物（如某些环境只包含 src），回退到仓库本地 gateway。
+    if (!fs.existsSync(entry)) {
+      return path.join(REPO_ROOT, 'gateway');
+    }
+    return dir;
   } catch {
     return path.join(REPO_ROOT, 'gateway');
   }

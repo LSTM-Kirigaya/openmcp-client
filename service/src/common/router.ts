@@ -11,6 +11,10 @@ import { SkillController } from "../skill/skill.controller.js";
 import { BatchValidationController } from "../batch-validation/batch-validation.controller.js";
 import { DebuggerMcpController } from "../debugger-mcp/debugger-mcp.controller.js";
 import { AuthController } from "../auth.controller.js";
+import { ProjectsController } from "../cloud/controllers/projects.controller.js";
+import { ProjectMembersController } from "../cloud/controllers/project-members.controller.js";
+import { ProjectInvitesController } from "../cloud/controllers/project-invites.controller.js";
+import { SpecCasesController } from "../cloud/controllers/spec-cases.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
 
 export const ModuleControllers = [
@@ -24,7 +28,11 @@ export const ModuleControllers = [
     SkillController,
     BatchValidationController,
     DebuggerMcpController,
-    AuthController
+    AuthController,
+    ProjectsController,
+    ProjectMembersController,
+    ProjectInvitesController,
+    SpecCasesController
 ];
 
 export async function routeMessage(command: string, data: any, webview: PostMessageble) {

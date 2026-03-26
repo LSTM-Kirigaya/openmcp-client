@@ -76,10 +76,17 @@ mcpServers 聚合示例 mcp-servers.json:
 
 export const HELP_CLOUD = `
 示例:
+  openmcp-cli cloud auth register --email me@example.com -u myuser -p mypass
   openmcp-cli cloud auth login -u myuser -p mypass
+  openmcp-cli cloud auth refresh
+  openmcp-cli cloud projects create --name "demo-project"
+  openmcp-cli cloud projects members list --project-id <projectId>
+  openmcp-cli cloud projects invites create --project-id <projectId> --role writer
+  openmcp-cli cloud spec-cases tree --project-id <projectId>
   openmcp-cli cloud auth oauth github
   openmcp-cli cloud auth oauth github --redirect-uri http://localhost:3000/callback
   openmcp-cli cloud auth oauth github --open
+  openmcp-cli cloud auth oauth github --open --auto-store
 `;
 
 export const HELP_LLM = `
