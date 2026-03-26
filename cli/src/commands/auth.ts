@@ -2,12 +2,20 @@ import { Command } from 'commander';
 import open from 'open';
 import http from 'node:http';
 import { URL } from 'node:url';
+import os from 'node:os';
+import path from 'node:path';
 import { createMessageBridge } from '../lib/message-bridge.js';
 import { printJson, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
 import { HELP_CLOUD } from '../lib/help-text.js';
 import { projectsCmd } from './cloud-projects.js';
 import { specCasesCmd } from './cloud-spec-cases.js';
 import { invitesCmd } from './cloud-invites.js';
+
+function getTokenPersistPath(): string {
+  const fromEnv = process.env.OPENMCP_TOKEN_PATH;
+  if (typeof fromEnv === 'string' && fromEnv.trim()) return fromEnv.trim();
+  return path.join(os.homedir(), '.openmcp', 'token.json');
+}
 
 export const cloudCommand = new Command('cloud')
   .description('OpenMCP Cloud 相关能力（认证 + 项目/成员/邀请/SpecCase）。')
@@ -242,20 +250,32 @@ authCommand
 
         if (server && finalizeDone) {
           console.log(`🔄 等待 OAuth 完成并自动保存 token...`);
-          const timeoutAt = Date.now() + 5 * 60 * 1000;
+          const timeoutMs = 5 * 60 * 1000;
+          let timeoutId: NodeJS.Timeout | null = null;
+          let oauthSaved = false;
           try {
-            await Promise.race([
+            const finalized = await Promise.race([
               finalizeDone,
               new Promise((r) => {
-                const ms = Math.max(0, timeoutAt - Date.now());
-                setTimeout(() => r(null), ms);
+                timeoutId = setTimeout(() => r(null), timeoutMs);
               })
             ]);
+            if (finalized) {
+              oauthSaved = true;
+            }
           } catch (e: any) {
             console.error(`❌ OAuth finalize 失败: ${e?.message || e}`);
             process.exitCode = 1;
+          } finally {
+            if (timeoutId) {
+              clearTimeout(timeoutId);
+            }
           }
           await new Promise<void>((r) => server?.close(() => r()));
+
+          if (oauthSaved && process.exitCode !== 1) {
+            console.log(`✅ 登录成功，token 已保存到: ${getTokenPersistPath()}`);
+          }
         }
       } else {
         printJson(result.msg);
@@ -266,6 +286,88 @@ authCommand
     }
 
     await bridge.close();
+  });
+
+authCommand
+  .command('device')
+  .description('Device Code 跨设备登录（AuthController: auth/device/start + auth/device/token）')
+  .argument('<channel>', 'OAuth 渠道，如 github / google')
+  .option('--open', '打开 verification_uri_complete（可选）')
+  .option('--timeout-seconds <seconds>', '轮询超时（秒），默认 60', '60')
+  .option('-g, --gateway <url>', 'Gateway URL', DEFAULT_GATEWAY)
+  .action(async (channel, options) => {
+    const bridge = await createMessageBridge(options.gateway);
+
+    try {
+      const startRes = await bridge.commandRequest('auth/device/start', {
+        channel
+      });
+
+      if (startRes.code !== 200) {
+        console.error('❌ Device start failed:', startRes.msg);
+        process.exitCode = 1;
+        return;
+      }
+
+      const {
+        deviceCode,
+        userCode,
+        verificationUri,
+        verificationUriComplete,
+        expiresIn,
+        interval
+      } = startRes.msg || {};
+
+      console.log(`✅ Device login created`);
+      console.log(`- user_code: ${userCode}`);
+      console.log(`- verification_uri: ${verificationUri}`);
+      console.log(`- verification_uri_complete: ${verificationUriComplete}`);
+      console.log(`- expires_in: ${expiresIn}s`);
+      console.log(`- interval: ${interval}s`);
+
+      if (options.open && typeof verificationUriComplete === 'string' && verificationUriComplete.trim()) {
+        try {
+          await open(verificationUriComplete);
+        } catch (e: any) {
+          console.error(`❌ 自动打开浏览器失败: ${e?.message || e}`);
+        }
+      }
+
+      const timeoutSeconds = Number(options.timeoutSeconds ?? 60);
+      const pollIntervalSeconds = Number(interval ?? 2);
+      const timeoutAt = Date.now() + timeoutSeconds * 1000;
+
+      while (Date.now() < timeoutAt) {
+        const pollRes = await bridge.commandRequest('auth/device/token', {
+          deviceCode
+        });
+
+        if (pollRes.code === 200) {
+          console.log('✅ OAuth complete, token saved.');
+          console.log(`✅ 登录成功，token 已保存到: ${getTokenPersistPath()}`);
+          printJson(pollRes.msg);
+          break;
+        }
+
+        // 202 表示仍在授权中
+        if (pollRes.code === 202) {
+          await new Promise<void>((r) => setTimeout(r, pollIntervalSeconds * 1000));
+          continue;
+        }
+
+        // 过期/无效
+        console.error(`❌ Device token poll failed (${pollRes.code}):`, pollRes.msg);
+        process.exitCode = 1;
+        return;
+      }
+
+      if (process.exitCode !== 1) {
+        console.error(`⏰ Device login timed out after ${timeoutSeconds}s`);
+        process.exitCode = 1;
+      }
+    } finally {
+      await bridge.close();
+    }
   });
 
 cloudCommand.addCommand(authCommand);

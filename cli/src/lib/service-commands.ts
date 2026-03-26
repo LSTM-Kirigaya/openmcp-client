@@ -58,6 +58,8 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'auth/register', hint: 'body: { email, username, password }' },
   { command: 'auth/oauth', hint: 'body: { channel, redirectUri? }' },
   { command: 'auth/oauth/finalize', hint: 'body: { nonce }' },
+  { command: 'auth/device/start', hint: 'body: { channel }' },
+  { command: 'auth/device/token', hint: 'body: { deviceCode }' },
   { command: 'auth/logout', hint: '' },
   { command: 'auth/logout-all', hint: '' },
   { command: 'auth/status', hint: '' },

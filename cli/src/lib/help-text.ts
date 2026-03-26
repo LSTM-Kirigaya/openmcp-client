@@ -87,6 +87,7 @@ export const HELP_CLOUD = `
   openmcp-cli cloud auth oauth github --redirect-uri http://localhost:3000/callback
   openmcp-cli cloud auth oauth github --open
   openmcp-cli cloud auth oauth github --open --auto-store
+  openmcp-cli cloud auth device github
 `;
 
 export const HELP_LLM = `

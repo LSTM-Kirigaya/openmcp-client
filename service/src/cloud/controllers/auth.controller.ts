@@ -14,7 +14,9 @@ import {
     clearToken,
     isLoggedIn,
     setTokenPairFromExternal,
-    oauthFinalizeByNonce
+    oauthFinalizeByNonce,
+    startDeviceAuth as apiStartDeviceAuth,
+    pollDeviceToken as apiPollDeviceToken
 } from "../auth.js";
 
 function extractErrorMessage(error: any, fallback: string): string {
@@ -253,6 +255,59 @@ export class AuthController {
             return {
                 code: 500,
                 msg: error?.message || 'Set token pair failed'
+            };
+        }
+    }
+
+    @Controller('auth/device/start')
+    async deviceStart(data: RequestData, webview: PostMessageble) {
+        const { channel } = data;
+        if (!channel) {
+            return {
+                code: 400,
+                msg: 'channel is required'
+            };
+        }
+
+        try {
+            const result = await apiStartDeviceAuth(String(channel));
+            return {
+                code: 200,
+                msg: result
+            };
+        } catch (error: any) {
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'Device start failed'
+            };
+        }
+    }
+
+    @Controller('auth/device/token')
+    async deviceToken(data: RequestData, webview: PostMessageble) {
+        const { deviceCode } = data;
+        if (!deviceCode) {
+            return {
+                code: 400,
+                msg: 'deviceCode is required'
+            };
+        }
+
+        try {
+            const result = await apiPollDeviceToken(String(deviceCode));
+            return {
+                code: 200,
+                msg: {
+                    token: result.token,
+                    user: result.user,
+                    expiresAt: result.expiresAt
+                }
+            };
+        } catch (error: any) {
+            // pending: 后端返回 202 + message；axios 会走这里
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'Device token poll failed'
             };
         }
     }

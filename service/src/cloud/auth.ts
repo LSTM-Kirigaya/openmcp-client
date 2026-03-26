@@ -43,6 +43,15 @@ export interface OAuthAuthorizeResponse {
   authUrl: string;
 }
 
+export interface DeviceStartResponse {
+  deviceCode: string;
+  userCode: string;
+  verificationUri: string;
+  verificationUriComplete: string;
+  expiresIn: number;
+  interval: number;
+}
+
 type BackendCommonResponse<T = any> = {
   code: number;
   message: string;
@@ -57,6 +66,20 @@ type BackendTokens = {
 };
 
 type BackendLoginResponse = BackendCommonResponse<{
+  user: StoredUser & { id?: string; username?: string; email?: string };
+  tokens: BackendTokens;
+}>;
+
+type BackendDeviceStartResponse = BackendCommonResponse<{
+  device_code: string;
+  user_code: string;
+  verification_uri: string;
+  verification_uri_complete: string;
+  expires_in: number;
+  interval: number;
+}>;
+
+type BackendDeviceTokenResponse = BackendCommonResponse<{
   user: StoredUser & { id?: string; username?: string; email?: string };
   tokens: BackendTokens;
 }>;
@@ -318,6 +341,77 @@ export async function oauthFinalizeByNonce(nonce: string): Promise<LoginResponse
       id: String((mappedUser as any).id ?? ''),
       username: String((mappedUser as any).username ?? ''),
       email: (mappedUser as any).email
+    },
+    expiresAt: getExpiresAt() ?? new Date().toISOString()
+  };
+}
+
+/**
+ * Device Code Flow start
+ * 后端：POST /api/v1/auth/device/start
+ */
+export async function startDeviceAuth(channel: string): Promise<DeviceStartResponse> {
+  const client = createApiClient();
+  const resp = await client.post<BackendDeviceStartResponse>('/auth/device/start', {
+    channel
+  });
+
+  const d = resp.data.data;
+  return {
+    deviceCode: d.device_code,
+    userCode: d.user_code,
+    verificationUri: d.verification_uri,
+    verificationUriComplete: d.verification_uri_complete,
+    expiresIn: d.expires_in,
+    interval: d.interval
+  };
+}
+
+/**
+ * Device Code Flow poll
+ * 后端：POST /api/v1/auth/device/token
+ */
+export async function pollDeviceToken(deviceCode: string): Promise<LoginResponse> {
+  const client = createApiClient();
+  const resp = await client.post<BackendDeviceTokenResponse>('/auth/device/token', {
+    device_code: deviceCode
+  });
+
+  // 后端 pending 阶段返回 202 + authorization_pending
+  if (resp.status === 202 || (resp.data as any)?.code === 42001) {
+    const err: any = new Error((resp.data as any)?.message || 'authorization_pending');
+    err.response = {
+      status: 202,
+      data: {
+        message: (resp.data as any)?.message || 'authorization_pending'
+      }
+    };
+    throw err;
+  }
+
+  const d = resp.data.data;
+  if (!d?.tokens) {
+    throw new Error('Device token response missing tokens');
+  }
+  const tokens = d.tokens;
+  const user = d.user;
+
+  setTokenPairFromExternal({
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token,
+    user: {
+      id: (user as any).id,
+      username: (user as any).username,
+      email: (user as any).email
+    }
+  });
+
+  return {
+    token: tokens.access_token,
+    user: {
+      id: String((user as any).id ?? ''),
+      username: String((user as any).username ?? ''),
+      email: (user as any).email
     },
     expiresAt: getExpiresAt() ?? new Date().toISOString()
   };
