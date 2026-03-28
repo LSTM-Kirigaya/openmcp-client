@@ -39,7 +39,7 @@ Complete project-level management panel for easier MCP project management at bot
 
 ![](./icons/openmcp.management.png)
 
-Supports multiple large models
+Supports multiple large models: DeepSeek, OpenAI, Qwen, Gemini, Grok, Mistral, MiniMax, Groq, Perplexity, Kimi, Ollama, OpenRouter and more.
 
 ![](./icons/openmcp.support.llm.png)
 

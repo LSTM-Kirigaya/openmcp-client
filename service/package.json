@@ -17,7 +17,9 @@
 		"clean": "rm -rf dist",
 		"lint": "eslint src --ext .ts,.tsx",
 		"typecheck": "tsc --noEmit",
-		"test:storage": "tsx src/common/json-archive-store.test.ts"
+		"test:storage": "tsx src/common/json-archive-store.test.ts",
+		"test:llm": "tsx src/hook/llm.test.ts",
+		"test:llm:integration": "tsx src/hook/llm.integration.test.ts"
 	},
 	"author": "LSTM-Kirigaya",
 	"license": "MIT",

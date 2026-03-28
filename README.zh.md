@@ -39,7 +39,7 @@
 
 ![](./icons/openmcp.management.png)
 
-支持多种大模型
+支持多种大模型：DeepSeek、OpenAI、通义千问、Gemini、Grok、Mistral、MiniMax、Groq、Perplexity、Kimi、Ollama、OpenRouter 等。
 
 ![](./icons/openmcp.support.llm.png)
 
