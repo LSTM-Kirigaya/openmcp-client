@@ -5,6 +5,9 @@
                 <span class="iconfont icon-tool"></span>
                 {{ t('test-cases-management') }}
             </h3>
+            <el-tag v-if="cloudContext.mode === 'cloud'" type="warning">
+                {{ t('runtime-mode-cloud') }}
+            </el-tag>
             <div class="header-actions">
                 <el-select v-model="statusFilter" class="header-status-filter" :placeholder="t('filter-by-status')"
                     style="width: 110px;">
@@ -31,6 +34,9 @@
                     </el-tooltip>
                 </el-button-group>
             </div>
+        </div>
+        <div v-if="cloudContext.mode === 'cloud' && !cloudContext.currentProjectId" class="no-test-cases-text">
+            {{ t('cloud-select-project-first') }}
         </div>
 
         <div class="test-cases-list">
@@ -177,13 +183,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, type FormInstance } from 'element-plus';
 import { tabs } from '../../../panel';
 import type { ToolStorage, TestCase } from '../../tools';
 import { mcpClientAdapter } from '@/views/connect/core';
-import { initTestCasesStore, testCasesState, saveTestCases, updateTestCase } from './store';
+import { cloudContext } from '@/hook/cloud-context';
+import {
+    createTestCase,
+    deleteTestCase,
+    initTestCasesStore,
+    loadTestCases,
+    testCasesState,
+    updateTestCase
+} from './store';
 
 const { t } = useI18n();
 
@@ -326,7 +340,7 @@ function copyFromCurrentForm() {
     }
 }
 
-function handleSaveTestCase() {
+async function handleSaveTestCase() {
     // 验证
     if (!currentTestCaseForm.value.name) {
         ElMessage.error(t('please-enter-test-case-name'));
@@ -360,20 +374,14 @@ function handleSaveTestCase() {
     const now = Date.now();
 
     if (isEditing.value && selectedTestCase.value) {
-        // 编辑现有测试用例
-        const index = testCasesState.value.findIndex(tc => tc.id === selectedTestCase.value!.id);
-        if (index !== -1) {
-            testCasesState.value[index] = {
-                ...testCasesState.value[index],
-                name: currentTestCaseForm.value.name,
-                toolName: currentTestCaseForm.value.toolName,
-                description: currentTestCaseForm.value.description,
-                input: parsedInput,
-                expectedOutput: parsedExpected,
-                updatedAt: now
-            };
-        }
-        saveTestCases();
+        await updateTestCase(selectedTestCase.value.id, {
+            name: currentTestCaseForm.value.name,
+            toolName: currentTestCaseForm.value.toolName,
+            description: currentTestCaseForm.value.description,
+            input: parsedInput,
+            expectedOutput: parsedExpected,
+            updatedAt: now
+        });
         ElMessage.success(t('test-case-updated'));
     } else {
         // 创建新测试用例
@@ -388,25 +396,20 @@ function handleSaveTestCase() {
             updatedAt: now,
             ...(parsedExpected !== undefined ? { expectedOutput: parsedExpected } : {})
         };
-        testCasesState.value.push(newTestCase);
-        saveTestCases();
+        await createTestCase(newTestCase);
         ElMessage.success(t('test-case-created'));
     }
 
     dialogVisible.value = false;
 }
 
-function handleDeleteTestCase(id: string) {
-    const index = testCasesState.value.findIndex(tc => tc.id === id);
-    if (index !== -1) {
-        testCasesState.value.splice(index, 1);
-        saveTestCases();
-        ElMessage.success(t('test-case-deleted'));
-    }
+async function handleDeleteTestCase(id: string) {
+    await deleteTestCase(id);
+    ElMessage.success(t('test-case-deleted'));
 }
 
 async function handleRunTest(testCase: TestCase) {
-    updateTestCase(testCase.id, { status: 'running' });
+    await updateTestCase(testCase.id, { status: 'running' }, { persist: false });
     try {
         const response = await mcpClientAdapter.callTool(testCase.toolName, testCase.input);
 
@@ -415,12 +418,11 @@ async function handleRunTest(testCase: TestCase) {
         const isMatch = !hasExpected || isToolCallResponseEqual(response, testCase.expectedOutput);
         const newStatus = isMatch ? 'passed' : 'failed';
 
-        updateTestCase(testCase.id, {
+        await updateTestCase(testCase.id, {
             status: newStatus,
             actualOutput: response,
             updatedAt: Date.now()
-        });
-        saveTestCases();
+        }, { persist: false });
         ElMessage.success(t('test-executed-successfully'));
 
         if (!runningAll.value) {
@@ -430,15 +432,14 @@ async function handleRunTest(testCase: TestCase) {
     } catch (e: any) {
         const errMsg = e?.message ?? String(e);
         const isTimeout = /timeout|timed out|ETIMEDOUT/i.test(errMsg);
-        updateTestCase(testCase.id, {
+        await updateTestCase(testCase.id, {
             status: isTimeout ? 'timeout' : 'failed',
             actualOutput: {
                 content: [{ type: 'text', text: `Error: ${errMsg}` }],
                 isError: true
             },
             updatedAt: Date.now()
-        });
-        saveTestCases();
+        }, { persist: false });
         ElMessage.error(t('test-execution-failed'));
 
         if (!runningAll.value) {
@@ -481,7 +482,6 @@ async function handleRunAllTests() {
     }
 
     runningAll.value = false;
-    saveTestCases();
     ElMessage.success(`${t('all-tests-completed')}: ${passed} ${t('passed')}, ${failed} ${t('failed')}`);
 }
 
@@ -509,6 +509,13 @@ function formatTime(timestamp: number): string {
     const date = new Date(timestamp);
     return date.toLocaleString();
 }
+
+watch(
+    () => [cloudContext.mode, cloudContext.currentProjectId],
+    () => {
+        loadTestCases();
+    }
+);
 
 </script>
 

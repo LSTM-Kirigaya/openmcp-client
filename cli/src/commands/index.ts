@@ -1,5 +1,5 @@
 export { gatewayCommand } from './gateway.js';
-export { webCommand } from './web.js';
+export { webCommand } from './webui.js';
 export { startCommand } from './start.js';
 export { cloudCommand } from './auth.js';
 export { mcpCommand } from './mcp.js';
