@@ -1,17 +1,23 @@
-import { Controller } from "./common/index.js";
-import { PostMessageble } from "./hook/adapter.js";
-import { RequestData } from "./common/index.dto.js";
+import { Controller } from "../../common/index.js";
+import { PostMessageble } from "../../hook/adapter.js";
+import { RequestData } from "../../common/index.dto.js";
 import {
+    register as apiRegister,
     login as apiLogin,
     getOAuthAuthorizeUrl as apiGetOAuthAuthorizeUrl,
     logout as apiLogout,
+    logoutAll as apiLogoutAll,
     checkAuthStatus as apiCheckAuthStatus,
     refreshToken as apiRefreshToken,
     getToken,
     setToken,
     clearToken,
-    isLoggedIn
-} from "./web/auth.js";
+    isLoggedIn,
+    setTokenPairFromExternal,
+    oauthFinalizeByNonce,
+    startDeviceAuth as apiStartDeviceAuth,
+    pollDeviceToken as apiPollDeviceToken
+} from "../auth.js";
 
 function extractErrorMessage(error: any, fallback: string): string {
     const message =
@@ -40,6 +46,34 @@ function buildOAuthFriendlyError(error: any): string {
 }
 
 export class AuthController {
+    @Controller('auth/register')
+    async register(data: RequestData, webview: PostMessageble) {
+        const { email, username, password } = data;
+        if (!email || !username || !password) {
+            return {
+                code: 400,
+                msg: 'Email, username and password are required'
+            };
+        }
+
+        try {
+            const result = await apiRegister(String(email), String(username), String(password));
+            return {
+                code: 200,
+                msg: {
+                    token: result.token,
+                    user: result.user,
+                    expiresAt: result.expiresAt
+                }
+            };
+        } catch (error: any) {
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'Register failed'
+            };
+        }
+    }
+
     @Controller('auth/login')
     async login(data: RequestData, webview: PostMessageble) {
         const { username, password } = data;
@@ -110,6 +144,23 @@ export class AuthController {
         }
     }
 
+    @Controller('auth/logout-all')
+    async logoutAll(data: RequestData, webview: PostMessageble) {
+        try {
+            await apiLogoutAll();
+            return {
+                code: 200,
+                msg: 'Logged out all sessions successfully'
+            };
+        } catch (error: any) {
+            clearToken();
+            return {
+                code: 200,
+                msg: 'Logged out all sessions (local)'
+            };
+        }
+    }
+
     @Controller('auth/status')
     async status(data: RequestData, webview: PostMessageble) {
         try {
@@ -154,6 +205,109 @@ export class AuthController {
             return {
                 code: error.response?.status || 500,
                 msg: error.response?.data?.message || error.message || 'Token refresh failed'
+            };
+        }
+    }
+
+    @Controller('auth/oauth/finalize')
+    async oauthFinalize(data: RequestData, webview: PostMessageble) {
+        const { nonce } = data;
+        if (!nonce) {
+            return {
+                code: 400,
+                msg: 'nonce is required'
+            };
+        }
+        try {
+            const result = await oauthFinalizeByNonce(String(nonce));
+            return {
+                code: 200,
+                msg: result
+            };
+        } catch (error: any) {
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'OAuth finalize failed'
+            };
+        }
+    }
+
+    @Controller('auth/set-token-pair')
+    async setTokenPairController(data: RequestData, webview: PostMessageble) {
+        const { accessToken, refreshToken, user } = data;
+        if (!accessToken || !refreshToken) {
+            return {
+                code: 400,
+                msg: 'accessToken and refreshToken are required'
+            };
+        }
+        try {
+            setTokenPairFromExternal({
+                accessToken: String(accessToken),
+                refreshToken: String(refreshToken),
+                user: user ?? null
+            });
+            return {
+                code: 200,
+                msg: 'Token pair set successfully'
+            };
+        } catch (error: any) {
+            return {
+                code: 500,
+                msg: error?.message || 'Set token pair failed'
+            };
+        }
+    }
+
+    @Controller('auth/device/start')
+    async deviceStart(data: RequestData, webview: PostMessageble) {
+        const { channel } = data;
+        if (!channel) {
+            return {
+                code: 400,
+                msg: 'channel is required'
+            };
+        }
+
+        try {
+            const result = await apiStartDeviceAuth(String(channel));
+            return {
+                code: 200,
+                msg: result
+            };
+        } catch (error: any) {
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'Device start failed'
+            };
+        }
+    }
+
+    @Controller('auth/device/token')
+    async deviceToken(data: RequestData, webview: PostMessageble) {
+        const { deviceCode } = data;
+        if (!deviceCode) {
+            return {
+                code: 400,
+                msg: 'deviceCode is required'
+            };
+        }
+
+        try {
+            const result = await apiPollDeviceToken(String(deviceCode));
+            return {
+                code: 200,
+                msg: {
+                    token: result.token,
+                    user: result.user,
+                    expiresAt: result.expiresAt
+                }
+            };
+        } catch (error: any) {
+            // pending: 后端返回 202 + message；axios 会走这里
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'Device token poll failed'
             };
         }
     }
