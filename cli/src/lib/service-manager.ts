@@ -3,6 +3,7 @@ import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import WebSocket from 'ws';
 import http from 'http';
 
@@ -35,6 +36,52 @@ const RENDERER_DIR = path.join(REPO_ROOT, 'renderer');
 const RENDERER_DIST_DIR = path.join(RENDERER_DIR, 'dist');
 const GATEWAY_ENTRY = path.join(GATEWAY_DIR, 'dist', 'main.js');
 const STATIC_WEB_SERVER_ENTRY = path.join(__dirname, 'static-web-server.js');
+
+/** 可选：用户目录下 KEY=VALUE 行文件，供后台启动的 Gateway 继承（避免 PowerShell 与 cmd 环境变量语法混淆） */
+export function gatewayEnvFilePath(): string {
+  return path.join(os.homedir(), '.openmcp', 'gateway.env');
+}
+
+function loadGatewayEnvFile(): Record<string, string> {
+  const filePath = gatewayEnvFilePath();
+  if (!fs.existsSync(filePath)) {
+    return {};
+  }
+  try {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const out: Record<string, string> = {};
+    for (const line of raw.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq <= 0) continue;
+      const key = trimmed.slice(0, eq).trim();
+      let val = trimmed.slice(eq + 1).trim();
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
+        val = val.slice(1, -1);
+      }
+      if (key) {
+        out[key] = val;
+      }
+    }
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+/** 合并：gateway.env（默认） + 当前进程环境（覆盖文件） + PORT */
+function buildGatewayChildEnv(port: number): NodeJS.ProcessEnv {
+  const fromFile = loadGatewayEnvFile();
+  return {
+    ...fromFile,
+    ...process.env,
+    PORT: String(port)
+  } as NodeJS.ProcessEnv;
+}
 
 // PID 文件路径（位于 cli 包根下）
 const PID_FILE = path.join(__dirname, '..', '..', '.gateway.pid');
@@ -353,7 +400,7 @@ function doStartService(port: number, detached: boolean = false): { pid: number 
     return { pid: 0 };
   }
 
-  const env = { ...process.env, PORT: String(port) };
+  const env = buildGatewayChildEnv(port);
 
   if (detached) {
     const child = spawn(NODE, ['dist/main.js'], {

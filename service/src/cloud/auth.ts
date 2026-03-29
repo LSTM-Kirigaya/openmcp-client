@@ -314,7 +314,8 @@ export function setTokenPairFromExternal(params: {
  * 后端：GET /api/v1/auth/oauth/tokens?nonce=...
  */
 export async function oauthFinalizeByNonce(nonce: string): Promise<LoginResponse> {
-  const client = createApiClient();
+  // 换 nonce 时不应附带旧的 Authorization，避免连错环境或干扰排查；该路由本身也不校验 JWT。
+  const client = createOAuthClient();
   const resp = await client.get<BackendCommonResponse<{
     user: StoredUser & { id?: string; username?: string; email?: string };
     tokens: BackendTokens;

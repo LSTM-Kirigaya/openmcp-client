@@ -4,6 +4,15 @@
 
 export const HELP_GATEWAY = `
 提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/cloud 等命令时加 -g ws://127.0.0.1:9000。
+
+云端 API 基址由 Gateway 进程内的环境变量决定（@openmcp/service 的 OPENMCP_API_BASE_URL / NODE_ENV），与运行 CLI 的终端无关。
+  · PowerShell 正确写法: $env:NODE_ENV = "development"  或  $env:OPENMCP_API_BASE_URL = "http://localhost:8000"
+  · 勿用 cmd 的 set NODE_ENV=...（在 PowerShell 中通常不会设进子进程）
+  · 可选配置文件（后台 start/restart 也会读取）: %USERPROFILE%\\.openmcp\\gateway.env
+    每行 KEY=VALUE，例如:
+    NODE_ENV=development
+    OPENMCP_API_BASE_URL=http://localhost:8000
+    当前终端已存在的环境变量会覆盖文件中的同名字段。
 `;
 
 export const HELP_PROGRAM_AFTER = `

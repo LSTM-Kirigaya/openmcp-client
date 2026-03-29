@@ -96,6 +96,12 @@ function clearDisk(): void {
 // 模块加载时先尝试从磁盘恢复
 loadFromDisk();
 
+/** 进程内内存未持有 access token 时再从磁盘拉取（例如 Gateway 重启后、OAuth 由其他进程写过文件）。 */
+export function reloadTokenFromDiskIfEmpty(): void {
+  if (accessToken) return;
+  loadFromDisk();
+}
+
 export function setAccessToken(token: string | null): void {
   accessToken = token;
   if (accessToken) {

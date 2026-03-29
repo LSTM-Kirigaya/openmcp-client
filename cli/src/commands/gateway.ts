@@ -14,6 +14,8 @@ OpenMCP Gateway 管理命令：
   restart 重启 Gateway
   status  查看 Gateway 状态
 
+云端/本地后端由 Gateway 进程的环境变量决定（OPENMCP_API_BASE_URL、NODE_ENV）。PowerShell 请用 $env:NODE_ENV="development"；或写入 %USERPROFILE%\\.openmcp\\gateway.env 后执行 restart。
+
 示例：
   openmcp-cli gateway run           # 前台运行
   openmcp-cli gateway start         # 后台启动
