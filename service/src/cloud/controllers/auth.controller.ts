@@ -1,6 +1,6 @@
 import { Controller } from "../../common/index.js";
 import { PostMessageble } from "../../hook/adapter.js";
-import { RequestData } from "../../common/index.dto.js";
+import { RequestData, type RestfulResponse } from "../../common/index.dto.js";
 import {
     register as apiRegister,
     login as apiLogin,
@@ -60,7 +60,8 @@ export class AuthController {
             const result = await apiRegister(String(email), String(username), String(password));
             return {
                 code: 200,
-                msg: {
+                msg: 'ok',
+                data: {
                     token: result.token,
                     user: result.user,
                     expiresAt: result.expiresAt
@@ -89,7 +90,8 @@ export class AuthController {
             const result = await apiLogin(username, password);
             return {
                 code: 200,
-                msg: {
+                msg: 'ok',
+                data: {
                     token: result.token,
                     user: result.user,
                     expiresAt: result.expiresAt
@@ -116,7 +118,8 @@ export class AuthController {
             const result = await apiGetOAuthAuthorizeUrl(channel, redirectUri);
             return {
                 code: 200,
-                msg: result
+                msg: 'ok',
+                data: result
             };
         } catch (error: any) {
             return {
@@ -162,19 +165,21 @@ export class AuthController {
     }
 
     @Controller('auth/status')
-    async status(data: RequestData, webview: PostMessageble) {
+    async status(data: RequestData, webview: PostMessageble): Promise<RestfulResponse> {
         try {
             const result = await apiCheckAuthStatus();
             return {
                 code: 200,
-                msg: result
+                msg: 'ok',
+                data: result
             };
         } catch (error: any) {
             // 如果请求失败，检查本地是否有 token
             if (isLoggedIn()) {
                 return {
                     code: 200,
-                    msg: {
+                    msg: 'ok',
+                    data: {
                         loggedIn: true,
                         note: 'Local token exists, but API unreachable'
                     }
@@ -182,7 +187,8 @@ export class AuthController {
             }
             return {
                 code: 200,
-                msg: {
+                msg: 'ok',
+                data: {
                     loggedIn: false
                 }
             };
@@ -195,7 +201,8 @@ export class AuthController {
             const result = await apiRefreshToken();
             return {
                 code: 200,
-                msg: {
+                msg: 'ok',
+                data: {
                     token: result.token,
                     user: result.user,
                     expiresAt: result.expiresAt
@@ -222,7 +229,8 @@ export class AuthController {
             const result = await oauthFinalizeByNonce(String(nonce));
             return {
                 code: 200,
-                msg: result
+                msg: 'ok',
+                data: result
             };
         } catch (error: any) {
             return {
@@ -273,7 +281,8 @@ export class AuthController {
             const result = await apiStartDeviceAuth(String(channel));
             return {
                 code: 200,
-                msg: result
+                msg: 'ok',
+                data: result
             };
         } catch (error: any) {
             return {
@@ -297,7 +306,8 @@ export class AuthController {
             const result = await apiPollDeviceToken(String(deviceCode));
             return {
                 code: 200,
-                msg: {
+                msg: 'ok',
+                data: {
                     token: result.token,
                     user: result.user,
                     expiresAt: result.expiresAt
@@ -331,11 +341,12 @@ export class AuthController {
     }
 
     @Controller('auth/get-token')
-    async getTokenController(data: RequestData, webview: PostMessageble) {
+    async getTokenController(data: RequestData, webview: PostMessageble): Promise<RestfulResponse> {
         const token = getToken();
         return {
             code: 200,
-            msg: {
+            msg: 'ok',
+            data: {
                 hasToken: !!token,
                 token: token ? token.substring(0, 20) + '...' : null
             }

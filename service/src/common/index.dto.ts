@@ -29,7 +29,10 @@ export interface MapperDescriptor<T> {
 
 export interface RestfulResponse {
     code: number;
+    /** 简短说明；错误时为错误文案，成功且带业务数据时建议为 "ok" */
     msg: any;
+    /** 与 HTTP 后端 `data` 对齐；无载荷的成功响应可省略 */
+    data?: any;
 }
 
 export interface ControllerOption {

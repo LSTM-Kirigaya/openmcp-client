@@ -35,7 +35,7 @@ export class ProjectMembersController {
 
     try {
       const resp = await listProjectMembers(String(projectId));
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'List members failed') };
     }
@@ -54,7 +54,7 @@ export class ProjectMembersController {
         userId: String(userId),
         role: String(role)
       });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 400, msg: getErrorMessage(error, 'Add member failed') };
     }
@@ -72,7 +72,7 @@ export class ProjectMembersController {
         operatorId,
         userId: String(userId)
       });
-      return { code: 200, msg: resp.data ?? 'Remove success' };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Remove member failed') };
     }
@@ -91,7 +91,7 @@ export class ProjectMembersController {
         userId: String(userId),
         role: String(role)
       });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Update role failed') };
     }

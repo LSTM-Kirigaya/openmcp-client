@@ -31,7 +31,7 @@ export class SpecCasesController {
         input: typeof input === 'string' ? input : undefined,
         output: typeof output === 'string' ? output : undefined
       });
-      return { code: 200, msg: resp.data as SpecCase };
+      return { code: 200, msg: 'ok', data: resp.data as SpecCase };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Create spec-cases failed') };
     }
@@ -43,7 +43,7 @@ export class SpecCasesController {
     if (!projectId) return { code: 400, msg: 'projectId is required' };
     try {
       const resp = await getSpecCaseTree({ projectId: String(projectId) });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Get spec-cases tree failed') };
     }
@@ -55,7 +55,7 @@ export class SpecCasesController {
     if (!projectId || !caseId) return { code: 400, msg: 'projectId/caseId are required' };
     try {
       const resp = await getSpecCase({ projectId: String(projectId), caseId: String(caseId) });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Get spec-case failed') };
     }
@@ -79,7 +79,7 @@ export class SpecCasesController {
         input: typeof input === 'string' ? input : undefined,
         output: typeof output === 'string' ? output : undefined
       });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Update spec-case failed') };
     }
@@ -91,7 +91,7 @@ export class SpecCasesController {
     if (!projectId || !caseId) return { code: 400, msg: 'projectId/caseId are required' };
     try {
       const resp = await deleteSpecCase({ projectId: String(projectId), caseId: String(caseId) });
-      return { code: 200, msg: resp.data ?? 'Delete success' };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Delete spec-case failed') };
     }

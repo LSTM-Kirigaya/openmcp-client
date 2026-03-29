@@ -23,7 +23,7 @@ export class ProjectsController {
 
     try {
       const resp = await createProject(String(name));
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Create project failed') };
     }
@@ -33,7 +33,7 @@ export class ProjectsController {
   async list(_data: RequestData, _webview: PostMessageble) {
     try {
       const resp = await listProjects();
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'List projects failed') };
     }
@@ -48,7 +48,7 @@ export class ProjectsController {
 
     try {
       const resp = await getProject(String(projectId));
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Get project failed') };
     }
@@ -63,7 +63,7 @@ export class ProjectsController {
 
     try {
       const resp = await updateProject(String(projectId), String(name));
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Update project failed') };
     }
@@ -78,7 +78,7 @@ export class ProjectsController {
 
     try {
       const resp = await deleteProject(String(projectId));
-      return { code: 200, msg: resp.data ?? 'Delete success' };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Delete project failed') };
     }

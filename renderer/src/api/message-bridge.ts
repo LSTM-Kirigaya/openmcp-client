@@ -13,6 +13,7 @@ export interface RestFulResponse<T = any> {
     _id?: string
 	code: number;
 	msg: T;
+	data?: unknown;
 }
 
 export type MessageHandler = (message: VSCodeMessage) => void;

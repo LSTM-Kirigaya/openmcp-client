@@ -12,6 +12,8 @@ export interface RestFulResponse<T = any> {
   _id?: string;
   code: number;
   msg: T;
+  /** 业务载荷（云/Auth 等成功响应）；与 HTTP API 的 data 一致 */
+  data?: unknown;
 }
 
 export type CommandHandler = (data: any) => void;

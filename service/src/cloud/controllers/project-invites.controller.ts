@@ -33,7 +33,7 @@ export class ProjectInvitesController {
     if (!projectId) return { code: 400, msg: 'projectId is required' };
     try {
       const resp = await listProjectInvites({ projectId: String(projectId), operatorId: requireOperatorId() });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'List invites failed') };
     }
@@ -51,7 +51,7 @@ export class ProjectInvitesController {
         expiresAt: typeof expiresAt === 'string' && expiresAt.trim() ? expiresAt : undefined,
         maxUses: typeof maxUses === 'number' ? maxUses : maxUses ? Number(maxUses) : undefined
       });
-      return { code: 200, msg: resp.data as ProjectInvite };
+      return { code: 200, msg: 'ok', data: resp.data as ProjectInvite };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Create invite failed') };
     }
@@ -67,7 +67,7 @@ export class ProjectInvitesController {
         operatorId: requireOperatorId(),
         inviteId: String(inviteId)
       });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Delete invite failed') };
     }
@@ -83,7 +83,7 @@ export class ProjectInvitesController {
         operatorId: requireOperatorId(),
         inviteId: String(inviteId)
       });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Revoke invite failed') };
     }
@@ -96,7 +96,7 @@ export class ProjectInvitesController {
 
     try {
       const resp = await joinProjectByInvite({ inviteCode: String(code), userId: String(userId) });
-      return { code: 200, msg: resp.data };
+      return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {
       return { code: error?.response?.status || 500, msg: getErrorMessage(error, 'Join project by invite failed') };
     }

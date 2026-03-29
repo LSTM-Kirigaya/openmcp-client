@@ -60,7 +60,7 @@ authCommand
 
     if (result.code === 200) {
       console.log(`✅ Login successful!`);
-      printJson(result.msg);
+      printJson(result.data ?? result.msg);
     } else {
       console.error(`❌ Login failed:`, result.msg);
       process.exitCode = 1;
@@ -236,7 +236,10 @@ authCommand
     });
 
     if (result.code === 200) {
-      const authUrl = result.msg?.authUrl || result.msg?.url;
+      const oauthBody = (result.data ?? result.msg) as Record<string, unknown> | undefined;
+      const authUrl =
+        (typeof oauthBody?.authUrl === 'string' && oauthBody.authUrl) ||
+        (typeof oauthBody?.url === 'string' && oauthBody.url);
       if (typeof authUrl === 'string') {
         console.log(authUrl);
         if (options.open) {
@@ -278,7 +281,7 @@ authCommand
           }
         }
       } else {
-        printJson(result.msg);
+        printJson(result.data ?? result.msg);
       }
     } else {
       console.error(`❌ OAuth URL 获取失败:`, result.msg);
@@ -316,7 +319,14 @@ authCommand
         verificationUriComplete,
         expiresIn,
         interval
-      } = startRes.msg || {};
+      } = ((startRes.data ?? startRes.msg) || {}) as {
+        deviceCode?: string;
+        userCode?: string;
+        verificationUri?: string;
+        verificationUriComplete?: string;
+        expiresIn?: number;
+        interval?: number;
+      };
 
       console.log(`✅ Device login created`);
       console.log(`- user_code: ${userCode}`);
@@ -345,7 +355,7 @@ authCommand
         if (pollRes.code === 200) {
           console.log('✅ OAuth complete, token saved.');
           console.log(`✅ 登录成功，token 已保存到: ${getTokenPersistPath()}`);
-          printJson(pollRes.msg);
+          printJson(pollRes.data ?? pollRes.msg);
           break;
         }
 
