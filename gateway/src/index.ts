@@ -6,3 +6,5 @@ export {
   VSCodeWebViewLike,
   setRunningCWD
 } from '@openmcp/service';
+
+export { gatewayUserLogDir } from './paths.js';

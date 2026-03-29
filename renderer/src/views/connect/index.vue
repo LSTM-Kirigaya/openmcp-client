@@ -155,18 +155,21 @@ async function connectCloudProject(project: CloudProject) {
 	cloudConnectingProjectId.value = project.id;
 	try {
 		setCurrentCloudProject(project.id);
-		const client = new McpClient();
+		const rawClient = new McpClient();
 		const mapped = mapCloudProjectTransport(project);
-		client.connectionArgs.connectionType = mapped.connectionType;
-		client.connectionArgs.commandString = mapped.commandString || '';
-		client.connectionArgs.url = mapped.url || '';
-		client.connectionResult.name = project.name;
-		mcpClientAdapter.clients.push(client);
-		mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
+		rawClient.connectionArgs.connectionType = mapped.connectionType;
+		rawClient.connectionArgs.commandString = mapped.commandString || '';
+		rawClient.connectionArgs.url = mapped.url || '';
+		rawClient.connectionResult.name = project.name;
+		mcpClientAdapter.clients.push(rawClient);
+		const insertedIndex = mcpClientAdapter.clients.length - 1;
+		mcpClientAdapter.currentClientIndex = insertedIndex;
+		// 使用列表中的代理对象执行后续状态更新，确保 UI 能立即响应
+		const client = mcpClientAdapter.clients[insertedIndex];
 		await client.handleEnvSwitch(true);
 		const ok = await client.connect();
 		if (!ok) {
-			mcpClientAdapter.clients.splice(mcpClientAdapter.currentClientIndex, 1);
+			mcpClientAdapter.clients.splice(insertedIndex, 1);
 			mcpClientAdapter.currentClientIndex = Math.max(0, mcpClientAdapter.clients.length - 1);
 			return;
 		}

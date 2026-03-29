@@ -9,9 +9,10 @@ export async function createSpecCase(params: {
   name: string;
   input?: string;
   output?: string;
+  description?: string;
 }): Promise<BackendCommonResponse<SpecCase>> {
   const client = createApiClient();
-  const { projectId, parentId, nodeType, type, name, input, output } = params;
+  const { projectId, parentId, nodeType, type, name, input, output, description } = params;
 
   const body: any = {
     node_type: nodeType,
@@ -21,6 +22,9 @@ export async function createSpecCase(params: {
   if (parentId !== undefined) body.parent_id = parentId;
   if (input !== undefined) body.input = input;
   if (output !== undefined) body.output = output;
+  if (description !== undefined) {
+    body.description = description;
+  }
 
   return (await client.post<BackendCommonResponse<SpecCase>>(
     `/projects/${encodeURIComponent(projectId)}/spec-cases`,
@@ -58,9 +62,10 @@ export async function updateSpecCase(params: {
   name: string;
   input?: string;
   output?: string;
+  description?: string;
 }): Promise<BackendCommonResponse<SpecCase>> {
   const client = createApiClient();
-  const { projectId, caseId, parentId, nodeType, type, name, input, output } = params;
+  const { projectId, caseId, parentId, nodeType, type, name, input, output, description } = params;
 
   const body: any = {
     node_type: nodeType,
@@ -70,6 +75,9 @@ export async function updateSpecCase(params: {
   if (parentId !== undefined) body.parent_id = parentId;
   if (input !== undefined) body.input = input;
   if (output !== undefined) body.output = output;
+  if (description !== undefined) {
+    body.description = description;
+  }
 
   return (await client.put<BackendCommonResponse<SpecCase>>(
     `/projects/${encodeURIComponent(projectId)}/spec-cases/${encodeURIComponent(caseId)}`,

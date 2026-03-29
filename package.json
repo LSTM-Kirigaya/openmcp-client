@@ -310,6 +310,7 @@
         "@rollup/plugin-json": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.1",
         "@rollup/plugin-typescript": "^12.1.2",
+        "@types/debug": "^4.1.12",
         "@types/express": "^5.0.6",
         "@types/node": "^22.15.29",
         "@types/pako": "^2.0.3",

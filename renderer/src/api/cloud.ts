@@ -33,6 +33,7 @@ export interface CloudSpecCase {
     name: string;
     input?: string;
     output?: string;
+    description?: string;
     children?: CloudSpecCase[];
 }
 
@@ -151,7 +152,8 @@ export async function cloudCreateSpecCase(projectId: string, input: Partial<Clou
         name: input.name,
         parentId: input.parent_id,
         input: input.input,
-        output: input.output
+        output: input.output,
+        description: input.description ?? ''
     });
 }
 
@@ -164,7 +166,8 @@ export async function cloudUpdateSpecCase(projectId: string, caseId: string, inp
         name: input.name,
         parentId: input.parent_id,
         input: input.input,
-        output: input.output
+        output: input.output,
+        description: input.description ?? ''
     });
 }
 

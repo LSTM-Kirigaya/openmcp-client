@@ -19,6 +19,7 @@ gw(
     .option('--parent-id <id>', '父节点ID（可选）')
     .option('--input <text>', 'input（可选）')
     .option('--output <text>', 'output（可选）')
+    .option('--description <text>', '描述（可选）')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('spec-cases/create', {
@@ -28,7 +29,8 @@ gw(
           name: options.name,
           parentId: options.parentId,
           input: options.input,
-          output: options.output
+          output: options.output,
+          description: options.description
         });
         printJson(res);
         if (res.code !== 200) process.exitCode = 1;
@@ -77,6 +79,7 @@ gw(
     .option('--parent-id <id>', '父节点ID（可选）')
     .option('--input <text>', 'input（可选）')
     .option('--output <text>', 'output（可选）')
+    .option('--description <text>', '描述（可选；不传则保持原值）')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('spec-cases/update', {
@@ -87,7 +90,8 @@ gw(
           name: options.name,
           parentId: options.parentId,
           input: options.input,
-          output: options.output
+          output: options.output,
+          description: options.description
         });
         printJson(res);
         if (res.code !== 200) process.exitCode = 1;

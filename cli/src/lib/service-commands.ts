@@ -55,9 +55,9 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'projects/invites/delete', hint: 'body: { projectId, inviteId }' },
   { command: 'projects/invites/revoke', hint: 'body: { projectId, inviteId }' },
   { command: 'invites/join', hint: 'body: { code, userId }' },
-  { command: 'spec-cases/create', hint: 'body: { projectId, nodeType, type, name, parentId?, input?, output? }' },
+  { command: 'spec-cases/create', hint: 'body: { projectId, nodeType, type, name, parentId?, input?, output?, description? }' },
   { command: 'spec-cases/tree', hint: 'body: { projectId }' },
   { command: 'spec-cases/get', hint: 'body: { projectId, caseId }' },
-  { command: 'spec-cases/update', hint: 'body: { projectId, caseId, nodeType, type, name, parentId?, input?, output? }' },
+  { command: 'spec-cases/update', hint: 'body: { projectId, caseId, nodeType, type, name, parentId?, input?, output?, description? }' },
   { command: 'spec-cases/delete', hint: 'body: { projectId, caseId }' }
 ];

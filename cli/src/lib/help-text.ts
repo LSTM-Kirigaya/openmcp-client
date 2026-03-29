@@ -5,14 +5,14 @@
 export const HELP_GATEWAY = `
 提示: 默认 WebSocket 为 ws://localhost:8282；若 gateway 使用其它端口（如 -p 9000），请在使用 mcp/cloud 等命令时加 -g ws://127.0.0.1:9000。
 
-云端 API 基址由 Gateway 进程内的环境变量决定（@openmcp/service 的 OPENMCP_API_BASE_URL / NODE_ENV），与运行 CLI 的终端无关。
-  · PowerShell 正确写法: $env:NODE_ENV = "development"  或  $env:OPENMCP_API_BASE_URL = "http://localhost:8000"
-  · 勿用 cmd 的 set NODE_ENV=...（在 PowerShell 中通常不会设进子进程）
-  · 可选配置文件（后台 start/restart 也会读取）: %USERPROFILE%\\.openmcp\\gateway.env
-    每行 KEY=VALUE，例如:
-    NODE_ENV=development
-    OPENMCP_API_BASE_URL=http://localhost:8000
-    当前终端已存在的环境变量会覆盖文件中的同名字段。
+文件日志目录（与 gateway.env 同属用户目录 .openmcp）: 运行 gateway logs-dir 查看绝对路径；gateway logs 查看 gateway.log 尾部。
+
+云端 API 基址由 Gateway 进程内 @openmcp/service 决定，与运行 CLI 的终端无关。默认规则：
+  · 未设 OPENMCP_API_BASE_URL 时：NODE_ENV=production（如 tsc 构建后的产物）→ 远程；否则 → 本地 http://localhost:8000
+  · OPENMCP_APP_ENV=development|production 可覆盖上述逻辑（见 service/.env.example）
+  · OPENMCP_API_BASE_URL 始终优先（可指向任意后端）
+  · service 包根目录的 .env 会在首次请求前自动加载（不覆盖已在环境中的变量）
+  · 后台 Gateway 还可读 %USERPROFILE%\\.openmcp\\gateway.env（KEY=VALUE，终端已有环境变量优先）
 `;
 
 export const HELP_PROGRAM_AFTER = `

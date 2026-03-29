@@ -1,20 +1,25 @@
+import fs from 'fs';
+import path from 'path';
 import { Command } from 'commander';
+import { gatewayUserLogDir } from '@openmcp/gateway';
 import { runService, startService, stopService, restartService, statusService } from '../lib/index.js';
 import { HELP_GATEWAY } from '../lib/help-text.js';
 
 export const gatewayCommand = new Command('gateway')
   .description('Manage OpenMCP Gateway (service)')
-  .summary('Gateway management: run|start|stop|restart|status')
+  .summary('Gateway: run|start|stop|restart|status|logs|logs-dir')
   .description(`
 OpenMCP Gateway 管理命令：
 
-  run     前台运行 Gateway（阻塞，查看日志）
-  start   后台启动 Gateway（立即返回）
-  stop    停止后台运行的 Gateway
-  restart 重启 Gateway
-  status  查看 Gateway 状态
+  run       前台运行 Gateway（阻塞，查看日志）
+  start     后台启动 Gateway（立即返回）
+  stop      停止后台运行的 Gateway
+  restart   重启 Gateway
+  status    查看 Gateway 状态
+  logs      查看最近若干行文件日志（默认 %USERPROFILE%\\.openmcp\\logs\\gateway\\gateway.log）
+  logs-dir  仅打印上述日志目录绝对路径（别名: log-dir）
 
-云端/本地后端由 Gateway 进程的环境变量决定（OPENMCP_API_BASE_URL、NODE_ENV）。PowerShell 请用 $env:NODE_ENV="development"；或写入 %USERPROFILE%\\.openmcp\\gateway.env 后执行 restart。
+云端/本地后端默认：非 production 时走本地 8000；构建产物 NODE_ENV=production 走远程。可用 OPENMCP_APP_ENV、OPENMCP_API_BASE_URL 或 service/.env、%USERPROFILE%\\.openmcp\\gateway.env 覆盖。
 
 示例：
   openmcp-cli gateway run           # 前台运行
@@ -22,6 +27,8 @@ OpenMCP Gateway 管理命令：
   openmcp-cli gateway stop         # 停止
   openmcp-cli gateway restart      # 重启
   openmcp-cli gateway status       # 查看状态
+  openmcp-cli gateway logs-dir     # 日志目录路径
+  openmcp-cli gateway logs -n 500  # 最近 500 行
   openmcp-cli gateway start -p 9000  # 自定义端口
   `)
   .addHelpText('after', HELP_GATEWAY);
@@ -66,6 +73,7 @@ gatewayCommand
    - Use 'openmcp-cli gateway status' to check if running
    - Use 'openmcp-cli gateway stop' to stop
    - Use 'openmcp-cli gateway run' to run in foreground
+   - File logs: 'openmcp-cli gateway logs-dir' / 'openmcp-cli gateway logs'
     `);
   });
 
@@ -136,4 +144,33 @@ gatewayCommand
 💡 Use 'openmcp-cli gateway start' to start
       `);
     }
+  });
+
+gatewayCommand
+  .command('logs-dir')
+  .alias('log-dir')
+  .description('Print Gateway log directory (user .openmcp/logs/gateway)')
+  .action(() => {
+    console.log(gatewayUserLogDir());
+  });
+
+gatewayCommand
+  .command('logs')
+  .description('Print tail of Gateway log file (gateway.log)')
+  .option('-n, --lines <n>', 'line count', '200')
+  .action((options) => {
+    const dir = gatewayUserLogDir();
+    const logFile = path.join(dir, 'gateway.log');
+    const n = Math.max(1, parseInt(String(options.lines), 10) || 200);
+
+    if (!fs.existsSync(logFile)) {
+      console.log(`尚无日志文件: ${logFile}`);
+      console.log('（后台 Gateway 写入此处；可用 gateway logs-dir 查看目录）');
+      return;
+    }
+
+    const raw = fs.readFileSync(logFile, 'utf8');
+    const lines = raw.split(/\r?\n/);
+    const tail = lines.slice(Math.max(0, lines.length - n));
+    console.log(tail.join('\n'));
   });

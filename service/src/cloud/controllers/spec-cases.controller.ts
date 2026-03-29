@@ -16,7 +16,7 @@ function getErrorMessage(error: any, fallback: string): string {
 export class SpecCasesController {
   @Controller('spec-cases/create')
   async create(data: RequestData, _webview: PostMessageble) {
-    const { projectId, nodeType, type, name, parentId, input, output } = data;
+    const { projectId, nodeType, type, name, parentId, input, output, description } = data;
     if (!projectId || !nodeType || !type || !name) {
       return { code: 400, msg: 'projectId/nodeType/type/name are required' };
     }
@@ -29,7 +29,8 @@ export class SpecCasesController {
         name: String(name),
         parentId: parentId === undefined ? undefined : String(parentId),
         input: typeof input === 'string' ? input : undefined,
-        output: typeof output === 'string' ? output : undefined
+        output: typeof output === 'string' ? output : undefined,
+        description: typeof description === 'string' ? description : undefined
       });
       return { code: 200, msg: 'ok', data: resp.data as SpecCase };
     } catch (error: any) {
@@ -63,7 +64,7 @@ export class SpecCasesController {
 
   @Controller('spec-cases/update')
   async update(data: RequestData, _webview: PostMessageble) {
-    const { projectId, caseId, parentId, nodeType, type, name, input, output } = data;
+    const { projectId, caseId, parentId, nodeType, type, name, input, output, description } = data;
     if (!projectId || !caseId || !nodeType || !type || !name) {
       return { code: 400, msg: 'projectId/caseId/nodeType/type/name are required' };
     }
@@ -77,7 +78,8 @@ export class SpecCasesController {
         type: String(type),
         name: String(name),
         input: typeof input === 'string' ? input : undefined,
-        output: typeof output === 'string' ? output : undefined
+        output: typeof output === 'string' ? output : undefined,
+        description: typeof description === 'string' ? description : undefined
       });
       return { code: 200, msg: 'ok', data: resp.data };
     } catch (error: any) {

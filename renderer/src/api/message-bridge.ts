@@ -233,27 +233,30 @@ export class MessageBridge {
 	 * @param data 
 	 * @returns 
 	 */
-	public commandRequest<T = any>(command: string, data?: ICommandRequestData): Promise<RestFulResponse<T>>  {
-        const _id = uuidv4();
-		
-        return new Promise<RestFulResponse>((resolve, reject) => {
-			const handler = this.addCommandListener(command, (data) => {
-                if (data._id === undefined) {
-                    console.warn('detect data without id, data: ' + JSON.stringify(data, null, 2));
-                }
+	public async commandRequest<T = any>(command: string, data?: ICommandRequestData): Promise<RestFulResponse<T>>  {
+		// Web 端在 WS 未 OPEN 时 postMessage 会直接丢包，请求永远无响应（刷新后 auth/status 先于连接完成会导致一直未登录）
+		await this.awaitForWebsocket();
 
-                if (data._id === _id) {
-                    handler();
-    				resolve(data as RestFulResponse);
-                }
+		const _id = uuidv4();
+
+		return new Promise<RestFulResponse>((resolve, reject) => {
+			const handler = this.addCommandListener(command, (data) => {
+				if (data._id === undefined) {
+					console.warn('detect data without id, data: ' + JSON.stringify(data, null, 2));
+				}
+
+				if (data._id === _id) {
+					handler();
+					resolve(data as RestFulResponse);
+				}
 			}, { once: false });
 
 			this.postMessage({
-                command,
+				command,
 				data: this.deserializeReactiveData({
-                    _id,
-                    ...data
-                })
+					_id,
+					...data
+				})
 			});
 		});
 	}

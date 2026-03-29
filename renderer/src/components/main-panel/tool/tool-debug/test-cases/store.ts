@@ -26,47 +26,56 @@ function inCloudMode(): boolean {
 }
 
 function toCloudPayload(testCase: Partial<TestCase>) {
-    const outputPayload = {
-        expectedOutput: testCase.expectedOutput,
-        description: testCase.description ?? ''
-    };
-    return {
+    const payload: Parameters<typeof cloudCreateSpecCase>[1] = {
         node_type: 'case' as const,
         type: testCase.toolName || 'tool',
         name: testCase.name || 'Untitled',
         input: JSON.stringify(testCase.input ?? {}),
-        output: JSON.stringify(outputPayload)
+        description: testCase.description ?? ''
     };
+    if (testCase.expectedOutput !== undefined && testCase.expectedOutput !== null) {
+        payload.output = JSON.stringify(testCase.expectedOutput);
+    }
+    return payload;
 }
 
 function mapCloudNodeToTestCase(node: CloudSpecCase): TestCase {
     let input: Record<string, any> = {};
     let expectedOutput: any = undefined;
-    let description = '';
+    let description = typeof node.description === 'string' ? node.description : '';
 
-    try {
-        input = node.input ? JSON.parse(node.input) : {};
-    } catch {
-        input = {};
+    const rawInput = node.input;
+    if (rawInput != null && String(rawInput).trim() !== '') {
+        try {
+            input = JSON.parse(String(rawInput));
+        } catch {
+            input = {};
+        }
     }
 
-    try {
-        const parsedOutput = node.output ? JSON.parse(node.output) : undefined;
-        if (
-            parsedOutput &&
-            typeof parsedOutput === 'object' &&
-            ('expectedOutput' in parsedOutput || 'description' in parsedOutput)
-        ) {
-            expectedOutput = (parsedOutput as any).expectedOutput;
-            description = typeof (parsedOutput as any).description === 'string'
-                ? (parsedOutput as any).description
-                : '';
-        } else {
-            // backward compatibility: old output stores expectedOutput directly
-            expectedOutput = parsedOutput;
+    const rawOut = node.output;
+    if (rawOut != null && String(rawOut).trim() !== '') {
+        try {
+            const parsedOutput = JSON.parse(String(rawOut));
+            if (
+                parsedOutput &&
+                typeof parsedOutput === 'object' &&
+                !Array.isArray(parsedOutput) &&
+                ('expectedOutput' in parsedOutput || 'description' in parsedOutput)
+            ) {
+                expectedOutput = (parsedOutput as { expectedOutput?: unknown }).expectedOutput;
+                if (description === '') {
+                    const leg = (parsedOutput as { description?: unknown }).description;
+                    if (typeof leg === 'string') {
+                        description = leg;
+                    }
+                }
+            } else {
+                expectedOutput = parsedOutput;
+            }
+        } catch {
+            expectedOutput = undefined;
         }
-    } catch {
-        expectedOutput = undefined;
     }
 
     const createdAt = typeof (node as any).created_at === 'string'
@@ -122,7 +131,15 @@ export async function saveTestCases() {
 }
 
 export async function loadTestCases() {
-    if (inCloudMode()) {
+    // 云端模式：须等 auth/status 完成后再拉树。若在已选项目但尚未登录时走本地 load，会用空文件覆盖云端列表且之后不会自动重拉。
+    if (cloudContext.mode === 'cloud') {
+        if (!cloudContext.currentProjectId) {
+            testCasesState.value = [];
+            return;
+        }
+        if (!isCloudLoggedIn.value) {
+            return;
+        }
         const tree = await cloudGetSpecCaseTree(cloudContext.currentProjectId);
         testCasesState.value = flattenCloudCases(tree);
         return;
@@ -157,7 +174,17 @@ export async function updateTestCase(id: string, patch: Partial<TestCase>, optio
         if (!current) {
             return;
         }
-        await cloudUpdateSpecCase(cloudContext.currentProjectId, id, toCloudPayload(current));
+        const row = await cloudUpdateSpecCase(cloudContext.currentProjectId, id, toCloudPayload(current));
+        const mapped = mapCloudNodeToTestCase(row);
+        testCasesState.value = testCasesState.value.map(tc =>
+            tc.id === id
+                ? {
+                      ...mapped,
+                      status: tc.status,
+                      actualOutput: tc.actualOutput
+                  }
+                : tc
+        );
         return;
     }
     await saveTestCases();

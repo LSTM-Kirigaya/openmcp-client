@@ -51,6 +51,7 @@ export type SpecCase = {
   name: string;
   input?: string;
   output?: string;
+  description?: string;
   created_at?: string;
   updated_at?: string;
   children?: SpecCase[];

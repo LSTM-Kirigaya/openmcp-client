@@ -150,7 +150,8 @@
                     <el-button @click="dialogVisible = false" class="btn-secondary btn-cancel">
                         {{ t('cancel') }}
                     </el-button>
-                    <el-button type="primary" @click="handleSaveTestCase" class="btn-save">
+                    <el-button type="primary" @click="handleSaveTestCase" class="btn-save" :loading="savingTestCase"
+                        :disabled="savingTestCase">
                         {{ t('save') }}
                     </el-button>
                 </el-button-group>
@@ -190,6 +191,7 @@ import { tabs } from '../../../panel';
 import type { ToolStorage, TestCase } from '../../tools';
 import { mcpClientAdapter } from '@/views/connect/core';
 import { cloudContext } from '@/hook/cloud-context';
+import { isCloudLoggedIn } from '@/hook/cloud-auth';
 import {
     createTestCase,
     deleteTestCase,
@@ -234,6 +236,7 @@ const dialogVisible = ref(false);
 const resultDialogVisible = ref(false);
 const isEditing = ref(false);
 const runningAll = ref(false);
+const savingTestCase = ref(false);
 const formRef = ref<FormInstance>();
 
 interface TestCaseForm {
@@ -292,7 +295,7 @@ function handleEditTestCase(testCase: TestCase) {
     currentTestCaseForm.value = {
         name: testCase.name,
         toolName: testCase.toolName,
-        description: testCase.description,
+        description: testCase.description ?? '',
         input: { ...testCase.input }
     };
     inputJson.value = JSON.stringify(testCase.input, null, 2);
@@ -349,6 +352,9 @@ function getFriendlyCloudErrorMessage(error: unknown): string {
 }
 
 async function handleSaveTestCase() {
+    if (savingTestCase.value) {
+        return;
+    }
     // 验证
     if (!currentTestCaseForm.value.name) {
         ElMessage.error(t('please-enter-test-case-name'));
@@ -381,12 +387,13 @@ async function handleSaveTestCase() {
 
     const now = Date.now();
 
+    savingTestCase.value = true;
     try {
         if (isEditing.value && selectedTestCase.value) {
             await updateTestCase(selectedTestCase.value.id, {
                 name: currentTestCaseForm.value.name,
                 toolName: currentTestCaseForm.value.toolName,
-                description: currentTestCaseForm.value.description,
+                description: currentTestCaseForm.value.description ?? '',
                 input: parsedInput,
                 expectedOutput: parsedExpected,
                 updatedAt: now
@@ -398,7 +405,7 @@ async function handleSaveTestCase() {
                 id: `test_${now}_${Math.random().toString(36).substr(2, 9)}`,
                 name: currentTestCaseForm.value.name,
                 toolName: currentTestCaseForm.value.toolName,
-                description: currentTestCaseForm.value.description,
+                description: currentTestCaseForm.value.description ?? '',
                 input: parsedInput,
                 status: 'pending',
                 createdAt: now,
@@ -412,6 +419,8 @@ async function handleSaveTestCase() {
         dialogVisible.value = false;
     } catch (error) {
         ElMessage.error(getFriendlyCloudErrorMessage(error));
+    } finally {
+        savingTestCase.value = false;
     }
 }
 
@@ -523,10 +532,11 @@ function formatTime(timestamp: number): string {
 }
 
 watch(
-    () => [cloudContext.mode, cloudContext.currentProjectId],
+    () => [cloudContext.mode, cloudContext.currentProjectId, isCloudLoggedIn.value],
     () => {
-        loadTestCases();
-    }
+        void loadTestCases();
+    },
+    { immediate: true }
 );
 
 </script>
