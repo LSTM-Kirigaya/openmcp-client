@@ -12,6 +12,7 @@ import {
 } from '@/api/cloud';
 
 let currentClient: any | null = null;
+const EXCLUDED_SPEC_CASE_TYPES = new Set(['batch-validation']);
 
 export const testCasesState = ref<TestCase[]>([]);
 
@@ -21,24 +22,27 @@ export function initTestCasesStore(client: any) {
 }
 
 function inCloudMode(): boolean {
-    return cloudContext.mode === 'cloud';
+    return cloudContext.mode === 'cloud' && isCloudLoggedIn.value && !!cloudContext.currentProjectId;
 }
 
 function toCloudPayload(testCase: Partial<TestCase>) {
+    const outputPayload = {
+        expectedOutput: testCase.expectedOutput,
+        description: testCase.description ?? ''
+    };
     return {
         node_type: 'case' as const,
         type: testCase.toolName || 'tool',
         name: testCase.name || 'Untitled',
         input: JSON.stringify(testCase.input ?? {}),
-        output: testCase.expectedOutput !== undefined
-            ? JSON.stringify(testCase.expectedOutput)
-            : ''
+        output: JSON.stringify(outputPayload)
     };
 }
 
 function mapCloudNodeToTestCase(node: CloudSpecCase): TestCase {
     let input: Record<string, any> = {};
     let expectedOutput: any = undefined;
+    let description = '';
 
     try {
         input = node.input ? JSON.parse(node.input) : {};
@@ -47,21 +51,40 @@ function mapCloudNodeToTestCase(node: CloudSpecCase): TestCase {
     }
 
     try {
-        expectedOutput = node.output ? JSON.parse(node.output) : undefined;
+        const parsedOutput = node.output ? JSON.parse(node.output) : undefined;
+        if (
+            parsedOutput &&
+            typeof parsedOutput === 'object' &&
+            ('expectedOutput' in parsedOutput || 'description' in parsedOutput)
+        ) {
+            expectedOutput = (parsedOutput as any).expectedOutput;
+            description = typeof (parsedOutput as any).description === 'string'
+                ? (parsedOutput as any).description
+                : '';
+        } else {
+            // backward compatibility: old output stores expectedOutput directly
+            expectedOutput = parsedOutput;
+        }
     } catch {
         expectedOutput = undefined;
     }
 
-    const now = Date.now();
+    const createdAt = typeof (node as any).created_at === 'string'
+        ? Date.parse((node as any).created_at) || Date.now()
+        : Date.now();
+    const updatedAt = typeof (node as any).updated_at === 'string'
+        ? Date.parse((node as any).updated_at) || createdAt
+        : createdAt;
     return {
         id: node.id,
         name: node.name,
+        description,
         toolName: node.type || '',
         input,
         expectedOutput,
         status: 'pending',
-        createdAt: now,
-        updatedAt: now
+        createdAt,
+        updatedAt
     };
 }
 
@@ -69,7 +92,7 @@ function flattenCloudCases(nodes: CloudSpecCase[]): TestCase[] {
     const cases: TestCase[] = [];
     const walk = (items: CloudSpecCase[]) => {
         for (const item of items) {
-            if (item.node_type === 'case') {
+            if (item.node_type === 'case' && !EXCLUDED_SPEC_CASE_TYPES.has(item.type || '')) {
                 cases.push(mapCloudNodeToTestCase(item));
             }
             if (item.children && item.children.length > 0) {
@@ -100,10 +123,6 @@ export async function saveTestCases() {
 
 export async function loadTestCases() {
     if (inCloudMode()) {
-        if (!isCloudLoggedIn.value || !cloudContext.currentProjectId) {
-            testCasesState.value = [];
-            return;
-        }
         const tree = await cloudGetSpecCaseTree(cloudContext.currentProjectId);
         testCasesState.value = flattenCloudCases(tree);
         return;
@@ -120,9 +139,6 @@ export async function loadTestCases() {
 
 export async function createTestCase(testCase: TestCase) {
     if (inCloudMode()) {
-        if (!isCloudLoggedIn.value || !cloudContext.currentProjectId) {
-            return;
-        }
         const created = await cloudCreateSpecCase(cloudContext.currentProjectId, toCloudPayload(testCase));
         testCasesState.value = [...testCasesState.value, mapCloudNodeToTestCase(created)];
         return;
@@ -137,9 +153,6 @@ export async function updateTestCase(id: string, patch: Partial<TestCase>, optio
         return;
     }
     if (inCloudMode()) {
-        if (!isCloudLoggedIn.value || !cloudContext.currentProjectId) {
-            return;
-        }
         const current = testCasesState.value.find(tc => tc.id === id);
         if (!current) {
             return;
@@ -153,9 +166,6 @@ export async function updateTestCase(id: string, patch: Partial<TestCase>, optio
 export async function deleteTestCase(id: string) {
     testCasesState.value = testCasesState.value.filter(tc => tc.id !== id);
     if (inCloudMode()) {
-        if (!isCloudLoggedIn.value || !cloudContext.currentProjectId) {
-            return;
-        }
         await cloudDeleteSpecCase(cloudContext.currentProjectId, id);
         return;
     }

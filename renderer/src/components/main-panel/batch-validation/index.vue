@@ -267,15 +267,6 @@ import type { ChatMessage, ChatStorage, ChatSetting, EnableToolItem } from '../c
 import { TaskLoop } from '../chat/core/task-loop';
 import { loadSkillContent } from '@/api/skill';
 import { mcpClientAdapter } from '@/views/connect/core';
-import { cloudContext } from '@/hook/cloud-context';
-import { isCloudLoggedIn } from '@/hook/cloud-auth';
-import {
-    cloudCreateSpecCase,
-    cloudDeleteSpecCase,
-    cloudGetSpecCaseTree,
-    cloudUpdateSpecCase,
-    type CloudSpecCase
-} from '@/api/cloud';
 import BatchValidationInput from './batch-validation-input.vue';
 import BatchValidationAgentTrace from './batch-validation-agent-trace.vue';
 import { markdownToHtml } from '../chat/markdown/markdown';
@@ -342,96 +333,6 @@ const chatTabs = computed(() => {
 
 /** 批量验证与交互测试隔离：不共享数据，始终为 null，由 BatchValidationInput 使用自身默认配置 */
 const sourceStorage = computed((): ChatStorage | null => null);
-const CLOUD_BATCH_CASE_TYPE = 'batch-validation';
-
-function inCloudBatchMode(): boolean {
-    return cloudContext.mode === 'cloud' && isCloudLoggedIn.value && !!cloudContext.currentProjectId;
-}
-
-function toCloudBatchCasePayload(tc: TestCase) {
-    return {
-        node_type: 'case' as const,
-        type: CLOUD_BATCH_CASE_TYPE,
-        name: tc.name || t('batch-validation-default-case-name'),
-        input: tc.input || '',
-        output: JSON.stringify({
-            description: tc.description || '',
-            criteria: tc.criteria || [],
-            evaluationMode: tc.evaluationMode || 'pass-fail',
-            inputRichContent: tc.inputRichContent || [],
-            lastResultGroup: tc.lastResultGroup
-        })
-    };
-}
-
-function fromCloudBatchNode(node: CloudSpecCase): TestCase {
-    let parsed: any = {};
-    if (node.output) {
-        try {
-            parsed = JSON.parse(node.output);
-        } catch {
-            parsed = {};
-        }
-    }
-    const criteria = Array.isArray(parsed.criteria) && parsed.criteria.length > 0
-        ? parsed.criteria.map((item: unknown) => String(item))
-        : [''];
-    return {
-        id: node.id,
-        name: node.name || '',
-        description: typeof parsed.description === 'string' ? parsed.description : '',
-        input: node.input || '',
-        criteria,
-        evaluationMode: parsed.evaluationMode === 'score' ? 'score' : 'pass-fail',
-        inputRichContent: Array.isArray(parsed.inputRichContent) ? parsed.inputRichContent : undefined,
-        lastResultGroup: parsed.lastResultGroup
-    };
-}
-
-function flattenCloudBatchNodes(nodes: CloudSpecCase[]): TestCase[] {
-    const rows: TestCase[] = [];
-    const walk = (items: CloudSpecCase[]) => {
-        for (const item of items) {
-            if (item.node_type === 'case' && item.type === CLOUD_BATCH_CASE_TYPE) {
-                rows.push(fromCloudBatchNode(item));
-            }
-            if (item.children && item.children.length > 0) {
-                walk(item.children);
-            }
-        }
-    };
-    walk(nodes);
-    return rows;
-}
-
-function createDefaultCloudErrorCases(): TestCase[] {
-    const now = Date.now();
-    return [
-        {
-            id: `cloud-default-${now}-1`,
-            name: '云端鉴权异常',
-            description: '验证未授权时是否给出明确报错和重试建议',
-            input: '请调用一个需要云端权限的能力，如果失败要明确写出错误原因和下一步建议。',
-            criteria: [
-                '输出中包含鉴权失败或权限不足的原因',
-                '输出中包含可执行的修复建议（重新登录/刷新令牌）'
-            ],
-            evaluationMode: 'pass-fail'
-        },
-        {
-            id: `cloud-default-${now}-2`,
-            name: '云端接口超时',
-            description: '验证云端接口超时时的降级处理',
-            input: '模拟云端接口请求超时，给出降级策略并保持回答结构化。',
-            criteria: [
-                '说明是超时场景而不是其他错误',
-                '给出降级策略（重试或稍后再试）',
-                '不返回空白结果'
-            ],
-            evaluationMode: 'pass-fail'
-        }
-    ];
-}
 
 function getTabLabel(tab: { name: string; icon: string }, idx: number) {
     const name = typeof tab.name === 'string' ? tab.name : (tab.name as any)?.value ?? '';
@@ -1068,45 +969,7 @@ watch(() => tabStorage.testCases?.length ?? 0, (len) => {
 
 // 批量验证持久化：从 JSON 归档加载（新 tab 或切换到此 tab 时），变更时防抖写入
 const bridge = useMessageBridge();
-
-function syncResultGroupsFromCases() {
-    tabStorage.resultGroups = (tabStorage.testCases || [])
-        .map((tc, idx) => tc.lastResultGroup ? { ...tc.lastResultGroup, testCaseIndex: idx } : null)
-        .filter(Boolean) as ResultGroup[];
-    resultGroupsWithStats.value = tabStorage.resultGroups;
-}
-
-async function loadBatchValidationFromCloud() {
-    if (!inCloudBatchMode()) {
-        return false;
-    }
-    const projectId = cloudContext.currentProjectId;
-    try {
-        const tree = await cloudGetSpecCaseTree(projectId);
-        let cases = flattenCloudBatchNodes(tree);
-        if (cases.length === 0) {
-            const defaults = createDefaultCloudErrorCases();
-            const createdRows: TestCase[] = [];
-            for (const tc of defaults) {
-                const created = await cloudCreateSpecCase(projectId, toCloudBatchCasePayload(tc));
-                createdRows.push(fromCloudBatchNode(created));
-            }
-            cases = createdRows;
-        }
-        tabStorage.testCases = cases;
-        tabStorage.selectedCaseIndex = Math.max(0, Math.min(tabStorage.selectedCaseIndex ?? 0, Math.max(0, cases.length - 1)));
-        syncResultGroupsFromCases();
-        return true;
-    } catch (error: any) {
-        ElMessage.error(error?.message || t('cloud-load-projects-failed'));
-        return true;
-    }
-}
-
-async function loadBatchValidationFromStorage() {
-    if (await loadBatchValidationFromCloud()) {
-        return;
-    }
+async function loadBatchValidationFromDuckDb() {
     const clientId = mcpClientAdapter.masterNode?.clientId;
     if (!clientId) return;
     const res = await bridge.commandRequest<{ storage: BatchValidationStorage }>('batch-validation/load', { clientId });
@@ -1125,7 +988,7 @@ async function loadBatchValidationFromStorage() {
     }
 }
 onMounted(() => {
-    loadBatchValidationFromStorage();
+    loadBatchValidationFromDuckDb();
     window.addEventListener('beforeunload', onBeforeUnload);
 });
 onUnmounted(() => {
@@ -1135,61 +998,19 @@ onUnmounted(() => {
 watch(
     () => tabs.activeIndex === props.tabId,
     (isActive) => {
-        if (isActive) loadBatchValidationFromStorage();
+        if (isActive) loadBatchValidationFromDuckDb();
     }
 );
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
-let cloudSavePending = false;
-
-async function syncBatchValidationToCloud() {
-    if (!inCloudBatchMode()) return;
-    const projectId = cloudContext.currentProjectId;
-    const tree = await cloudGetSpecCaseTree(projectId);
-    const remoteCases = flattenCloudBatchNodes(tree);
-    const remoteMap = new Map(remoteCases.map((tc) => [tc.id, tc]));
-
-    const localCases = tabStorage.testCases ?? [];
-    for (let i = 0; i < localCases.length; i++) {
-        const tc = localCases[i];
-        if (tabStorage.resultGroups?.[i] && !tc.lastResultGroup) {
-            tc.lastResultGroup = tabStorage.resultGroups[i];
-        }
-        if (remoteMap.has(tc.id)) {
-            await cloudUpdateSpecCase(projectId, tc.id, toCloudBatchCasePayload(tc));
-        } else {
-            const created = await cloudCreateSpecCase(projectId, toCloudBatchCasePayload(tc));
-            tc.id = created.id;
-        }
-    }
-
-    const localIds = new Set(localCases.map((tc) => tc.id));
-    for (const remote of remoteCases) {
-        if (!localIds.has(remote.id)) {
-            await cloudDeleteSpecCase(projectId, remote.id);
-        }
-    }
-    syncResultGroupsFromCases();
-}
-
-async function flushSave() {
+function flushSave() {
     const clientId = mcpClientAdapter.masterNode?.clientId;
     if (saveTimer) {
         clearTimeout(saveTimer);
         saveTimer = null;
     }
-    if (inCloudBatchMode()) {
-        if (cloudSavePending) return;
-        cloudSavePending = true;
-        try {
-            await syncBatchValidationToCloud();
-        } finally {
-            cloudSavePending = false;
-        }
-        return;
-    }
     if (!clientId) return;
-    await bridge.commandRequest('batch-validation/save', {
+    bridge.commandRequest('batch-validation/save', {
         clientId,
         storage: {
             testCases: tabStorage.testCases ?? [],
@@ -1201,21 +1022,17 @@ async function flushSave() {
 }
 function scheduleSaveToDuckDb() {
     const clientId = mcpClientAdapter.masterNode?.clientId;
-    if (!clientId && !inCloudBatchMode()) return;
+    if (!clientId) return;
     if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => {
-        void flushSave();
-    }, 400);
+    saveTimer = setTimeout(flushSave, 400);
 }
 
 function onBeforeUnload() {
-    void flushSave();
+    flushSave();
 }
 
 watch(
     () => [
-        cloudContext.mode,
-        cloudContext.currentProjectId,
         JSON.stringify(tabStorage.testCases ?? []),
         tabStorage.selectedCaseIndex,
         tabStorage.sourceTabIndex,
@@ -1223,13 +1040,6 @@ watch(
     ],
     () => scheduleSaveToDuckDb(),
     { deep: true }
-);
-
-watch(
-    () => [cloudContext.mode, cloudContext.currentProjectId, isCloudLoggedIn.value],
-    () => {
-        loadBatchValidationFromStorage();
-    }
 );
 </script>
 

@@ -31,7 +31,6 @@
 							<Api v-show="settingSections.current === 'api'" />
 							<Appearance v-show="settingSections.current === 'appearance'" />
 							<CloudAccount v-show="settingSections.current === 'cloud-account'" />
-							<CloudProjects v-show="settingSections.current === 'cloud-projects'" />
 						</div>
 					</el-scrollbar>
 				</div>
@@ -50,7 +49,6 @@ import General from './general.vue';
 import Api from './api.vue';
 import Appearance from './appearance.vue';
 import CloudAccount from './cloud-account.vue';
-import CloudProjects from './cloud-projects.vue';
 import { settingSections } from './setting-section';
 
 defineComponent({ name: 'setting' });

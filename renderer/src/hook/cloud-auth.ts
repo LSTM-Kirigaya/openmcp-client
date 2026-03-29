@@ -1,64 +1,54 @@
 import { computed, reactive } from 'vue';
-import { cloudLogin, cloudLogout, cloudRefresh, cloudRegister, type CloudTokenPair, type CloudUser } from '@/api/cloud';
-import { registerCloudAccessTokenGetter } from '@/api/cloud-http';
-
-const CLOUD_AUTH_STORAGE_KEY = 'openmcp.cloud.auth';
-
-interface CloudAuthPersist {
-    user: CloudUser | null;
-    tokens: CloudTokenPair | null;
-}
+import { cloudAuthStatus, cloudLogin, cloudLogout, cloudRefresh, cloudRegister, type CloudUser } from '@/api/cloud';
 
 interface CloudAuthState {
     user: CloudUser | null;
-    tokens: CloudTokenPair | null;
+    loggedIn: boolean;
+    subscriptionTier: string | null;
     loading: boolean;
     ready: boolean;
 }
 
 export const cloudAuthState = reactive<CloudAuthState>({
     user: null,
-    tokens: null,
+    loggedIn: false,
+    subscriptionTier: null,
     loading: false,
     ready: false
 });
 
-export const isCloudLoggedIn = computed(() => Boolean(cloudAuthState.tokens?.access_token));
-
-function persistCloudAuth() {
-    const data: CloudAuthPersist = {
-        user: cloudAuthState.user,
-        tokens: cloudAuthState.tokens
-    };
-    localStorage.setItem(CLOUD_AUTH_STORAGE_KEY, JSON.stringify(data));
-}
-
-function clearPersistedCloudAuth() {
-    localStorage.removeItem(CLOUD_AUTH_STORAGE_KEY);
-}
+export const isCloudLoggedIn = computed(() => cloudAuthState.loggedIn);
 
 export function hydrateCloudAuth() {
     if (cloudAuthState.ready) {
         return;
     }
-    const raw = localStorage.getItem(CLOUD_AUTH_STORAGE_KEY);
-    if (raw) {
-        try {
-            const data = JSON.parse(raw) as CloudAuthPersist;
-            cloudAuthState.user = data.user ?? null;
-            cloudAuthState.tokens = data.tokens ?? null;
-        } catch {
-            clearPersistedCloudAuth();
-        }
-    }
     cloudAuthState.ready = true;
+    void refreshCloudAuthStatus();
+}
+
+export async function refreshCloudAuthStatus() {
+    try {
+        const status = await cloudAuthStatus();
+        cloudAuthState.loggedIn = Boolean(status.loggedIn);
+        cloudAuthState.subscriptionTier = status.subscriptionTier || null;
+        if (status.user) {
+            cloudAuthState.user = status.user;
+        } else if (!status.loggedIn) {
+            cloudAuthState.user = null;
+        }
+    } catch {
+        cloudAuthState.loggedIn = false;
+        cloudAuthState.user = null;
+        cloudAuthState.subscriptionTier = null;
+    }
 }
 
 export async function cloudAccountLogin(identifier: string, password: string) {
     cloudAuthState.loading = true;
     try {
         const result = await cloudLogin(identifier, password);
-        setCloudSession(result.user, result.tokens);
+        setCloudSession(result.user);
         return result.user;
     } finally {
         cloudAuthState.loading = false;
@@ -69,7 +59,7 @@ export async function cloudAccountRegister(email: string, username: string, pass
     cloudAuthState.loading = true;
     try {
         const result = await cloudRegister(email, username, password);
-        setCloudSession(result.user, result.tokens);
+        setCloudSession(result.user);
         return result.user;
     } finally {
         cloudAuthState.loading = false;
@@ -77,34 +67,22 @@ export async function cloudAccountRegister(email: string, username: string, pass
 }
 
 export async function cloudAccountRefresh() {
-    const refreshToken = cloudAuthState.tokens?.refresh_token;
-    if (!refreshToken) {
-        return null;
-    }
-    const tokens = await cloudRefresh(refreshToken);
-    cloudAuthState.tokens = tokens;
-    persistCloudAuth();
-    return tokens;
+    await cloudRefresh();
+    await refreshCloudAuthStatus();
 }
 
 export async function cloudAccountLogout() {
-    const refreshToken = cloudAuthState.tokens?.refresh_token;
-    if (refreshToken) {
-        try {
-            await cloudLogout(refreshToken);
-        } catch {
-            // Ignore remote logout failure and clear local state.
-        }
+    try {
+        await cloudLogout();
+    } catch {
+        // Ignore remote logout failure and clear local state.
     }
     cloudAuthState.user = null;
-    cloudAuthState.tokens = null;
-    clearPersistedCloudAuth();
+    cloudAuthState.loggedIn = false;
+    cloudAuthState.subscriptionTier = null;
 }
 
-export function setCloudSession(user: CloudUser, tokens: CloudTokenPair) {
+export function setCloudSession(user: CloudUser) {
     cloudAuthState.user = user;
-    cloudAuthState.tokens = tokens;
-    persistCloudAuth();
+    cloudAuthState.loggedIn = true;
 }
-
-registerCloudAccessTokenGetter(() => cloudAuthState.tokens?.access_token);

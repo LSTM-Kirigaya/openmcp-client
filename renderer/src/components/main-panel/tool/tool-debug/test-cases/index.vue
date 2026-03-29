@@ -340,6 +340,14 @@ function copyFromCurrentForm() {
     }
 }
 
+function getFriendlyCloudErrorMessage(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error ?? '');
+    if (/401|unauthorized|token|expired|鉴权|未授权/i.test(message)) {
+        return '云端登录已过期，请先刷新令牌或重新登录后再试。';
+    }
+    return message || t('error');
+}
+
 async function handleSaveTestCase() {
     // 验证
     if (!currentTestCaseForm.value.name) {
@@ -373,34 +381,38 @@ async function handleSaveTestCase() {
 
     const now = Date.now();
 
-    if (isEditing.value && selectedTestCase.value) {
-        await updateTestCase(selectedTestCase.value.id, {
-            name: currentTestCaseForm.value.name,
-            toolName: currentTestCaseForm.value.toolName,
-            description: currentTestCaseForm.value.description,
-            input: parsedInput,
-            expectedOutput: parsedExpected,
-            updatedAt: now
-        });
-        ElMessage.success(t('test-case-updated'));
-    } else {
-        // 创建新测试用例
-        const newTestCase: TestCase = {
-            id: `test_${now}_${Math.random().toString(36).substr(2, 9)}`,
-            name: currentTestCaseForm.value.name,
-            toolName: currentTestCaseForm.value.toolName,
-            description: currentTestCaseForm.value.description,
-            input: parsedInput,
-            status: 'pending',
-            createdAt: now,
-            updatedAt: now,
-            ...(parsedExpected !== undefined ? { expectedOutput: parsedExpected } : {})
-        };
-        await createTestCase(newTestCase);
-        ElMessage.success(t('test-case-created'));
-    }
+    try {
+        if (isEditing.value && selectedTestCase.value) {
+            await updateTestCase(selectedTestCase.value.id, {
+                name: currentTestCaseForm.value.name,
+                toolName: currentTestCaseForm.value.toolName,
+                description: currentTestCaseForm.value.description,
+                input: parsedInput,
+                expectedOutput: parsedExpected,
+                updatedAt: now
+            });
+            ElMessage.success(t('test-case-updated'));
+        } else {
+            // 创建新测试用例
+            const newTestCase: TestCase = {
+                id: `test_${now}_${Math.random().toString(36).substr(2, 9)}`,
+                name: currentTestCaseForm.value.name,
+                toolName: currentTestCaseForm.value.toolName,
+                description: currentTestCaseForm.value.description,
+                input: parsedInput,
+                status: 'pending',
+                createdAt: now,
+                updatedAt: now,
+                ...(parsedExpected !== undefined ? { expectedOutput: parsedExpected } : {})
+            };
+            await createTestCase(newTestCase);
+            ElMessage.success(t('test-case-created'));
+        }
 
-    dialogVisible.value = false;
+        dialogVisible.value = false;
+    } catch (error) {
+        ElMessage.error(getFriendlyCloudErrorMessage(error));
+    }
 }
 
 async function handleDeleteTestCase(id: string) {

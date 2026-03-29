@@ -8,6 +8,7 @@ import {
   isLoggedIn as isLoggedInStore,
   setToken as setTokenAccessOnly,
   setTokenPair,
+  setUser,
   type StoredUser
 } from './token-store.js';
 
@@ -35,6 +36,12 @@ export interface LoginResponse {
 export interface AuthStatusResponse {
   loggedIn: boolean;
   username?: string;
+  user?: {
+    id?: string;
+    username?: string;
+    email?: string;
+  };
+  subscriptionTier?: string;
   expiresAt?: string;
 }
 
@@ -83,6 +90,45 @@ type BackendDeviceTokenResponse = BackendCommonResponse<{
   user: StoredUser & { id?: string; username?: string; email?: string };
   tokens: BackendTokens;
 }>;
+
+type BackendMeProfileResponse = BackendCommonResponse<{
+  id?: string;
+  username?: string;
+  email?: string;
+}>;
+
+type BackendMeSubscriptionResponse = BackendCommonResponse<{
+  plan?: {
+    code?: string;
+    name?: string;
+  };
+}>;
+
+function decodeJwtUserFromAccessToken(token: string | null): StoredUser | null {
+  if (!token) return null;
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  try {
+    const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
+    const json = Buffer.from(normalized + padding, 'base64').toString('utf8');
+    const payload = JSON.parse(json) as {
+      uid?: string;
+      username?: string;
+      email?: string;
+    };
+    if (!payload.uid && !payload.username && !payload.email) {
+      return null;
+    }
+    return {
+      id: payload.uid,
+      username: payload.username,
+      email: payload.email
+    };
+  } catch {
+    return null;
+  }
+}
 
 function mapBackendLogin(resp: BackendLoginResponse): LoginResponse {
   const tokens = resp.data.tokens;
@@ -183,9 +229,60 @@ export async function logoutAll(): Promise<void> {
  * 后端当前没有 /auth/status；这里做本地状态判断，避免 404。
  */
 export async function checkAuthStatus(): Promise<AuthStatusResponse> {
+  const loggedIn = isLoggedInStore();
+  let user = getUser();
+  let subscriptionTier: string | undefined;
+
+  if (loggedIn) {
+    const client = createApiClient();
+    const needRemoteUser = !user || (!user.id && !user.username && !user.email);
+
+    if (needRemoteUser) {
+      try {
+        const profileResp = await client.get<BackendMeProfileResponse>('/me/profile');
+        const profile = profileResp.data?.data;
+        if (profile && (profile.id || profile.username || profile.email)) {
+          user = {
+            id: profile.id,
+            username: profile.username,
+            email: profile.email
+          };
+          setUser(user);
+        }
+      } catch {
+        // ignore: 仍然返回本地登录态
+      }
+    }
+
+    // 最后兜底：从 access token claims 解析用户信息（uid/username/email）
+    if (!user || (!user.id && !user.username && !user.email)) {
+      const decoded = decodeJwtUserFromAccessToken(getAccessToken());
+      if (decoded) {
+        user = decoded;
+        setUser(decoded);
+      }
+    }
+
+    try {
+      const subResp = await client.get<BackendMeSubscriptionResponse>('/me/subscription');
+      const plan = subResp.data?.data?.plan;
+      subscriptionTier = plan?.name || plan?.code || undefined;
+    } catch {
+      // ignore: 订阅接口失败不影响登录态
+    }
+  }
+
   return {
-    loggedIn: isLoggedInStore(),
-    username: undefined,
+    loggedIn,
+    username: user?.username,
+    user: user
+      ? {
+          id: user.id,
+          username: user.username,
+          email: user.email
+        }
+      : undefined,
+    subscriptionTier,
     expiresAt: getExpiresAt() ?? undefined
   };
 }

@@ -1,4 +1,4 @@
-import { cloudRequest } from './cloud-http';
+import { useMessageBridge } from './message-bridge';
 
 export interface CloudUser {
     id: string;
@@ -36,122 +36,138 @@ export interface CloudSpecCase {
     children?: CloudSpecCase[];
 }
 
+async function requestCommand<T>(command: string, payload: Record<string, unknown>): Promise<T> {
+    const bridge = useMessageBridge();
+    const res = await bridge.commandRequest<T>(command, payload);
+    if (res.code !== 200) {
+        throw new Error(typeof res.msg === 'string' ? res.msg : 'Request failed');
+    }
+    return ((res.data ?? res.msg) as T);
+}
+
 export async function cloudLogin(identifier: string, password: string) {
-    const result = await cloudRequest<{ user: CloudUser; tokens: CloudTokenPair }>(
-        '/auth/login',
-        {
-            method: 'POST',
-            body: JSON.stringify({ identifier, password })
-        },
-        { auth: false }
-    );
-    return result.data;
+    const result = await requestCommand<{
+        token: string;
+        user: CloudUser;
+        expiresAt?: string;
+    }>('auth/login', {
+        username: identifier,
+        password
+    });
+    return {
+        user: result.user
+    };
 }
 
 export async function cloudRegister(email: string, username: string, password: string) {
-    const result = await cloudRequest<{ user: CloudUser; tokens: CloudTokenPair }>(
-        '/auth/register',
-        {
-            method: 'POST',
-            body: JSON.stringify({ email, username, password })
-        },
-        { auth: false }
-    );
-    return result.data;
+    const result = await requestCommand<{
+        token: string;
+        user: CloudUser;
+        expiresAt?: string;
+    }>('auth/register', {
+        email,
+        username,
+        password
+    });
+    return {
+        user: result.user
+    };
 }
 
-export async function cloudRefresh(refreshToken: string) {
-    const result = await cloudRequest<{ tokens: CloudTokenPair }>(
-        '/auth/refresh',
-        {
-            method: 'POST',
-            body: JSON.stringify({ refresh_token: refreshToken })
-        },
-        { auth: false }
-    );
-    return result.data.tokens;
+export async function cloudRefresh() {
+    await requestCommand('auth/refresh', {});
 }
 
-export async function cloudLogout(refreshToken: string) {
-    await cloudRequest<null>(
-        '/auth/logout',
-        {
-            method: 'POST',
-            body: JSON.stringify({ refresh_token: refreshToken })
-        },
-        { auth: false }
-    );
+export async function cloudLogout() {
+    await requestCommand('auth/logout', {});
 }
 
-export async function cloudGetOAuthUrl(provider: string, redirectUri: string, state?: string) {
-    const params = new URLSearchParams();
-    params.set('redirect_uri', redirectUri);
-    if (state) {
-        params.set('state', state);
-    }
-    const result = await cloudRequest<{ url: string }>(
-        `/auth/oauth/${encodeURIComponent(provider)}?${params.toString()}`,
-        { method: 'GET' },
-        { auth: false }
-    );
-    return result.data.url;
+export async function cloudGetOAuthUrl(provider: string, redirectUri: string, _state?: string) {
+    const result = await requestCommand<{ channel?: string; authUrl?: string; url?: string }>('auth/oauth', {
+        channel: provider,
+        redirectUri
+    });
+    return result.authUrl || result.url || '';
 }
 
 export async function cloudExchangeOAuthNonce(nonce: string) {
-    const result = await cloudRequest<{ user: CloudUser; tokens: CloudTokenPair }>(
-        `/auth/oauth/tokens?nonce=${encodeURIComponent(nonce)}`,
-        { method: 'GET' },
-        { auth: false }
-    );
-    return result.data;
+    const result = await requestCommand<{
+        token: string;
+        user: CloudUser;
+        expiresAt?: string;
+    }>('auth/oauth/finalize', { nonce });
+    return {
+        user: result.user
+    };
+}
+
+export async function cloudAuthStatus() {
+    return await requestCommand<{
+        loggedIn: boolean;
+        user?: CloudUser;
+        username?: string;
+        subscriptionTier?: string;
+    }>('auth/status', {});
 }
 
 export async function cloudListProjects() {
-    const result = await cloudRequest<CloudProject[]>('/projects', { method: 'GET' });
-    return result.data ?? [];
+    return await requestCommand<CloudProject[]>('projects/list', {});
 }
 
 export async function cloudCreateProject(input: Partial<CloudProject> & { name: string; transport: 'stdio' | 'sse' | 'http'; endpoint: string }) {
-    const result = await cloudRequest<CloudProject>('/projects', {
-        method: 'POST',
-        body: JSON.stringify(input)
+    return await requestCommand<CloudProject>('projects/create', {
+        name: input.name,
+        transport: input.transport,
+        endpoint: input.endpoint,
+        description: input.description,
+        enabled: input.enabled
     });
-    return result.data;
 }
 
 export async function cloudUpdateProject(id: string, input: Partial<CloudProject> & { name: string; transport: 'stdio' | 'sse' | 'http'; endpoint: string }) {
-    const result = await cloudRequest<CloudProject>(`/projects/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(input)
+    return await requestCommand<CloudProject>('projects/update', {
+        projectId: id,
+        name: input.name,
+        transport: input.transport,
+        endpoint: input.endpoint,
+        description: input.description,
+        enabled: input.enabled
     });
-    return result.data;
 }
 
 export async function cloudDeleteProject(id: string) {
-    await cloudRequest<null>(`/projects/${id}`, { method: 'DELETE' });
+    await requestCommand('projects/delete', { projectId: id });
 }
 
 export async function cloudGetSpecCaseTree(projectId: string) {
-    const result = await cloudRequest<CloudSpecCase[]>(`/projects/${projectId}/spec-cases`, { method: 'GET' });
-    return result.data ?? [];
+    return await requestCommand<CloudSpecCase[]>('spec-cases/tree', { projectId });
 }
 
 export async function cloudCreateSpecCase(projectId: string, input: Partial<CloudSpecCase> & { node_type: 'folder' | 'case'; type: string; name: string }) {
-    const result = await cloudRequest<CloudSpecCase>(`/projects/${projectId}/spec-cases`, {
-        method: 'POST',
-        body: JSON.stringify(input)
+    return await requestCommand<CloudSpecCase>('spec-cases/create', {
+        projectId,
+        nodeType: input.node_type,
+        type: input.type,
+        name: input.name,
+        parentId: input.parent_id,
+        input: input.input,
+        output: input.output
     });
-    return result.data;
 }
 
 export async function cloudUpdateSpecCase(projectId: string, caseId: string, input: Partial<CloudSpecCase> & { node_type: 'folder' | 'case'; type: string; name: string }) {
-    const result = await cloudRequest<CloudSpecCase>(`/projects/${projectId}/spec-cases/${caseId}`, {
-        method: 'PUT',
-        body: JSON.stringify(input)
+    return await requestCommand<CloudSpecCase>('spec-cases/update', {
+        projectId,
+        caseId,
+        nodeType: input.node_type,
+        type: input.type,
+        name: input.name,
+        parentId: input.parent_id,
+        input: input.input,
+        output: input.output
     });
-    return result.data;
 }
 
 export async function cloudDeleteSpecCase(projectId: string, caseId: string) {
-    await cloudRequest<null>(`/projects/${projectId}/spec-cases/${caseId}`, { method: 'DELETE' });
+    await requestCommand('spec-cases/delete', { projectId, caseId });
 }

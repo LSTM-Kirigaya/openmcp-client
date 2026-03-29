@@ -492,6 +492,8 @@
     "cloud-current-user": "Current user",
     "cloud-token-status": "Token status",
     "cloud-token-valid": "Logged in",
+    "cloud-subscription-level": "Subscription tier",
+    "cloud-subscription-unknown": "Unknown",
     "cloud-refresh-token": "Refresh token",
     "cloud-refresh-success": "Token refreshed",
     "cloud-refresh-failed": "Token refresh failed",

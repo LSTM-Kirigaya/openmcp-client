@@ -491,6 +491,8 @@
     "cloud-current-user": "当前用户",
     "cloud-token-status": "令牌状态",
     "cloud-token-valid": "已登录",
+    "cloud-subscription-level": "订阅等级",
+    "cloud-subscription-unknown": "未知",
     "cloud-refresh-token": "刷新令牌",
     "cloud-refresh-success": "刷新成功",
     "cloud-refresh-failed": "刷新失败",
