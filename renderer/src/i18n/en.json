@@ -512,6 +512,11 @@
     "cloud-project-updated": "Project updated",
     "cloud-project-deleted": "Project deleted",
     "cloud-select-project-first": "Please select a cloud project in Settings > Cloud Projects first",
+    "cloud-connect-title": "Cloud MCP List",
+    "cloud-connect-empty": "No cloud projects available",
+    "cloud-connect-project-disabled": "This cloud project is disabled",
+    "cloud-connect-success": "Connected to cloud MCP project",
+    "cloud-connect-failed": "Failed to connect cloud MCP project",
     "enabled": "Enabled",
     "disabled": "Disabled"
 }

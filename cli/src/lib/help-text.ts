@@ -27,12 +27,15 @@ export const HELP_PROGRAM_AFTER = `
 export const HELP_MCP_ROOT = `
 子命令概览:
   connect              建立 MCP 连接（需 --config-file 或 --type 等）
+  sessions-*           会话管理（list/current/recent/use）
+  config-*             配置生命周期（validate/init/export/env-preview）
+  history-*            调用历史查询与回放
   disconnect / ping    断开或探测连接
   lookup-env           解析环境变量
   server-version       服务端版本
-  prompts-* / resources-* / tools-*  需先有 clientId（connect 成功返回）
+  prompts-* / resources-* / tools-*  默认使用当前会话，亦可 --client-id 指定
 
-获取 clientId: 先执行 connect，响应 JSON 中 msg.clientId 即为后续 --client-id。
+获取 clientId: 先执行 connect，响应 JSON 中 msg.clientId；CLI 会自动记为当前默认会话。
 `;
 
 export const HELP_MCP_CONNECT = `
@@ -104,7 +107,6 @@ export const HELP_LLM = `
   openmcp-cli llm models --base-url https://api.openai.com/v1 --api-key sk-...
   openmcp-cli llm models-openrouter
   openmcp-cli llm chat-sync -f ./chat-body.json
-  openmcp-cli llm abort --session-id <id>
 
 chat-sync 的 JSON 需含: baseURL, apiKey, model, messages（OpenAI 格式数组）, 可选 temperature。
 `;
@@ -113,17 +115,6 @@ export const HELP_SETTING = `
 示例:
   openmcp-cli setting load
   openmcp-cli setting save -f ./settings.json
-  openmcp-cli setting set-tour --user-has-read-guide true
-  openmcp-cli setting get-tour
-`;
-
-export const HELP_PANEL = `
-多数子命令需 -c / --client-id；大块数据用 -f JSON 文件（结构与 Web 面板导出一致）。
-
-示例:
-  openmcp-cli panel load -c <clientId>
-  openmcp-cli panel variables-load -c <clientId>
-  openmcp-cli panel variables-save -c <clientId> -f ./variables.json
 `;
 
 export const HELP_SKILLS = `
@@ -133,33 +124,11 @@ export const HELP_SKILLS = `
   openmcp-cli skills read-file --skill-name myskill --file-path README.md
 `;
 
-export const HELP_FEEDBACK = `
-示例:
-  openmcp-cli feedback save --name mystore -f ./storage.json
-  openmcp-cli feedback count --name mystore
-  openmcp-cli feedback list-data --name mystore --page 1 --page-size 20
-`;
-
 export const HELP_BATCH_VALIDATION = `
 示例:
   openmcp-cli batch-validation run -f ./batch-body.json
 
 body 需含 messages、testCases、llmConfig（baseURL, apiKey, model）等，见 service BatchValidationController。
-`;
-
-export const HELP_DEBUGGER = `
-示例:
-  openmcp-cli debugger-mcp load
-  openmcp-cli debugger-mcp save -f ./debugger-mcp.json
-  openmcp-cli debugger-mcp connection-info
-  openmcp-cli debugger-mcp toggle-tool --tool-name openmcp_debugger_list_all_tools --enabled true
-`;
-
-export const HELP_OCR = `
-示例:
-  openmcp-cli ocr get-image --filename <disk-name>
-  openmcp-cli ocr start -f ./image-payload.json
-  openmcp-cli ocr start --image-file ./shot.png --mime-type image/png
 `;
 
 export const HELP_WEB = `
@@ -192,5 +161,6 @@ export const HELP_START = `
 /** 子命令无单独示例时用一行说明 */
 export const HELP_GENERIC_CLIENT = `
 示例:
-  openmcp-cli mcp <子命令> --client-id <从 connect 得到的 UUID> [-g ws://127.0.0.1:8282]
+  openmcp-cli mcp <子命令> [--client-id <UUID>] [-g ws://127.0.0.1:8282]
+  # 不传 --client-id 时，默认使用 mcp sessions use / connect 记录的当前会话
 `;

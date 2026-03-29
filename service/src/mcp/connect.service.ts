@@ -13,6 +13,11 @@ import chalk from 'chalk';
 import { FORBIDDEN_MONITOR } from '../hook/setting.js';
 
 export const clientMap: Map<string, RequestClientType> = new Map();
+export interface ConnectedSessionInfo {
+    clientId: string;
+    name: string;
+    version: string;
+}
 function normalizeConnectionType(type?: string): ConnectionType | undefined {
     if (!type) return undefined;
     const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
@@ -408,4 +413,24 @@ export async function disconnectService(data: RequestData) {
             msg: `Failed to disconnect: ${error}`
         };
     }
+}
+
+export async function listConnectedSessionsService() {
+    const sessions: ConnectedSessionInfo[] = [];
+    for (const [clientId, client] of clientMap.entries()) {
+        if (!client) {
+            continue;
+        }
+        const versionInfo = client.getServerVersion();
+        sessions.push({
+            clientId,
+            name: versionInfo?.name || 'unknown',
+            version: versionInfo?.version || 'unknown'
+        });
+    }
+
+    return {
+        code: 200,
+        msg: sessions
+    };
 }

@@ -35,6 +35,31 @@
 									<span class="iconfont icon-add"></span>
 									<span class="add-server-text">{{ t('add-server') }}</span>
 								</div>
+								<div v-if="isCloudLoggedIn" class="cloud-projects-section">
+									<div class="cloud-projects-header">
+										<span>{{ t('cloud-connect-title') }}</span>
+										<el-button text size="small" :loading="cloudLoading" @click.stop="loadCloudProjects">
+											{{ t('refresh') }}
+										</el-button>
+									</div>
+									<div
+										v-for="project in cloudProjects"
+										:key="project.id"
+										class="cloud-project-item"
+										@click="connectCloudProject(project)"
+									>
+										<div class="cloud-project-content">
+											<span class="cloud-project-name">{{ project.name }}</span>
+											<span class="cloud-project-meta">{{ project.transport }} · {{ project.endpoint }}</span>
+										</div>
+										<el-tag size="small" :type="project.enabled ? 'success' : 'info'">
+											{{ project.enabled ? t('enabled') : t('disabled') }}
+										</el-tag>
+									</div>
+									<div v-if="!cloudLoading && cloudProjects.length === 0" class="cloud-project-empty">
+										{{ t('cloud-connect-empty') }}
+									</div>
+								</div>
 							</div>
 						</el-scrollbar>
 					</div>
@@ -54,11 +79,14 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, computed } from 'vue';
+import { defineComponent, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ConnectionPanel from './connection-panel.vue';
 import { McpClient, mcpClientAdapter } from './core';
 import { ElMessage } from 'element-plus';
+import { cloudListProjects, type CloudProject } from '@/api/cloud';
+import { isCloudLoggedIn } from '@/hook/cloud-auth';
+import { setCurrentCloudProject } from '@/hook/cloud-context';
 
 /* 连接参数/环境变量区块样式（迁移自设置页），在连接页入口引入避免依赖 setting 组件异步加载 */
 import './connection-setting-styles.css';
@@ -66,6 +94,9 @@ import './connection-setting-styles.css';
 defineComponent({ name: 'connection' });
 
 const { t } = useI18n();
+const cloudProjects = ref<CloudProject[]>([]);
+const cloudLoading = ref(false);
+const cloudConnectingProjectId = ref('');
 
 function selectServer(index: number) {
 	mcpClientAdapter.currentClientIndex = index;
@@ -89,6 +120,87 @@ function deleteServer(index: number) {
 	}
 	mcpClientAdapter.saveLaunchSignature();
 }
+
+function mapCloudProjectTransport(project: CloudProject): {
+	connectionType: 'STDIO' | 'SSE' | 'STREAMABLE_HTTP';
+	commandString?: string;
+	url?: string;
+} {
+	if (project.transport === 'stdio') {
+		return {
+			connectionType: 'STDIO',
+			commandString: project.endpoint
+		};
+	}
+	if (project.transport === 'sse') {
+		return {
+			connectionType: 'SSE',
+			url: project.endpoint
+		};
+	}
+	return {
+		connectionType: 'STREAMABLE_HTTP',
+		url: project.endpoint
+	};
+}
+
+async function connectCloudProject(project: CloudProject) {
+	if (!project.enabled) {
+		ElMessage.warning(t('cloud-connect-project-disabled'));
+		return;
+	}
+	if (cloudConnectingProjectId.value) {
+		return;
+	}
+	cloudConnectingProjectId.value = project.id;
+	try {
+		setCurrentCloudProject(project.id);
+		const client = new McpClient();
+		const mapped = mapCloudProjectTransport(project);
+		client.connectionArgs.connectionType = mapped.connectionType;
+		client.connectionArgs.commandString = mapped.commandString || '';
+		client.connectionArgs.url = mapped.url || '';
+		client.connectionResult.name = project.name;
+		mcpClientAdapter.clients.push(client);
+		mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
+		await client.handleEnvSwitch(true);
+		const ok = await client.connect();
+		if (!ok) {
+			mcpClientAdapter.clients.splice(mcpClientAdapter.currentClientIndex, 1);
+			mcpClientAdapter.currentClientIndex = Math.max(0, mcpClientAdapter.clients.length - 1);
+			return;
+		}
+		mcpClientAdapter.saveLaunchSignature();
+		ElMessage.success(t('cloud-connect-success'));
+	} catch (error: any) {
+		ElMessage.error(error?.message || t('cloud-connect-failed'));
+	} finally {
+		cloudConnectingProjectId.value = '';
+	}
+}
+
+async function loadCloudProjects() {
+	if (!isCloudLoggedIn.value) {
+		cloudProjects.value = [];
+		return;
+	}
+	cloudLoading.value = true;
+	try {
+		cloudProjects.value = await cloudListProjects();
+	} catch (error: any) {
+		ElMessage.error(error?.message || t('cloud-load-projects-failed'));
+	} finally {
+		cloudLoading.value = false;
+	}
+}
+
+watch(isCloudLoggedIn, () => {
+	loadCloudProjects();
+});
+
+onMounted(() => {
+	loadCloudProjects();
+});
 </script>
 
 <style scoped>
@@ -221,6 +333,65 @@ function deleteServer(index: number) {
 }
 .server-list-panel .add-server-text {
 	font-size: 13px;
+}
+
+.cloud-projects-section {
+	margin: 8px 3px 0;
+	padding-top: 10px;
+	border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.cloud-projects-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 6px;
+	font-size: 12px;
+	color: var(--el-text-color-secondary);
+}
+
+.cloud-project-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 10px;
+	border-radius: 6px;
+	cursor: pointer;
+}
+
+.cloud-project-item:hover {
+	background-color: var(--el-fill-color-light);
+}
+
+.cloud-project-content {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.cloud-project-name {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--el-text-color-primary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cloud-project-meta {
+	font-size: 12px;
+	color: var(--el-text-color-secondary);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.cloud-project-empty {
+	font-size: 12px;
+	color: var(--el-text-color-secondary);
+	padding: 6px 10px;
 }
 
 .connection-detail-panel {

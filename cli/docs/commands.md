@@ -56,37 +56,22 @@ openmcp-cli -V
 
 ---
 
-## `rpc`（别名 `call`）
-
-通过 WebSocket 调用**任意**已注册的 service 命令。
-
-| 选项 | 说明 |
-|------|------|
-| `[command]` | 如 `tools/list`、`connect`、`setting/load` |
-| `-g` | Gateway WebSocket URL |
-| `-d` | 请求体 JSON 字符串 |
-| `-f` | 从文件读 JSON，与 `-d` 合并（文件覆盖同名字段） |
-| `-t` | 超时毫秒 |
-| `--list` | 列出已知命令名（与源码 `service-commands` 同步） |
-| `-q` | 成功时只打印响应中的 `msg` |
-
-示例：
-
-```bash
-openmcp-cli rpc --list
-openmcp-cli rpc tools/list -d "{\"clientId\":\"...\"}"
-openmcp-cli rpc batch-validation/run -f ./payload.json -t 600000
-```
-
----
-
 ## `mcp`
 
 MCP 连接与协议封装（Connect + Client 控制器）。
 
-包含但不限于：`connect`、`disconnect`、`ping`、`lookup-env`、`server-version`、`prompts-list`、`resources-list`、`resources-read`、`tools-list`、`tools-call` 等。
+常见子命令：
 
-`connect` 支持 `--config` 完整 JSON，或 `--type` + STDIO/SSE/STREAMABLE_HTTP 相关参数。
+| 子命令 | 说明 |
+|--------|------|
+| `connect` | 建立连接，支持 `--config-file`（扁平或 `mcpServers`） |
+| `sessions list/current/recent/use` | 会话列表、默认会话切换、最近连接记录 |
+| `config validate/init/export/env-preview` | 配置校验、模板、导出、环境注入预览 |
+| `history list/replay` | 请求留痕查询与回放（支持失败重放） |
+| `disconnect` / `ping` / `lookup-env` | 连接管理 |
+| `prompts-*` / `resources-*` / `tools-*` | MCP 协议能力 |
+
+`connect` 支持 `--config-file` 完整 JSON，或 `--type` + STDIO/SSE/STREAMABLE_HTTP 相关参数。依赖 `clientId` 的子命令可省略 `--client-id`，默认使用当前会话。
 
 ---
 
@@ -98,7 +83,6 @@ MCP 连接与协议封装（Connect + Client 控制器）。
 | `models-openrouter` | `llm/models/openrouter` |
 | `models-dynamic` | `llm/models/dynamic` |
 | `chat-sync` | `llm/chat/completions/sync` |
-| `abort` | `llm/chat/completions/abort` |
 
 `chat-sync` 支持 `-f` / `-d` 传入完整 body。
 
@@ -110,16 +94,6 @@ MCP 连接与协议封装（Connect + Client 控制器）。
 |--------|------|
 | `load` | 加载设置 |
 | `save` | `-f` / `-d` 保存 |
-| `set-tour` | `--user-has-read-guide true\|false` |
-| `get-tour` | 读取引导状态 |
-
----
-
-## `panel`
-
-面板与本地持久化配置（`panel/*`、`system-prompts/*`、`variables/*`、`extraction-rules/*`、`test-cases/*`、`batch-validation/load|save` 等）。
-
-多数子命令支持 `-c client-id`、`-d`、`-f`，与前端保存结构一致时请用 **`-f` 指向导出 JSON**。
 
 ---
 
@@ -129,29 +103,11 @@ MCP 连接与协议封装（Connect + Client 控制器）。
 
 ---
 
-## `feedback`
-
-Reflux：`save`、`count`、`list-data`、`find-trace`、`find-tools`。
-
----
-
 ## `batch-validation`
 
 | 子命令 | 说明 |
 |--------|------|
-| `run` | `-f` / `-d`，执行批量验证（耗时可调 `rpc` 超时） |
-
----
-
-## `debugger-mcp`
-
-`load`、`save`、`connection-info`、`toggle-tool`。
-
----
-
-## `ocr`
-
-`get-image`、`start`（支持从 JSON 或 `--image-file` + `--mime-type` 提交图片）。
+| `run` | `-f` / `-d`，执行批量验证 |
 
 ---
 

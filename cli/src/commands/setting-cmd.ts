@@ -7,7 +7,7 @@ function gw(cmd: Command): Command {
 }
 
 export const settingCmd = new Command('setting')
-  .description('读写全局应用设置与引导状态（SettingController）。')
+  .description('读写全局应用设置（SettingController）。')
   .addHelpText('after', HELP_SETTING);
 
 gw(
@@ -35,36 +35,6 @@ gw(
       if (options.file) body = { ...body, ...readJsonFile(options.file) };
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('setting/save', body);
-        printJson(res);
-        if (res.code !== 200) process.exitCode = 1;
-      });
-    })
-);
-
-gw(
-  settingCmd
-    .command('set-tour')
-    .description('设置引导状态')
-    .requiredOption('--user-has-read-guide <bool>', 'true 或 false')
-    .action(async (options) => {
-      const read = String(options.userHasReadGuide).toLowerCase() === 'true';
-      await withGateway(options.gateway, async (bridge) => {
-        const res = await bridge.commandRequest('setting/set-tour', {
-          userHasReadGuide: read
-        });
-        printJson(res);
-        if (res.code !== 200) process.exitCode = 1;
-      });
-    })
-);
-
-gw(
-  settingCmd
-    .command('get-tour')
-    .description('获取引导状态')
-    .action(async (options) => {
-      await withGateway(options.gateway, async (bridge) => {
-        const res = await bridge.commandRequest('setting/get-tour', {});
         printJson(res);
         if (res.code !== 200) process.exitCode = 1;
       });

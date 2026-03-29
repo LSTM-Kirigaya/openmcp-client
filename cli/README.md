@@ -67,16 +67,10 @@ yarn openmcp-cli --help
    openmcp-cli gateway start
    ```
 
-2. 查看所有可通过 `rpc` 调用的 service 命令名：
+2. 在已连接 MCP 的前提下，列出工具（需替换真实 `clientId`）：
 
    ```bash
-   openmcp-cli rpc --list
-   ```
-
-3. 在已连接 MCP 的前提下，列出工具（需替换真实 `clientId`）：
-
-   ```bash
-   openmcp-cli rpc tools/list -d "{\"clientId\":\"<uuid>\"}"
+   openmcp-cli mcp tools-list --client-id "<uuid>"
    ```
 
 更完整的用法、前置条件与典型流程见 **[使用说明](docs/usage.md)**。
@@ -91,13 +85,9 @@ yarn openmcp-cli --help
 | `rpc`（别名 `call`） | **任意** service 命令 + JSON 请求体 |
 | `mcp` | 连接、断开、ping、环境变量、tools/prompts/resources |
 | `llm` | 模型列表、同步聊天等 |
-| `setting` | 读写应用设置、引导状态 |
-| `panel` | 面板与本地配置（与 PanelController 对齐） |
+| `setting` | 读写应用设置 |
 | `skills` | 技能包列表与读文件 |
-| `feedback` | Reflux 反馈数据 |
 | `batch-validation` | 批量验证执行 |
-| `debugger-mcp` | 调试器 MCP 配置与连接信息 |
-| `ocr` | OCR 图片提交与读取 |
 
 完整子命令与参数说明见 **[命令参考](docs/commands.md)**。
 

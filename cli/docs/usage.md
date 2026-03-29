@@ -4,7 +4,7 @@
 
 ### Gateway
 
-除 `gateway run|start|stop|restart|status` 以及仅本地打印帮助外，**`rpc`、`mcp`、`llm`、`auth` 等多数命令**都需要 Gateway 进程在运行，且 WebSocket 地址可达（默认 **`ws://localhost:8282`**）。
+除 `gateway run|start|stop|restart|status` 以及仅本地打印帮助外，**`mcp`、`llm`、`cloud` 等多数命令**都需要 Gateway 进程在运行，且 WebSocket 地址可达（默认 **`ws://localhost:8282`**）。
 
 若 Gateway 监听其它端口，请在各命令上加：
 
@@ -18,6 +18,7 @@ CLI 不单独实现业务逻辑，请求由 **Gateway** 转发到 **OpenMCP Serv
 
 - 需保证 Gateway 使用的 `service` 版本与预期一致（通常与 monorepo 一起构建）。
 - 需先 **建立 MCP 连接** 得到 `clientId`，再调用 `tools/list`、`tools/call` 等依赖连接的命令。
+- CLI 会自动记录默认会话，后续 `mcp` 子命令可不显式传 `--client-id`。
 
 ## 典型流程
 
@@ -29,44 +30,65 @@ openmcp-cli gateway start
 openmcp-cli gateway run -p 8282
 ```
 
-### 2. 建立连接并拿到 clientId
+### 2. 建立连接并拿到 clientId（支持扁平配置与 mcpServers）
 
-`--config` 指向的必须是 **扁平的 McpOptions JSON**（字段如 `connectionType`、`command`、`args`、`url`），与 `service/src/mcp/client.dto.ts` 一致；**不是** Cursor/VSCode 里带 `mcpServers` 外层包装的那份。完整示例见：
+`mcp connect` 的 `--config-file` 支持两种格式：
+
+- 扁平 `McpOptions`（`connectionType`、`command`、`args`、`url`...）
+- 聚合 `mcpServers`（Cursor / VSCode 常见格式，必要时加 `--mcp-server <name>`）
+
+完整示例见：
 
 ```bash
 openmcp-cli mcp connect --help
 ```
 
-**方式 A：使用 `mcp connect`**
+**方式 A：配置文件**
 
 ```bash
-# 使用 JSON 文件描述 McpOptions（与 service 中 connect 一致）
-openmcp-cli mcp connect --config ./my-mcp.json
+openmcp-cli mcp connect --config-file ./my-mcp.json
+openmcp-cli mcp connect --config-file ./mcp-servers.json --mcp-server my-server
 ```
 
-**方式 B：使用 `rpc connect`**
+**方式 B：命令行参数**
 
 ```bash
-openmcp-cli rpc connect -f ./my-mcp.json
+openmcp-cli mcp connect --type STDIO --command npx --args-json "[\"-y\",\"@modelcontextprotocol/server-everything\"]"
 ```
 
-成功时响应里的 `msg.clientId` 即为后续请求所需的 `clientId`。
+成功时响应里的 `msg.clientId` 会被记录为默认会话。
 
-### 3. 调用工具或通用 RPC
+### 3. 会话管理（可选）
 
 ```bash
-openmcp-cli mcp tools-list --client-id "<uuid>"
-# 或
-openmcp-cli rpc tools/list -d "{\"clientId\":\"<uuid>\"}"
+openmcp-cli mcp sessions current
+openmcp-cli mcp sessions recent --limit 10
+openmcp-cli mcp sessions list
+openmcp-cli mcp sessions use --client-id "<uuid>"
 ```
 
-### 4. 列出全部可用 service 命令名
+### 4. 调用 tools/prompts/resources
 
 ```bash
-openmcp-cli rpc --list
+openmcp-cli mcp tools-list
+openmcp-cli mcp tools-call --name echo --args "{\"message\":\"hi\"}"
 ```
 
-便于对照 `service/src/**/*controller.ts` 中的 `@Controller('...')`。
+如果要显式指定目标连接，可加 `--client-id <uuid>`。
+
+### 5. 配置生命周期与调试留痕
+
+```bash
+# 配置校验 / 模板 / 导出 / env 预览
+openmcp-cli mcp config validate -f ./mcp.json
+openmcp-cli mcp config init --template stdio -o ./mcp-template.json
+openmcp-cli mcp config export --client-id "<uuid>" -o ./exported.json
+openmcp-cli mcp config env-preview -f ./mcp.json
+
+# 历史与回放
+openmcp-cli mcp history list --limit 20
+openmcp-cli mcp history replay --failed --limit 1
+```
 
 ## Web UI 与一键启动
 
@@ -77,12 +99,12 @@ openmcp-cli rpc --list
 
 ## 大 JSON 与超时
 
-- 批量验证、同步聊天等请求体较大或耗时长时，优先使用 **`rpc` 的 `-f`** 从文件读 JSON。
-- **`rpc`** 默认超时较长（见 `--timeout`）；子命令内部对连接、OCR、LLM 等也设置了合理超时，若仍不够可统一用 `rpc` 并调大 `-t`。
+- 对请求体较大的场景，优先使用各子命令提供的 `-f` 读文件能力（如 `llm chat-sync`、`batch-validation run`）。
+- `mcp connect` 默认超时较长；其它子命令如需更细粒度控制，建议拆分调用并结合历史回放定位问题。
 
 ## 流式 LLM
 
 `llm/chat/completions` 为**流式**接口，面向 Webview 的多条推送；CLI 日常请使用：
 
 - `openmcp-cli llm chat-sync`（对应 `llm/chat/completions/sync`），或  
-- `openmcp-cli rpc llm/chat/completions/sync -f body.json`
+- `openmcp-cli llm chat-sync -f body.json`

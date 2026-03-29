@@ -2,8 +2,13 @@ import { Command } from 'commander';
 import {
   gatewayCommand,
   webCommand,
+  startCommand,
   mcpCommand,
-  cloudCommand
+  cloudCommand,
+  llmCommand,
+  settingCmd,
+  skillsCmd,
+  batchValidationCmd
 } from './commands/index.js';
 import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
 
@@ -16,7 +21,12 @@ program
   .addHelpText('after', HELP_PROGRAM_AFTER)
   .addCommand(gatewayCommand)
   .addCommand(webCommand)
+  .addCommand(startCommand)
   .addCommand(mcpCommand)
-  .addCommand(cloudCommand);
+  .addCommand(cloudCommand)
+  .addCommand(llmCommand)
+  .addCommand(settingCmd)
+  .addCommand(skillsCmd)
+  .addCommand(batchValidationCmd);
 
 program.parse();

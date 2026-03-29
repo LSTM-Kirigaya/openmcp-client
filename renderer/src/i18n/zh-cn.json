@@ -511,6 +511,11 @@
     "cloud-project-updated": "项目更新成功",
     "cloud-project-deleted": "项目删除成功",
     "cloud-select-project-first": "请先在设置-云端项目中选择项目",
+    "cloud-connect-title": "云端 MCP 列表",
+    "cloud-connect-empty": "暂无可连接的云端项目",
+    "cloud-connect-project-disabled": "该云端项目已禁用，无法连接",
+    "cloud-connect-success": "已连接云端 MCP 项目",
+    "cloud-connect-failed": "连接云端 MCP 项目失败",
     "enabled": "启用",
     "disabled": "禁用"
 }

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { parseJsonData, printJson, withGateway, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
+import { parseJsonData, printResponse, withGateway, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
@@ -72,7 +72,7 @@ const projectsCreate = projectsCmd
       if (options.description !== undefined) req.description = options.description;
       if (enabled !== undefined) req.enabled = enabled;
       const res = await bridge.commandRequest('projects/create', req);
-      printJson(res);
+      printResponse('projects/create', res);
       if (res.code !== 200) process.exitCode = 1;
     });
   });
@@ -85,7 +85,7 @@ gw(
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('projects/list', {});
-        printJson(res);
+        printResponse('projects/list', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -99,7 +99,7 @@ gw(
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('projects/get', { projectId: options.projectId });
-        printJson(res);
+        printResponse('projects/get', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -137,7 +137,7 @@ gw(
           projectId: options.projectId,
           ...body
         });
-        printJson(res);
+        printResponse('projects/update', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -151,7 +151,7 @@ gw(
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('projects/delete', { projectId: options.projectId });
-        printJson(res);
+        printResponse('projects/delete', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -167,7 +167,7 @@ gw(
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('projects/members/list', { projectId: options.projectId });
-        printJson(res);
+        printResponse('projects/members/list', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -187,7 +187,7 @@ gw(
           userId: options.userId,
           role: options.role
         });
-        printJson(res);
+        printResponse('projects/members/add', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -205,7 +205,7 @@ gw(
           projectId: options.projectId,
           userId: options.userId
         });
-        printJson(res);
+        printResponse('projects/members/remove', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -225,7 +225,7 @@ gw(
           userId: options.userId,
           role: options.role
         });
-        printJson(res);
+        printResponse('projects/members/update-role', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -241,7 +241,7 @@ gw(
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('projects/invites/list', { projectId: options.projectId });
-        printJson(res);
+        printResponse('projects/invites/list', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -263,7 +263,7 @@ gw(
           expiresAt: options.expiresAt,
           maxUses: options.maxUses ? Number(options.maxUses) : undefined
         });
-        printJson(res);
+        printResponse('projects/invites/create', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -281,7 +281,7 @@ gw(
           projectId: options.projectId,
           inviteId: options.inviteId
         });
-        printJson(res);
+        printResponse('projects/invites/delete', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })
@@ -299,7 +299,7 @@ gw(
           projectId: options.projectId,
           inviteId: options.inviteId
         });
-        printJson(res);
+        printResponse('projects/invites/revoke', res);
         if (res.code !== 200) process.exitCode = 1;
       });
     })

@@ -5,10 +5,10 @@
 | 路径 | 说明 |
 |------|------|
 | `src/index.ts` | Commander 入口，注册各子命令 |
-| `src/commands/` | 各命令模块（`gateway`、`rpc`、`mcp` 等） |
+| `src/commands/` | 各命令模块（`gateway`、`mcp`、`cloud`、`llm` 等） |
 | `src/lib/message-bridge.ts` | WebSocket 客户端，请求/响应与 `_id` 配对 |
 | `src/lib/service-manager.ts` | Gateway/Web UI 进程启停、PID 文件 |
-| `src/lib/service-commands.ts` | `rpc --list` 与文档用的命令列表 |
+| `src/lib/service-commands.ts` | service 命令清单（供对照与文档维护） |
 | `src/lib/cli-helpers.ts` | JSON 解析、打印、`withGateway` 封装 |
 | `bin/openmcp-cli.js` | 入口 shebang，加载 `dist/index.js` |
 | `dist/` | `yarn build` 输出，运行依赖此目录 |
@@ -40,19 +40,19 @@ yarn dev
 2. 使用 Node 调试器（示例）：
 
    ```bash
-   node --inspect-brk ./bin/openmcp-cli.js rpc --list
+   node --inspect-brk ./bin/openmcp-cli.js mcp sessions list
    ```
 
    在 Chrome 打开 `chrome://inspect` 连接调试。
 
-3. 确认 **Gateway 已启动** 后再调试 `rpc`、`mcp` 等需 WebSocket 的命令；否则 `MessageBridge` 会连接失败。
+3. 确认 **Gateway 已启动** 后再调试 `mcp`、`cloud`、`llm` 等需 WebSocket 的命令；否则 `MessageBridge` 会连接失败。
 
 ## 与 monorepo 其它包的关系
 
 | 包 | 关系 |
 |----|------|
 | **`gateway/`** | CLI 的 `gateway` 子命令启动的是 **gateway** 包构建产物（`gateway/dist/main.js`），不是直接启动 `service/src/main.ts`。Gateway 依赖 `@openmcp/service` 做路由。 |
-| **`service/`** | 全部 `rpc` 命令字符串与 `service/src/**/*controller.ts` 中 `@Controller('...')` 一致。 |
+| **`service/`** | WebSocket 命令字符串与 `service/src/**/*controller.ts` 中 `@Controller('...')` 一致。 |
 | **`renderer/`** | `webui` / `start` 通过 `service-manager` 在 `renderer` 目录执行 `yarn run serve:website`（脚本名含 `:` 时建议带 `run`）。 |
 
 修改 **service 路由或控制器** 后，需重新构建 **service** 与 **gateway**（按仓库根目录 `turbo` / `yarn build` 流程），再重启 Gateway，CLI 侧无需改代码即可调用新命令（记得更新 `service-commands.ts` 与文档）。
@@ -65,8 +65,8 @@ yarn dev
 
 ## 常见问题
 
-**Q: `rpc` 报超时？**  
-A: 调大 `-t`；或检查 service 是否阻塞、MCP 子进程是否无响应。
+**Q: WebSocket 命令报超时？**  
+A: 检查 Gateway 与 service 是否阻塞、MCP 子进程是否无响应；同时可用 `mcp history list --failed` 定位失败请求并回放。
 
 **Q: Gateway `start` 提示已运行但端口不对？**  
 A: `status` 中端口展示为简化逻辑时，以实际 `gateway` 监听与 `-p` 为准；多实例需自行协调端口与 PID 文件（当前 PID 文件位于 `cli` 包内路径，见 `service-manager.ts`）。

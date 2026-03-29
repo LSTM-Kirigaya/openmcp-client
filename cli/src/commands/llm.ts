@@ -74,19 +74,3 @@ gw(
       });
     })
 );
-
-gw(
-  llmCommand
-    .command('abort')
-    .description('中止流式会话（需 sessionId）')
-    .requiredOption('--session-id <id>', 'sessionId')
-    .action(async (options) => {
-      await withGateway(options.gateway, async (bridge) => {
-        const res = await bridge.commandRequest('llm/chat/completions/abort', {
-          sessionId: options.sessionId
-        });
-        printJson(res);
-        if (res.code !== 200) process.exitCode = 1;
-      });
-    })
-);

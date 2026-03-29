@@ -5,7 +5,7 @@ import { URL } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
 import { createMessageBridge } from '../lib/message-bridge.js';
-import { printJson, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
+import { printJson, printResponse, DEFAULT_GATEWAY } from '../lib/cli-helpers.js';
 import { HELP_CLOUD } from '../lib/help-text.js';
 import { projectsCmd } from './cloud-projects.js';
 import { specCasesCmd } from './cloud-spec-cases.js';
@@ -38,7 +38,7 @@ authCommand
       username: options.username,
       password: options.password
     });
-    printJson(result);
+    printResponse('auth/register', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -76,7 +76,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/logout', {});
-    printJson(result);
+    printResponse('auth/logout', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -88,7 +88,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/logout-all', {});
-    printJson(result);
+    printResponse('auth/logout-all', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -100,7 +100,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/status', {});
-    printJson(result);
+    printResponse('auth/status', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -112,7 +112,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/refresh', {});
-    printJson(result);
+    printResponse('auth/refresh', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -125,7 +125,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/set-token', { token: options.token });
-    printJson(result);
+    printResponse('auth/set-token', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -137,7 +137,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/get-token', {});
-    printJson(result);
+    printResponse('auth/get-token', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -149,7 +149,7 @@ authCommand
   .action(async (options) => {
     const bridge = await createMessageBridge(options.gateway);
     const result = await bridge.commandRequest('auth/clear-token', {});
-    printJson(result);
+    printResponse('auth/clear-token', result);
     if (result.code !== 200) process.exitCode = 1;
     await bridge.close();
   });
@@ -234,6 +234,7 @@ authCommand
       channel,
       redirectUri: callbackUrl
     });
+    printResponse('auth/oauth', result);
 
     if (result.code === 200) {
       const oauthBody = (result.data ?? result.msg) as Record<string, unknown> | undefined;
@@ -284,7 +285,6 @@ authCommand
         printJson(result.data ?? result.msg);
       }
     } else {
-      console.error(`❌ OAuth URL 获取失败:`, result.msg);
       process.exitCode = 1;
     }
 
@@ -307,7 +307,7 @@ authCommand
       });
 
       if (startRes.code !== 200) {
-        console.error('❌ Device start failed:', startRes.msg);
+        printResponse('auth/device/start', startRes);
         process.exitCode = 1;
         return;
       }
@@ -366,7 +366,7 @@ authCommand
         }
 
         // 过期/无效
-        console.error(`❌ Device token poll failed (${pollRes.code}):`, pollRes.msg);
+        printResponse('auth/device/token', pollRes);
         process.exitCode = 1;
         return;
       }

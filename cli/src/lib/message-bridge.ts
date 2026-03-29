@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { buildGatewayUnreachableError } from './gateway-errors.js';
+import { appendRpcHistory } from './rpc-history.js';
 
 export interface VSCodeMessage {
   command: string;
@@ -122,12 +123,26 @@ export class MessageBridge {
     timeoutMs: number = 30000
   ): Promise<RestFulResponse<T>> {
     const _id = uuidv4();
+    const startedAt = Date.now();
+    const requestPayload = (data && typeof data === 'object') ? { ...data } : {};
 
     return new Promise<RestFulResponse>((resolve, reject) => {
       const handler = this.addCommandListener(command, (responseData: any) => {
         if (responseData._id === _id) {
           clearTimeout(timer);
           handler();
+          appendRpcHistory({
+            gateway: this.wsUrl,
+            command,
+            request: requestPayload,
+            durationMs: Date.now() - startedAt,
+            ok: responseData?.code === 200,
+            response: {
+              code: Number(responseData?.code ?? 500),
+              msg: responseData?.msg,
+              data: responseData?.data
+            }
+          });
           resolve(responseData as RestFulResponse<T>);
         }
       });
@@ -139,6 +154,14 @@ export class MessageBridge {
 
       const timer = setTimeout(() => {
         handler();
+        appendRpcHistory({
+          gateway: this.wsUrl,
+          command,
+          request: requestPayload,
+          durationMs: Date.now() - startedAt,
+          ok: false,
+          error: `Command ${command} timeout after ${timeoutMs}ms`
+        });
         reject(new Error(`Command ${command} timeout after ${timeoutMs}ms`));
       }, timeoutMs);
     });
