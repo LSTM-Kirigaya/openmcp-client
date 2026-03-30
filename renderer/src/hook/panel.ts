@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { mcpClientAdapter, type McpClient } from "@/views/connect/core";
 import type { BatchValidationStorage } from "@/components/main-panel/batch-validation/storage";
 import { ensureBatchValidationStorage } from "@/components/main-panel/batch-validation/storage";
+import { cloudContext } from "@/hook/cloud-context";
 
 const BATCH_VALIDATION_COMPONENT_INDEX = 5;
 
@@ -61,16 +62,18 @@ export async function loadPanels(client: McpClient | Reactive<McpClient>) {
 
 		tabs.activeIndex = persistTab.currentIndex;
 
-		// 批量验证：从 JSON 归档加载同一份数据，同步到所有批量验证 tab，使左侧列表一致
-		const bvRes = await bridge.commandRequest<{ storage: BatchValidationStorage }>('batch-validation/load', {
-			clientId: client.clientId
-		});
-		if (bvRes.code === 200 && bvRes.msg?.storage) {
-			const loaded = bvRes.msg.storage;
-			for (const tab of tabs.content) {
-				if (tab.componentIndex === BATCH_VALIDATION_COMPONENT_INDEX) {
-					Object.assign(tab.storage, loaded);
-					ensureBatchValidationStorage(tab.storage);
+		// 云端模式下不从本地 batch-validation/load 覆盖，以免冲掉云端项目内容。
+		if (cloudContext.mode !== 'cloud') {
+			const bvRes = await bridge.commandRequest<{ storage: BatchValidationStorage }>('batch-validation/load', {
+				clientId: client.clientId
+			});
+			if (bvRes.code === 200 && bvRes.msg?.storage) {
+				const loaded = bvRes.msg.storage;
+				for (const tab of tabs.content) {
+					if (tab.componentIndex === BATCH_VALIDATION_COMPONENT_INDEX) {
+						Object.assign(tab.storage, loaded);
+						ensureBatchValidationStorage(tab.storage);
+					}
 				}
 			}
 		}

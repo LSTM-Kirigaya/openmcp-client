@@ -20,6 +20,7 @@ export const HELP_PROGRAM_AFTER = `
   openmcp-cli gateway start
   openmcp-cli mcp connect --help
   openmcp-cli mcp connect --config-file ./mcp-options.json
+  openmcp-cli validation tool
 
 说明: 多数子命令需 Gateway 已启动（默认 ws://localhost:8282），详见各命令 --help。
 `;
@@ -95,6 +96,8 @@ export const HELP_CLOUD = `
   openmcp-cli cloud projects members list --project-id <projectId>
   openmcp-cli cloud projects invites create --project-id <projectId> --role writer
   openmcp-cli cloud spec-cases tree --project-id <projectId>
+  openmcp-cli cloud spec-cases create --project-id <projectId> --node-type case --type tool_case --tool-name weather.get_current --name "天气用例"
+  openmcp-cli cloud batch-validation-cases list --project-id <projectId>
   openmcp-cli cloud auth oauth github
   openmcp-cli cloud auth oauth github --redirect-uri http://localhost:3000/callback
   openmcp-cli cloud auth oauth github --open
@@ -114,7 +117,16 @@ chat-sync 的 JSON 需含: baseURL, apiKey, model, messages（OpenAI 格式数�
 export const HELP_SETTING = `
 示例:
   openmcp-cli setting load
+  openmcp-cli setting list
+  openmcp-cli setting set --key MCP_TIMEOUT_SEC --value 120
+  openmcp-cli setting set --key PROXY_SERVER --value http://127.0.0.1:7890
+  openmcp-cli setting set --key LLM_INFO --json '[{"id":"custom-provider"}]'
   openmcp-cli setting save -f ./settings.json
+
+说明:
+  · load / list: 查看当前完整 settings
+  · save: 整包保存 settings
+  · set: 只修改一个顶层字段；--value 会优先按 JSON 字面量解析，失败则按字符串处理
 `;
 
 export const HELP_SKILLS = `
@@ -124,11 +136,28 @@ export const HELP_SKILLS = `
   openmcp-cli skills read-file --skill-name myskill --file-path README.md
 `;
 
-export const HELP_BATCH_VALIDATION = `
+export const HELP_VALIDATION = `
 示例:
-  openmcp-cli batch-validation run -f ./batch-body.json
+  openmcp-cli validation tool
+  openmcp-cli validation tool --tool-name weather.get_current
+  openmcp-cli validation tool --case-id case_1
+  openmcp-cli validation batch -f ./batch-body.json
 
-body 需含 messages、testCases、llmConfig（baseURL, apiKey, model）等，见 service BatchValidationController。
+说明:
+  · validation tool：执行已保存的工具测试用例，自动读取输入并对比 expectedOutput
+  · validation batch：执行批量验证，请求体需含 messages、testCases、llmConfig 等
+`;
+
+export const HELP_VALIDATION_TOOL = `
+示例:
+  openmcp-cli validation tool
+  openmcp-cli validation tool --tool-name weather.get_current
+  openmcp-cli validation tool --case-name "搜索天气_成功"
+
+说明:
+  · 不传 --client-id 时，默认使用 mcp connect / mcp sessions use 记录的当前会话
+  · tool 会加载当前会话对应服务下保存的 test cases，并将执行结果回写到测试用例存储
+  · 用例未配置 expectedOutput 时，只要工具调用成功就视为通过
 `;
 
 export const HELP_WEB = `

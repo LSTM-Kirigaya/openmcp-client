@@ -6,13 +6,14 @@ export async function createSpecCase(params: {
   parentId?: string;
   nodeType: string;
   type: string;
+  toolName?: string;
   name: string;
   input?: string;
   output?: string;
   description?: string;
 }): Promise<BackendCommonResponse<SpecCase>> {
   const client = createApiClient();
-  const { projectId, parentId, nodeType, type, name, input, output, description } = params;
+  const { projectId, parentId, nodeType, type, toolName, name, input, output, description } = params;
 
   const body: any = {
     node_type: nodeType,
@@ -20,6 +21,7 @@ export async function createSpecCase(params: {
     name
   };
   if (parentId !== undefined) body.parent_id = parentId;
+  if (toolName !== undefined) body.tool_name = toolName;
   if (input !== undefined) body.input = input;
   if (output !== undefined) body.output = output;
   if (description !== undefined) {
@@ -59,13 +61,14 @@ export async function updateSpecCase(params: {
   parentId?: string;
   nodeType: string;
   type: string;
+  toolName?: string;
   name: string;
   input?: string;
   output?: string;
   description?: string;
 }): Promise<BackendCommonResponse<SpecCase>> {
   const client = createApiClient();
-  const { projectId, caseId, parentId, nodeType, type, name, input, output, description } = params;
+  const { projectId, caseId, parentId, nodeType, type, toolName, name, input, output, description } = params;
 
   const body: any = {
     node_type: nodeType,
@@ -73,6 +76,7 @@ export async function updateSpecCase(params: {
     name
   };
   if (parentId !== undefined) body.parent_id = parentId;
+  if (toolName !== undefined) body.tool_name = toolName;
   if (input !== undefined) body.input = input;
   if (output !== undefined) body.output = output;
   if (description !== undefined) {

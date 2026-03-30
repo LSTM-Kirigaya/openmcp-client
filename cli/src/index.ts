@@ -8,7 +8,7 @@ import {
   llmCommand,
   settingCmd,
   skillsCmd,
-  batchValidationCmd
+  validationCmd
 } from './commands/index.js';
 import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
 
@@ -27,6 +27,6 @@ program
   .addCommand(llmCommand)
   .addCommand(settingCmd)
   .addCommand(skillsCmd)
-  .addCommand(batchValidationCmd);
+  .addCommand(validationCmd);
 
 program.parse();

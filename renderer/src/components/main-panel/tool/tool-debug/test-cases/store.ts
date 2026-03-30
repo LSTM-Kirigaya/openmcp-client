@@ -12,7 +12,9 @@ import {
 } from '@/api/cloud';
 
 let currentClient: any | null = null;
-const EXCLUDED_SPEC_CASE_TYPES = new Set(['batch-validation']);
+const EXCLUDED_SPEC_CASE_TYPES = new Set(['batch-validation', 'batch_validation']);
+const NON_TOOL_CASE_TYPES = new Set(['group', 'prompt', 'prompt_case']);
+const TOOL_CASE_TYPES = new Set(['tool_case', 'tool']);
 
 export const testCasesState = ref<TestCase[]>([]);
 
@@ -28,7 +30,8 @@ function inCloudMode(): boolean {
 function toCloudPayload(testCase: Partial<TestCase>) {
     const payload: Parameters<typeof cloudCreateSpecCase>[1] = {
         node_type: 'case' as const,
-        type: testCase.toolName || 'tool',
+        type: 'tool_case',
+        tool_name: testCase.toolName || '',
         name: testCase.name || 'Untitled',
         input: JSON.stringify(testCase.input ?? {}),
         description: testCase.description ?? ''
@@ -43,6 +46,13 @@ function mapCloudNodeToTestCase(node: CloudSpecCase): TestCase {
     let input: Record<string, any> = {};
     let expectedOutput: any = undefined;
     let description = typeof node.description === 'string' ? node.description : '';
+    const legacyType = typeof node.type === 'string' ? node.type.trim() : '';
+    const normalizedType = TOOL_CASE_TYPES.has(legacyType) ? 'tool_case' : legacyType;
+    const toolName = typeof node.tool_name === 'string' && node.tool_name.trim() !== ''
+        ? node.tool_name.trim()
+        : (!EXCLUDED_SPEC_CASE_TYPES.has(normalizedType) && normalizedType !== '' && normalizedType !== 'tool_case'
+            ? normalizedType
+            : '');
 
     const rawInput = node.input;
     if (rawInput != null && String(rawInput).trim() !== '') {
@@ -88,7 +98,7 @@ function mapCloudNodeToTestCase(node: CloudSpecCase): TestCase {
         id: node.id,
         name: node.name,
         description,
-        toolName: node.type || '',
+        toolName,
         input,
         expectedOutput,
         status: 'pending',
@@ -97,11 +107,19 @@ function mapCloudNodeToTestCase(node: CloudSpecCase): TestCase {
     };
 }
 
+function isCloudToolCase(node: CloudSpecCase): boolean {
+    const rawType = typeof node.type === 'string' ? node.type.trim() : '';
+    if (EXCLUDED_SPEC_CASE_TYPES.has(rawType) || NON_TOOL_CASE_TYPES.has(rawType)) {
+        return false;
+    }
+    return true;
+}
+
 function flattenCloudCases(nodes: CloudSpecCase[]): TestCase[] {
     const cases: TestCase[] = [];
     const walk = (items: CloudSpecCase[]) => {
         for (const item of items) {
-            if (item.node_type === 'case' && !EXCLUDED_SPEC_CASE_TYPES.has(item.type || '')) {
+            if (item.node_type === 'case' && isCloudToolCase(item)) {
                 cases.push(mapCloudNodeToTestCase(item));
             }
             if (item.children && item.children.length > 0) {

@@ -9,6 +9,7 @@ import { printJson, printResponse, DEFAULT_GATEWAY } from '../lib/cli-helpers.js
 import { HELP_CLOUD } from '../lib/help-text.js';
 import { projectsCmd } from './cloud-projects.js';
 import { specCasesCmd } from './cloud-spec-cases.js';
+import { batchValidationCasesCmd } from './cloud-batch-validation-cases.js';
 import { invitesCmd } from './cloud-invites.js';
 
 function getTokenPersistPath(): string {
@@ -18,7 +19,7 @@ function getTokenPersistPath(): string {
 }
 
 export const cloudCommand = new Command('cloud')
-  .description('OpenMCP Cloud 相关能力（认证 + 项目/成员/邀请/SpecCase）。')
+  .description('OpenMCP Cloud 相关能力（认证 + 项目/成员/邀请/SpecCase/批量验证集合）。')
   .addHelpText('after', HELP_CLOUD);
 
 const authCommand = new Command('auth')
@@ -383,4 +384,5 @@ authCommand
 cloudCommand.addCommand(authCommand);
 cloudCommand.addCommand(projectsCmd);
 cloudCommand.addCommand(specCasesCmd);
+cloudCommand.addCommand(batchValidationCasesCmd);
 cloudCommand.addCommand(invitesCmd);

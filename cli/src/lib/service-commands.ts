@@ -22,6 +22,8 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'llm/chat/completions/sync', hint: 'body: { baseURL, apiKey, model, messages, temperature? }' },
   { command: 'llm/models/dynamic', hint: 'body: { providerId }' },
   { command: 'batch-validation/run', hint: 'body: { messages, testCases, llmConfig, evaluationMode?, customPrompt? }' },
+  { command: 'test-cases/load', hint: 'body: { clientId }；加载当前服务下保存的工具测试用例' },
+  { command: 'test-cases/save', hint: 'body: { clientId, testCases }；保存工具测试用例与结果' },
   { command: 'setting/save', hint: 'body: 任意设置对象' },
   { command: 'setting/load', hint: '加载设置' },
   { command: 'skills/list', hint: '列出技能' },
@@ -55,9 +57,14 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'projects/invites/delete', hint: 'body: { projectId, inviteId }' },
   { command: 'projects/invites/revoke', hint: 'body: { projectId, inviteId }' },
   { command: 'invites/join', hint: 'body: { code, userId }' },
-  { command: 'spec-cases/create', hint: 'body: { projectId, nodeType, type, name, parentId?, input?, output?, description? }' },
+  { command: 'spec-cases/create', hint: 'body: { projectId, nodeType, type, toolName?, name, parentId?, input?, output?, description? }' },
   { command: 'spec-cases/tree', hint: 'body: { projectId }' },
   { command: 'spec-cases/get', hint: 'body: { projectId, caseId }' },
-  { command: 'spec-cases/update', hint: 'body: { projectId, caseId, nodeType, type, name, parentId?, input?, output?, description? }' },
-  { command: 'spec-cases/delete', hint: 'body: { projectId, caseId }' }
+  { command: 'spec-cases/update', hint: 'body: { projectId, caseId, nodeType, type, toolName?, name, parentId?, input?, output?, description? }' },
+  { command: 'spec-cases/delete', hint: 'body: { projectId, caseId }' },
+  { command: 'batch-validation-cases/create', hint: 'body: { projectId, name, description?, testCasesJSON?, presetsJSON?, resultGroupsJSON? }' },
+  { command: 'batch-validation-cases/list', hint: 'body: { projectId }' },
+  { command: 'batch-validation-cases/get', hint: 'body: { projectId, caseId }' },
+  { command: 'batch-validation-cases/update', hint: 'body: { projectId, caseId, name, description?, testCasesJSON?, presetsJSON?, resultGroupsJSON? }' },
+  { command: 'batch-validation-cases/delete', hint: 'body: { projectId, caseId }' }
 ];

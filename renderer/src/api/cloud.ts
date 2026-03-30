@@ -30,11 +30,24 @@ export interface CloudSpecCase {
     node_type: 'folder' | 'case';
     level: number;
     type: string;
+    tool_name?: string;
     name: string;
     input?: string;
     output?: string;
     description?: string;
     children?: CloudSpecCase[];
+}
+
+export interface CloudBatchValidationCase {
+    id: string;
+    project_id: string;
+    name: string;
+    description?: string;
+    test_cases_json?: string;
+    presets_json?: string;
+    result_groups_json?: string;
+    created_at?: string;
+    updated_at?: string;
 }
 
 async function requestCommand<T>(command: string, payload: Record<string, unknown>): Promise<T> {
@@ -149,6 +162,7 @@ export async function cloudCreateSpecCase(projectId: string, input: Partial<Clou
         projectId,
         nodeType: input.node_type,
         type: input.type,
+        toolName: input.tool_name,
         name: input.name,
         parentId: input.parent_id,
         input: input.input,
@@ -163,6 +177,7 @@ export async function cloudUpdateSpecCase(projectId: string, caseId: string, inp
         caseId,
         nodeType: input.node_type,
         type: input.type,
+        toolName: input.tool_name,
         name: input.name,
         parentId: input.parent_id,
         input: input.input,
@@ -173,4 +188,51 @@ export async function cloudUpdateSpecCase(projectId: string, caseId: string, inp
 
 export async function cloudDeleteSpecCase(projectId: string, caseId: string) {
     await requestCommand('spec-cases/delete', { projectId, caseId });
+}
+
+export async function cloudListBatchValidationCases(projectId: string) {
+    return await requestCommand<CloudBatchValidationCase[]>('batch-validation-cases/list', { projectId });
+}
+
+export async function cloudGetBatchValidationCase(projectId: string, caseId: string) {
+    return await requestCommand<CloudBatchValidationCase>('batch-validation-cases/get', { projectId, caseId });
+}
+
+export async function cloudCreateBatchValidationCase(projectId: string, input: {
+    name: string;
+    description?: string;
+    test_cases_json?: string;
+    presets_json?: string;
+    result_groups_json?: string;
+}) {
+    return await requestCommand<CloudBatchValidationCase>('batch-validation-cases/create', {
+        projectId,
+        name: input.name,
+        description: input.description,
+        testCasesJSON: input.test_cases_json,
+        presetsJSON: input.presets_json,
+        resultGroupsJSON: input.result_groups_json
+    });
+}
+
+export async function cloudUpdateBatchValidationCase(projectId: string, caseId: string, input: {
+    name: string;
+    description?: string;
+    test_cases_json?: string;
+    presets_json?: string;
+    result_groups_json?: string;
+}) {
+    return await requestCommand<CloudBatchValidationCase>('batch-validation-cases/update', {
+        projectId,
+        caseId,
+        name: input.name,
+        description: input.description,
+        testCasesJSON: input.test_cases_json,
+        presetsJSON: input.presets_json,
+        resultGroupsJSON: input.result_groups_json
+    });
+}
+
+export async function cloudDeleteBatchValidationCase(projectId: string, caseId: string) {
+    await requestCommand('batch-validation-cases/delete', { projectId, caseId });
 }

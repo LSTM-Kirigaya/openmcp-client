@@ -48,6 +48,7 @@ export type SpecCase = {
   node_type: string;
   level: number;
   type: string;
+  tool_name?: string;
   name: string;
   input?: string;
   output?: string;
@@ -55,5 +56,17 @@ export type SpecCase = {
   created_at?: string;
   updated_at?: string;
   children?: SpecCase[];
+};
+
+export type BatchValidationCase = {
+  id: string;
+  project_id: string;
+  name: string;
+  description?: string;
+  test_cases_json?: string;
+  presets_json?: string;
+  result_groups_json?: string;
+  created_at?: string;
+  updated_at?: string;
 };
 

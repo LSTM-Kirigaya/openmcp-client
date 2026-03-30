@@ -72,6 +72,7 @@ openmcp-cli mcp sessions use --client-id "<uuid>"
 ```bash
 openmcp-cli mcp tools-list
 openmcp-cli mcp tools-call --name echo --args "{\"message\":\"hi\"}"
+openmcp-cli validation tool --tool-name echo
 ```
 
 如果要显式指定目标连接，可加 `--client-id <uuid>`。
@@ -99,7 +100,7 @@ openmcp-cli mcp history replay --failed --limit 1
 
 ## 大 JSON 与超时
 
-- 对请求体较大的场景，优先使用各子命令提供的 `-f` 读文件能力（如 `llm chat-sync`、`batch-validation run`）。
+- 对请求体较大的场景，优先使用各子命令提供的 `-f` 读文件能力（如 `llm chat-sync`、`validation batch`）。
 - `mcp connect` 默认超时较长；其它子命令如需更细粒度控制，建议拆分调用并结合历史回放定位问题。
 
 ## 流式 LLM

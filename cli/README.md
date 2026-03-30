@@ -86,8 +86,8 @@ yarn openmcp-cli --help
 | `mcp` | 连接、断开、ping、环境变量、tools/prompts/resources |
 | `llm` | 模型列表、同步聊天等 |
 | `setting` | 读写应用设置 |
+| `validation` | 工具测试用例执行与批量验证 |
 | `skills` | 技能包列表与读文件 |
-| `batch-validation` | 批量验证执行 |
 
 完整子命令与参数说明见 **[命令参考](docs/commands.md)**。
 

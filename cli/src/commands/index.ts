@@ -6,4 +6,5 @@ export { mcpCommand } from './mcp.js';
 export { llmCommand } from './llm.js';
 export { settingCmd } from './setting-cmd.js';
 export { skillsCmd } from './skills-cmd.js';
-export { batchValidationCmd } from './batch-validation-cmd.js';
+export { validationCmd } from './validation-cmd.js';
+export { batchValidationCasesCmd } from './cloud-batch-validation-cases.js';

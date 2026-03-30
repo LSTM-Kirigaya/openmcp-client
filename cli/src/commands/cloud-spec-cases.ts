@@ -14,7 +14,8 @@ gw(
     .description('创建 Spec Case（spec-cases/create）')
     .requiredOption('--project-id <id>', '项目ID')
     .requiredOption('--node-type <node_type>', 'node_type（folder|case）')
-    .requiredOption('--type <type>', 'type（tool|prompt）')
+    .requiredOption('--type <type>', 'type（工具用例建议传 tool_case；目录可传 group）')
+    .option('--tool-name <name>', '真实工具名（type=tool_case 时建议传）')
     .requiredOption('--name <name>', '名称')
     .option('--parent-id <id>', '父节点ID（可选）')
     .option('--input <text>', 'input（可选）')
@@ -26,6 +27,7 @@ gw(
           projectId: options.projectId,
           nodeType: options.nodeType,
           type: options.type,
+          toolName: options.toolName,
           name: options.name,
           parentId: options.parentId,
           input: options.input,
@@ -74,7 +76,8 @@ gw(
     .requiredOption('--project-id <id>', '项目ID')
     .requiredOption('--case-id <id>', 'Spec Case ID')
     .requiredOption('--node-type <node_type>', 'node_type（folder|case）')
-    .requiredOption('--type <type>', 'type（tool|prompt）')
+    .requiredOption('--type <type>', 'type（工具用例建议传 tool_case；目录可传 group）')
+    .option('--tool-name <name>', '真实工具名（type=tool_case 时建议传）')
     .requiredOption('--name <name>', '名称')
     .option('--parent-id <id>', '父节点ID（可选）')
     .option('--input <text>', 'input（可选）')
@@ -87,6 +90,7 @@ gw(
           caseId: options.caseId,
           nodeType: options.nodeType,
           type: options.type,
+          toolName: options.toolName,
           name: options.name,
           parentId: options.parentId,
           input: options.input,

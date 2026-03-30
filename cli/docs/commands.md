@@ -93,7 +93,11 @@ MCP 连接与协议封装（Connect + Client 控制器）。
 | 子命令 | 说明 |
 |--------|------|
 | `load` | 加载设置 |
-| `save` | `-f` / `-d` 保存 |
+| `list` | 查看当前全部设置（等价于 `load`） |
+| `set` | `--key` + (`--value` 或 `--json`) 单项修改顶层设置 |
+| `save` | `-f` / `-d` 整包保存 |
+
+`set` 会先读取当前 settings，再只覆盖指定键后保存，避免手工准备整包 JSON。`--value` 默认优先按 JSON 字面量解析（例如 `120`、`true`、`null`），解析失败时按普通字符串处理；对象/数组或想显式写入字符串时可用 `--json`。
 
 ---
 
@@ -103,11 +107,14 @@ MCP 连接与协议封装（Connect + Client 控制器）。
 
 ---
 
-## `batch-validation`
+## `validation`
 
 | 子命令 | 说明 |
 |--------|------|
-| `run` | `-f` / `-d`，执行批量验证 |
+| `tool` | 执行已保存的工具测试用例，并与 `expectedOutput` 对比 |
+| `batch` | `-f` / `-d`，执行批量验证 |
+
+`tool` 默认读取当前会话对应服务下保存的 `test-cases`，逐个调用工具并回写 `status` / `actualOutput`。可用 `--tool-name`、`--case-id`、`--case-name` 过滤；不传 `--client-id` 时，默认使用当前会话。
 
 ---
 
