@@ -16,13 +16,9 @@ import {
   validateConfig
 } from '../../lib/mcp-config.js';
 import {
-  getCurrentClientId,
-  getRecentSessions,
   getSessionByClientId,
-  getSessionStorePath,
   rememberSession,
-  requireClientId,
-  setCurrentClientId
+  requireClientId
 } from '../../lib/mcp-session-store.js';
 import { findRpcHistoryById, getRpcHistoryPath, queryRpcHistory } from '../../lib/rpc-history.js';
 import { diagnoseThrownError } from '../../lib/error-diagnose.js';
@@ -115,60 +111,18 @@ gw(
     })
 );
 
-/* ── sessions ── */
+/* ── sessions（已迁移到 mcp session） ── */
 
-const sessionsCmd = new Command('sessions').description('会话管理');
-
-gw(
-  sessionsCmd
-    .command('list')
-    .description('列出 Gateway 中当前活跃会话')
-    .action(async (options) => {
-      try {
-        await withGateway(options.gateway, async (bridge) => {
-          const res = await bridge.commandRequest('connect/list', {});
-          printResponse('connect/list', res);
-          if (res.code !== 200) process.exitCode = 1;
-        });
-      } catch (error) {
-        printThrown(error);
-      }
-    })
-);
-
-sessionsCmd
-  .command('current')
-  .description('查看当前默认会话')
+mcpRawCommand
+  .command('sessions')
+  .description('[已迁移] 请使用 "mcp session list/current/recent/use"')
   .action(() => {
-    printJson({
-      currentClientId: getCurrentClientId() ?? null,
-      storePath: getSessionStorePath()
-    });
+    console.log('此命令已迁移，请使用:');
+    console.log('  openmcp-cli mcp session list       列出活跃会话');
+    console.log('  openmcp-cli mcp session current     查看当前默认会话');
+    console.log('  openmcp-cli mcp session recent      查看最近连接记录');
+    console.log('  openmcp-cli mcp session use         切换默认会话');
   });
-
-sessionsCmd
-  .command('recent')
-  .description('查看最近连接记录')
-  .option('--limit <n>', '数量，默认 20', '20')
-  .action((options) => {
-    const limit = Number(options.limit || 20);
-    printJson({
-      currentClientId: getCurrentClientId() ?? null,
-      recent: getRecentSessions(limit),
-      storePath: getSessionStorePath()
-    });
-  });
-
-sessionsCmd
-  .command('use')
-  .description('切换默认会话')
-  .requiredOption('--client-id <id>', '目标 clientId')
-  .action((options) => {
-    setCurrentClientId(options.clientId);
-    printJson({ ok: true, currentClientId: options.clientId });
-  });
-
-mcpRawCommand.addCommand(sessionsCmd);
 
 /* ── config ── */
 

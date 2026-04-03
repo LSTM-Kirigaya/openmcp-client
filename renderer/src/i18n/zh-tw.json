@@ -461,5 +461,14 @@
     "batch-validation-collapse-detail": "收起詳情",
     "batch-validation-last-run-summary": "上次驗證結果",
     "chat-tab": "聊天",
-    "add": "新增"
+    "add": "新增",
+    "server-tab": "伺服器",
+    "session-tab": "工作階段",
+    "local-servers": "本機伺服器",
+    "no-local-servers": "尚無本機伺服器設定",
+    "no-active-sessions": "目前沒有使用中的工作階段",
+    "unnamed-server": "未命名伺服器",
+    "delete-success": "已刪除",
+    "delete-failed": "刪除失敗",
+    "load-servers-failed": "載入伺服器清單失敗"
 }

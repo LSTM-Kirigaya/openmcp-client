@@ -461,5 +461,14 @@
     "batch-validation-collapse-detail": "Collapse",
     "batch-validation-last-run-summary": "Last run",
     "chat-tab": "Chat",
-    "add": "Add"
+    "add": "Add",
+    "server-tab": "الخادم",
+    "session-tab": "الجلسة",
+    "local-servers": "الخوادم المحلية",
+    "no-local-servers": "لا توجد إعدادات لخوادم محلية",
+    "no-active-sessions": "لا توجد جلسات نشطة",
+    "unnamed-server": "خادم بدون اسم",
+    "delete-success": "تم الحذف",
+    "delete-failed": "فشل الحذف",
+    "load-servers-failed": "تعذّر تحميل قائمة الخوادم"
 }

@@ -461,5 +461,14 @@
     "batch-validation-collapse-detail": "Collapse",
     "batch-validation-last-run-summary": "Last run",
     "chat-tab": "Chat",
-    "add": "Add"
+    "add": "Add",
+    "server-tab": "サーバー",
+    "session-tab": "セッション",
+    "local-servers": "ローカルサーバー",
+    "no-local-servers": "ローカルサーバーの設定がありません",
+    "no-active-sessions": "アクティブなセッションはありません",
+    "unnamed-server": "名前未設定のサーバー",
+    "delete-success": "削除しました",
+    "delete-failed": "削除に失敗しました",
+    "load-servers-failed": "サーバー一覧の読み込みに失敗しました"
 }

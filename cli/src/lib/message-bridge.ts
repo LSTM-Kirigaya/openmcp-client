@@ -109,7 +109,7 @@ export class MessageBridge {
     return () => commandHandlers.delete(commandHandler);
   }
 
-  private postMessage(message: VSCodeMessage) {
+  public postMessage(message: VSCodeMessage) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
@@ -149,7 +149,7 @@ export class MessageBridge {
 
       this.postMessage({
         command,
-        data: { _id, ...data }
+        data: { ...data, _id }
       });
 
       const timer = setTimeout(() => {

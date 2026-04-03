@@ -17,6 +17,7 @@ import { ProjectInvitesController } from "../cloud/controllers/project-invites.c
 import { SpecCasesController } from "../cloud/controllers/spec-cases.controller.js";
 import { BatchValidationCasesController } from "../cloud/controllers/batch-validation-cases.controller.js";
 import { LocalStorageController } from "../storage/storage.controller.js";
+import { ServerConfigController } from "../mcp/server-config.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
 
 export const ModuleControllers = [
@@ -36,7 +37,8 @@ export const ModuleControllers = [
     ProjectInvitesController,
     SpecCasesController,
     BatchValidationCasesController,
-    LocalStorageController
+    LocalStorageController,
+    ServerConfigController
 ];
 
 export async function routeMessage(command: string, data: any, webview: PostMessageble) {

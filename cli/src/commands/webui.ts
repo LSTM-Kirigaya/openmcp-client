@@ -215,6 +215,33 @@ async function startWebBackground(options: any) {
   }, 3000);
 }
 
+async function restartWebBackground(options: any) {
+  const webPort = parseInt(options.port, 10);
+
+  console.log(`
+╔═══════════════════════════════════════╗
+║      Restarting OpenMCP Web UI        ║
+╚═══════════════════════════════════════╝
+  `);
+
+  await stopRendererService(webPort);
+
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  const stillThere = await statusRendererService(webPort);
+  if (stillThere.running) {
+    console.error(
+      '❌ Web UI 仍在运行，重启中止。请检查进程是否无法结束或端口被占用。'
+    );
+    process.exit(1);
+    return;
+  }
+
+  await startWebBackground(options);
+
+  console.log(`\n✅ Web UI restarted`);
+}
+
 async function showWebStatus(options: any) {
   const gatewayPort = parseInt(options.gatewayPort ?? '8282', 10);
   const webPort = parseInt(options.port ?? '8283', 10);
@@ -242,7 +269,7 @@ async function showWebStatus(options: any) {
 
 export const webCommand = new Command('webui')
   .description('OpenMCP Web UI（Renderer）')
-  .summary('Web management: run|start|status|stop')
+  .summary('Web management: run|start|restart|status|stop')
   .addHelpText('after', HELP_WEB);
 
 // 必须携带子命令：不提供子命令时只输出帮助
@@ -268,6 +295,16 @@ webCommand
   .option('-b, --browser <browser>', '用指定浏览器打开，如 chrome、msedge')
   .action(async (options) => {
     await startWebBackground(options);
+  });
+
+webCommand
+  .command('restart')
+  .description('后台重启（先停止再启动，与 start 相同选项）')
+  .option('-p, --port <port>', 'Vite 开发服务器端口（Web UI）', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway WebSocket 端口', '8282')
+  .option('-b, --browser <browser>', '用指定浏览器打开，如 chrome、msedge')
+  .action(async (options) => {
+    await restartWebBackground(options);
   });
 
 webCommand

@@ -21,8 +21,10 @@ export const HELP_PROGRAM_AFTER = `
   openmcp-cli setting llm provider list
   openmcp-cli setting general list
   openmcp-cli setting cloud login -u myuser -p mypass
-  openmcp-cli connection list
-  openmcp-cli connection connect --id <connectionId>
+  openmcp-cli mcp server list
+  openmcp-cli mcp server add -f ./my-server.json
+  openmcp-cli mcp session connect --id <SERVER_ID>
+  openmcp-cli mcp session list
   openmcp-cli debug tool list
   openmcp-cli debug tool test-case list --connection-id <id>
   openmcp-cli debug tool run
@@ -40,6 +42,7 @@ export const HELP_WEB = `
   - 支持子命令:
       run     前台运行（阻塞，Ctrl+C 退出）
       start   后台运行（立即返回）
+      restart 后台重启（先 stop 再 start，与 gateway restart 类似）
       status  检查 Gateway 可达性 + Renderer 状态
       stop    停止后台运行的 Web UI（只停 Renderer）
 
@@ -47,6 +50,7 @@ export const HELP_WEB = `
 示例:
   openmcp-cli webui run -p 8283 -g 8282
   openmcp-cli webui start -p 8283 -g 8282
+  openmcp-cli webui restart -p 8283 -g 8282
   OPENMCP_WEB_DEV=1 openmcp-cli webui run -p 8283 -g 8282
   openmcp-cli webui status
   openmcp-cli webui stop

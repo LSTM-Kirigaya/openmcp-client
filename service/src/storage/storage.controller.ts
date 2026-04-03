@@ -1,16 +1,7 @@
 import { Controller } from '../common/index.js';
 import type { RequestData, RestfulResponse } from '../common/index.dto.js';
 import type { PostMessageble } from '../hook/adapter.js';
-import { connectService, getClient } from '../mcp/connect.service.js';
-import {
-    deleteLocalConnectionRecord,
-    getLocalConnectionRecordById,
-    getLocalConnectionRecordByName,
-    getLocalConnectionsStoragePath,
-    listLocalConnectionRecords,
-    type LocalConnectionEntry,
-    upsertLocalConnectionRecord
-} from './connections.repository.js';
+import { getClient } from '../mcp/connect.service.js';
 import { getClientStorageBinding } from './client-binding.js';
 import {
     deleteStoredToolCase,
@@ -57,107 +48,7 @@ function resolveConnectionKey(data: RequestData): string | undefined {
     return undefined;
 }
 
-function cloneEntry<T>(value: T): T {
-    return JSON.parse(JSON.stringify(value)) as T;
-}
-
 export class LocalStorageController {
-    @Controller('connections/list')
-    async listConnections(data: RequestData, _webview: PostMessageble): Promise<RestfulResponse> {
-        const options = resolveLocalOptions(data);
-        return {
-            code: 200,
-            msg: 'ok',
-            data: {
-                scope: options.scope || 'auto',
-                storagePath: getLocalConnectionsStoragePath(options),
-                records: listLocalConnectionRecords(options)
-            }
-        };
-    }
-
-    @Controller('connections/get')
-    async getConnection(data: RequestData, _webview: PostMessageble): Promise<RestfulResponse> {
-        const options = resolveLocalOptions(data);
-        const record = typeof data.id === 'string' && data.id.trim()
-            ? getLocalConnectionRecordById(data.id.trim(), options)
-            : typeof data.name === 'string' && data.name.trim()
-                ? getLocalConnectionRecordByName(data.name.trim(), options)
-                : undefined;
-        if (!record) {
-            return { code: 404, msg: 'connection not found' };
-        }
-        return {
-            code: 200,
-            msg: 'ok',
-            data: record
-        };
-    }
-
-    @Controller('connections/save')
-    async saveConnection(data: RequestData, _webview: PostMessageble): Promise<RestfulResponse> {
-        const options = resolveLocalOptions(data);
-        const item = (data.item ?? data.items) as LocalConnectionEntry | undefined;
-        if (!item) {
-            return { code: 400, msg: 'item is required' };
-        }
-        const record = upsertLocalConnectionRecord(item, {
-            ...options,
-            id: typeof data.id === 'string' ? data.id : undefined,
-            name: typeof data.name === 'string' ? data.name : undefined
-        });
-        return {
-            code: 200,
-            msg: 'ok',
-            data: record
-        };
-    }
-
-    @Controller('connections/delete')
-    async deleteConnection(data: RequestData, _webview: PostMessageble): Promise<RestfulResponse> {
-        const options = resolveLocalOptions(data);
-        if (typeof data.id !== 'string' || !data.id.trim()) {
-            return { code: 400, msg: 'id is required' };
-        }
-        const ok = deleteLocalConnectionRecord(data.id.trim(), options);
-        return {
-            code: ok ? 200 : 404,
-            msg: ok ? 'ok' : 'connection not found'
-        };
-    }
-
-    @Controller('connections/connect')
-    async connectStoredConnection(data: RequestData, webview: PostMessageble): Promise<RestfulResponse> {
-        const options = resolveLocalOptions(data);
-        if (typeof data.id !== 'string' || !data.id.trim()) {
-            return { code: 400, msg: 'id is required' };
-        }
-        const record = getLocalConnectionRecordById(data.id.trim(), options);
-        if (!record) {
-            return { code: 404, msg: 'connection not found' };
-        }
-        const entries = Array.isArray(record.item) ? record.item : [record.item];
-        const results = [];
-        let allOk = true;
-        for (const entry of entries) {
-            const payload = cloneEntry(entry);
-            payload.connectionId = record.id;
-            payload.storageScope = options.scope;
-            payload.workspacePath = options.workspacePath;
-            const res = await connectService(payload as any, webview);
-            results.push(res);
-            allOk &&= res.code === 200;
-        }
-        return {
-            code: allOk ? 200 : 207,
-            msg: allOk ? 'ok' : 'partial failure',
-            data: {
-                connection: record,
-                results
-            }
-        };
-    }
-
     @Controller('test-cases/list')
     async listToolCases(data: RequestData, _webview: PostMessageble): Promise<RestfulResponse> {
         const options = resolveLocalOptions(data);

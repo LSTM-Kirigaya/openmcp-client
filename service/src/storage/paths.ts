@@ -101,6 +101,14 @@ export function getConnectionsIndexPath(options: LocalStorageScopeOptions = {}):
     return path.join(getConnectionsDir(options), 'index.json');
 }
 
+export function getServersDir(): string {
+    return path.join(getLocalStorageRoot({ scope: 'user', ensure: true }), 'servers');
+}
+
+export function getServersIndexPath(): string {
+    return path.join(getServersDir(), 'index.json');
+}
+
 export function getPanelStateDir(options: LocalStorageScopeOptions = {}): string {
     return path.join(getLocalStorageRoot({ ...options, ensure: true }), 'panel-state');
 }

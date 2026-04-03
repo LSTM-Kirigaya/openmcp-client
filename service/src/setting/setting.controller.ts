@@ -8,7 +8,8 @@ export class SettingController {
 
     @Controller('setting/save')
     async saveSetting(data: RequestData, webview: PostMessageble) {
-        saveSetting(data);
+        const { _id, ...config } = data as any;
+        saveSetting(config);
         console.log('Settings saved successfully');
         
         return {

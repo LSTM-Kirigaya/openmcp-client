@@ -13,6 +13,7 @@ export { loadSetting, saveSetting } from './setting/setting.service.js';
 export {
     getLocalStorageRoot,
     getConnectionsIndexPath,
+    getServersIndexPath,
     getSettingsFilePath,
     getTokenFilePath,
     getGatewayEnvPath,
@@ -30,6 +31,14 @@ export {
     deleteLocalConnectionRecord,
     getLocalConnectionsStoragePath
 } from './storage/connections.repository.js';
+export {
+    listServers,
+    getServerById,
+    upsertServer,
+    deleteServer,
+    replaceAllServers,
+    getServersStoragePath
+} from './storage/servers.repository.js';
 
 // TaskLoop class is available at runtime via:
 //   const { TaskLoop } = await import('@openmcp/service/dist/task-loop.js');

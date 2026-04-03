@@ -64,6 +64,9 @@
                 <span class="option-title">{{ t('cloud-subscription-level') }}</span>
                 <span>{{ cloudAuthState.subscriptionTier || t('cloud-subscription-unknown') }}</span>
             </div>
+            <div class="setting-option">
+                <span class="subscription-notice">{{ t('cloud-subscription-free-only') }}</span>
+            </div>
             <div class="setting-option actions">
                 <el-button @click="handleRefresh">{{ t('cloud-refresh-token') }}</el-button>
                 <el-button type="danger" @click="handleLogout">{{ t('cloud-logout') }}</el-button>
@@ -468,5 +471,11 @@ onMounted(async () => {
 .project-op-btn.danger {
     color: var(--el-color-danger);
     border-color: var(--el-color-danger-light-5);
+}
+
+.subscription-notice {
+    font-size: 13px;
+    color: var(--el-color-warning);
+    padding: 4px 0;
 }
 </style>

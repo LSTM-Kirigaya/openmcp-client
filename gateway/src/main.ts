@@ -2,8 +2,7 @@ import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import type { Logger } from 'pino';
-import { routeMessage, VSCodeWebViewLike, setRunningCWD } from '@openmcp/service';
-import fs from 'fs/promises';
+import { routeMessage, VSCodeWebViewLike, setRunningCWD, listServers, replaceAllServers } from '@openmcp/service';
 import { createGatewayLogger } from './logger.js';
 
 export interface VSCodeMessage {
@@ -13,63 +12,19 @@ export interface VSCodeMessage {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-// 统一路径变量
 const devHome = join(__dirname, '..', '..');
-const serverPath = join(devHome, 'servers');
-const envPath = join(__dirname, '..', '.env');
 
 export type MessageHandler = (message: VSCodeMessage) => void;
 
-async function refreshConnectionOption(logger: Logger) {
-    const defaultOption = {
-        connectionType: 'STDIO',
-        commandString: 'mcp run main.py',
-        cwd: serverPath
-    };
-
-    try {
-        await fs.writeFile(envPath, JSON.stringify(defaultOption, null, 4), 'utf-8');
-        return { items: [defaultOption] };
-    } catch (error) {
-        logger.error({ err: error }, '刷新连接配置失败');
-        throw error;
-    }
-}
-
-async function acquireConnectionOption(logger: Logger) {
-    try {
-        const data = await fs.readFile(envPath, 'utf-8');
-        const option = JSON.parse(data);
-
-        if (!option.items || option.items.length === 0) {
-            return await refreshConnectionOption(logger);
+function loadLaunchServers(): any[] {
+    const records = listServers();
+    return records.map((r: any) => {
+        const item: any = { ...r };
+        if (item.connectionType === 'STDIO' && item.command) {
+            item.commandString = [item.command, ...(item.args || [])].join(' ');
         }
-
-        // 按照前端的规范，整理成 commandString 样式
-        option.items = option.items.map((item: any) => {
-            if (item.connectionType === 'STDIO') {
-                item.commandString = [item.command, ...item.args]?.join(' ');
-            } else {
-                item.url = item.url;
-            }
-            return item;
-        });
-
-        return option;
-    } catch (error) {
-        logger.warn({ err: error }, '读取 .env 配置文件失败，将写入默认配置');
-        return await refreshConnectionOption(logger);
-    }
-}
-
-async function updateConnectionOption(logger: Logger, data: any) {
-    try {
-        await fs.writeFile(envPath, JSON.stringify({ items: data }, null, 4), 'utf-8');
-    } catch (error) {
-        logger.error({ err: error }, '更新连接配置失败');
-        throw error;
-    }
+        return item;
+    });
 }
 
 function parseGatewayPort(): number {
@@ -94,10 +49,6 @@ async function bootstrap() {
 
     wss.on('connection', (ws) => {
         const webview = new VSCodeWebViewLike(ws);
-        const optionPromise = acquireConnectionOption(logger).catch(async (error) => {
-            logger.error({ err: error }, '初始化连接配置失败');
-            return await refreshConnectionOption(logger);
-        });
 
         webview.postMessage({
             command: 'hello',
@@ -114,20 +65,26 @@ async function bootstrap() {
 
             switch (command) {
                 case 'web/launch-signature': {
-                    const option = await optionPromise;
+                    const items = loadLaunchServers();
                     webview.postMessage({
                         command: 'web/launch-signature',
                         data: {
                             _id: data._id,
                             code: 200,
-                            msg: option.items
+                            msg: items
                         }
                     });
                     break;
                 }
 
                 case 'web/update-connection-signature':
-                    await updateConnectionOption(logger, data);
+                    try {
+                        if (Array.isArray(data)) {
+                            replaceAllServers(data);
+                        }
+                    } catch (error) {
+                        logger.error({ err: error }, '更新 Server 配置失败');
+                    }
                     break;
 
                 default:

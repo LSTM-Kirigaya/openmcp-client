@@ -461,5 +461,14 @@
     "batch-validation-collapse-detail": "Collapse",
     "batch-validation-last-run-summary": "Last run",
     "chat-tab": "Chat",
-    "add": "Add"
+    "add": "Add",
+    "server-tab": "서버",
+    "session-tab": "세션",
+    "local-servers": "로컬 서버",
+    "no-local-servers": "로컬 서버 설정이 없습니다",
+    "no-active-sessions": "활성 세션이 없습니다",
+    "unnamed-server": "이름 없는 서버",
+    "delete-success": "삭제되었습니다",
+    "delete-failed": "삭제에 실패했습니다",
+    "load-servers-failed": "서버 목록을 불러오지 못했습니다"
 }

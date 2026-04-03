@@ -26,11 +26,8 @@ export async function initialise() {
 
 	loading.close();
 
-    // 尝试进行初始化连接
-    await mcpClientAdapter.launch();
-
-	// loading panels
-	await mcpClientAdapter.loadPanels();
+	// 注册消息监听器（不再自动连接 Server）
+	await mcpClientAdapter.launch();
 
 	isConnecting.value = false;
 }

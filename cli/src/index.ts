@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import {
   settingCommand,
   debugCommand,
-  connectionCommand,
+  mcpCommand,
   gatewayCommand,
   webCommand,
   startCommand
@@ -17,8 +17,8 @@ program
   .version('0.2.0')
   .addHelpText('after', HELP_PROGRAM_AFTER)
   .addCommand(settingCommand)
+  .addCommand(mcpCommand)
   .addCommand(debugCommand)
-  .addCommand(connectionCommand)
   .addCommand(gatewayCommand)
   .addCommand(webCommand)
   .addCommand(startCommand);

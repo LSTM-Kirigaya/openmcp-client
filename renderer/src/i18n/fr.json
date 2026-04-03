@@ -461,5 +461,14 @@
     "batch-validation-collapse-detail": "Collapse",
     "batch-validation-last-run-summary": "Last run",
     "chat-tab": "Chat",
-    "add": "Add"
+    "add": "Add",
+    "server-tab": "Serveur",
+    "session-tab": "Session",
+    "local-servers": "Serveurs locaux",
+    "no-local-servers": "Aucune configuration de serveur local",
+    "no-active-sessions": "Aucune session active",
+    "unnamed-server": "Serveur sans nom",
+    "delete-success": "Supprimé",
+    "delete-failed": "Échec de la suppression",
+    "load-servers-failed": "Impossible de charger la liste des serveurs"
 }

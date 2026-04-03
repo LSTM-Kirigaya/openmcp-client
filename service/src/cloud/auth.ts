@@ -267,8 +267,10 @@ export async function checkAuthStatus(): Promise<AuthStatusResponse> {
       const subResp = await client.get<BackendMeSubscriptionResponse>('/me/subscription');
       const plan = subResp.data?.data?.plan;
       subscriptionTier = plan?.name || plan?.code || undefined;
-    } catch {
-      // ignore: 订阅接口失败不影响登录态
+      console.log('[cloud/auth] /me/subscription response:', JSON.stringify(subResp.data), '=> subscriptionTier:', subscriptionTier);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn('[cloud/auth] /me/subscription failed:', msg);
     }
   }
 

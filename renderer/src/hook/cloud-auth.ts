@@ -30,6 +30,11 @@ export function hydrateCloudAuth() {
 export async function refreshCloudAuthStatus() {
     try {
         const status = await cloudAuthStatus();
+        console.log('[cloud-auth] auth/status response:', JSON.stringify({
+            loggedIn: status.loggedIn,
+            subscriptionTier: status.subscriptionTier,
+            user: status.user?.username
+        }));
         cloudAuthState.loggedIn = Boolean(status.loggedIn);
         cloudAuthState.subscriptionTier = status.subscriptionTier || null;
         if (status.user) {
@@ -37,7 +42,8 @@ export async function refreshCloudAuthStatus() {
         } else if (!status.loggedIn) {
             cloudAuthState.user = null;
         }
-    } catch {
+    } catch (err) {
+        console.warn('[cloud-auth] refreshCloudAuthStatus failed:', err);
         cloudAuthState.loggedIn = false;
         cloudAuthState.user = null;
         cloudAuthState.subscriptionTier = null;

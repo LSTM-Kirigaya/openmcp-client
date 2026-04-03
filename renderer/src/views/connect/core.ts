@@ -587,22 +587,36 @@ class McpClientAdapter {
     }
 
     /**
-     * @description 获取连接参数签名
+     * @description 获取连接参数签名（优先使用 servers/list，兼容旧 launch-signature）
      * @returns 
      */
     public async getLaunchSignature(): Promise<IConnectionArgs[]> {
 
         const bridge = useMessageBridge();
-        const { code, msg } = await bridge.commandRequest(this.platform + '/launch-signature');
 
+        // 先尝试新 RPC
+        try {
+            const res = await bridge.commandRequest<{ servers: any[] }>('servers/list', {});
+            if (res.code === 200 && res.msg?.servers) {
+                const locals = res.msg.servers.filter((s: any) => s.source === 'local');
+                return locals.map((s: any) => {
+                    const item: any = { ...s };
+                    if (item.connectionType === 'STDIO' && item.command) {
+                        item.commandString = [item.command, ...(item.args || [])].join(' ');
+                    }
+                    return item;
+                });
+            }
+        } catch {
+            // fallback to legacy RPC
+        }
+
+        const { code, msg } = await bridge.commandRequest(this.platform + '/launch-signature');
         if (code !== 200) {
             const message = msg.toString();
             ElMessage.error(message);
             return [];
         }
-
-        // 判断一下版本，新版本的 msg 应该是数组，老版本是对象
-        // 返回的数组的第一个为主节点，其余为从节点
         if (Array.isArray(msg)) {
             return msg;
         }
@@ -637,13 +651,17 @@ class McpClientAdapter {
             options.push(option);
         }
 
-        // 同步成功的连接参数到后端，更新 vscode treeview 中的列表
         const deserializeOption = JSON.parse(JSON.stringify(options));
 
-        bridge.postMessage({
-            command: platform + '/update-connection-signature',
-            data: deserializeOption
-        });
+        // 使用新 RPC 逐条保存；同时保持旧接口兼容
+        try {
+            await bridge.commandRequest('servers/replace-all', { items: deserializeOption });
+        } catch {
+            bridge.postMessage({
+                command: platform + '/update-connection-signature',
+                data: deserializeOption
+            });
+        }
     }
 
     private findClientIndexByUuid(uuid: string): number {
@@ -686,6 +704,10 @@ class McpClientAdapter {
         }
     }
 
+    /**
+     * 注册 connect/log 和 connect/refresh 监听器，不再自动连接已保存的 Server。
+     * 用户需要在 Server Tab 手动选择要连接的 Server。
+     */
     public async launch() {
         // 创建对于 log/output 的监听
         if (!this.connectLogListenerCancel) {
@@ -708,82 +730,65 @@ class McpClientAdapter {
             }, { once: false });
         }
 
-        await this.lock.acquire();
-        const launchSignature = await this.getLaunchSignature();
-
-        let allOk = true;
-
-        for (const item of launchSignature) {
-
-            // 创建一个新的客户端            
-            const rawClient = new McpClient();
-
-            // 同步连接参数
-            await rawClient.acquireConnectionSignature(item);
-
-            this.clients.push(rawClient);
-
-            // 使用列表中的代理对象执行后续状态更新，确保 UI 能立即响应
-            const client = this.clients[this.clients.length - 1];
-
-            // 同步环境变量
-            await client.handleEnvSwitch(true);
-
-            // 连接
-            const ok = await client.connect();
-
-            let wrapperChalk = chalk as any;
-
-            if (platform === 'web') {
-                wrapperChalk = {
-                    gray: (s: string) => s,
-                    green: (s: string) => s,
-                    red: (s: string) => s
-                }
-            }
-
-            if (ok) {
-                console.log(
-                    wrapperChalk.gray(`${logTimeStampString()} |`),
-                    wrapperChalk.green(`🚀 [${client.name}] ${client.version} connected, type ${client.connectOption.connectionType}`)
-                );
-            } else {
-                console.log(
-                    wrapperChalk.gray(`${logTimeStampString()} |`),
-                    wrapperChalk.red(`❌ fail to connect `),
-                    wrapperChalk.red(JSON.stringify(client.connectionResult.logString, null, 2))
-                );
-            }
-
-            allOk &&= ok;
-        }
-
-        // 更新部分设置
-        if (launchSignature.length > 0 && this.clients.length > 0) {
-            const masterNode = this.clients[0];
-
-            mcpSetting.enableDatasetReflux = masterNode.connectionArgs.enableDatasetReflux || false;
-            mcpSetting.datasetName = masterNode.connectionArgs.datasetName || '';
-            // 如果 datasetName 尚未初始化，使用第一个连接服务器名称来
-            if (mcpSetting.datasetName === '') {
-                const serverName = this.clients[0].connectionResult.name || '';
-                mcpSetting.datasetName = serverName;
-                masterNode.connectionArgs.datasetName = serverName;
-            }
-        }
-
-        // 如果全部成功，保存连接参数
-        if (allOk) {
-            this.saveLaunchSignature();
-        }
-
-        this.lock.releaseAll();
-
-        // 释放信号
+        // 释放信号，告知应用已就绪（不再等待连接完成）
         if (platform === 'web') {
             const event = new CustomEvent(CONNECTION_READY_EVENT, { detail: { message: 'ready' } });
             document.dispatchEvent(event);
         }
+    }
+
+    /**
+     * 手动连接指定的 Server 配置（由 UI 触发，替代旧的自动批量连接逻辑）。
+     */
+    public async connectServer(item: IConnectionArgs) {
+        await this.lock.acquire();
+
+        const rawClient = new McpClient();
+        await rawClient.acquireConnectionSignature(item);
+
+        this.clients.push(rawClient);
+        const client = this.clients[this.clients.length - 1];
+
+        await client.handleEnvSwitch(true);
+
+        const ok = await client.connect();
+
+        let wrapperChalk = chalk as any;
+        if (platform === 'web') {
+            wrapperChalk = {
+                gray: (s: string) => s,
+                green: (s: string) => s,
+                red: (s: string) => s
+            }
+        }
+
+        if (ok) {
+            console.log(
+                wrapperChalk.gray(`${logTimeStampString()} |`),
+                wrapperChalk.green(`🚀 [${client.name}] ${client.version} connected, type ${client.connectOption.connectionType}`)
+            );
+
+            mcpSetting.enableDatasetReflux = client.connectionArgs.enableDatasetReflux || false;
+            if (!mcpSetting.datasetName) {
+                mcpSetting.datasetName = client.connectionArgs.datasetName || client.connectionResult.name || '';
+            }
+
+            this.saveLaunchSignature();
+        } else {
+            console.log(
+                wrapperChalk.gray(`${logTimeStampString()} |`),
+                wrapperChalk.red(`❌ fail to connect `),
+                wrapperChalk.red(JSON.stringify(client.connectionResult.logString, null, 2))
+            );
+            // 连接失败，移除这个 client
+            const idx = this.clients.indexOf(client);
+            if (idx >= 0) {
+                this.clients.splice(idx, 1);
+            }
+        }
+
+        this.lock.releaseAll();
+        return ok;
     }
 
     public async readResource(resourceUri?: string, clientIndex?: number) {

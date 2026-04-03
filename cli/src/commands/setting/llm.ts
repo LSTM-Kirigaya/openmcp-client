@@ -64,7 +64,15 @@ export const llmCommand = new Command('llm')
 /* ── provider list ── */
 
 const providerCmd = new Command('provider')
-  .description('LLM 提供商管理');
+  .description('LLM 提供商管理')
+  .addHelpText('after', `
+示例:
+  查看所有提供商:     openmcp-cli setting llm provider list
+  设置 DeepSeek Key:  openmcp-cli setting llm provider update --id deepseek --api-key sk-xxx
+  设置 OpenAI Key:    openmcp-cli setting llm provider update --id openai --api-key sk-xxx
+  添加新提供商:       openmcp-cli setting llm provider add --id my-llm --name "My LLM"
+  删除提供商:         openmcp-cli setting llm provider delete --id my-llm
+`);
 
 gw(
   providerCmd
@@ -88,8 +96,9 @@ gw(
         }
 
         console.log('已配置的提供商:\n');
+        const needKeyProviders: string[] = [];
         for (const p of llmInfo) {
-          const keyStatus = p.userToken ? '已配置' : '未设置';
+          const keyStatus = p.userToken ? '✔ 已配置' : '✘ 未设置';
           const models: string[] = Array.isArray(p.models) ? p.models : [];
           const modelsList = models.length > 0 ? models.join(', ') : '(无预置模型)';
           console.log(`  ${p.id}  (${p.name})`);
@@ -97,7 +106,21 @@ gw(
           console.log(`    Base URL: ${p.baseUrl || '(未设置)'}`);
           console.log(`    可选模型: ${modelsList}`);
           console.log('');
+          if (!p.userToken) needKeyProviders.push(p.id);
         }
+
+        console.log('─'.repeat(50));
+        console.log('常用操作:');
+        if (needKeyProviders.length > 0) {
+          console.log(`  设置 API Key:    openmcp-cli setting llm provider update --id ${needKeyProviders[0]} --api-key <你的Key>`);
+        } else {
+          console.log('  设置 API Key:    openmcp-cli setting llm provider update --id <提供商ID> --api-key <你的Key>');
+        }
+        console.log('  修改 Base URL:   openmcp-cli setting llm provider update --id <提供商ID> --base-url <新地址>');
+        console.log('  添加提供商:      openmcp-cli setting llm provider add --id <ID> --name <名称>');
+        console.log('  删除提供商:      openmcp-cli setting llm provider delete --id <提供商ID>');
+        console.log('  测试连通性:      openmcp-cli setting llm test --provider <提供商ID>');
+        console.log('');
       });
     })
 );
@@ -150,13 +173,38 @@ gw(
 gw(
   providerCmd
     .command('update')
-    .description('更新已有的 LLM 提供商')
-    .requiredOption('--id <id>', '提供商 ID')
+    .description('更新已有的 LLM 提供商（需指定至少一个修改项）')
+    .requiredOption('--id <id>', '提供商 ID（使用 provider list 查看）')
     .option('--name <name>', '新的显示名称')
     .option('--base-url <url>', '新的 API 基础地址')
     .option('--api-key <key>', '新的 API Key')
+    .addHelpText('after', `
+示例:
+  设置 API Key:                 openmcp-cli setting llm provider update --id deepseek --api-key sk-xxx
+  修改 Base URL:                openmcp-cli setting llm provider update --id openai --base-url https://api.openai.com/v1
+  同时修改 Key 和 Base URL:    openmcp-cli setting llm provider update --id qwen --api-key sk-xxx --base-url https://new-url.com/v1
+  修改显示名称:                 openmcp-cli setting llm provider update --id deepseek --name "DeepSeek V3"
+`)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
+        const hasName = options.name !== undefined;
+        const hasBaseUrl = options.baseUrl !== undefined;
+        const hasApiKey = options.apiKey !== undefined;
+
+        if (!hasName && !hasBaseUrl && !hasApiKey) {
+          console.warn(`⚠ 未指定任何要修改的内容。请至少提供以下选项之一:\n`);
+          console.log(`  --api-key <key>    设置 API Key`);
+          console.log(`  --base-url <url>   设置 API 基础地址`);
+          console.log(`  --name <name>      设置显示名称`);
+          console.log('');
+          console.log(`示例:`);
+          console.log(`  openmcp-cli setting llm provider update --id ${options.id} --api-key sk-xxx`);
+          console.log(`  openmcp-cli setting llm provider update --id ${options.id} --base-url https://api.example.com/v1`);
+          console.log(`  openmcp-cli setting llm provider update --id ${options.id} --api-key sk-xxx --base-url https://api.example.com/v1`);
+          process.exitCode = 1;
+          return;
+        }
+
         const settings = await loadSettings(bridge);
         const llmInfo: LlmProviderInfo[] = Array.isArray(settings.LLM_INFO) ? settings.LLM_INFO : [];
 
@@ -165,13 +213,29 @@ gw(
           const available = llmInfo.map(p => `  · ${p.id}  (${p.name})`).join('\n');
           console.error(`未找到提供商 "${options.id}"。`);
           if (available) console.error(`\n已配置的提供商:\n${available}`);
+          console.error(`\n使用 "openmcp-cli setting llm provider list" 查看所有提供商。`);
           process.exitCode = 1;
           return;
         }
 
-        if (options.name !== undefined) provider.name = options.name;
-        if (options.baseUrl !== undefined) provider.baseUrl = options.baseUrl;
-        if (options.apiKey !== undefined) provider.userToken = options.apiKey;
+        const changes: string[] = [];
+        if (hasName) {
+          const old = provider.name;
+          provider.name = options.name;
+          changes.push(`  显示名称: ${old} → ${provider.name}`);
+        }
+        if (hasBaseUrl) {
+          const old = provider.baseUrl || '(未设置)';
+          provider.baseUrl = options.baseUrl;
+          changes.push(`  Base URL:  ${old} → ${provider.baseUrl}`);
+        }
+        if (hasApiKey) {
+          const masked = options.apiKey.length > 8
+            ? options.apiKey.slice(0, 4) + '****' + options.apiKey.slice(-4)
+            : '****';
+          changes.push(`  API Key:   已更新 (${masked})`);
+          provider.userToken = options.apiKey;
+        }
 
         const saveRes = await bridge.commandRequest('setting/save', settings);
         if (saveRes.code !== 200) {
@@ -179,7 +243,9 @@ gw(
           process.exitCode = 1;
           return;
         }
-        console.log(`已更新提供商: ${provider.id} (${provider.name})`);
+        console.log(`✔ 已更新提供商: ${provider.id} (${provider.name})\n`);
+        console.log('变更内容:');
+        for (const c of changes) console.log(c);
       });
     })
 );
