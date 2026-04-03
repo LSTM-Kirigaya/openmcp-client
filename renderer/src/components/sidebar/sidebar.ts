@@ -1,13 +1,20 @@
 import { reactive } from 'vue';
 
-export const sidebarItems = reactive([
+export type SidebarNavItem = {
+	icon: string;
+	ident: string;
+	labelKey?: string;
+};
+
+export const sidebarItems = reactive<SidebarNavItem[]>([
 	{
 		icon: 'icon-debug',
 		ident: 'debug'
 	},
 	{
 		icon: 'icon-connect',
-		ident: 'connect'
+		ident: 'connect',
+		labelKey: 'sidebar-mcp-hub'
 	},
 	{
 		icon: 'icon-setting',

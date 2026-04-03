@@ -153,6 +153,75 @@ export async function cloudDeleteProject(id: string) {
     await requestCommand('projects/delete', { projectId: id });
 }
 
+export interface CloudProjectMember {
+    id: string;
+    project_id: string;
+    user_id: string;
+    role: string;
+    created_at?: string;
+    updated_at?: string;
+    user?: {
+        id: string;
+        username: string;
+        email?: string;
+        avatar_url?: string | null;
+    };
+}
+
+export interface CloudProjectInvite {
+    id: string;
+    project_id: string;
+    invite_code: string;
+    creator_id: string;
+    role: string;
+    expires_at?: string | null;
+    max_uses?: number | null;
+    use_count?: number | null;
+    is_revoked?: boolean | null;
+    created_at?: string;
+    updated_at?: string;
+}
+
+export async function cloudListProjectMembers(projectId: string) {
+    return await requestCommand<CloudProjectMember[]>('projects/members/list', { projectId });
+}
+
+export async function cloudAddProjectMember(projectId: string, userId: string, role: string) {
+    return await requestCommand<CloudProjectMember>('projects/members/add', { projectId, userId, role });
+}
+
+export async function cloudRemoveProjectMember(projectId: string, userId: string) {
+    await requestCommand('projects/members/remove', { projectId, userId });
+}
+
+export async function cloudUpdateProjectMemberRole(projectId: string, userId: string, role: string) {
+    return await requestCommand<CloudProjectMember>('projects/members/update-role', { projectId, userId, role });
+}
+
+export async function cloudListProjectInvites(projectId: string) {
+    return await requestCommand<CloudProjectInvite[]>('projects/invites/list', { projectId });
+}
+
+export async function cloudCreateProjectInvite(
+    projectId: string,
+    input: { role: string; expiresAt?: string; maxUses?: number }
+) {
+    return await requestCommand<CloudProjectInvite>('projects/invites/create', {
+        projectId,
+        role: input.role,
+        expiresAt: input.expiresAt,
+        maxUses: input.maxUses
+    });
+}
+
+export async function cloudDeleteProjectInvite(projectId: string, inviteId: string) {
+    await requestCommand('projects/invites/delete', { projectId, inviteId });
+}
+
+export async function cloudRevokeProjectInvite(projectId: string, inviteId: string) {
+    await requestCommand('projects/invites/revoke', { projectId, inviteId });
+}
+
 export async function cloudGetSpecCaseTree(projectId: string) {
     return await requestCommand<CloudSpecCase[]>('spec-cases/tree', { projectId });
 }

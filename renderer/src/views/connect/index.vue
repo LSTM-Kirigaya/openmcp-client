@@ -28,6 +28,34 @@
 					<div v-show="activeTab === 'server'" class="list-container">
 						<el-scrollbar>
 							<div class="list-inner">
+								<div class="cloud-context-toolbar">
+									<div class="cloud-context-row">
+										<span class="cloud-context-label">{{ t('runtime-mode') }}</span>
+										<el-segmented
+											:model-value="cloudContext.mode"
+											:options="runtimeModeOptions"
+											size="small"
+											@change="onRuntimeModeChange"
+										/>
+									</div>
+									<div v-if="cloudContext.mode === 'cloud' && isCloudLoggedIn" class="cloud-context-row">
+										<span class="cloud-context-label">{{ t('cloud-current-project') }}</span>
+										<el-select
+											:model-value="cloudContext.currentProjectId"
+											:placeholder="t('cloud-select-project')"
+											class="cloud-current-project-select"
+											size="small"
+											@change="onCurrentProjectSelect"
+										>
+											<el-option
+												v-for="item in cloudProjects"
+												:key="item.id"
+												:label="item.name"
+												:value="item.id"
+											/>
+										</el-select>
+									</div>
+								</div>
 								<!-- 本地 Server -->
 								<div class="section-header">
 									<span>{{ t('local-servers') }}</span>
@@ -40,7 +68,7 @@
 								:key="server.id"
 								class="list-item server-config-item"
 								:class="{ active: selectedServerId === server.id }"
-								@click="selectedServerId = server.id"
+								@click="selectLocalServer(server)"
 							>
 								<div class="list-item-content">
 									<span class="item-title">{{ server.name || t('unnamed-server') }}</span>
@@ -73,15 +101,22 @@
 								<div v-if="isCloudLoggedIn" class="cloud-projects-section">
 									<div class="section-header">
 										<span>{{ t('cloud-connect-title') }}</span>
-										<el-button text size="small" :loading="cloudLoading" @click.stop="loadCloudProjects">
-											{{ t('refresh') }}
-										</el-button>
+										<div class="section-header-actions">
+											<el-button text size="small" type="primary" @click.stop="openCreateCloudProjectDialog">
+												{{ t('add') }}
+											</el-button>
+											<el-button text size="small" :loading="cloudLoading" @click.stop="loadCloudProjects">
+												{{ t('refresh') }}
+											</el-button>
+										</div>
 									</div>
 								<div
 									v-for="project in cloudProjects"
 									:key="project.id"
-									class="cloud-project-item"
-								>
+							class="cloud-project-item"
+							:class="{ active: selectedServerId === project.id && selectedItemSource === 'cloud' }"
+							@click="selectCloudProject(project)"
+							>
 									<div class="cloud-project-content">
 										<span class="cloud-project-name">{{ project.name }}</span>
 										<span class="cloud-project-meta">{{ project.transport }} · {{ project.endpoint }}</span>
@@ -148,12 +183,155 @@
 				</div>
 			</el-splitter-panel>
 			<el-splitter-panel class="splitter-panel-right">
-				<div class="connection-detail-panel" v-if="mcpClientAdapter.clients.length > 0">
+				<!-- Session 连接面板 -->
+				<div class="connection-detail-panel" v-if="activeTab === 'session' && mcpClientAdapter.clients.length > 0">
 					<ConnectionPanel :index="mcpClientAdapter.currentClientIndex" />
 				</div>
+
+				<!-- 云端项目：配置、协作（成员/邀请） -->
+				<CloudServerDetail
+					v-else-if="activeTab === 'server' && selectedItemSource === 'cloud' && selectedCloudProject"
+					:project="selectedCloudProject"
+					:connect-loading="cloudConnectingProjectId === selectedServerId"
+					@refresh-list="loadCloudProjects"
+					@deleted="onCloudProjectDeleted"
+					@connect="connectCloudFromDetail"
+				/>
+
+				<!-- 本地 Server 配置编辑面板 -->
+				<div class="server-detail-panel" v-else-if="activeTab === 'server' && hasSelectedItem && selectedItemSource === 'local'">
+					<div class="detail-header">
+						<div class="detail-title-wrapper">
+							<el-input
+								v-model="editForm.name"
+								:placeholder="t('server-name-placeholder')"
+								class="detail-title-input"
+							/>
+						</div>
+						<div class="detail-header-actions">
+							<el-button
+								type="success"
+								:loading="editFormSaving"
+								@click="saveEditedServer"
+							>{{ t('save') }}</el-button>
+							<el-button
+								type="primary"
+								:loading="connectingServerId === selectedServerId"
+								@click="connectFromDetail"
+							>{{ t('connect') }}</el-button>
+							<el-button
+								type="danger"
+								plain
+								@click="deleteCurrentServer"
+							>{{ t('delete') }}</el-button>
+						</div>
+					</div>
+					<el-scrollbar class="detail-body">
+						<div class="connection-setting-content">
+							<div class="setting-section">
+								<h2>{{ t('connection-settings') }}</h2>
+								<div class="setting-options">
+									<div class="setting-option connection-method-option">
+										<span class="option-title">{{ t('connection-type') }}</span>
+										<el-radio-group
+											v-model="editForm.connectionType"
+											size="default"
+											class="connection-method-radio"
+										>
+											<el-radio-button
+												v-for="option in connectionSelectDataViewOption"
+												:key="option.value"
+												:value="option.value"
+											>
+												{{ option.label }}
+											</el-radio-button>
+										</el-radio-group>
+									</div>
+									<template v-if="editForm.connectionType === 'STDIO'">
+										<div class="setting-option">
+											<span class="option-title">{{ t('command') }}</span>
+											<div class="setting-option-input">
+												<el-input
+													v-model="editForm.cmdText"
+													:placeholder="t('server-command-placeholder')"
+												/>
+											</div>
+										</div>
+										<div class="setting-option">
+											<span class="option-title">{{ t('cwd') }}</span>
+											<div class="setting-option-input">
+												<el-input
+													v-model="editForm.cwd"
+													:placeholder="t('server-cwd-placeholder')"
+												/>
+											</div>
+										</div>
+									</template>
+									<template v-else>
+										<div class="setting-option">
+											<span class="option-title">URL</span>
+											<div class="setting-option-input">
+												<el-input
+													v-model="editForm.url"
+													placeholder="http://"
+												/>
+											</div>
+										</div>
+										<div class="setting-option">
+											<span class="option-title">OAuth</span>
+											<div class="setting-option-input">
+												<el-input
+													v-model="editForm.oauth"
+													placeholder=""
+												/>
+											</div>
+										</div>
+									</template>
+								</div>
+							</div>
+							<div class="setting-section connection-env-section">
+								<h2>{{ t('env-var') }}</h2>
+								<div class="setting-options">
+									<div class="setting-option setting-option-add">
+										<span class="option-title">{{ t('add-env-var') }}</span>
+										<div class="setting-option-inputs">
+											<el-input v-model="newEnvKey" :placeholder="t('key')" @keyup.enter="addEditEnvItem" />
+											<el-input v-model="newEnvValue" :placeholder="t('value')" @keyup.enter="addEditEnvItem" />
+											<el-button type="primary" circle @click="addEditEnvItem">
+												<span class="iconfont icon-add"></span>
+											</el-button>
+										</div>
+									</div>
+									<div
+										v-for="(envItem, idx) in editForm.envList"
+										:key="idx"
+										class="setting-option setting-option-env-row"
+									>
+										<span class="option-title option-title--muted">{{ envItem.key || t('key') }}</span>
+										<div class="setting-option-inputs">
+											<el-input v-model="envItem.key" :placeholder="t('key')" />
+											<el-input v-model="envItem.value" type="password" show-password :placeholder="t('value')" />
+											<el-button type="danger" circle @click="editForm.envList.splice(idx, 1)">
+												<span class="iconfont icon-delete"></span>
+											</el-button>
+										</div>
+									</div>
+									<div v-if="editForm.envList.length === 0" class="setting-option env-empty-hint">
+										<span class="option-title option-title--muted">{{ t('no-env-vars') }}</span>
+									</div>
+								</div>
+							</div>
+							<div class="server-id-info">
+								ID: {{ selectedServerId }}
+							</div>
+						</div>
+					</el-scrollbar>
+				</div>
+
+				<!-- 空状态 -->
 				<div class="empty-state" v-else>
 					<span class="iconfont icon-openmcp"></span>
-					<span class="empty-text">{{ t('no-connect-right-now') }}</span>
+					<span class="empty-text">{{ activeTab === 'session' ? t('no-connect-right-now') : t('select-server-hint') }}</span>
 				</div>
 			</el-splitter-panel>
 		</el-splitter>
@@ -197,19 +375,48 @@
 				<el-button type="primary" :loading="addServerSaving" @click="saveNewServer">{{ t('save') }}</el-button>
 			</template>
 		</el-dialog>
+
+		<el-dialog v-model="showCreateCloudProjectDialog" :title="t('add')" width="520px" @closed="resetCloudCreateForm">
+			<el-form :model="cloudCreateForm" label-position="top">
+				<el-form-item :label="t('cloud-project-name')" required>
+					<el-input v-model="cloudCreateForm.name" />
+				</el-form-item>
+				<el-form-item :label="t('connection-type')" required>
+					<el-select v-model="cloudCreateForm.transport" style="width: 100%;">
+						<el-option label="streamable_http" value="http" />
+						<el-option label="sse" value="sse" />
+						<el-option label="stdio" value="stdio" />
+					</el-select>
+				</el-form-item>
+				<el-form-item :label="t('cloud-project-endpoint')" required>
+					<el-input v-model="cloudCreateForm.endpoint" />
+				</el-form-item>
+				<el-form-item :label="t('description')">
+					<el-input v-model="cloudCreateForm.description" type="textarea" />
+				</el-form-item>
+				<el-form-item :label="t('status')">
+					<el-switch v-model="cloudCreateForm.enabled" />
+				</el-form-item>
+			</el-form>
+			<template #footer>
+				<el-button @click="showCreateCloudProjectDialog = false">{{ t('cancel') }}</el-button>
+				<el-button type="primary" :loading="cloudCreateSaving" @click="submitCloudCreateProject">{{ t('save') }}</el-button>
+			</template>
+		</el-dialog>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, ref, watch } from 'vue';
+import { computed, defineComponent, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ConnectionPanel from './connection-panel.vue';
-import { mcpClientAdapter } from './core';
+import CloudServerDetail from './cloud-server-detail.vue';
+import { connectionSelectDataViewOption, mcpClientAdapter } from './core';
 import { useMessageBridge } from '@/api/message-bridge';
 import { ElMessage } from 'element-plus';
-import { cloudListProjects, type CloudProject } from '@/api/cloud';
+import { cloudCreateProject, cloudListProjects, type CloudProject } from '@/api/cloud';
 import { isCloudLoggedIn } from '@/hook/cloud-auth';
-import { setCurrentCloudProject } from '@/hook/cloud-context';
+import { cloudContext, setCurrentCloudProject, setRuntimeMode } from '@/hook/cloud-context';
 
 import './connection-setting-styles.css';
 
@@ -218,6 +425,26 @@ defineComponent({ name: 'connection' });
 const { t } = useI18n();
 
 const activeTab = ref<'server' | 'session'>('server');
+
+const runtimeModeOptions = computed(() => [
+	{ label: t('runtime-mode-local'), value: 'local' },
+	{ label: t('runtime-mode-cloud'), value: 'cloud' }
+]);
+
+function onRuntimeModeChange(value: unknown) {
+	if (value === 'cloud' || value === 'local') {
+		setRuntimeMode(value);
+	}
+}
+
+function onCurrentProjectSelect(projectId: string) {
+	setCurrentCloudProject(projectId);
+	const p = cloudProjects.value.find(x => x.id === projectId);
+	if (p) {
+		selectedServerId.value = projectId;
+		selectedItemSource.value = 'cloud';
+	}
+}
 
 // Server 列表
 interface ServerConfig {
@@ -236,6 +463,37 @@ const localServers = ref<ServerConfig[]>([]);
 const serverLoading = ref(false);
 const selectedServerId = ref('');
 const connectingServerId = ref('');
+const selectedItemSource = ref<'local' | 'cloud'>('local');
+
+const selectedLocalServer = computed(() => {
+	if (selectedItemSource.value !== 'local') return null;
+	return localServers.value.find(s => s.id === selectedServerId.value) || null;
+});
+const selectedCloudProject = computed(() => {
+	if (selectedItemSource.value !== 'cloud') return null;
+	return cloudProjects.value.find(p => p.id === selectedServerId.value) || null;
+});
+const hasSelectedItem = computed(() => {
+	return (selectedItemSource.value === 'local' && selectedLocalServer.value !== null) ||
+	       (selectedItemSource.value === 'cloud' && selectedCloudProject.value !== null);
+});
+
+interface EditFormData {
+	name: string;
+	connectionType: string;
+	cmdText: string;
+	cwd: string;
+	url: string;
+	oauth: string;
+	envList: { key: string; value: string }[];
+}
+
+const editForm = ref<EditFormData>({
+	name: '', connectionType: 'STDIO', cmdText: '', cwd: '', url: '', oauth: '', envList: []
+});
+const editFormSaving = ref(false);
+const newEnvKey = ref('');
+const newEnvValue = ref('');
 
 const cloudProjects = ref<CloudProject[]>([]);
 const cloudLoading = ref(false);
@@ -265,6 +523,125 @@ async function refreshServerList() {
 	} finally {
 		serverLoading.value = false;
 	}
+}
+
+function selectLocalServer(server: ServerConfig) {
+	selectedServerId.value = server.id;
+	selectedItemSource.value = 'local';
+	populateEditFormFromServer(server);
+}
+
+function selectCloudProject(project: CloudProject) {
+	selectedServerId.value = project.id;
+	selectedItemSource.value = 'cloud';
+	setCurrentCloudProject(project.id);
+}
+
+function populateEditFormFromServer(server: ServerConfig) {
+	const type = server.connectionType || 'STDIO';
+	editForm.value = {
+		name: server.name || '',
+		connectionType: type,
+		cmdText: type === 'STDIO' ? [server.command, ...(server.args || [])].join(' ') : '',
+		cwd: (server as any).cwd || '',
+		url: type !== 'STDIO' ? ((server as any).url || '') : '',
+		oauth: (server as any).oauth || '',
+		envList: server.env
+			? Object.entries(server.env as Record<string, string>).map(([key, value]) => ({ key, value: String(value) }))
+			: []
+	};
+	newEnvKey.value = '';
+	newEnvValue.value = '';
+}
+
+function addEditEnvItem() {
+	const key = newEnvKey.value.trim();
+	const value = newEnvValue.value;
+	if (!key) return;
+	const existing = editForm.value.envList.find(e => e.key === key);
+	if (existing) {
+		existing.value = value;
+	} else {
+		editForm.value.envList.push({ key, value });
+	}
+	newEnvKey.value = '';
+	newEnvValue.value = '';
+}
+
+async function saveEditedServer() {
+	const fd = editForm.value;
+	if (!fd.name.trim()) { ElMessage.warning(t('server-name-required')); return; }
+	if (fd.connectionType === 'STDIO' && !fd.cmdText.trim()) { ElMessage.warning(t('server-command-required')); return; }
+	if (fd.connectionType !== 'STDIO' && !fd.url.trim()) { ElMessage.warning(t('server-url-required')); return; }
+
+	editFormSaving.value = true;
+	try {
+		const bridge = useMessageBridge();
+		const payload: Record<string, unknown> = {
+			id: selectedServerId.value,
+			name: fd.name.trim(),
+			connectionType: fd.connectionType
+		};
+		if (fd.connectionType === 'STDIO') {
+			const parts = fd.cmdText.trim().split(/\s+/);
+			payload.command = parts[0];
+			payload.args = parts.slice(1);
+			if (fd.cwd.trim()) payload.cwd = fd.cwd.trim();
+		} else {
+			payload.url = fd.url.trim();
+			if (fd.oauth.trim()) payload.oauth = fd.oauth.trim();
+		}
+		const envObj: Record<string, string> = {};
+		for (const item of fd.envList) { if (item.key.trim()) envObj[item.key.trim()] = item.value; }
+		if (Object.keys(envObj).length > 0) payload.env = envObj;
+
+		const res = await bridge.commandRequest('servers/save', payload);
+		if (res.code === 200) {
+			ElMessage.success(t('save-success'));
+			await refreshServerList();
+		} else {
+			ElMessage.error(res.msg?.toString() || t('save-failed'));
+		}
+	} catch (error: any) {
+		ElMessage.error(error?.message || t('save-failed'));
+	} finally {
+		editFormSaving.value = false;
+	}
+}
+
+async function connectFromDetail() {
+	if (selectedItemSource.value !== 'local') return;
+	if (connectingServerId.value) return;
+	connectingServerId.value = selectedServerId.value;
+	try {
+		const fd = editForm.value;
+		const item: any = { connectionType: fd.connectionType, name: fd.name };
+		if (fd.connectionType === 'STDIO') {
+			item.commandString = fd.cmdText;
+			if (fd.cwd.trim()) item.cwd = fd.cwd;
+		} else {
+			item.url = fd.url;
+			if (fd.oauth.trim()) item.oauth = fd.oauth;
+		}
+		const envObj: Record<string, string> = {};
+		for (const e of fd.envList) { if (e.key.trim()) envObj[e.key.trim()] = e.value; }
+		if (Object.keys(envObj).length > 0) item.env = envObj;
+
+		const ok = await mcpClientAdapter.connectServer(item);
+		if (ok) {
+			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
+			activeTab.value = 'session';
+			await mcpClientAdapter.loadPanels();
+		}
+	} finally {
+		connectingServerId.value = '';
+	}
+}
+
+function deleteCurrentServer() {
+	const server = selectedLocalServer.value;
+	if (!server) return;
+	deleteServerConfig(server);
 }
 
 async function connectFromServerConfig(server: ServerConfig) {
@@ -425,6 +802,76 @@ async function connectCloudProject(project: CloudProject) {
 	}
 }
 
+const showCreateCloudProjectDialog = ref(false);
+const cloudCreateSaving = ref(false);
+const cloudCreateForm = ref({
+	name: '',
+	transport: 'http' as 'stdio' | 'sse' | 'http',
+	endpoint: '',
+	description: '',
+	enabled: true
+});
+
+function openCreateCloudProjectDialog() {
+	cloudCreateForm.value = {
+		name: '',
+		transport: 'http',
+		endpoint: '',
+		description: '',
+		enabled: true
+	};
+	showCreateCloudProjectDialog.value = true;
+}
+
+function resetCloudCreateForm() {
+	cloudCreateForm.value = {
+		name: '',
+		transport: 'http',
+		endpoint: '',
+		description: '',
+		enabled: true
+	};
+}
+
+async function submitCloudCreateProject() {
+	const f = cloudCreateForm.value;
+	if (!f.name?.trim() || !f.transport || !f.endpoint?.trim()) {
+		ElMessage.warning(t('cloud-project-required'));
+		return;
+	}
+	cloudCreateSaving.value = true;
+	try {
+		const created = await cloudCreateProject({
+			name: f.name.trim(),
+			transport: f.transport,
+			endpoint: f.endpoint.trim(),
+			description: f.description,
+			enabled: f.enabled
+		});
+		ElMessage.success(t('cloud-project-created'));
+		showCreateCloudProjectDialog.value = false;
+		resetCloudCreateForm();
+		await loadCloudProjects();
+		if (!cloudContext.currentProjectId) {
+			setCurrentCloudProject(created.id);
+		}
+		selectedServerId.value = created.id;
+		selectedItemSource.value = 'cloud';
+	} catch (error: any) {
+		ElMessage.error(error?.message || t('error'));
+	} finally {
+		cloudCreateSaving.value = false;
+	}
+}
+
+function onCloudProjectDeleted() {
+	selectedServerId.value = '';
+}
+
+async function connectCloudFromDetail(project: CloudProject) {
+	await connectCloudProject(project);
+}
+
 async function loadCloudProjects() {
 	if (!isCloudLoggedIn.value) {
 		cloudProjects.value = [];
@@ -433,6 +880,11 @@ async function loadCloudProjects() {
 	cloudLoading.value = true;
 	try {
 		cloudProjects.value = await cloudListProjects();
+		if (cloudContext.mode === 'cloud' && cloudProjects.value.length > 0) {
+			if (!cloudProjects.value.some(item => item.id === cloudContext.currentProjectId)) {
+				setCurrentCloudProject(cloudProjects.value[0]?.id || '');
+			}
+		}
 	} catch (error: any) {
 		ElMessage.error(error?.message || t('cloud-load-projects-failed'));
 	} finally {
@@ -771,4 +1223,176 @@ onMounted(() => {
 .env-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .env-input { flex: 1; min-width: 0; }
 .env-eq { color: var(--el-text-color-secondary); font-weight: bold; flex-shrink: 0; }
+
+/* Server 配置编辑面板 */
+.server-detail-panel {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+.detail-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 24px;
+	border-bottom: 1px solid var(--el-border-color-lighter);
+	flex-shrink: 0;
+	gap: 12px;
+}
+
+.detail-title-wrapper {
+	flex: 1;
+	min-width: 0;
+}
+
+.detail-title-input :deep(.el-input__wrapper) {
+	font-size: 16px;
+	font-weight: 600;
+	border-radius: 8px;
+}
+
+.detail-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--el-text-color-primary);
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.detail-header-actions {
+	display: flex;
+	gap: 8px;
+	flex-shrink: 0;
+}
+
+.detail-body {
+	flex: 1;
+	min-height: 0;
+}
+
+.server-detail-panel .connection-method-option {
+	display: flex;
+	align-items: center;
+}
+
+.server-detail-panel .connection-method-radio {
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .connection-method-radio :deep(.el-radio-button) {
+	flex: 1;
+}
+
+.server-detail-panel .connection-method-radio :deep(.el-radio-button__inner) {
+	width: 100%;
+}
+
+.server-detail-panel .setting-option-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .setting-option-input :deep(.el-input) {
+	width: 100%;
+}
+
+.server-detail-panel .setting-option-input :deep(.el-input__wrapper) {
+	border-radius: 12px;
+}
+
+.server-detail-panel .setting-option-inputs {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .setting-option-inputs :deep(.el-input) {
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .setting-option-inputs :deep(.el-input__wrapper) {
+	border-radius: 12px;
+}
+
+.server-detail-panel .setting-option-add .setting-option-inputs,
+.server-detail-panel .setting-option-env-row .setting-option-inputs {
+	flex-wrap: wrap;
+}
+
+.server-detail-panel .option-title--muted {
+	color: var(--sidebar-border);
+	font-size: 13px;
+}
+
+.server-detail-panel .setting-option-inputs .el-button.is-circle {
+	padding: 8px;
+	flex-shrink: 0;
+}
+
+.server-detail-panel .setting-option-inputs .el-button .iconfont {
+	font-size: 14px;
+}
+
+.env-empty-hint {
+	justify-content: center;
+}
+
+.server-id-info {
+	font-size: 12px;
+	color: var(--el-text-color-placeholder);
+	font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+	padding: 8px 0;
+	text-align: center;
+}
+
+.cloud-project-item.active {
+	background-color: var(--el-fill-color-light);
+	border-left: 3px solid var(--el-color-primary-light-5);
+}
+
+.cloud-context-toolbar {
+	padding: 8px 10px 12px;
+	margin: 0 3px 10px;
+	border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.cloud-context-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+	flex-wrap: wrap;
+}
+
+.cloud-context-row:last-child {
+	margin-bottom: 0;
+}
+
+.cloud-context-label {
+	font-size: 12px;
+	color: var(--el-text-color-secondary);
+	flex-shrink: 0;
+}
+
+.cloud-current-project-select {
+	flex: 1;
+	min-width: 120px;
+	max-width: 220px;
+}
+
+.section-header-actions {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+}
 </style>
