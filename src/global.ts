@@ -1,7 +1,13 @@
 import * as vscode from 'vscode';
-import * as os from 'os';
 import * as fspath from 'path';
 import * as fs from 'fs';
+import {
+    getLocalConnectionRecordByName,
+    getLocalConnectionRecordByPath,
+    getLocalConnectionsStoragePath,
+    listLocalConnectionItems,
+    replaceLocalConnectionItems
+} from '@openmcp/service';
 import { t } from './i18n';
 
 export type FsPath = string;
@@ -49,8 +55,6 @@ export interface McpOptions {
 }
 
 
-export const CONNECTION_CONFIG_NAME = 'connection.json';
-
 let _connectionConfig: IConnectionConfig | undefined;
 let _workspaceConnectionConfig: IConnectionConfig | undefined;
 
@@ -62,36 +66,10 @@ export function getConnectionConfig() {
     if (_connectionConfig) {
         return _connectionConfig;
     }
-    const homeDir = os.homedir();
-    const configDir = fspath.join(homeDir, '.openmcp');
-    const connectionConfig = fspath.join(configDir, CONNECTION_CONFIG_NAME);
-    if (!fs.existsSync(connectionConfig)) {
-        fs.mkdirSync(configDir, { recursive: true });
-        fs.writeFileSync(connectionConfig, JSON.stringify({ items: [] }), 'utf-8');
-    }
-
-    const rawConnectionString = fs.readFileSync(connectionConfig, 'utf-8');
-    let connection;
-    try {
-        connection = JSON.parse(rawConnectionString) as IConnectionConfig;
-
-        // 对连接信息进行校验
-        if (!connection.items) {
-            connection = { items: [] };
-        }
-
-        connection.items = connection.items.filter(item => {
-            if (Array.isArray(item) && item.length === 0) {
-                return false;
-            }
-            return true;
-        });
-
-    } catch (error) {
-        connection = { items: [] };
-    }
-
-    _connectionConfig = connection;
+    _connectionConfig = {
+        items: listLocalConnectionItems({ scope: 'user' }) as (McpOptions[] | McpOptions)[]
+    };
+    const connection = _connectionConfig;
     return connection;
 }
 
@@ -104,12 +82,7 @@ export function getWorkspaceConnectionConfigPath() {
     if (!workspace) {
        return null; // 如果没有工作区，则返回 null
     }
-    const configDir = fspath.join(workspace, '.openmcp');
-     if (!fs.existsSync(configDir)) {
-        fs.mkdirSync(configDir, { recursive: true }); // 递归创建目录
-    }
-    const connectionConfig = fspath.join(configDir, CONNECTION_CONFIG_NAME);
-    return connectionConfig;
+    return getLocalConnectionsStoragePath({ scope: 'workspace', workspacePath: workspace });
 }
 
 /**
@@ -125,61 +98,18 @@ export function getWorkspaceConnectionConfig():IConnectionConfig| null {
     if (!workspace) {
        return null; // 如果没有工作区，则返回 null
     }
-    const configDir = fspath.join(workspace, '.openmcp');
-    const connectionConfig = fspath.join(configDir, CONNECTION_CONFIG_NAME);
-
-    if (!fs.existsSync(connectionConfig)) {
-        fs.mkdirSync(configDir, { recursive: true });
-        fs.writeFileSync(connectionConfig, JSON.stringify({ items: [] }), 'utf-8');
-    }
-
-    const rawConnectionString = fs.readFileSync(connectionConfig, 'utf-8');
-
-    let connection;
-    try {
-        connection = JSON.parse(rawConnectionString) as IConnectionConfig;
-
-        // 对连接信息进行校验
-        if (!connection.items) {
-            connection = { items: [] };
-        }
-
-        connection.items = connection.items.filter(item => {
-            if (Array.isArray(item) && item.length === 0) {
-                return false;
-            }
-            return true;
-        });
-
-    } catch (error) {
-        connection = { items: [] };
-    }
-
-    const workspacePath = getWorkspacePath();
-    for (let item of connection.items) {
-        for (let connection of detachMcpOptionAsArray(item)) {
-            const connectionType = (connection.type || connection.connectionType).toUpperCase() as ConnectionType;
-            connection.type = undefined;
-            connection.connectionType = connectionType;
-
-            if (connection.filePath && connection.filePath.startsWith('{workspace}')) {
-                connection.filePath = connection.filePath.replace('{workspace}', workspacePath).replace(/\\/g, '/');
-            }
-            if (connectionType === 'STDIO' && connection.cwd && connection.cwd.startsWith('{workspace}')) {
-                connection.cwd = connection.cwd.replace('{workspace}', workspacePath).replace(/\\/g, '/');
-            }
-        }
-    }
-
-    _workspaceConnectionConfig = connection;
+    _workspaceConnectionConfig = {
+        items: listLocalConnectionItems({
+            scope: 'workspace',
+            workspacePath: workspace
+        }) as (McpOptions[] | McpOptions)[]
+    };
+    const connection = _workspaceConnectionConfig;
     return connection;
 }
 
 export function getInstalledConnectionConfigPath() {
-    const homeDir = os.homedir();
-    const configDir = fspath.join(homeDir, '.openmcp');
-    const connectionConfig = fspath.join(configDir, CONNECTION_CONFIG_NAME);
-    return connectionConfig;
+    return getLocalConnectionsStoragePath({ scope: 'user' });
 }
 
 /**
@@ -190,10 +120,7 @@ export function saveConnectionConfig() {
     if (!_connectionConfig) {
         return;
     }
-
-    const connectionConfig = getInstalledConnectionConfigPath();
-
-    fs.writeFileSync(connectionConfig, JSON.stringify(_connectionConfig, null, 2), 'utf-8');
+    replaceLocalConnectionItems(_connectionConfig.items as any[], { scope: 'user' });
 }
 
 export function saveWorkspaceConnectionConfig(workspace: string) {
@@ -201,30 +128,10 @@ export function saveWorkspaceConnectionConfig(workspace: string) {
     if (!_workspaceConnectionConfig) {
         return;
     }
-
-    const connectionConfig = JSON.parse(JSON.stringify(_workspaceConnectionConfig)) as IConnectionConfig;
-
-    const configDir = fspath.join(workspace, '.openmcp');
-    const connectionConfigPath = fspath.join(configDir, CONNECTION_CONFIG_NAME);
-
-    const workspacePath = getWorkspacePath();
-    for (let item of connectionConfig.items) {
-        for (let connection of detachMcpOptionAsArray(item)) {
-            console.log(connection);
-            
-            const connectionType = (connection.type || connection.connectionType).toUpperCase() as ConnectionType;
-            connection.type = undefined;
-            connection.connectionType = connectionType;
-
-            if (connection.filePath && connection.filePath.replace(/\\/g, '/').startsWith(workspacePath)) {
-                connection.filePath = connection.filePath.replace(workspacePath, '{workspace}').replace(/\\/g, '/');
-            }
-            if (connectionType === 'STDIO' && connection.cwd && connection.cwd.replace(/\\/g, '/').startsWith(workspacePath)) {
-                connection.cwd = connection.cwd.replace(workspacePath, '{workspace}').replace(/\\/g, '/');
-            }
-        }
-    }
-    fs.writeFileSync(connectionConfigPath, JSON.stringify(connectionConfig, null, 2), 'utf-8');
+    replaceLocalConnectionItems(_workspaceConnectionConfig.items as any[], {
+        scope: 'workspace',
+        workspacePath: workspace
+    });
 }
 
 
@@ -232,12 +139,13 @@ export function updateWorkspaceConnectionConfig(
     name: string,
     data: McpOptions[]
 ) {
-    const connectionItem = getWorkspaceConnectionConfigItemByName(name);
     const workspaceConnectionConfig = getWorkspaceConnectionConfig();
     if (!workspaceConnectionConfig) {
         console.error('没有工作区连接配置文件，请先创建一个工作区连接');
         return;
     }
+    const connectionIndex = workspaceConnectionConfig.items.findIndex(item => detachMcpOptionAsItem(item).name === name);
+    const connectionItem = connectionIndex >= 0 ? workspaceConnectionConfig.items[connectionIndex] : undefined;
 
     data.forEach(item => {
         item.cwd = item.cwd?.replace(/\\/g, '/');
@@ -250,17 +158,16 @@ export function updateWorkspaceConnectionConfig(
 
     // 如果存在，替换老的 connectionItem
     if (connectionItem) {
-        const index = workspaceConnectionConfig.items.indexOf(connectionItem);
-        if (index !== -1) {
+        if (connectionIndex !== -1) {
             // check rename value
-            const oldNItem = detachMcpOptionAsItem(workspaceConnectionConfig.items[index]);
+            const oldNItem = detachMcpOptionAsItem(workspaceConnectionConfig.items[connectionIndex]);
             if (oldNItem.rename) {
                 // if renamed, reserve user defined name
                 const newNItem = detachMcpOptionAsItem(data);
                 newNItem.name = oldNItem.name;
             }
 
-            workspaceConnectionConfig.items[index] = data;
+            workspaceConnectionConfig.items[connectionIndex] = data;
         } else {
             // insert new one
             workspaceConnectionConfig.items.unshift(data);
@@ -279,8 +186,9 @@ export function updateInstalledConnectionConfig(
     name: string,
     data: McpOptions[]
 ) {
-    const connectionItem = getInstalledConnectionConfigItemByName(name);
     const installedConnectionConfig = getConnectionConfig();
+    const connectionIndex = installedConnectionConfig.items.findIndex(item => detachMcpOptionAsItem(item).name === name);
+    const connectionItem = connectionIndex >= 0 ? installedConnectionConfig.items[connectionIndex] : undefined;
 
     // 对于第一个 item 添加 filePath
     // 对路径进行标准化
@@ -294,9 +202,8 @@ export function updateInstalledConnectionConfig(
     console.log('get connectionItem: ', data);
 
     if (connectionItem) {
-        const index = installedConnectionConfig.items.indexOf(connectionItem);
-        if (index !== -1) {
-            installedConnectionConfig.items[index] = data;
+        if (connectionIndex !== -1) {
+            installedConnectionConfig.items[connectionIndex] = data;
         } else {
             installedConnectionConfig.items.unshift(data);
         }
@@ -308,18 +215,6 @@ export function updateInstalledConnectionConfig(
     vscode.commands.executeCommand('openmcp.sidebar.installed-connection.refresh');
 }
 
-
-function normaliseConnectionFilePath(item: McpOptions, workspace: string) {
-    if (item.filePath) {
-        if (item.filePath.startsWith('{workspace}')) {
-            return item.filePath.replace('{workspace}', workspace).replace(/\\/g, '/');
-        } else {
-            return item.filePath.replace(/\\/g, '/');
-        }
-    }
-
-    return undefined;
-}
 
 export function getWorkspacePath() {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -333,23 +228,13 @@ export function getWorkspacePath() {
  */
 export function getWorkspaceConnectionConfigItemByPath(absPath: string) {
     const workspacePath = getWorkspacePath();
-    const workspaceConnectionConfig = getWorkspaceConnectionConfig();
-    if (!workspaceConnectionConfig) {
+    if (!workspacePath) {
         return null; // 如果没有工作区连接配置文件，则返回 null
     }
-
-
-    const normaliseAbsPath = absPath.replace(/\\/g, '/');
-    for (let item of workspaceConnectionConfig.items) {
-        const nItem = detachMcpOptionAsItem(item);
-
-        const filePath = normaliseConnectionFilePath(nItem, workspacePath);
-        if (filePath === normaliseAbsPath) {
-            return item;
-        }
-    }
-
-    return undefined;
+    return getLocalConnectionRecordByPath(absPath, {
+        scope: 'workspace',
+        workspacePath
+    })?.item as McpOptions[] | McpOptions | undefined;
 }
 
 /**
@@ -357,18 +242,14 @@ export function getWorkspaceConnectionConfigItemByPath(absPath: string) {
  * @param absPath 
  */
 export function getWorkspaceConnectionConfigItemByName(name: string) {
-    const workspaceConnectionConfig = getWorkspaceConnectionConfig();
-    if (!workspaceConnectionConfig) {
+    const workspacePath = getWorkspacePath();
+    if (!workspacePath) {
         return null; // 如果没有工作区连接配置文件，则返回 null
     }
-    for (let item of workspaceConnectionConfig.items) {
-        const nItem = detachMcpOptionAsItem(item);
-        if (nItem.name === name) {
-            return item;
-        }
-    }
-
-    return undefined;
+    return getLocalConnectionRecordByName(name, {
+        scope: 'workspace',
+        workspacePath
+    })?.item as McpOptions[] | McpOptions | undefined;
 }
 
 /**
@@ -376,17 +257,7 @@ export function getWorkspaceConnectionConfigItemByName(name: string) {
  * @param absPath 
  */
 export function getInstalledConnectionConfigItemByName(name: string) {
-    const installedConnectionConfig = getConnectionConfig();
-
-    for (let item of installedConnectionConfig.items) {
-        const nItem = detachMcpOptionAsItem(item);
-
-        if (nItem.name) {
-            return item;
-        }
-    }
-
-    return undefined;
+    return getLocalConnectionRecordByName(name, { scope: 'user' })?.item as McpOptions[] | McpOptions | undefined;
 }
 
 
@@ -395,19 +266,7 @@ export function getInstalledConnectionConfigItemByName(name: string) {
  * @param absPath 
  */
 export function getInstalledConnectionConfigItemByPath(absPath: string) {
-    const installedConnectionConfig = getConnectionConfig();
-
-    const normaliseAbsPath = absPath.replace(/\\/g, '/');
-    for (let item of installedConnectionConfig.items) {
-        const nItem = detachMcpOptionAsItem(item);
-
-        const filePath = (nItem.filePath || '').replace(/\\/g, '/');
-        if (filePath === normaliseAbsPath) {
-            return item;
-        }
-    }
-
-    return undefined;
+    return getLocalConnectionRecordByPath(absPath, { scope: 'user' })?.item as McpOptions[] | McpOptions | undefined;
 }
 
 

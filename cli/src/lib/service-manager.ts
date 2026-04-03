@@ -39,10 +39,25 @@ const STATIC_WEB_SERVER_ENTRY = path.join(__dirname, 'static-web-server.js');
 
 /** 可选：用户目录下 KEY=VALUE 行文件，供后台启动的 Gateway 继承（避免 PowerShell 与 cmd 环境变量语法混淆） */
 export function gatewayEnvFilePath(): string {
+  return path.join(os.homedir(), '.openmcp', 'config', 'gateway.env');
+}
+
+function legacyGatewayEnvFilePath(): string {
   return path.join(os.homedir(), '.openmcp', 'gateway.env');
 }
 
+function ensureGatewayEnvFileMigrated(): void {
+  const target = gatewayEnvFilePath();
+  const legacy = legacyGatewayEnvFilePath();
+  if (fs.existsSync(target) || !fs.existsSync(legacy)) {
+    return;
+  }
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.copyFileSync(legacy, target);
+}
+
 function loadGatewayEnvFile(): Record<string, string> {
+  ensureGatewayEnvFileMigrated();
   const filePath = gatewayEnvFilePath();
   if (!fs.existsSync(filePath)) {
     return {};

@@ -82,6 +82,9 @@ yarn openmcp-cli --help
 | `gateway` | 前台/后台启停 Gateway、查看状态 |
 | `webui` / `start` | 拉起 Web UI（及可选 Gateway） |
 | `cloud` | 云能力入口（当前仅 `auth` 认证登录） |
+| `connection` | 本地连接资源管理（`user/workspace`） |
+| `test-case` | 测试用例资源管理（`user/workspace/cloud`） |
+| `validation-suite` | 批量验证套件管理（`user/workspace/cloud`） |
 | `rpc`（别名 `call`） | **任意** service 命令 + JSON 请求体 |
 | `mcp` | 连接、断开、ping、环境变量、tools/prompts/resources |
 | `llm` | 模型列表、同步聊天等 |
@@ -90,6 +93,8 @@ yarn openmcp-cli --help
 | `skills` | 技能包列表与读文件 |
 
 完整子命令与参数说明见 **[命令参考](docs/commands.md)**。
+
+资源命令默认使用 `--scope user`；若要操作工作区资源，请显式传 `--scope workspace --workspace <path>`。`test-case` 与 `validation-suite` 在 `--scope cloud` 下会分别映射到云端 `spec-cases` 与 `batch-validation-cases`。
 
 ## 开发与调试
 

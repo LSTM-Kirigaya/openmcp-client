@@ -162,6 +162,9 @@ export class McpClient {
         this.connectionArgs.env = args.env || {};
         this.connectionArgs.enableDatasetReflux = args.enableDatasetReflux || false;
         this.connectionArgs.datasetName = args.datasetName || '';
+        this.connectionArgs.connectionId = args.connectionId || '';
+        this.connectionArgs.storageScope = args.storageScope;
+        this.connectionArgs.workspacePath = args.workspacePath || '';
     }
 
     get clientId() {
@@ -314,6 +317,9 @@ export class McpClient {
         const connectionType = this.connectionArgs.connectionType;
         const enableDatasetReflux = this.connectionArgs.enableDatasetReflux;
         const datasetName = this.connectionArgs.datasetName;
+        const connectionId = this.connectionArgs.connectionId;
+        const storageScope = this.connectionArgs.storageScope;
+        const workspacePath = this.connectionArgs.workspacePath;
 
         const clientName = this.clientNamePrefix + '.' + this.connectionArgs.connectionType;
         const clientVersion = this.clientVersion;
@@ -342,6 +348,9 @@ export class McpClient {
             },
             enableDatasetReflux,
             datasetName,
+            connectionId,
+            storageScope,
+            workspacePath
         };
 
         return option;
@@ -707,15 +716,18 @@ class McpClientAdapter {
         for (const item of launchSignature) {
 
             // 创建一个新的客户端            
-            const client = new McpClient();
+            const rawClient = new McpClient();
 
             // 同步连接参数
-            await client.acquireConnectionSignature(item);
+            await rawClient.acquireConnectionSignature(item);
+
+            this.clients.push(rawClient);
+
+            // 使用列表中的代理对象执行后续状态更新，确保 UI 能立即响应
+            const client = this.clients[this.clients.length - 1];
 
             // 同步环境变量
             await client.handleEnvSwitch(true);
-
-            this.clients.push(client);
 
             // 连接
             const ok = await client.connect();

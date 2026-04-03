@@ -15,8 +15,9 @@ interface SessionState {
   recent: SessionRecord[];
 }
 
-const SESSION_DIR = path.join(os.homedir(), '.openmcp');
+const SESSION_DIR = path.join(os.homedir(), '.openmcp', 'runtime');
 const SESSION_FILE = path.join(SESSION_DIR, 'mcp-sessions.json');
+const LEGACY_SESSION_FILE = path.join(os.homedir(), '.openmcp', 'mcp-sessions.json');
 const MAX_RECENT = 30;
 
 function defaultState(): SessionState {
@@ -25,6 +26,12 @@ function defaultState(): SessionState {
 
 function readState(): SessionState {
   try {
+    if (!fs.existsSync(SESSION_FILE) && fs.existsSync(LEGACY_SESSION_FILE)) {
+      if (!fs.existsSync(SESSION_DIR)) {
+        fs.mkdirSync(SESSION_DIR, { recursive: true });
+      }
+      fs.copyFileSync(LEGACY_SESSION_FILE, SESSION_FILE);
+    }
     if (!fs.existsSync(SESSION_FILE)) return defaultState();
     const raw = fs.readFileSync(SESSION_FILE, 'utf-8');
     const parsed = JSON.parse(raw) as SessionState;

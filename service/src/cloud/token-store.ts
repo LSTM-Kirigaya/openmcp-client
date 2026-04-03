@@ -1,6 +1,6 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
+import { ensureParentDir, getLegacyTokenFilePath, getTokenFilePath } from '../storage/paths.js';
 
 export interface StoredUser {
   id?: string;
@@ -14,14 +14,11 @@ let expiresAt: string | null = null;
 let user: StoredUser | null = null;
 
 function getTokenPath(): string {
-  const fromEnv = process.env.OPENMCP_TOKEN_PATH;
-  if (fromEnv && fromEnv.trim()) return fromEnv.trim();
-  return path.join(os.homedir(), '.openmcp', 'token.json');
+  return getTokenFilePath();
 }
 
 function ensureDirForFile(filePath: string): void {
-  const dir = path.dirname(filePath);
-  fs.mkdirSync(dir, { recursive: true });
+  ensureParentDir(filePath);
 }
 
 function decodeJwtExpIso(token: string): string | null {
@@ -60,6 +57,13 @@ function saveToDisk(): void {
 
 function loadFromDisk(): void {
   const tokenPath = getTokenPath();
+  if (!fs.existsSync(tokenPath)) {
+    const legacyPath = getLegacyTokenFilePath();
+    if (legacyPath !== tokenPath && fs.existsSync(legacyPath)) {
+      ensureParentDir(tokenPath);
+      fs.copyFileSync(legacyPath, tokenPath);
+    }
+  }
   if (!fs.existsSync(tokenPath)) return;
   try {
     const raw = fs.readFileSync(tokenPath, 'utf8');

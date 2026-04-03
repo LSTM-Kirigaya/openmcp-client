@@ -1,7 +1,7 @@
 import Datastore from '@seald-io/nedb';
-import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
+import { ensureStorageDir, getBinaryStorageDir, getNedbDir } from '../storage/paths.js';
 
 interface Entity {
     id: string | number;
@@ -19,12 +19,9 @@ export class LocalDB<T extends Entity> {
     }
 
     private async init() {
-        const homedir = os.homedir();
-        const dbPath = path.join(homedir, '.openmcp', 'nedb');
+        const dbPath = getNedbDir();
 
-        if (!fs.existsSync(dbPath)) {
-            fs.mkdirSync(dbPath, { recursive: true });
-        }
+        ensureStorageDir(dbPath);
 
         const filename = path.join(dbPath, `${this.tableName}.db`);
         
@@ -65,13 +62,10 @@ class DiskStorage {
     #storageHome: string;
 
     constructor() {
-        const homedir = os.homedir();
-        const imageStorageFolder = path.join(homedir, '.openmcp', 'storage');
+        const imageStorageFolder = getBinaryStorageDir();
         
         // 确保存储目录存在
-        if (!fs.existsSync(imageStorageFolder)) {
-            fs.mkdirSync(imageStorageFolder, { recursive: true });
-        }
+        ensureStorageDir(imageStorageFolder);
 
         this.#storageHome = imageStorageFolder;
     }

@@ -58,6 +58,14 @@ openmcp-cli mcp connect --type STDIO --command npx --args-json "[\"-y\",\"@model
 
 成功时响应里的 `msg.clientId` 会被记录为默认会话。
 
+如果希望把连接、测试用例、验证套件都落到统一的本地仓储，推荐先把连接保存成资源，再通过资源建立会话：
+
+```bash
+openmcp-cli connection save -f ./my-mcp.json --name my-local
+openmcp-cli connection list
+openmcp-cli connection connect --id <connectionId>
+```
+
 ### 3. 会话管理（可选）
 
 ```bash
@@ -76,6 +84,26 @@ openmcp-cli validation tool --tool-name echo
 ```
 
 如果要显式指定目标连接，可加 `--client-id <uuid>`。
+
+### 4.1 本地测试用例与验证套件
+
+```bash
+# 本地 user scope
+openmcp-cli test-case list --connection-id <connectionId>
+openmcp-cli test-case save --connection-id <connectionId> -f ./tool-case.json
+openmcp-cli validation-suite list --connection-id <connectionId>
+openmcp-cli validation-suite save --connection-id <connectionId> -f ./suite.json
+
+# 工作区 scope
+openmcp-cli connection list --scope workspace --workspace .
+openmcp-cli test-case list --scope workspace --workspace . --connection-id <connectionId>
+
+# 云端 scope
+openmcp-cli test-case list --scope cloud --project-id <projectId>
+openmcp-cli validation-suite list --scope cloud --project-id <projectId>
+```
+
+`test-case` 与 `validation-suite` 默认都是 `user` scope；切到 `workspace` / `cloud` 时需要显式传 `--scope`。
 
 ### 5. 配置生命周期与调试留痕
 

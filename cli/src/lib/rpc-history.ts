@@ -19,11 +19,15 @@ export interface RpcHistoryRecord {
   error?: string;
 }
 
-const HISTORY_DIR = path.join(os.homedir(), '.openmcp');
+const HISTORY_DIR = path.join(os.homedir(), '.openmcp', 'runtime');
 const HISTORY_FILE = path.join(HISTORY_DIR, 'rpc-history.jsonl');
+const LEGACY_HISTORY_FILE = path.join(os.homedir(), '.openmcp', 'rpc-history.jsonl');
 
 function ensureDir(): void {
   if (!fs.existsSync(HISTORY_DIR)) fs.mkdirSync(HISTORY_DIR, { recursive: true });
+  if (!fs.existsSync(HISTORY_FILE) && fs.existsSync(LEGACY_HISTORY_FILE)) {
+    fs.copyFileSync(LEGACY_HISTORY_FILE, HISTORY_FILE);
+  }
 }
 
 export function appendRpcHistory(input: Omit<RpcHistoryRecord, 'id' | 'ts'>): RpcHistoryRecord {

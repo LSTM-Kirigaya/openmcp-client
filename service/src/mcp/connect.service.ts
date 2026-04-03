@@ -11,6 +11,7 @@ import * as os from 'os';
 import { PostMessageble } from '../hook/adapter.js';
 import chalk from 'chalk';
 import { FORBIDDEN_MONITOR } from '../hook/setting.js';
+import { releaseClientStorageBinding, rememberClientStorageBinding } from '../storage/client-binding.js';
 
 export const clientMap: Map<string, RequestClientType> = new Map();
 export interface ConnectedSessionInfo {
@@ -335,6 +336,14 @@ export async function connectService(
         }
 
         const versionInfo = client.getServerVersion();        
+        rememberClientStorageBinding({
+            clientId: uuid,
+            connectionId: option.connectionId,
+            connectionKey: option.connectionId || versionInfo?.name || 'default',
+            scope: option.storageScope,
+            workspacePath: option.workspacePath,
+            serverName: versionInfo?.name || 'default'
+        });
         const connectResult = {
             code: 200,
             msg: {
@@ -402,6 +411,7 @@ export async function disconnectService(data: RequestData) {
         clientMap.delete(clientId);
         clientMonitorMap.get(clientId)?.close();
         clientMonitorMap.delete(clientId);
+        releaseClientStorageBinding(clientId);
 
         return {
             code: 200,

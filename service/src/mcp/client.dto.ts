@@ -36,6 +36,10 @@ export interface McpOptions {
     // 通用客户端选项
     clientName?: string;
     clientVersion?: string;
+    // 本地存储上下文
+    connectionId?: string;
+    storageScope?: 'user' | 'workspace';
+    workspacePath?: string;
 }
 
 export interface ToolCallContent {

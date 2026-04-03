@@ -94,6 +94,10 @@ async function bootstrap() {
 
     wss.on('connection', (ws) => {
         const webview = new VSCodeWebViewLike(ws);
+        const optionPromise = acquireConnectionOption(logger).catch(async (error) => {
+            logger.error({ err: error }, '初始化连接配置失败');
+            return await refreshConnectionOption(logger);
+        });
 
         webview.postMessage({
             command: 'hello',
@@ -103,38 +107,34 @@ async function bootstrap() {
             }
         });
 
-        acquireConnectionOption(logger)
-            .then((option) => {
-                webview.onDidReceiveMessage(async (message: VSCodeMessage) => {
-                    logger.info({ command: message.command ?? '未定义' }, 'receive command');
+        webview.onDidReceiveMessage(async (message: VSCodeMessage) => {
+            logger.info({ command: message.command ?? '未定义' }, 'receive command');
 
-                    const { command, data } = message as { command: string; data: any };
+            const { command, data } = message as { command: string; data: any };
 
-                    switch (command) {
-                        case 'web/launch-signature':
-                            webview.postMessage({
-                                command: 'web/launch-signature',
-                                data: {
-                                    _id: data._id,
-                                    code: 200,
-                                    msg: option.items
-                                }
-                            });
-                            break;
+            switch (command) {
+                case 'web/launch-signature': {
+                    const option = await optionPromise;
+                    webview.postMessage({
+                        command: 'web/launch-signature',
+                        data: {
+                            _id: data._id,
+                            code: 200,
+                            msg: option.items
+                        }
+                    });
+                    break;
+                }
 
-                        case 'web/update-connection-signature':
-                            await updateConnectionOption(logger, data);
-                            break;
+                case 'web/update-connection-signature':
+                    await updateConnectionOption(logger, data);
+                    break;
 
-                        default:
-                            routeMessage(command, data, webview);
-                            break;
-                    }
-                });
-            })
-            .catch((error) => {
-                logger.error({ err: error }, '初始化连接配置失败');
-            });
+                default:
+                    routeMessage(command, data, webview);
+                    break;
+            }
+        });
     });
 }
 

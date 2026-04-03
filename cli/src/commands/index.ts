@@ -1,10 +1,6 @@
+export { settingCommand } from './setting/index.js';
+export { debugCommand } from './debug/index.js';
+export { connectionCommand } from './connection/index.js';
 export { gatewayCommand } from './gateway.js';
 export { webCommand } from './webui.js';
 export { startCommand } from './start.js';
-export { cloudCommand } from './auth.js';
-export { mcpCommand } from './mcp.js';
-export { llmCommand } from './llm.js';
-export { settingCmd } from './setting-cmd.js';
-export { skillsCmd } from './skills-cmd.js';
-export { validationCmd } from './validation-cmd.js';
-export { batchValidationCasesCmd } from './cloud-batch-validation-cases.js';

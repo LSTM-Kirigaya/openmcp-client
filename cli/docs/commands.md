@@ -56,6 +56,50 @@ openmcp-cli -V
 
 ---
 
+## `connection`
+
+本地连接资源管理。默认作用于 `user` scope；若要操作工作区连接，显式传 `--scope workspace --workspace <path>`。
+
+| 子命令 | 说明 |
+|--------|------|
+| `list` | 列出本地连接 |
+| `get` | 获取单个连接 |
+| `save` | 保存/更新连接（支持对象、数组、`mcpServers` 聚合配置） |
+| `delete` | 删除连接 |
+| `connect` | 使用已保存连接直接建立会话 |
+
+---
+
+## `test-case`
+
+统一的测试用例资源入口。
+
+| 子命令 | 说明 |
+|--------|------|
+| `list/get/save/delete` | 本地 `user/workspace` 或云端 `cloud` 统一 CRUD |
+
+说明：
+
+- 本地 scope 推荐用 `--connection-id` 指定所属连接；若当前已有默认会话，也可用 `--client-id`
+- `--scope cloud` 时需传 `--project-id`，底层映射到 `spec-cases` 中的 `tool_case`
+
+---
+
+## `validation-suite`
+
+统一的批量验证套件入口。
+
+| 子命令 | 说明 |
+|--------|------|
+| `list/get/save/delete` | 本地 `user/workspace` 或云端 `cloud` 统一 CRUD |
+
+说明：
+
+- 本地 scope 会读写统一的 `validation-suites` 目录
+- `--scope cloud` 时需传 `--project-id`，底层映射到 `batch-validation-cases`
+
+---
+
 ## `mcp`
 
 MCP 连接与协议封装（Connect + Client 控制器）。
