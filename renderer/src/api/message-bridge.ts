@@ -235,7 +235,15 @@ export class MessageBridge {
 	 */
 	public async commandRequest<T = any>(command: string, data?: ICommandRequestData): Promise<RestFulResponse<T>>  {
 		// Web 端在 WS 未 OPEN 时 postMessage 会直接丢包，请求永远无响应（刷新后 auth/status 先于连接完成会导致一直未登录）
-		await this.awaitForWebsocket();
+		const platform = getPlatform();
+		if (platform === 'web') {
+			const ok = await this.awaitForWebsocket();
+			if (!ok || this.ws?.readyState !== WebSocket.OPEN) {
+				throw new Error('WebSocket is not connected');
+			}
+		} else {
+			await this.awaitForWebsocket();
+		}
 
 		const _id = uuidv4();
 

@@ -1,52 +1,123 @@
 <template>
 	<div class="cloud-server-detail">
-		<div class="detail-header">
-			<h3 class="detail-title">{{ form.name || t('unnamed-server') }}</h3>
-			<div class="detail-header-actions">
-				<el-button type="success" :loading="saving" @click="saveProject">{{ t('save') }}</el-button>
-				<el-button
-					type="primary"
-					:loading="connectLoading"
-					:disabled="!form.enabled"
-					@click="emitConnectPayload"
-				>{{ t('connect') }}</el-button>
-				<el-button type="danger" plain :loading="deleting" @click="confirmDelete">{{ t('delete') }}</el-button>
+		<div class="cloud-detail-centered">
+			<div class="detail-header">
+				<div class="detail-title-wrapper">
+					<el-input
+						v-model="connForm.name"
+						:placeholder="t('server-name-placeholder')"
+						class="detail-title-input"
+					/>
+				</div>
+				<div class="detail-header-actions">
+					<el-button type="success" :loading="saving" @click="saveProject">{{ t('save') }}</el-button>
+					<el-button
+						type="primary"
+						:loading="connectLoading"
+						:disabled="!props.project.enabled"
+						@click="emitConnectPayload"
+					>{{ t('connect') }}</el-button>
+					<el-button type="danger" plain :loading="deleting" @click="confirmDelete">{{ t('delete') }}</el-button>
+				</div>
 			</div>
-		</div>
-		<el-scrollbar class="detail-body">
-			<div class="connection-setting-content cloud-detail-body">
+			<el-scrollbar class="detail-body">
+				<div class="cloud-detail-scroll-inner">
+					<div class="connection-setting-content cloud-detail-body server-detail-panel">
 				<div class="setting-section">
-					<h2>{{ t('cloud-project-settings-section') }}</h2>
+					<h2>{{ t('connection-settings') }}</h2>
+					<div class="setting-options">
+						<div class="setting-option connection-method-option">
+							<span class="option-title">{{ t('connection-type') }}</span>
+							<el-radio-group
+								v-model="connForm.connectionType"
+								size="default"
+								class="connection-method-radio"
+							>
+								<el-radio-button
+									v-for="option in connectionSelectDataViewOption"
+									:key="option.value"
+									:value="option.value"
+								>
+									{{ option.label }}
+								</el-radio-button>
+							</el-radio-group>
+						</div>
+						<template v-if="connForm.connectionType === 'STDIO'">
+							<div class="setting-option">
+								<span class="option-title">{{ t('command') }}</span>
+								<div class="setting-option-input">
+									<el-input
+										v-model="connForm.cmdText"
+										:placeholder="t('server-command-placeholder')"
+									/>
+								</div>
+							</div>
+							<div class="setting-option">
+								<span class="option-title">{{ t('cwd') }}</span>
+								<div class="setting-option-input">
+									<el-input
+										v-model="connForm.cwd"
+										:placeholder="t('server-cwd-placeholder')"
+									/>
+								</div>
+							</div>
+						</template>
+						<template v-else>
+							<div class="setting-option">
+								<span class="option-title">URL</span>
+								<div class="setting-option-input">
+									<el-input v-model="connForm.url" placeholder="http://" />
+								</div>
+							</div>
+							<div class="setting-option">
+								<span class="option-title">OAuth</span>
+								<div class="setting-option-input">
+									<el-input v-model="connForm.oauth" placeholder="" />
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
+				<div class="setting-section connection-env-section">
+					<h2>{{ t('env-var') }}</h2>
+					<p class="cloud-env-hint">{{ t('cloud-env-not-synced') }}</p>
+					<div class="setting-options">
+						<div class="setting-option setting-option-add">
+							<span class="option-title">{{ t('add-env-var') }}</span>
+							<div class="setting-option-inputs">
+								<el-input v-model="newEnvKey" :placeholder="t('key')" @keyup.enter="addConnEnvItem" />
+								<el-input v-model="newEnvValue" :placeholder="t('value')" @keyup.enter="addConnEnvItem" />
+								<el-button type="primary" circle @click="addConnEnvItem">
+									<span class="iconfont icon-add"></span>
+								</el-button>
+							</div>
+						</div>
+						<div
+							v-for="(envItem, idx) in connForm.envList"
+							:key="idx"
+							class="setting-option setting-option-env-row"
+						>
+							<span class="option-title option-title--muted">{{ envItem.key || t('key') }}</span>
+							<div class="setting-option-inputs">
+								<el-input v-model="envItem.key" :placeholder="t('key')" />
+								<el-input v-model="envItem.value" type="password" show-password :placeholder="t('value')" />
+								<el-button type="danger" circle @click="connForm.envList.splice(idx, 1)">
+									<span class="iconfont icon-delete"></span>
+								</el-button>
+							</div>
+						</div>
+						<div v-if="connForm.envList.length === 0" class="setting-option env-empty-hint">
+							<span class="option-title option-title--muted">{{ t('no-env-vars') }}</span>
+						</div>
+					</div>
+				</div>
+				<div class="setting-section">
+					<h2>{{ t('description') }}</h2>
 					<div class="setting-options">
 						<div class="setting-option">
-							<span class="option-title">{{ t('cloud-project-name') }}</span>
 							<div class="setting-option-input">
-								<el-input v-model="form.name" />
+								<el-input v-model="connForm.description" type="textarea" :rows="2" />
 							</div>
-						</div>
-						<div class="setting-option">
-							<span class="option-title">{{ t('connection-type') }}</span>
-							<el-select v-model="form.transport" style="width: 100%;">
-								<el-option label="streamable_http" value="http" />
-								<el-option label="sse" value="sse" />
-								<el-option label="stdio" value="stdio" />
-							</el-select>
-						</div>
-						<div class="setting-option">
-							<span class="option-title">{{ t('cloud-project-endpoint') }}</span>
-							<div class="setting-option-input">
-								<el-input v-model="form.endpoint" />
-							</div>
-						</div>
-						<div class="setting-option">
-							<span class="option-title">{{ t('description') }}</span>
-							<div class="setting-option-input">
-								<el-input v-model="form.description" type="textarea" :rows="2" />
-							</div>
-						</div>
-						<div class="setting-option">
-							<span class="option-title">{{ t('status') }}</span>
-							<el-switch v-model="form.enabled" />
 						</div>
 					</div>
 				</div>
@@ -74,7 +145,7 @@
 								<el-select
 									:model-value="row.role"
 									size="small"
-									@change="(v) => updateMemberRole(row, String(v))"
+									@change="handleMemberRoleChange(row, $event)"
 								>
 									<el-option v-for="r in memberRoles" :key="r" :label="r" :value="r" />
 								</el-select>
@@ -82,7 +153,13 @@
 						</el-table-column>
 						<el-table-column :label="t('operation-setting')" width="100" fixed="right">
 							<template #default="{ row }">
-								<el-button size="small" type="danger" link @click="removeMember(row)">{{ t('delete') }}</el-button>
+								<el-button
+									v-if="memberRowCanRemove(row)"
+									size="small"
+									type="danger"
+									link
+									@click="removeMember(row)"
+								>{{ t('delete') }}</el-button>
 							</template>
 						</el-table-column>
 					</el-table>
@@ -96,11 +173,25 @@
 							<el-button :loading="invitesLoading" @click="loadInvites">{{ t('refresh') }}</el-button>
 						</div>
 					</div>
-					<el-table :data="invites" border size="small" class="collab-table" v-loading="invitesLoading">
-						<el-table-column :label="t('cloud-invite-code')" min-width="200">
+					<el-table :data="invites" border size="small" class="collab-table collab-table--invites" v-loading="invitesLoading">
+						<el-table-column :label="t('cloud-invite-code')" min-width="220" class-name="invite-code-column">
 							<template #default="{ row }">
-								<code class="invite-code">{{ row.invite_code }}</code>
-								<el-button size="small" link @click="copyCode(row.invite_code)">{{ t('cloud-invite-copy') }}</el-button>
+								<div class="invite-code-cell">
+									<div class="invite-code-block" :title="row.invite_code">
+										<code class="invite-code">{{ row.invite_code }}</code>
+									</div>
+									<div class="invite-code-actions">
+										<el-button
+											type="primary"
+											plain
+											size="small"
+											:icon="CopyDocument"
+											@click="copyCode(row.invite_code)"
+										>
+											{{ t('cloud-invite-copy') }}
+										</el-button>
+									</div>
+								</div>
 							</template>
 						</el-table-column>
 						<el-table-column prop="role" :label="t('cloud-member-role')" width="100" />
@@ -123,8 +214,10 @@
 						</el-table-column>
 					</el-table>
 				</div>
-			</div>
-		</el-scrollbar>
+					</div>
+				</div>
+			</el-scrollbar>
+		</div>
 
 		<el-dialog v-model="inviteDialogVisible" :title="t('cloud-invite-create')" width="440px" @closed="resetInviteForm">
 			<el-form label-position="top">
@@ -149,6 +242,8 @@
 import { computed, defineComponent, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { CopyDocument } from '@element-plus/icons-vue';
+import { cloudAuthState } from '@/hook/cloud-auth';
 import {
 	cloudAddProjectMember,
 	cloudCreateProjectInvite,
@@ -164,6 +259,14 @@ import {
 	type CloudProjectInvite,
 	type CloudProjectMember
 } from '@/api/cloud';
+import { connectionSelectDataViewOption } from './core';
+import {
+	cloudProjectToConnectionForm,
+	connectionFormToCloudWritePayload,
+	createEmptyMcpConnectionForm,
+	validateMcpConnectionForm,
+	type McpConnectionFormState
+} from './mcp-connection-form-map';
 
 defineComponent({ name: 'CloudServerDetail' });
 
@@ -186,13 +289,9 @@ const { t } = useI18n();
 const memberRoles = ['owner', 'writer', 'reader'] as const;
 const inviteRoles = ['writer', 'reader'] as const;
 
-const form = ref({
-	name: '',
-	transport: 'http' as 'stdio' | 'sse' | 'http',
-	endpoint: '',
-	description: '',
-	enabled: true
-});
+const connForm = ref<McpConnectionFormState>(createEmptyMcpConnectionForm());
+const newEnvKey = ref('');
+const newEnvValue = ref('');
 
 const saving = ref(false);
 const deleting = ref(false);
@@ -205,6 +304,21 @@ const addMemberUserId = ref('');
 const addMemberRole = ref<string>('writer');
 const addingMember = ref(false);
 
+const currentCloudUserId = computed(() => cloudAuthState.user?.id ?? '');
+
+const isCurrentUserCloudProjectOwner = computed(() => {
+	const uid = currentCloudUserId.value;
+	if (!uid) return false;
+	return members.value.some(m => m.user_id === uid && m.role === 'owner');
+});
+
+function memberRowCanRemove(row: CloudProjectMember): boolean {
+	if (!isCurrentUserCloudProjectOwner.value) return false;
+	if (row.role === 'owner') return false;
+	if (row.user_id === currentCloudUserId.value) return false;
+	return true;
+}
+
 const invites = ref<CloudProjectInvite[]>([]);
 const invitesLoading = ref(false);
 const inviteDialogVisible = ref(false);
@@ -212,13 +326,23 @@ const inviteForm = ref({ role: 'writer' as string, maxUses: undefined as number 
 const inviteCreating = ref(false);
 
 function syncFormFromProject(p: CloudProject) {
-	form.value = {
-		name: p.name,
-		transport: p.transport,
-		endpoint: p.endpoint,
-		description: p.description || '',
-		enabled: p.enabled
-	};
+	connForm.value = cloudProjectToConnectionForm(p);
+	newEnvKey.value = '';
+	newEnvValue.value = '';
+}
+
+function addConnEnvItem() {
+	const key = newEnvKey.value.trim();
+	const value = newEnvValue.value;
+	if (!key) return;
+	const existing = connForm.value.envList.find(e => e.key === key);
+	if (existing) {
+		existing.value = value;
+	} else {
+		connForm.value.envList.push({ key, value });
+	}
+	newEnvKey.value = '';
+	newEnvValue.value = '';
 }
 
 watch(
@@ -264,18 +388,22 @@ async function loadInvites() {
 }
 
 async function saveProject() {
-	if (!form.value.name?.trim() || !form.value.transport || !form.value.endpoint?.trim()) {
-		ElMessage.warning(t('cloud-project-required'));
+	const errKey = validateMcpConnectionForm(connForm.value);
+	if (errKey) {
+		ElMessage.warning(t(errKey));
 		return;
 	}
+	const payload = connectionFormToCloudWritePayload(connForm.value, {
+		enabled: props.project.enabled
+	});
 	saving.value = true;
 	try {
 		await cloudUpdateProject(props.project.id, {
-			name: form.value.name.trim(),
-			transport: form.value.transport,
-			endpoint: form.value.endpoint.trim(),
-			description: form.value.description,
-			enabled: form.value.enabled
+			name: payload.name,
+			transport: payload.transport,
+			endpoint: payload.endpoint,
+			description: payload.description,
+			enabled: payload.enabled
 		});
 		ElMessage.success(t('cloud-project-updated'));
 		emit('refresh-list');
@@ -310,13 +438,21 @@ async function confirmDelete() {
 }
 
 function emitConnectPayload() {
+	const errKey = validateMcpConnectionForm(connForm.value);
+	if (errKey) {
+		ElMessage.warning(t(errKey));
+		return;
+	}
+	const w = connectionFormToCloudWritePayload(connForm.value, {
+		enabled: props.project.enabled
+	});
 	const p: CloudProject = {
 		...props.project,
-		name: form.value.name.trim() || props.project.name,
-		transport: form.value.transport,
-		endpoint: form.value.endpoint.trim(),
-		description: form.value.description,
-		enabled: form.value.enabled
+		name: w.name,
+		transport: w.transport,
+		endpoint: w.endpoint,
+		description: w.description ?? '',
+		enabled: w.enabled
 	};
 	emit('connect', p);
 }
@@ -338,6 +474,10 @@ async function addMember() {
 	} finally {
 		addingMember.value = false;
 	}
+}
+
+function handleMemberRoleChange(row: CloudProjectMember, value: unknown) {
+	void updateMemberRole(row, String(value));
 }
 
 async function updateMemberRole(row: CloudProjectMember, role: string) {
@@ -440,8 +580,30 @@ async function deleteInvite(row: CloudProjectInvite) {
 .cloud-server-detail {
 	display: flex;
 	flex-direction: column;
+	align-items: center;
 	height: 100%;
 	overflow: hidden;
+	width: 100%;
+}
+
+.cloud-detail-centered {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	max-width: 720px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+}
+
+.cloud-detail-scroll-inner {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0 16px 24px;
+	box-sizing: border-box;
 }
 
 .detail-header {
@@ -454,16 +616,90 @@ async function deleteInvite(row: CloudProjectInvite) {
 	gap: 12px;
 }
 
-.detail-title {
-	margin: 0;
-	font-size: 16px;
-	font-weight: 600;
-	color: var(--el-text-color-primary);
+.detail-title-wrapper {
 	flex: 1;
 	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+}
+
+.detail-title-input :deep(.el-input__wrapper) {
+	font-size: 16px;
+	font-weight: 600;
+	border-radius: 8px;
+}
+
+.cloud-env-hint {
+	font-size: 12px;
+	color: var(--el-text-color-secondary);
+	margin: 0 0 10px 0;
+	line-height: 1.4;
+	padding: 0 4px;
+}
+
+.server-detail-panel .connection-method-option {
+	display: flex;
+	align-items: center;
+}
+
+.server-detail-panel .connection-method-radio {
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .connection-method-radio :deep(.el-radio-button) {
+	flex: 1;
+}
+
+.server-detail-panel .connection-method-radio :deep(.el-radio-button__inner) {
+	width: 100%;
+}
+
+.server-detail-panel .setting-option-input {
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .setting-option-input :deep(.el-input) {
+	width: 100%;
+}
+
+.server-detail-panel .setting-option-input :deep(.el-input__wrapper) {
+	border-radius: 12px;
+}
+
+.server-detail-panel .setting-option-inputs {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .setting-option-inputs :deep(.el-input) {
+	flex: 1;
+	min-width: 0;
+}
+
+.server-detail-panel .setting-option-inputs :deep(.el-input__wrapper) {
+	border-radius: 12px;
+}
+
+.server-detail-panel .setting-option-add .setting-option-inputs,
+.server-detail-panel .setting-option-env-row .setting-option-inputs {
+	flex-wrap: wrap;
+}
+
+.server-detail-panel .option-title--muted {
+	color: var(--sidebar-border);
+	font-size: 13px;
+}
+
+.server-detail-panel .setting-option-inputs .el-button.is-circle {
+	padding: 8px;
+	flex-shrink: 0;
+}
+
+.server-detail-panel .setting-option-inputs .el-button .iconfont {
+	font-size: 14px;
 }
 
 .detail-header-actions {
@@ -475,12 +711,19 @@ async function deleteInvite(row: CloudProjectInvite) {
 .detail-body {
 	flex: 1;
 	min-height: 0;
+	width: 100%;
+}
+
+.detail-body :deep(.el-scrollbar__view) {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .cloud-detail-body {
 	width: 100%;
-	max-width: 720px;
-	align-self: center;
+	max-width: 100%;
+	box-sizing: border-box;
 }
 
 .flat-options .setting-option {
@@ -505,16 +748,59 @@ async function deleteInvite(row: CloudProjectInvite) {
 
 .collab-table {
 	width: 100%;
-	margin-top: 12px;
+	margin: 12px auto 0;
+}
+
+.collab-table--invites :deep(.el-table__cell) {
+	vertical-align: middle;
+}
+
+/* 表格单元格默认 nowrap，会撑出整表横向滚动条；邀请码列允许换行 */
+.collab-table--invites :deep(td.invite-code-column .cell) {
+	white-space: normal;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+
+.invite-code-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 8px;
+	min-width: 0;
+	width: 100%;
+}
+
+.invite-code-block {
+	padding: 6px 10px;
+	border-radius: 8px;
+	background: var(--el-fill-color-light);
+	border: 1px solid var(--el-border-color-lighter);
+	min-width: 0;
+	overflow: hidden;
 }
 
 .invite-code {
+	display: block;
+	margin: 0;
 	font-size: 12px;
-	margin-right: 8px;
+	line-height: 1.45;
+	font-family: var(--el-font-family-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
 	user-select: all;
+	white-space: normal;
+	word-break: break-all;
+	overflow-wrap: anywhere;
+}
+
+.invite-code-actions {
+	display: flex;
+	justify-content: flex-start;
 }
 
 .cloud-detail-body :deep(.setting-section) {
-	width: min(720px, 100%);
+	width: 100%;
+	max-width: 100%;
+	margin-left: auto;
+	margin-right: auto;
 }
 </style>

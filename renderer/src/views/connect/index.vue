@@ -18,8 +18,8 @@
 							@click="activeTab = 'session'"
 						>
 							{{ t('session-tab') }}
-							<span v-if="mcpClientAdapter.clients.length > 0" class="session-badge">
-								{{ mcpClientAdapter.clients.length }}
+							<span v-if="gatewaySessions.length > 0" class="session-badge">
+								{{ gatewaySessions.length }}
 							</span>
 						</div>
 					</div>
@@ -28,155 +28,132 @@
 					<div v-show="activeTab === 'server'" class="list-container">
 						<el-scrollbar>
 							<div class="list-inner">
-								<div class="cloud-context-toolbar">
-									<div class="cloud-context-row">
-										<span class="cloud-context-label">{{ t('runtime-mode') }}</span>
-										<el-segmented
-											:model-value="cloudContext.mode"
-											:options="runtimeModeOptions"
-											size="small"
-											@change="onRuntimeModeChange"
-										/>
-									</div>
-									<div v-if="cloudContext.mode === 'cloud' && isCloudLoggedIn" class="cloud-context-row">
-										<span class="cloud-context-label">{{ t('cloud-current-project') }}</span>
-										<el-select
-											:model-value="cloudContext.currentProjectId"
-											:placeholder="t('cloud-select-project')"
-											class="cloud-current-project-select"
-											size="small"
-											@change="onCurrentProjectSelect"
-										>
-											<el-option
-												v-for="item in cloudProjects"
-												:key="item.id"
-												:label="item.name"
-												:value="item.id"
+								<!-- 本地 / 云端：上行居中切换，下行居中添加/刷新 -->
+								<div class="server-source-chrome">
+									<div class="server-source-chrome__top">
+										<div class="server-source-chrome__segmented">
+											<el-segmented
+												:model-value="cloudContext.mode"
+												:options="runtimeModeOptions"
+												size="small"
+												@change="onRuntimeModeChange"
 											/>
-										</el-select>
-									</div>
-								</div>
-								<!-- 本地 Server -->
-								<div class="section-header">
-									<span>{{ t('local-servers') }}</span>
-									<el-button text size="small" @click="refreshServerList">
-										{{ t('refresh') }}
-									</el-button>
-								</div>
-							<div
-								v-for="server in localServers"
-								:key="server.id"
-								class="list-item server-config-item"
-								:class="{ active: selectedServerId === server.id }"
-								@click="selectLocalServer(server)"
-							>
-								<div class="list-item-content">
-									<span class="item-title">{{ server.name || t('unnamed-server') }}</span>
-									<span class="item-meta">{{ describeServerType(server) }}</span>
-								</div>
-								<div class="server-actions" @click.stop>
-									<el-button
-										type="primary"
-										size="small"
-										:loading="connectingServerId === server.id"
-										@click="connectFromServerConfig(server)"
-									>{{ t('connect') }}</el-button>
-									<span
-										class="delete-btn"
-										@click="deleteServerConfig(server)"
-									>
-										<span class="iconfont icon-delete"></span>
-									</span>
-								</div>
-							</div>
-								<div v-if="!serverLoading && localServers.length === 0" class="server-empty">
-									{{ t('no-local-servers') }}
-								</div>
-								<div class="add-server" @click="showAddServerDialog = true">
-									<span class="iconfont icon-add"></span>
-									<span class="add-server-text">{{ t('add-server') }}</span>
-								</div>
-
-								<!-- 云端 Server -->
-								<div v-if="isCloudLoggedIn" class="cloud-projects-section">
-									<div class="section-header">
-										<span>{{ t('cloud-connect-title') }}</span>
-										<div class="section-header-actions">
-											<el-button text size="small" type="primary" @click.stop="openCreateCloudProjectDialog">
-												{{ t('add') }}
-											</el-button>
-											<el-button text size="small" :loading="cloudLoading" @click.stop="loadCloudProjects">
-												{{ t('refresh') }}
-											</el-button>
 										</div>
 									</div>
-								<div
-									v-for="project in cloudProjects"
-									:key="project.id"
-							class="cloud-project-item"
-							:class="{ active: selectedServerId === project.id && selectedItemSource === 'cloud' }"
-							@click="selectCloudProject(project)"
-							>
-									<div class="cloud-project-content">
-										<span class="cloud-project-name">{{ project.name }}</span>
-										<span class="cloud-project-meta">{{ project.transport }} · {{ project.endpoint }}</span>
-									</div>
-									<div class="server-actions">
-										<el-button
-											v-if="project.enabled"
-											type="primary"
-											size="small"
-											:loading="cloudConnectingProjectId === project.id"
-											@click="connectCloudProject(project)"
-										>{{ t('connect') }}</el-button>
-										<el-tag v-else size="small" type="info">
-											{{ t('disabled') }}
-										</el-tag>
+									<div
+										v-if="chromeActionsVisible"
+										class="server-source-chrome__actions"
+									>
+										<el-button text size="small" type="primary" @click="onServerListAdd">
+											{{ t('add') }}
+										</el-button>
+										<el-button text size="small" :loading="chromeRefreshLoading" @click="onServerListRefresh">
+											{{ t('refresh') }}
+										</el-button>
 									</div>
 								</div>
-									<div v-if="!cloudLoading && cloudProjects.length === 0" class="cloud-project-empty">
-										{{ t('cloud-connect-empty') }}
+
+								<template v-if="cloudContext.mode === 'local'">
+									<div
+										v-for="(server, serverIdx) in localServers"
+										:key="`${server.id}#${serverIdx}`"
+										class="list-item server-config-item"
+										:class="{ active: selectedServerId === server.id && selectedItemSource === 'local' }"
+										@click="selectLocalServer(server)"
+									>
+										<div class="list-item-content">
+											<span class="item-title">{{ server.name || t('unnamed-server') }}</span>
+											<span class="item-meta">{{ describeServerType(server) }}</span>
+										</div>
+										<div class="server-actions" @click.stop>
+											<el-button
+												type="primary"
+												size="small"
+												:loading="connectingServerId === server.id"
+												@click="connectFromServerConfig(server)"
+											>{{ t('connect') }}</el-button>
+										</div>
 									</div>
-								</div>
+									<div v-if="!serverLoading && localServers.length === 0" class="server-empty">
+										{{ t('no-local-servers') }}
+									</div>
+								</template>
+
+								<template v-else>
+									<div v-if="!isCloudLoggedIn" class="server-empty cloud-mode-hint">
+										{{ t('mcp-cloud-login-hint') }}
+									</div>
+									<template v-else>
+										<div
+											v-for="(project, cloudIdx) in cloudProjects"
+											:key="`${project.id}#${cloudIdx}`"
+											class="list-item server-config-item"
+											:class="{ active: selectedServerId === project.id && selectedItemSource === 'cloud' }"
+											@click="selectCloudProject(project)"
+										>
+											<div class="list-item-content">
+												<span class="item-title">{{ project.name || t('unnamed-server') }}</span>
+												<span class="item-meta">{{ describeCloudProjectLine(project) }}</span>
+											</div>
+											<div class="server-actions" @click.stop>
+												<el-button
+													v-if="project.enabled"
+													type="primary"
+													size="small"
+													:loading="cloudConnectingProjectId === project.id"
+													@click="connectCloudProject(project)"
+												>{{ t('connect') }}</el-button>
+												<el-tag v-else size="small" type="info">
+													{{ t('disabled') }}
+												</el-tag>
+											</div>
+										</div>
+										<div v-if="!cloudLoading && cloudProjects.length === 0" class="server-empty">
+											{{ t('cloud-connect-empty') }}
+										</div>
+									</template>
+								</template>
 							</div>
 						</el-scrollbar>
 					</div>
 
-					<!-- Session Tab -->
+					<!-- Session Tab（列表数据来自 Gateway connect/list，与 CLI 一致） -->
 					<div v-show="activeTab === 'session'" class="list-container">
 						<el-scrollbar>
 							<div class="list-inner">
-								<div
-									v-for="(item, index) in mcpClientAdapter.clients"
-									:key="index"
-									class="list-item server-item"
-									:class="{ active: mcpClientAdapter.currentClientIndex === index }"
-									@click="selectSession(index)"
-								>
-									<div class="list-item-content">
-										<span class="connect-status">
-											<span v-if="item.connectionResult.success" class="success">
-												<span class="item-title name">{{ item.connectionResult.name }}</span>
+								<div v-if="gatewaySessionsLoading" class="server-empty">
+									{{ t('loading') }}
+								</div>
+								<template v-else>
+									<div
+										v-for="s in gatewaySessions"
+										:key="s.clientId"
+										class="list-item server-item"
+										:class="{ active: selectedGatewayClientId === s.clientId }"
+										@click="selectGatewaySession(s)"
+									>
+										<div class="list-item-content">
+											<span class="connect-status">
+												<span class="success">
+													<span class="item-title name">{{ s.name || t('unnamed-server') }}</span>
+												</span>
 											</span>
-											<span v-else>
-												<span class="item-title">{{ t('server') }} {{ index + 1 }}</span>
+											<span class="session-status-tag connected">
+												{{ t('connected') }}
 											</span>
-										</span>
-										<span class="session-status-tag" :class="item.connectionResult.success ? 'connected' : 'disconnected'">
-											{{ item.connectionResult.success ? t('connected') : t('disconnected') }}
+											<span class="item-meta session-client-id" :title="s.clientId">{{ s.version }}</span>
+										</div>
+										<span
+											class="delete-btn"
+											@click.stop="disconnectGatewaySession(s.clientId)"
+										>
+											<span class="iconfont icon-delete"></span>
 										</span>
 									</div>
-									<span
-										v-if="mcpClientAdapter.clients.length > 1"
-										class="delete-btn"
-										@click.stop="deleteSession(index)"
-									>
-										<span class="iconfont icon-delete"></span>
-									</span>
-								</div>
-								<div v-if="mcpClientAdapter.clients.length === 0" class="server-empty">
-									{{ t('no-active-sessions') }}
-								</div>
+									<div v-if="gatewaySessions.length === 0" class="server-empty">
+										{{ t('no-active-sessions') }}
+									</div>
+								</template>
 							</div>
 						</el-scrollbar>
 					</div>
@@ -184,8 +161,9 @@
 			</el-splitter-panel>
 			<el-splitter-panel class="splitter-panel-right">
 				<!-- Session 连接面板 -->
-				<div class="connection-detail-panel" v-if="activeTab === 'session' && mcpClientAdapter.clients.length > 0">
-					<ConnectionPanel :index="mcpClientAdapter.currentClientIndex" />
+				<div class="connection-detail-panel" v-if="activeTab === 'session' && gatewaySessions.length > 0">
+					<ConnectionPanel v-if="sessionDetailIndex >= 0" :index="sessionDetailIndex" />
+					<div v-else class="server-empty">{{ t('loading') }}</div>
 				</div>
 
 				<!-- 云端项目：配置、协作（成员/邀请） -->
@@ -378,24 +356,36 @@
 
 		<el-dialog v-model="showCreateCloudProjectDialog" :title="t('add')" width="520px" @closed="resetCloudCreateForm">
 			<el-form :model="cloudCreateForm" label-position="top">
-				<el-form-item :label="t('cloud-project-name')" required>
-					<el-input v-model="cloudCreateForm.name" />
+				<el-form-item :label="t('server-name')">
+					<el-input v-model="cloudCreateForm.name" :placeholder="t('server-name-placeholder')" />
 				</el-form-item>
-				<el-form-item :label="t('connection-type')" required>
-					<el-select v-model="cloudCreateForm.transport" style="width: 100%;">
-						<el-option label="streamable_http" value="http" />
-						<el-option label="sse" value="sse" />
-						<el-option label="stdio" value="stdio" />
+				<el-form-item :label="t('connection-type')">
+					<el-select v-model="cloudCreateForm.connectionType" style="width: 100%">
+						<el-option value="STDIO" label="STDIO" />
+						<el-option value="SSE" label="SSE" />
+						<el-option value="STREAMABLE_HTTP" label="STREAMABLE_HTTP" />
 					</el-select>
 				</el-form-item>
-				<el-form-item :label="t('cloud-project-endpoint')" required>
-					<el-input v-model="cloudCreateForm.endpoint" />
+				<el-form-item v-if="cloudCreateForm.connectionType === 'STDIO'" :label="t('server-command')">
+					<el-input v-model="cloudCreateForm.cmdText" :placeholder="t('server-command-placeholder')" />
 				</el-form-item>
-				<el-form-item :label="t('description')">
-					<el-input v-model="cloudCreateForm.description" type="textarea" />
+				<el-form-item v-if="cloudCreateForm.connectionType === 'STDIO'" :label="t('server-cwd')">
+					<el-input v-model="cloudCreateForm.cwd" :placeholder="t('server-cwd-placeholder')" />
 				</el-form-item>
-				<el-form-item :label="t('status')">
-					<el-switch v-model="cloudCreateForm.enabled" />
+				<el-form-item v-if="cloudCreateForm.connectionType !== 'STDIO'" :label="t('server-url')">
+					<el-input v-model="cloudCreateForm.url" :placeholder="t('server-url-placeholder')" />
+				</el-form-item>
+				<el-form-item :label="t('server-env')">
+					<p class="cloud-create-env-hint">{{ t('cloud-env-not-synced') }}</p>
+					<div class="env-list">
+						<div v-for="(envItem, idx) in cloudCreateForm.envList" :key="idx" class="env-row">
+							<el-input v-model="envItem.key" :placeholder="t('server-env-key')" class="env-input" />
+							<span class="env-eq">=</span>
+							<el-input v-model="envItem.value" :placeholder="t('server-env-value')" class="env-input" />
+							<span class="delete-btn" @click="removeCloudCreateEnvItem(idx)"><span class="iconfont icon-delete"></span></span>
+						</div>
+						<el-button text size="small" @click="addCloudCreateEnvItem">+ {{ t('server-env-add') }}</el-button>
+					</div>
 				</el-form-item>
 			</el-form>
 			<template #footer>
@@ -412,11 +402,22 @@ import { useI18n } from 'vue-i18n';
 import ConnectionPanel from './connection-panel.vue';
 import CloudServerDetail from './cloud-server-detail.vue';
 import { connectionSelectDataViewOption, mcpClientAdapter } from './core';
+import {
+	fetchAndApplyGatewaySessions,
+	type GatewaySessionItem
+} from './gateway-session-sync';
 import { useMessageBridge } from '@/api/message-bridge';
+import { panelLoaded } from '@/hook/panel';
 import { ElMessage } from 'element-plus';
 import { cloudCreateProject, cloudListProjects, type CloudProject } from '@/api/cloud';
 import { isCloudLoggedIn } from '@/hook/cloud-auth';
 import { cloudContext, setCurrentCloudProject, setRuntimeMode } from '@/hook/cloud-context';
+import {
+	createEmptyMcpConnectionForm,
+	connectionFormToCloudWritePayload,
+	validateMcpConnectionForm,
+	type McpConnectionFormState
+} from './mcp-connection-form-map';
 
 import './connection-setting-styles.css';
 
@@ -426,25 +427,68 @@ const { t } = useI18n();
 
 const activeTab = ref<'server' | 'session'>('server');
 
+const gatewaySessions = ref<GatewaySessionItem[]>([]);
+const gatewaySessionsLoading = ref(false);
+const selectedGatewayClientId = ref('');
+
+const sessionDetailIndex = computed(() =>
+	mcpClientAdapter.clients.findIndex(c => c.clientId === selectedGatewayClientId.value)
+);
+
+async function refreshGatewaySessions() {
+	gatewaySessionsLoading.value = true;
+	try {
+		const { list, selectedClientId, error } = await fetchAndApplyGatewaySessions(selectedGatewayClientId.value);
+		gatewaySessions.value = list;
+		selectedGatewayClientId.value = selectedClientId;
+		if (error) {
+			ElMessage.error(error || t('session-list-load-failed'));
+		}
+	} catch (e: unknown) {
+		const msg = e instanceof Error ? e.message : String(e);
+		ElMessage.error(msg || t('session-list-load-failed'));
+	} finally {
+		gatewaySessionsLoading.value = false;
+	}
+}
+
+async function selectGatewaySession(s: GatewaySessionItem) {
+	const idx = await mcpClientAdapter.attachExistingGatewaySession(s);
+	mcpClientAdapter.currentClientIndex = idx;
+	selectedGatewayClientId.value = s.clientId;
+	if (!panelLoaded.value && mcpClientAdapter.clients.length > 0) {
+		await mcpClientAdapter.loadPanels();
+	}
+}
+
+async function disconnectGatewaySession(clientId: string) {
+	try {
+		const bridge = useMessageBridge();
+		const res = await bridge.commandRequest('disconnect', { clientId });
+		if (res.code !== 200) {
+			ElMessage.error((res.msg != null ? String(res.msg) : '') || t('session-disconnect-failed'));
+			return;
+		}
+		if (selectedGatewayClientId.value === clientId) {
+			selectedGatewayClientId.value = '';
+		}
+		await refreshGatewaySessions();
+	} catch (e: unknown) {
+		const msg = e instanceof Error ? e.message : String(e);
+		ElMessage.error(msg || t('session-disconnect-failed'));
+	}
+}
+
+watch(activeTab, tab => {
+	if (tab === 'session') {
+		void refreshGatewaySessions();
+	}
+});
+
 const runtimeModeOptions = computed(() => [
 	{ label: t('runtime-mode-local'), value: 'local' },
 	{ label: t('runtime-mode-cloud'), value: 'cloud' }
 ]);
-
-function onRuntimeModeChange(value: unknown) {
-	if (value === 'cloud' || value === 'local') {
-		setRuntimeMode(value);
-	}
-}
-
-function onCurrentProjectSelect(projectId: string) {
-	setCurrentCloudProject(projectId);
-	const p = cloudProjects.value.find(x => x.id === projectId);
-	if (p) {
-		selectedServerId.value = projectId;
-		selectedItemSource.value = 'cloud';
-	}
-}
 
 // Server 列表
 interface ServerConfig {
@@ -464,6 +508,19 @@ const serverLoading = ref(false);
 const selectedServerId = ref('');
 const connectingServerId = ref('');
 const selectedItemSource = ref<'local' | 'cloud'>('local');
+
+function onRuntimeModeChange(value: unknown) {
+	if (value !== 'cloud' && value !== 'local') {
+		return;
+	}
+	setRuntimeMode(value);
+	if (value === 'local' && selectedItemSource.value === 'cloud') {
+		selectedServerId.value = '';
+		selectedItemSource.value = 'local';
+	} else if (value === 'cloud' && selectedItemSource.value === 'local' && selectedServerId.value) {
+		selectedServerId.value = '';
+	}
+}
 
 const selectedLocalServer = computed(() => {
 	if (selectedItemSource.value !== 'local') return null;
@@ -499,6 +556,14 @@ const cloudProjects = ref<CloudProject[]>([]);
 const cloudLoading = ref(false);
 const cloudConnectingProjectId = ref('');
 
+const chromeActionsVisible = computed(
+	() => cloudContext.mode === 'local' || isCloudLoggedIn.value
+);
+
+const chromeRefreshLoading = computed(() =>
+	cloudContext.mode === 'local' ? serverLoading.value : cloudLoading.value
+);
+
 function describeServerType(server: ServerConfig): string {
 	const type = server.connectionType || '未知';
 	if (type === 'STDIO') {
@@ -507,6 +572,10 @@ function describeServerType(server: ServerConfig): string {
 		return `STDIO · ${cmd} ${args}`.trim();
 	}
 	return `${type} · ${server.url || ''}`;
+}
+
+function describeCloudProjectLine(project: CloudProject): string {
+	return `${project.transport} · ${project.endpoint}`;
 }
 
 async function refreshServerList() {
@@ -629,7 +698,10 @@ async function connectFromDetail() {
 
 		const ok = await mcpClientAdapter.connectServer(item);
 		if (ok) {
-			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
+			const last = mcpClientAdapter.clients[mcpClientAdapter.clients.length - 1];
+			selectedGatewayClientId.value = last.clientId;
+			await refreshGatewaySessions();
+			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.findIndex(c => c.clientId === last.clientId);
 			activeTab.value = 'session';
 			await mcpClientAdapter.loadPanels();
 		}
@@ -654,7 +726,10 @@ async function connectFromServerConfig(server: ServerConfig) {
 		}
 		const ok = await mcpClientAdapter.connectServer(item);
 		if (ok) {
-			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
+			const last = mcpClientAdapter.clients[mcpClientAdapter.clients.length - 1];
+			selectedGatewayClientId.value = last.clientId;
+			await refreshGatewaySessions();
+			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.findIndex(c => c.clientId === last.clientId);
 			activeTab.value = 'session';
 			await mcpClientAdapter.loadPanels();
 		}
@@ -676,10 +751,6 @@ async function deleteServerConfig(server: ServerConfig) {
 	} catch (error: any) {
 		ElMessage.error(error?.message || t('delete-failed'));
 	}
-}
-
-function selectSession(index: number) {
-	mcpClientAdapter.currentClientIndex = index;
 }
 
 // ── 添加 Server 对话框 ──
@@ -749,13 +820,6 @@ async function saveNewServer() {
 	}
 }
 
-function deleteSession(index: number) {
-	mcpClientAdapter.clients.splice(index, 1);
-	if (mcpClientAdapter.currentClientIndex >= mcpClientAdapter.clients.length) {
-		mcpClientAdapter.currentClientIndex = Math.max(0, mcpClientAdapter.clients.length - 1);
-	}
-}
-
 function mapCloudProjectTransport(project: CloudProject): {
 	connectionType: 'STDIO' | 'SSE' | 'STREAMABLE_HTTP';
 	commandString?: string;
@@ -790,7 +854,10 @@ async function connectCloudProject(project: CloudProject) {
 		};
 		const ok = await mcpClientAdapter.connectServer(item);
 		if (ok) {
-			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
+			const last = mcpClientAdapter.clients[mcpClientAdapter.clients.length - 1];
+			selectedGatewayClientId.value = last.clientId;
+			await refreshGatewaySessions();
+			mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.findIndex(c => c.clientId === last.clientId);
 			activeTab.value = 'session';
 			await mcpClientAdapter.loadPanels();
 			ElMessage.success(t('cloud-connect-success'));
@@ -804,49 +871,40 @@ async function connectCloudProject(project: CloudProject) {
 
 const showCreateCloudProjectDialog = ref(false);
 const cloudCreateSaving = ref(false);
-const cloudCreateForm = ref({
-	name: '',
-	transport: 'http' as 'stdio' | 'sse' | 'http',
-	endpoint: '',
-	description: '',
-	enabled: true
-});
+const cloudCreateForm = ref<McpConnectionFormState>(createEmptyMcpConnectionForm());
+
+function addCloudCreateEnvItem() {
+	cloudCreateForm.value.envList.push({ key: '', value: '' });
+}
+
+function removeCloudCreateEnvItem(idx: number) {
+	cloudCreateForm.value.envList.splice(idx, 1);
+}
 
 function openCreateCloudProjectDialog() {
-	cloudCreateForm.value = {
-		name: '',
-		transport: 'http',
-		endpoint: '',
-		description: '',
-		enabled: true
-	};
+	cloudCreateForm.value = createEmptyMcpConnectionForm();
 	showCreateCloudProjectDialog.value = true;
 }
 
 function resetCloudCreateForm() {
-	cloudCreateForm.value = {
-		name: '',
-		transport: 'http',
-		endpoint: '',
-		description: '',
-		enabled: true
-	};
+	cloudCreateForm.value = createEmptyMcpConnectionForm();
 }
 
 async function submitCloudCreateProject() {
-	const f = cloudCreateForm.value;
-	if (!f.name?.trim() || !f.transport || !f.endpoint?.trim()) {
-		ElMessage.warning(t('cloud-project-required'));
+	const errKey = validateMcpConnectionForm(cloudCreateForm.value);
+	if (errKey) {
+		ElMessage.warning(t(errKey));
 		return;
 	}
+	const payload = connectionFormToCloudWritePayload(cloudCreateForm.value, { enabled: true });
 	cloudCreateSaving.value = true;
 	try {
 		const created = await cloudCreateProject({
-			name: f.name.trim(),
-			transport: f.transport,
-			endpoint: f.endpoint.trim(),
-			description: f.description,
-			enabled: f.enabled
+			name: payload.name,
+			transport: payload.transport,
+			endpoint: payload.endpoint,
+			description: payload.description,
+			enabled: payload.enabled
 		});
 		ElMessage.success(t('cloud-project-created'));
 		showCreateCloudProjectDialog.value = false;
@@ -892,6 +950,22 @@ async function loadCloudProjects() {
 	}
 }
 
+function onServerListAdd() {
+	if (cloudContext.mode === 'local') {
+		showAddServerDialog.value = true;
+	} else {
+		openCreateCloudProjectDialog();
+	}
+}
+
+function onServerListRefresh() {
+	if (cloudContext.mode === 'local') {
+		void refreshServerList();
+	} else {
+		void loadCloudProjects();
+	}
+}
+
 watch(isCloudLoggedIn, () => {
 	loadCloudProjects();
 });
@@ -899,6 +973,7 @@ watch(isCloudLoggedIn, () => {
 onMounted(() => {
 	refreshServerList();
 	loadCloudProjects();
+	void refreshGatewaySessions();
 });
 </script>
 
@@ -982,15 +1057,6 @@ onMounted(() => {
 	font-size: 11px;
 	font-weight: 600;
 	line-height: 1;
-}
-
-.section-header {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 6px;
-	font-size: 12px;
-	color: var(--el-text-color-secondary);
 }
 
 .server-list-panel .list-container {
@@ -1103,27 +1169,6 @@ onMounted(() => {
 	opacity: 0.8;
 }
 
-.server-list-panel .add-server {
-	padding: 10px 12px;
-	text-align: center;
-	cursor: pointer;
-	border-radius: 0.3em;
-	border: 1px dashed var(--el-border-color);
-	margin: 3px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 6px;
-	transition: var(--animation-3s);
-}
-.server-list-panel .add-server:hover {
-	background-color: var(--el-fill-color-light);
-	border-color: var(--el-color-primary-light-5);
-}
-.server-list-panel .add-server-text {
-	font-size: 13px;
-}
-
 .server-empty {
 	font-size: 12px;
 	color: var(--el-text-color-secondary);
@@ -1131,54 +1176,41 @@ onMounted(() => {
 	text-align: center;
 }
 
-.cloud-projects-section {
-	margin: 8px 3px 0;
-	padding-top: 10px;
-	border-top: 1px solid var(--el-border-color-lighter);
-}
-
-.cloud-project-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-	padding: 8px 10px;
-	border-radius: 6px;
-	cursor: pointer;
-}
-
-.cloud-project-item:hover {
-	background-color: var(--el-fill-color-light);
-}
-
-.cloud-project-content {
-	min-width: 0;
+/* 本地 / 云端：上行切换、下行操作，均居中 */
+.server-source-chrome {
+	padding: 8px 10px 10px;
+	margin: 0 3px 6px;
+	border-bottom: 1px solid var(--el-border-color-lighter);
+	flex-shrink: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	align-items: center;
+	gap: 8px;
 }
 
-.cloud-project-name {
-	font-size: 13px;
-	font-weight: 600;
-	color: var(--el-text-color-primary);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+.server-source-chrome__top {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
 }
 
-.cloud-project-meta {
-	font-size: 12px;
-	color: var(--el-text-color-secondary);
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+.server-source-chrome__segmented {
+	flex-shrink: 0;
+	padding: 2px;
+	border-radius: 8px;
+	background-color: var(--el-fill-color-light);
+	border: 1px solid var(--el-border-color-lighter);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.cloud-project-empty {
-	font-size: 12px;
-	color: var(--el-text-color-secondary);
-	padding: 6px 10px;
+.server-source-chrome__actions {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	flex-wrap: wrap;
+	width: 100%;
 }
 
 .connection-detail-panel {
@@ -1223,6 +1255,13 @@ onMounted(() => {
 .env-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .env-input { flex: 1; min-width: 0; }
 .env-eq { color: var(--el-text-color-secondary); font-weight: bold; flex-shrink: 0; }
+
+.cloud-create-env-hint {
+	font-size: 12px;
+	color: var(--el-text-color-secondary);
+	margin: 0 0 8px 0;
+	line-height: 1.4;
+}
 
 /* Server 配置编辑面板 */
 .server-detail-panel {
@@ -1355,44 +1394,9 @@ onMounted(() => {
 	text-align: center;
 }
 
-.cloud-project-item.active {
-	background-color: var(--el-fill-color-light);
-	border-left: 3px solid var(--el-color-primary-light-5);
-}
-
-.cloud-context-toolbar {
-	padding: 8px 10px 12px;
-	margin: 0 3px 10px;
-	border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.cloud-context-row {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-bottom: 8px;
-	flex-wrap: wrap;
-}
-
-.cloud-context-row:last-child {
-	margin-bottom: 0;
-}
-
-.cloud-context-label {
-	font-size: 12px;
-	color: var(--el-text-color-secondary);
-	flex-shrink: 0;
-}
-
-.cloud-current-project-select {
-	flex: 1;
-	min-width: 120px;
-	max-width: 220px;
-}
-
-.section-header-actions {
-	display: inline-flex;
-	align-items: center;
-	gap: 2px;
+.cloud-mode-hint {
+	padding: 16px 12px;
+	line-height: 1.5;
+	text-align: center;
 }
 </style>

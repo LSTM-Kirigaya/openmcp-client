@@ -128,13 +128,34 @@ function deduplicateById(records: McpServerRecord[]): McpServerRecord[] {
     });
 }
 
+/** 历史数据或 replaceAll 按名匹配 bug 可能导致多条记录共用同一 id，加载时补新 id 并写回 */
+function repairDuplicateServerIds(records: McpServerRecord[]): { records: McpServerRecord[]; repaired: boolean } {
+    const seen = new Set<string>();
+    let repaired = false;
+    const now = Date.now();
+    const next = records.map((r, i) => {
+        if (!seen.has(r.id)) {
+            seen.add(r.id);
+            return r;
+        }
+        repaired = true;
+        return { ...r, id: crypto.randomUUID(), updatedAt: now + i };
+    });
+    return { records: next, repaired };
+}
+
 function loadStore(): ServerStore {
     const storePath = getServersIndexPath();
     const existing = readJson<ServerStore>(storePath);
     if (existing && Array.isArray(existing.records)) {
+        const filtered = existing.records.filter(r => r && typeof r.id === 'string');
+        const { records, repaired } = repairDuplicateServerIds(filtered);
+        if (repaired) {
+            writeStore(storePath, { version: 1, records });
+        }
         return {
             version: 1,
-            records: existing.records.filter(r => r && typeof r.id === 'string')
+            records
         };
     }
 
@@ -204,15 +225,29 @@ export function deleteServer(id: string): boolean {
 export function replaceAllServers(items: Record<string, any>[]): McpServerRecord[] {
     const store = loadStore();
     const prevById = new Map(store.records.map(r => [r.id, r]));
-    const prevByName = new Map(store.records.map(r => [r.name, r]));
+    const usedPrevIds = new Set<string>();
 
     const records = items
         .filter(item => item && typeof item === 'object')
         .map((item, idx) => {
             const name = resolveRecordName(item);
-            const prev = prevByName.get(name);
             const now = Date.now() + idx;
             const { _id, commandString, connectionId, storageScope, workspacePath: _wp, ...rest } = item;
+
+            let prev: McpServerRecord | undefined;
+            const incomingId =
+                typeof item.id === 'string' && item.id.trim() ? item.id.trim() : undefined;
+            if (incomingId && prevById.has(incomingId) && !usedPrevIds.has(incomingId)) {
+                prev = prevById.get(incomingId);
+                usedPrevIds.add(incomingId);
+            } else {
+                const match = store.records.find(r => !usedPrevIds.has(r.id) && r.name === name);
+                if (match) {
+                    prev = match;
+                    usedPrevIds.add(match.id);
+                }
+            }
+
             return {
                 ...rest,
                 id: prev?.id || crypto.randomUUID(),

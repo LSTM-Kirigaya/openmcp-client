@@ -738,6 +738,36 @@ class McpClientAdapter {
     }
 
     /**
+     * 将 Gateway 上已存在的会话挂到本机 UI（例如 CLI 或其它客户端已 connect）。
+     * 不发起新的 connect RPC，仅用 clientId 拉取 tools 等元数据。
+     */
+    public async attachExistingGatewaySession(session: { clientId: string; name: string; version: string }): Promise<number> {
+        const existing = this.findClientIndexByUuid(session.clientId);
+        if (existing >= 0) {
+            const c = this.clients[existing];
+            c.connectionResult.success = true;
+            c.connectionResult.status = 'connected';
+            c.connectionResult.name = session.name;
+            c.connectionResult.version = session.version;
+            return existing;
+        }
+        const rawClient = new McpClient();
+        rawClient.connectionResult.success = true;
+        rawClient.connectionResult.status = 'connected';
+        rawClient.connectionResult.clientId = session.clientId;
+        rawClient.connectionResult.name = session.name;
+        rawClient.connectionResult.version = session.version;
+        this.clients.push(rawClient);
+        const idx = this.clients.length - 1;
+        try {
+            await this.clients[idx].getTools({ cache: false });
+        } catch (e) {
+            console.error('[attachExistingGatewaySession] getTools', e);
+        }
+        return idx;
+    }
+
+    /**
      * 手动连接指定的 Server 配置（由 UI 触发，替代旧的自动批量连接逻辑）。
      */
     public async connectServer(item: IConnectionArgs) {
