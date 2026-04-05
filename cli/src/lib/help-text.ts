@@ -22,7 +22,7 @@ export const HELP_PROGRAM_AFTER = `
   openmcp-cli setting general list
   openmcp-cli setting cloud login -u myuser -p mypass
   openmcp-cli mcp server list
-  openmcp-cli mcp server add -f ./my-server.json
+  openmcp-cli mcp server add --file ./my-server.json
   openmcp-cli mcp session connect --id <SERVER_ID>
   openmcp-cli mcp session list
   openmcp-cli debug tool list

@@ -24,8 +24,11 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'batch-validation/run', hint: 'body: { messages, testCases, llmConfig, evaluationMode?, customPrompt? }' },
   { command: 'servers/list', hint: 'body: {}；列出本地 + 云端 MCP Server' },
   { command: 'servers/get', hint: 'body: { id }；读取单个本地 MCP Server' },
-  { command: 'servers/save', hint: 'body: { id?, name, connectionType, ... }；保存本地 MCP Server' },
-  { command: 'servers/delete', hint: 'body: { id }；删除本地 MCP Server' },
+  {
+    command: 'servers/save',
+    hint: 'body: { scope?: local|cloud|auto, id?, ... }；auto+id 时先本地 upsert，否则云端 update（需登录）；local/cloud 行为同前'
+  },
+  { command: 'servers/delete', hint: 'body: { id }；先删本地记录，不存在则删云端项目（需登录）' },
   { command: 'servers/replace-all', hint: 'body: { items }；批量替换本地 MCP Server' },
   { command: 'test-cases/load', hint: 'body: { clientId }；加载当前服务下保存的工具测试用例' },
   { command: 'test-cases/save', hint: 'body: { clientId, testCases }；保存工具测试用例与结果' },

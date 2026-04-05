@@ -1476,7 +1476,7 @@ __metadata:
 
 "@openmcp/service@file:../service::locator=%40openmcp%2Fsdk%40workspace%3Asdk":
   version: 0.0.1
-  resolution: "@openmcp/service@file:../service#../service::hash=397709&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
+  resolution: "@openmcp/service@file:../service#../service::hash=f942fe&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
     "@seald-io/nedb": "npm:^4.1.1"
@@ -1491,13 +1491,13 @@ __metadata:
     rotating-file-stream: "npm:^3.2.0"
     tesseract.js: "npm:^6.0.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/647dbc5751a40613fff54632c659f156adcabdab951b5be725e29d48f55f5e28ac09aa752c175d0c9f8378a9c6a7265de651ac69e70285ff81e77f657ab31da7
+  checksum: 10c0/cdb6090e27f4e796b5a72822a41530d54a42e3cc61bfa568b5c2628d314058bd118bbcbdcf3656227109cd3e7de32e2427ebe031021a0e7e012b872357291d0b
   languageName: node
   linkType: hard
 
 "@openmcp/service@file:./service::locator=openmcp%40workspace%3A.":
   version: 0.0.1
-  resolution: "@openmcp/service@file:./service#./service::hash=397709&locator=openmcp%40workspace%3A."
+  resolution: "@openmcp/service@file:./service#./service::hash=f942fe&locator=openmcp%40workspace%3A."
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.18.2"
     "@seald-io/nedb": "npm:^4.1.1"
@@ -1512,7 +1512,7 @@ __metadata:
     rotating-file-stream: "npm:^3.2.0"
     tesseract.js: "npm:^6.0.1"
     uuid: "npm:^11.1.0"
-  checksum: 10c0/647dbc5751a40613fff54632c659f156adcabdab951b5be725e29d48f55f5e28ac09aa752c175d0c9f8378a9c6a7265de651ac69e70285ff81e77f657ab31da7
+  checksum: 10c0/cdb6090e27f4e796b5a72822a41530d54a42e3cc61bfa568b5c2628d314058bd118bbcbdcf3656227109cd3e7de32e2427ebe031021a0e7e012b872357291d0b
   languageName: node
   linkType: hard
 
@@ -8775,6 +8775,7 @@ __metadata:
     "@types/ws": "npm:^8.5.10"
     commander: "npm:^11.1.0"
     open: "npm:^10.1.0"
+    tsx: "npm:^4.19.0"
     typescript: "npm:^5.4.0"
     uuid: "npm:^9.0.0"
     ws: "npm:^8.18.0"
@@ -10824,7 +10825,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tsx@npm:^4.19.4":
+"tsx@npm:^4.19.0, tsx@npm:^4.19.4":
   version: 4.21.0
   resolution: "tsx@npm:4.21.0"
   dependencies:

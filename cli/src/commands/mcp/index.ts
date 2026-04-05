@@ -12,8 +12,11 @@ export const mcpCommand = new Command('mcp')
   session  运行时的 MCP 会话（连接、断开、切换活跃会话）
 
 快速上手:
-  openmcp-cli mcp server list                    查看已保存的 Server（本地 + 云端）
-  openmcp-cli mcp server add -f config.json      添加一个本地 Server 配置
+  openmcp-cli mcp server list                    查看 Server（本地 + 云端，可用 --scope）
+  openmcp-cli mcp server add --file config.json        添加本地（亦可用 --data）
+  openmcp-cli mcp server add --scope cloud --file c.json   添加云端项目（需登录）
+  openmcp-cli mcp server edit --id <ID> --file patch.json  编辑合并部分字段（JSON 字段同 add）
+  openmcp-cli mcp server add -h                  JSON 字段说明（transport/endpoint 等）在文末
   openmcp-cli mcp session connect --id <ID>      连接指定 Server
   openmcp-cli mcp session list                   查看当前活跃会话
   openmcp-cli mcp session disconnect             断开当前会话

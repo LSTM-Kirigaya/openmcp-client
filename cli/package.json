@@ -15,7 +15,14 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "tsx --test --test-concurrency=1 test/gateway/start.test.ts test/gateway/stop.test.ts test/gateway/restart.test.ts test/gateway/status.test.ts test/gateway/run.test.ts test/gateway/logs-dir.test.ts test/gateway/logs.test.ts test/setting/general.test.ts test/setting/llm.test.ts test/setting/cloud.test.ts test/mcp/server.test.ts test/mcp/session.test.ts test/debug/resource.test.ts test/debug/prompt.test.ts test/debug/tool.test.ts test/debug/mcp.test.ts test/debug/batch.test.ts test/debug/chat.test.ts test/webui/start.test.ts test/webui/stop.test.ts test/webui/status.test.ts test/webui/restart.test.ts test/webui/run.test.ts test/start/start.test.ts",
+    "test:gateway": "tsx --test --test-concurrency=1 test/gateway/start.test.ts test/gateway/stop.test.ts test/gateway/restart.test.ts test/gateway/status.test.ts test/gateway/run.test.ts test/gateway/logs-dir.test.ts test/gateway/logs.test.ts",
+    "test:setting": "tsx --test --test-concurrency=1 test/setting/general.test.ts test/setting/llm.test.ts test/setting/cloud.test.ts",
+    "test:mcp": "tsx --test --test-concurrency=1 test/mcp/server.test.ts test/mcp/session.test.ts",
+    "test:debug": "tsx --test --test-concurrency=1 test/debug/resource.test.ts test/debug/prompt.test.ts test/debug/tool.test.ts test/debug/mcp.test.ts test/debug/batch.test.ts test/debug/chat.test.ts",
+    "test:webui": "tsx --test --test-concurrency=1 test/webui/start.test.ts test/webui/stop.test.ts test/webui/status.test.ts test/webui/restart.test.ts test/webui/run.test.ts",
+    "test:start": "tsx --test --test-concurrency=1 test/start/start.test.ts"
   },
   "keywords": [
     "mcp",
@@ -37,6 +44,7 @@
     "@types/node": "^20.11.0",
     "@types/uuid": "^9.0.0",
     "@types/ws": "^8.5.10",
+    "tsx": "^4.19.0",
     "typescript": "^5.4.0"
   },
   "engines": {
