@@ -178,10 +178,16 @@ export function getDefaultLanunchSignature(path: string, cwd: string) {
 
 export function getNewsWebviewContent(context: vscode.ExtensionContext, panel: vscode.WebviewPanel): string | undefined {
     const viewRoot = fspath.join(context.extensionPath, 'resources', 'changelog');
-    const htmlIndexPath = fspath.join(viewRoot, 'index.html');    
+    const htmlIndexPath = fspath.join(viewRoot, 'index.html');
 
-    const html = fs.readFileSync(htmlIndexPath, { encoding: 'utf-8' });
-    return html;
+    try {
+        if (!fs.existsSync(htmlIndexPath)) {
+            return undefined;
+        }
+        return fs.readFileSync(htmlIndexPath, { encoding: 'utf-8' });
+    } catch {
+        return undefined;
+    }
 }
 
 export function revealOpenMcpNewsWebviewPanel(

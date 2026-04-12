@@ -204,22 +204,28 @@ class AuthService {
             throw new Error('Login failed: No user returned');
         }
 
+        if (!data.session) {
+            throw new Error('Login failed: No session returned');
+        }
+
+        const session = data.session;
+
         // 更新本地状态
         this.state = {
             isLoggedIn: true,
             user: this.mapUserToProfile(data.user),
-            accessToken: data.session.access_token,
-            refreshToken: data.session.refresh_token,
-            expiresAt: data.session.expires_at
+            accessToken: session.access_token,
+            refreshToken: session.refresh_token,
+            expiresAt: session.expires_at ?? null
         };
         this.saveState();
 
         return {
             user: this.state.user,
             session: {
-                access_token: data.session.access_token,
-                refresh_token: data.session.refresh_token,
-                expires_at: data.session.expires_at
+                access_token: session.access_token,
+                refresh_token: session.refresh_token,
+                expires_at: session.expires_at
             }
         };
     }
@@ -261,22 +267,29 @@ class AuthService {
             throw new Error('Session refresh failed: No user returned');
         }
 
+        if (!data.session) {
+            this.clearState();
+            throw new Error('Session refresh failed: No session returned');
+        }
+
+        const session = data.session;
+
         // 更新本地状态
         this.state = {
             isLoggedIn: true,
             user: this.mapUserToProfile(data.user),
-            accessToken: data.session.access_token,
-            refreshToken: data.session.refresh_token,
-            expiresAt: data.session.expires_at
+            accessToken: session.access_token,
+            refreshToken: session.refresh_token,
+            expiresAt: session.expires_at ?? null
         };
         this.saveState();
 
         return {
             user: this.state.user,
             session: {
-                access_token: data.session.access_token,
-                refresh_token: data.session.refresh_token,
-                expires_at: data.session.expires_at
+                access_token: session.access_token,
+                refresh_token: session.refresh_token,
+                expires_at: session.expires_at
             }
         };
     }

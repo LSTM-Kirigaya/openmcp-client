@@ -222,12 +222,15 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Upload, Download, Delete, Refresh } from '@element-plus/icons-vue';
 import { useAuthStore } from '../../stores/useAuthStore.js';
-import { useCloudBackupStore, BackupMetadata } from '../../stores/useCloudBackupStore.js';
+import { useCloudBackupStore } from '../../stores/useCloudBackupStore.js';
+import type { BackupMetadata } from '../../stores/useCloudBackupStore.js';
 import LoginDialog from './LoginDialog.vue';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const cloudBackupStore = useCloudBackupStore();
 
@@ -289,7 +292,7 @@ async function handleCreateBackup() {
     showCreateBackupDialog.value = false;
     resetBackupForm();
   } else {
-    ElMessage.error(cloudBackupStore.error || t('backup.createFailed'));
+    ElMessage.error(cloudBackupStore.error.value || t('backup.createFailed'));
   }
 }
 
@@ -328,7 +331,7 @@ async function confirmRestore() {
       // TODO: 应用恢复的数据
       console.log('Restored data:', data);
     } else {
-      ElMessage.error(cloudBackupStore.error || t('backup.restoreFailed'));
+      ElMessage.error(cloudBackupStore.error.value || t('backup.restoreFailed'));
     }
   } catch {
     // 用户取消
@@ -341,7 +344,7 @@ async function handleDelete(backupId: string) {
   if (success) {
     ElMessage.success(t('backup.deleteSuccess'));
   } else {
-    ElMessage.error(cloudBackupStore.error || t('backup.deleteFailed'));
+    ElMessage.error(cloudBackupStore.error.value || t('backup.deleteFailed'));
   }
 }
 

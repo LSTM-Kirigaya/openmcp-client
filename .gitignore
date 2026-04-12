@@ -25,3 +25,6 @@ resources/changelog/**
 **/AGENTS.md
 **/openmcp/*
 **/dataset/*
+# Agent tooling logs (do not commit)
+.agent-e2e-log.txt
+.agent-git-summary.txt

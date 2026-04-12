@@ -279,3 +279,12 @@ export function useMessageBridge() {
 
 	return bridge;
 }
+
+/** 与 extension 侧 service 通信的便捷封装（auth、cloud-backup 等 API 使用） */
+export async function sendRequest<T = unknown>(
+	command: string,
+	data?: ICommandRequestData
+): Promise<RestFulResponse<T>> {
+	const bridge = useMessageBridge();
+	return bridge.commandRequest<T>(command, data);
+}

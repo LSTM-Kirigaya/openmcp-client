@@ -119,11 +119,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue';
+import { ref, reactive, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ElMessage } from 'element-plus';
 import { Message, Lock, User } from '@element-plus/icons-vue';
 import type { FormInstance, FormRules } from 'element-plus';
 import { useAuthStore } from '../../stores/useAuthStore.js';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: boolean;

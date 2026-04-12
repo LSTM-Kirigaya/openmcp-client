@@ -2,7 +2,7 @@
   <div class="user-menu">
     <!-- 未登录状态 -->
     <el-button
-      v-if="!authStore.isAuthenticated"
+      v-if="!isAuthenticated"
       type="primary"
       size="small"
       @click="showLoginDialog = true"
@@ -16,10 +16,10 @@
       <div class="user-info">
         <el-avatar
           :size="32"
-          :src="authStore.user?.avatar_url"
+          :src="user?.avatar_url"
           :icon="UserFilled"
         />
-        <span class="username">{{ authStore.userDisplayName }}</span>
+        <span class="username">{{ userDisplayName }}</span>
         <el-icon><ArrowDown /></el-icon>
       </div>
       
@@ -31,7 +31,7 @@
           </el-dropdown-item>
           
           <el-dropdown-item @click="showBackupManager = true">
-            <el-icon><Cloud /></el-icon>
+            <el-icon><Cloudy /></el-icon>
             {{ $t('backup.title') }}
           </el-dropdown-item>
           
@@ -71,7 +71,7 @@
         </el-button>
         <el-button
           type="primary"
-          :loading="authStore.isLoading"
+          :loading="isLoading"
           @click="handleUpdateProfile"
         >
           {{ $t('common.save') }}
@@ -92,14 +92,17 @@
 
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { User, UserFilled, ArrowDown, SwitchButton, Cloud } from '@element-plus/icons-vue';
+import { User, UserFilled, ArrowDown, SwitchButton, Cloudy } from '@element-plus/icons-vue';
 import { useAuthStore } from '../../stores/useAuthStore.js';
 import { useCloudBackupStore } from '../../stores/useCloudBackupStore.js';
 import LoginDialog from './LoginDialog.vue';
 import CloudBackupManager from './CloudBackupManager.vue';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
+const { user, isAuthenticated, userDisplayName, isLoading, error: authError } = authStore;
 const cloudBackupStore = useCloudBackupStore();
 
 const showLoginDialog = ref(false);
@@ -112,10 +115,10 @@ const profileForm = reactive({
 });
 
 // 监听用户变化，更新表单
-watch(() => authStore.user, (user) => {
-  if (user) {
-    profileForm.email = user.email;
-    profileForm.username = user.username || '';
+watch(user, (u) => {
+  if (u) {
+    profileForm.email = u.email;
+    profileForm.username = u.username || '';
   }
 }, { immediate: true });
 
@@ -134,7 +137,7 @@ async function handleUpdateProfile() {
     ElMessage.success(t('auth.updateSuccess'));
     showProfileDialog.value = false;
   } else {
-    ElMessage.error(authStore.error || t('auth.updateFailed'));
+    ElMessage.error(authError.value || t('auth.updateFailed'));
   }
 }
 
