@@ -19,7 +19,9 @@ resources/service
 stats.html
 .openmcp
 test-vsix
+# News webview: ignore generated assets but keep stub index.html
 resources/changelog/**
+!resources/changelog/index.html
  
 # Ignore agent guidance files from VCS noise
 **/AGENTS.md
