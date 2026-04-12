@@ -25,7 +25,7 @@ if (fs.existsSync(distPath)) {
   require(distPath);
 } else {
   // 找不到编译后的文件
-  console.error('❌ Error: Cannot find OpenMCP CLI entry point.');
+  console.error('❌ Error: Cannot find OpenMCP entry point.');
   console.error('   Looked for: ' + distPath);
   console.error('');
   console.error('This could mean:');
@@ -38,7 +38,7 @@ if (fs.existsSync(distPath)) {
   console.error('     npm install && npm run build');
   console.error('');
   console.error('  2. If you installed from npm:');
-  console.error('     npm uninstall -g openmcp-cli');
+  console.error('     npm uninstall -g openmcp');
   console.error('     npm install -g openmcp-cli');
   process.exit(1);
 }

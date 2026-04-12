@@ -21,7 +21,7 @@
 [![IMAGE ALT TEXT HERE](https://pic1.zhimg.com/80/v2-951261f789708621a2c34faa5fa6f330_1440w.png)](https://www.bilibili.com/video/BV1MFTBzpEtZ/?vd_source=3f248073d6ebdb61308992901b606f24)
 ### [👆 完整视频](https://www.youtube.com/watch?v=S7igsEhcLiw)
 
-### openmcp-client
+### openmcpent
 
 集成 Inspector + MCP 客户端基础功能，开发测试一体化。
 
@@ -49,7 +49,7 @@
 
 ### openmcp-sdk
 
-一旦你在 `openmcp-client` 中完成了所有测试和验证，就可以使用 `openmcp-sdk` 快速且轻松地将你的 MCP 部署为一个 Agent 应用：
+一旦你在 `openmcpent` 中完成了所有测试和验证，就可以使用 `openmcp-sdk` 快速且轻松地将你的 MCP 部署为一个 Agent 应用：
 
 ```bash
 npm install openmcp-sdk
@@ -208,23 +208,23 @@ flowchart TD
 npm install -g openmcp-cli
 
 # 创建新项目
-openmcp-cli init my-project
+openmcp init my-project
 cd my-project
 
 # 启动开发服务器（前后端）
-openmcp-cli dev
+openmcp dev
 ```
 
 ### CLI 命令
 
 | 命令 | 描述 |
 |---------|-------------|
-| `openmcp-cli init <project-name>` | 初始化一个新的 OpenMCP 项目 |
-| `openmcp-cli dev` | 启动开发模式（后端 + 前端） |
-| `openmcp-cli dev --service-only` | 只启动后端服务 |
-| `openmcp-cli dev --renderer-only` | 只启动前端渲染器 |
-| `openmcp-cli start` | 启动生产模式 |
-| `openmcp-cli update` | 更新到最新版本 |
+| `openmcp init <project-name>` | 初始化一个新的 OpenMCP 项目 |
+| `openmcp dev` | 启动开发模式（后端 + 前端） |
+| `openmcp dev --service-only` | 只启动后端服务 |
+| `openmcp dev --renderer-only` | 只启动前端渲染器 |
+| `openmcp start` | 启动生产模式 |
+| `openmcp update` | 更新到最新版本 |
 
 [📖 CLI 完整文档](./cli/README.md)
 

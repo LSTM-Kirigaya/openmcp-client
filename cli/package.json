@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "openmcp-cli": "./bin/openmcp-cli"
+    "openmcp": "bin/openmcp"
   },
   "files": [
     "bin/",
@@ -31,7 +31,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LSTM-Kirigaya/openmcp-client.git",
+    "url": "git+https://github.com/LSTM-Kirigaya/openmcp-client.git",
     "directory": "cli"
   },
   "engines": {

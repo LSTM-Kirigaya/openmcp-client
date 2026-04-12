@@ -74,7 +74,7 @@ async function testVersion() {
   log('\n=== Test 2: Testing CLI version ===');
   
   try {
-    const version = execSync('node bin/openmcp-cli --version', {
+    const version = execSync('node bin/openmcp --version', {
       cwd: cliDir,
       encoding: 'utf-8'
     }).trim();
@@ -88,7 +88,7 @@ async function testHelp() {
   log('\n=== Test 3: Testing CLI help ===');
   
   try {
-    const help = execSync('node bin/openmcp-cli --help', {
+    const help = execSync('node bin/openmcp --help', {
       cwd: cliDir,
       encoding: 'utf-8'
     });
@@ -109,7 +109,7 @@ async function testInit() {
 
   // Test init command (skip actual clone by testing error case)
   try {
-    execSync('node bin/openmcp-cli init --help', {
+    execSync('node bin/openmcp init --help', {
       cwd: cliDir,
       encoding: 'utf-8'
     });
@@ -161,7 +161,7 @@ async function main() {
     
     log('\nTo test globally:');
     log(`  cd ${cliDir} && npm link`);
-    log('  openmcp-cli --version');
+    log('  openmcp --version');
     
   } catch (err) {
     console.error(err);

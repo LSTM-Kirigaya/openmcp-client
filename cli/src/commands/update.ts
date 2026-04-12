@@ -9,7 +9,7 @@ interface UpdateOptions {
   check: boolean;
 }
 
-const REPO_URL = 'https://github.com/LSTM-Kirigaya/openmcp-client.git';
+const REPO_URL = 'https://github.com/LSTM-Kirigaya/openmcpent.git';
 
 async function getLatestVersion(): Promise<string | null> {
   return new Promise((resolve) => {
@@ -92,7 +92,7 @@ export async function updateCommand(projectPath: string, options: UpdateOptions)
       logger.success('\nYou are already on the latest version!');
     } else {
       logger.warning('\nA new version is available!');
-      logger.info(`Run "openmcp-cli update" to update.`);
+      logger.info(`Run "openmcp update" to update.`);
     }
     return;
   }
@@ -138,7 +138,7 @@ export async function updateCommand(projectPath: string, options: UpdateOptions)
     logger.info('You can manually update by:');
     logger.info('  1. Backup your data');
     logger.info('  2. Delete the project directory');
-    logger.info('  3. Run "openmcp-cli init" to create a fresh project');
+    logger.info('  3. Run "openmcp init" to create a fresh project');
     process.exit(1);
   }
 

@@ -2,14 +2,14 @@
 
 ## 项目概述
 
-OpenMCP CLI 是一个命令行工具，允许用户通过 `npm install -g openmcp-cli` 全局安装，并使用 `openmcp-cli` 命令快速搭建和运行 OpenMCP 开发环境。
+OpenMCP CLI 是一个命令行工具，允许用户通过 `npm install -g openmcp-cli` 全局安装，并使用 `openmcp` 命令快速搭建和运行 OpenMCP 开发环境。
 
 ## 功能特性
 
-- ✅ `openmcp-cli init` - 一键初始化 OpenMCP 项目
-- ✅ `openmcp-cli dev` - 启动开发模式（前后端并行运行）
-- ✅ `openmcp-cli start` - 启动生产模式
-- ✅ `openmcp-cli update` - 检查并更新到最新版本
+- ✅ `openmcp init` - 一键初始化 OpenMCP 项目
+- ✅ `openmcp dev` - 启动开发模式（前后端并行运行）
+- ✅ `openmcp start` - 启动生产模式
+- ✅ `openmcp update` - 检查并更新到最新版本
 - ✅ 支持 npm/yarn/pnpm 多种包管理器
 - ✅ 自动检测项目结构
 - ✅ 友好的错误提示和日志输出
@@ -19,7 +19,7 @@ OpenMCP CLI 是一个命令行工具，允许用户通过 `npm install -g openmc
 ```
 cli/
 ├── bin/
-│   └── openmcp-cli          # CLI 入口脚本 (可执行)
+│   └── openmcp          # CLI 入口脚本 (可执行)
 ├── src/
 │   ├── index.ts             # 主入口，命令注册
 │   ├── commands/
@@ -53,7 +53,7 @@ npm install
 npm run build
 
 # 测试构建结果
-node bin/openmcp-cli --version
+node bin/openmcp --version
 ```
 
 ### 2. 完整构建（推荐）
@@ -113,12 +113,12 @@ npm run test:cli
 cd cli
 npm link
 
-# 现在可以在任意位置使用 openmcp-cli 命令
-openmcp-cli --version
-openmcp-cli --help
+# 现在可以在任意位置使用 openmcp 命令
+openmcp --version
+openmcp --help
 
 # 解除链接（测试完成后）
-npm unlink -g openmcp-cli
+npm unlink -g openmcp
 ```
 
 ### 4. 发布到 npm
@@ -141,11 +141,11 @@ npm publish --access public  # 如果是 scoped 包 (@scope/name)
 npm install -g openmcp-cli
 
 # 验证安装
-openmcp-cli --version
-which openmcp-cli
+openmcp --version
+which openmcp
 
 # 卸载
-npm uninstall -g openmcp-cli
+npm uninstall -g openmcp
 ```
 
 ## 用户使用指南
@@ -160,7 +160,7 @@ npm install -g openmcp-cli
 
 ```bash
 # 创建新项目
-openmcp-cli init my-mcp-project
+openmcp init my-mcp-project
 
 # 进入项目目录
 cd my-mcp-project
@@ -170,36 +170,36 @@ cd my-mcp-project
 
 ```bash
 # 启动前后端（推荐）
-openmcp-cli dev
+openmcp dev
 
 # 只启动后端服务
-openmcp-cli dev --service-only
+openmcp dev --service-only
 
 # 只启动前端渲染器
-openmcp-cli dev --renderer-only
+openmcp dev --renderer-only
 
 # 指定端口
-openmcp-cli dev --port 9000
+openmcp dev --port 9000
 ```
 
 ### 生产模式
 
 ```bash
 # 构建并启动生产服务
-openmcp-cli start
+openmcp start
 
 # 指定端口
-openmcp-cli start --port 9000
+openmcp start --port 9000
 ```
 
 ### 更新项目
 
 ```bash
 # 检查更新
-openmcp-cli update --check
+openmcp update --check
 
 # 更新到最新版本
-openmcp-cli update
+openmcp update
 ```
 
 ## 常见问题
@@ -226,10 +226,10 @@ npx openmcp-cli init my-project
 npm config get prefix
 
 # 确认可执行文件存在
-ls -la $(npm config get prefix)/bin/openmcp-cli
+ls -la $(npm config get prefix)/bin/openmcp
 
 # 重新安装
-npm uninstall -g openmcp-cli
+npm uninstall -g openmcp
 npm install -g openmcp-cli
 ```
 
@@ -244,7 +244,7 @@ git --version
 curl -I https://github.com
 
 # 手动初始化
-git clone --depth 1 https://github.com/LSTM-Kirigaya/openmcp-client.git my-project
+git clone --depth 1 https://github.com/LSTM-Kirigaya/openmcpent.git my-project
 cd my-project
 npm install
 ```
@@ -257,7 +257,7 @@ npm install
 
 ## 后续扩展计划
 
-- [ ] 支持自定义模板（`openmcp-cli init --template vue`）
+- [ ] 支持自定义模板（`openmcp init --template vue`）
 - [ ] 支持项目配置导入/导出
 - [ ] 集成 Docker 部署
 - [ ] 支持插件系统
@@ -266,5 +266,5 @@ npm install
 ## 相关链接
 
 - [OpenMCP 官方文档](https://openmcp.kirigaya.cn)
-- [GitHub 仓库](https://github.com/LSTM-Kirigaya/openmcp-client)
-- [npm 包页面](https://www.npmjs.com/package/openmcp-cli)
+- [GitHub 仓库](https://github.com/LSTM-Kirigaya/openmcpent)
+- [npm 包页面](https://www.npmjs.com/package/openmcp)

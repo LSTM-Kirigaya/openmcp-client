@@ -29,7 +29,6 @@
 		>
 			<span
 				class="debug-option"
-				:class="{ 'disable': !mcpClientAdapter.connected }"
 				v-for="(option, index) of advanceOptions"
 				:key="index"
 				@click="chooseDebugMode(index + baseOptions.length)"
@@ -95,23 +94,8 @@ const advanceOptions = [
 
 function chooseDebugMode(index: number) {
 	// TODO: 支持更多的 server
-	if (mcpClientAdapter.connected) {
-		const activeTab = tabs.activeTab;
-		activeTab.componentIndex = index;
-		// 根据索引确定使用哪个选项数组中的图标
-		if (index < baseOptions.length) {
-			activeTab.icon = baseOptions[index].icon;
-			activeTab.name = baseOptions[index].name as any;
-		} else {
-			activeTab.icon = advanceOptions[index - baseOptions.length].icon;
-			activeTab.name = advanceOptions[index - baseOptions.length].name as any;
-		}
-
-		// 此处可以这么做是因为这个操作过后 activeTab 绑定的 tab 的 name 就不会再被进行赋值操作了
-		// console.log(debugOptions[index]);
-
-		console.log(tabs);
-	} else {
+	const isBase = index < baseOptions.length;
+	if (isBase && !mcpClientAdapter.connected) {
 		const message = t('warning.click-to-connect')
 			.replace('$1', t('connect'));
 		
@@ -121,7 +105,24 @@ function chooseDebugMode(index: number) {
 			duration: 3000,
 			showClose: true,
 		});
+		return;
 	}
+
+	const activeTab = tabs.activeTab;
+	activeTab.componentIndex = index;
+	// 根据索引确定使用哪个选项数组中的图标
+	if (index < baseOptions.length) {
+		activeTab.icon = baseOptions[index].icon;
+		activeTab.name = baseOptions[index].name as any;
+	} else {
+		activeTab.icon = advanceOptions[index - baseOptions.length].icon;
+		activeTab.name = advanceOptions[index - baseOptions.length].name as any;
+	}
+
+	// 此处可以这么做是因为这个操作过后 activeTab 绑定的 tab 的 name 就不会再被进行赋值操作了
+	// console.log(debugOptions[index]);
+
+	console.log(tabs);
 }
 
 </script>
@@ -204,9 +205,7 @@ function chooseDebugMode(index: number) {
 }
 
 .debug-option:hover {
-	background-color: var(--foreground);
-	color: var(--background);
-	border-color: var(--foreground);
+	border-color: var(--main-color);
 	transition: var(--animation-3s);
 }
 

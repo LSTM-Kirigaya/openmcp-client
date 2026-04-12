@@ -23,7 +23,7 @@ export async function devCommand(projectPath: string, options: DevOptions): Prom
   if (!existsSync(packageJsonPath)) {
     logger.error(`No package.json found in ${resolvedPath}`);
     logger.info('Make sure you are in an OpenMCP project directory.');
-    logger.info('Run "openmcp-cli init <project-name>" to create a new project.');
+    logger.info('Run "openmcp init <project-name>" to create a new project.');
     process.exit(1);
   }
 

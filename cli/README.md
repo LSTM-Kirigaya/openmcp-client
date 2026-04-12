@@ -19,7 +19,7 @@ npm install -g openmcp-cli
 ### Initialize a new project
 
 ```bash
-openmcp-cli init my-project
+openmcp init my-project
 cd my-project
 ```
 
@@ -28,43 +28,43 @@ cd my-project
 Start both service (backend) and renderer (frontend) in development mode:
 
 ```bash
-openmcp-cli dev
+openmcp dev
 ```
 
 Start only the backend service:
 
 ```bash
-openmcp-cli dev --service-only
+openmcp dev --service-only
 ```
 
 Start only the frontend renderer:
 
 ```bash
-openmcp-cli dev --renderer-only
+openmcp dev --renderer-only
 ```
 
 Specify a custom port for the service:
 
 ```bash
-openmcp-cli dev --port 9000
+openmcp dev --port 9000
 ```
 
 ### Start production mode
 
 ```bash
-openmcp-cli start
+openmcp start
 ```
 
 ### Check for updates
 
 ```bash
-openmcp-cli update --check
+openmcp update --check
 ```
 
 ### Update to latest version
 
 ```bash
-openmcp-cli update
+openmcp update
 ```
 
 ## Commands
@@ -99,13 +99,13 @@ my-project/
 
 1. **Create a new project:**
    ```bash
-   openmcp-cli init my-project
+   openmcp init my-project
    cd my-project
    ```
 
 2. **Start development servers:**
    ```bash
-   openmcp-cli dev
+   openmcp dev
    ```
    
    This will start:
@@ -127,7 +127,7 @@ my-project/
 If port 8282 is already in use, you can specify a different port:
 
 ```bash
-openmcp-cli dev --port 9000
+openmcp dev --port 9000
 ```
 
 ### Permission denied on global install
@@ -157,4 +157,4 @@ MIT
 ## Links
 
 - [OpenMCP Documentation](https://openmcp.kirigaya.cn)
-- [GitHub Repository](https://github.com/LSTM-Kirigaya/openmcp-client)
+- [GitHub Repository](https://github.com/LSTM-Kirigaya/openmcpent)

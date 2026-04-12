@@ -21,7 +21,7 @@ An all-in-one vscode/trae/cursor plugin for MCP server debugging.
 [![IMAGE ALT TEXT HERE](https://pic1.zhimg.com/80/v2-951261f789708621a2c34faa5fa6f330_1440w.png)](https://www.youtube.com/watch?v=S7igsEhcLiw)
 ### [👆 Full Video](https://www.youtube.com/watch?v=S7igsEhcLiw)
 
-### openmcp-client
+### openmcpent
 
 Integrated Inspector + MCP client basic functions, combining development and testing into one.
 
@@ -49,7 +49,7 @@ Support XML mode and customized options for your tool selection.
 
 ### openmcp-sdk
 
-once everything is tested and verified in `openmcp-client`, you can deploy your mcp as an agent app with `openmcp-sdk` fastly and easily:
+once everything is tested and verified in `openmcpent`, you can deploy your mcp as an agent app with `openmcp-sdk` fastly and easily:
 
 ```bash
 npm install openmcp-sdk
@@ -209,23 +209,23 @@ Quickly setup and run OpenMCP development environment with a single command:
 npm install -g openmcp-cli
 
 # Create a new project
-openmcp-cli init my-project
+openmcp init my-project
 cd my-project
 
 # Start development servers (service + renderer)
-openmcp-cli dev
+openmcp dev
 ```
 
 ### CLI Commands
 
 | Command | Description |
 |---------|-------------|
-| `openmcp-cli init <project-name>` | Initialize a new OpenMCP project |
-| `openmcp-cli dev` | Start development mode (backend + frontend) |
-| `openmcp-cli dev --service-only` | Start only the backend service |
-| `openmcp-cli dev --renderer-only` | Start only the frontend renderer |
-| `openmcp-cli start` | Start production mode |
-| `openmcp-cli update` | Update to the latest version |
+| `openmcp init <project-name>` | Initialize a new OpenMCP project |
+| `openmcp dev` | Start development mode (backend + frontend) |
+| `openmcp dev --service-only` | Start only the backend service |
+| `openmcp dev --renderer-only` | Start only the frontend renderer |
+| `openmcp start` | Start production mode |
+| `openmcp update` | Update to the latest version |
 
 [📖 Full CLI Documentation](./cli/README.md)
 
@@ -281,6 +281,6 @@ Then just press F5, いただきます (Let's begin)
 
 ✅ npm run build
 ✅ npm run build:task-loop
-✅ openmcp-client UT
+✅ openmcpent UT
 ✅ openmcp-sdk UT
 ✅ vscode extension UT

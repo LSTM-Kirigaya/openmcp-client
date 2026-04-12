@@ -19,11 +19,7 @@
 						<span class="iconfont icon-wendang"></span>
 					</a>
 				</el-tooltip>
-				<el-tooltip :content="t('sidebar-author-homepage')" placement="right" effect="light">
-					<a class="sidebar-link" href="https://kirigaya.cn/about" target="_blank" rel="noopener noreferrer">
-						<span class="iconfont icon-home-page"></span>
-					</a>
-				</el-tooltip>
+
 			</div>
 			<Connected></Connected>
 		</div>

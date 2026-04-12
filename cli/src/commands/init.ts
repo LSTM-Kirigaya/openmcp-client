@@ -53,12 +53,12 @@ PORT=8282
 
   console.log(chalk.bold('Next steps:'));
   console.log(`  ${chalk.cyan('cd')} ${projectName}`);
-  console.log(`  ${chalk.cyan('openmcp-cli dev')}     ${chalk.gray('# Start development servers')}`);
-  console.log(`  ${chalk.cyan('openmcp-cli start')}   ${chalk.gray('# Start production mode')}`);
+  console.log(`  ${chalk.cyan('openmcp dev')}     ${chalk.gray('# Start development servers')}`);
+  console.log(`  ${chalk.cyan('openmcp start')}   ${chalk.gray('# Start production mode')}`);
   console.log('');
 
   console.log(chalk.bold('Documentation:'));
   console.log(`  ${chalk.cyan('https://openmcp.kirigaya.cn')}`);
-  console.log(`  ${chalk.cyan('https://github.com/LSTM-Kirigaya/openmcp-client')}`);
+  console.log(`  ${chalk.cyan('https://github.com/LSTM-Kirigaya/openmcpent')}`);
   console.log('');
 }
