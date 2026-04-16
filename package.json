@@ -281,7 +281,9 @@
         "publish:sdk": "npx tsx scripts/publish-sdk.mts",
         "publish:sdk:check": "npx tsx scripts/publish-sdk.mts --check-only",
         "build:cli:full": "npx tsx scripts/build-cli.mts",
-        "test:cli": "npx tsx scripts/test-cli.mts"
+        "test:cli": "npx tsx scripts/test-cli.mts",
+        "software:dev": "npm --prefix software run dev",
+        "software:build": "npm --prefix software run build"
     },
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.18.2",
