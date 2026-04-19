@@ -19,7 +19,7 @@ OpenMCP Gateway 管理命令：
   logs      查看最近若干行文件日志（默认 %USERPROFILE%\\.openmcp\\logs\\gateway\\gateway.log）
   logs-dir  仅打印上述日志目录绝对路径（别名: log-dir）
 
-云端/本地后端默认：非 production 时走本地 8000；构建产物 NODE_ENV=production 走远程。可用 OPENMCP_APP_ENV、OPENMCP_API_BASE_URL 或 service/.env、%USERPROFILE%\\.openmcp\\gateway.env 覆盖。
+云端后端地址默认由 service/.env.development 与 service/.env.production 提供；也可用 OPENMCP_API_BASE_URL、service/.env.local 或 %USERPROFILE%\\.openmcp\\gateway.env 覆盖。
 
 示例：
   openmcp-cli gateway run           # 前台运行

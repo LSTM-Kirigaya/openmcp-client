@@ -7,11 +7,11 @@ export const HELP_GATEWAY = `
 
 文件日志目录（与 gateway.env 同属用户目录 .openmcp）: 运行 gateway logs-dir 查看绝对路径；gateway logs 查看 gateway.log 尾部。
 
-云端 API 基址由 Gateway 进程内 @openmcp/service 决定，与运行 CLI 的终端无关。默认规则：
-  · 未设 OPENMCP_API_BASE_URL 时：NODE_ENV=production（如 tsc 构建后的产物）→ 远程；否则 → 本地 http://localhost:8000
-  · OPENMCP_APP_ENV=development|production 可覆盖上述逻辑（见 service/.env.example）
+云端 API 基址由 Gateway 进程内 @openmcp/service 决定，与运行 CLI 的终端无关。默认读取规则：
+  · development 模式读取 service/.env.development（默认 http://localhost:8000）
+  · production 模式读取 service/.env.production（默认 https://openmcp.peacesheep.xyz）
   · OPENMCP_API_BASE_URL 始终优先（可指向任意后端）
-  · service 包根目录的 .env 会在首次请求前自动加载（不覆盖已在环境中的变量）
+  · service 包根目录的 .env、.env.local、.env.<mode>.local 会作为本地覆盖读取（不覆盖已在进程环境中的变量）
   · 后台 Gateway 还可读 %USERPROFILE%\\.openmcp\\config\\gateway.env（KEY=VALUE，终端已有环境变量优先）
 `;
 
