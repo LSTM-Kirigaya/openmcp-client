@@ -4,6 +4,8 @@ node_modules
 .vscode-test/
 *.vsix
 .env
+.env.local
+.env.*.local
 .release-notes-temp.md
 openmcp-sdk
 .DS_Store

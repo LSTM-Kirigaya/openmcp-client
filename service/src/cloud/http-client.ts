@@ -7,29 +7,20 @@ import {
 } from './token-store.js';
 import { loadServiceDotEnv } from './load-service-env.js';
 
-const DEV_BASE_URL_RAW = 'http://localhost:8000';
-const PROD_BASE_URL_RAW = 'https://openmcp.peacesheep.xyz';
-
 loadServiceDotEnv();
 
 /**
- * 云端 API 基址（优先级从高到低）：
- * 1. OPENMCP_API_BASE_URL 显式指定
- * 2. OPENMCP_APP_ENV=production → 远程；=development → 本地
- * 3. 未设 OPENMCP_APP_ENV 时：NODE_ENV=production（如 yarn build 后的产物）→ 远程；否则默认本地
+ * 云端 API 基址来自 service 包根目录环境文件：
+ * - `.env.development`
+ * - `.env.production`
+ * - 以及更高优先级的 `.env*.local` / 进程环境变量
  */
 function getBaseUrlRaw(): string {
-  if (process.env.OPENMCP_API_BASE_URL) {
-    return String(process.env.OPENMCP_API_BASE_URL);
+  const explicit = String(process.env.OPENMCP_API_BASE_URL || '').trim();
+  if (explicit) {
+    return explicit;
   }
-  const appEnv = (process.env.OPENMCP_APP_ENV || '').trim().toLowerCase();
-  if (appEnv === 'production') {
-    return PROD_BASE_URL_RAW;
-  }
-  if (appEnv === 'development') {
-    return DEV_BASE_URL_RAW;
-  }
-  return process.env.NODE_ENV === 'production' ? PROD_BASE_URL_RAW : DEV_BASE_URL_RAW;
+  throw new Error('OPENMCP_API_BASE_URL is not configured. Please check service/.env.development or service/.env.production.');
 }
 
 function normalizeApiBaseUrl(baseRaw: string): string {

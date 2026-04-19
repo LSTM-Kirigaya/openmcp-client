@@ -6,6 +6,11 @@ export interface CloudUser {
     username: string;
 }
 
+export interface CloudAuthResult {
+    user: CloudUser;
+    requiresOnboarding: boolean;
+}
+
 export interface CloudTokenPair {
     access_token: string;
     refresh_token: string;
@@ -64,12 +69,14 @@ export async function cloudLogin(identifier: string, password: string) {
         token: string;
         user: CloudUser;
         expiresAt?: string;
+        requiresOnboarding?: boolean;
     }>('auth/login', {
         username: identifier,
         password
     });
     return {
-        user: result.user
+        user: result.user,
+        requiresOnboarding: result.requiresOnboarding === true
     };
 }
 
@@ -78,13 +85,15 @@ export async function cloudRegister(email: string, username: string, password: s
         token: string;
         user: CloudUser;
         expiresAt?: string;
+        requiresOnboarding?: boolean;
     }>('auth/register', {
         email,
         username,
         password
     });
     return {
-        user: result.user
+        user: result.user,
+        requiresOnboarding: result.requiresOnboarding === true
     };
 }
 
@@ -109,9 +118,11 @@ export async function cloudExchangeOAuthNonce(nonce: string) {
         token: string;
         user: CloudUser;
         expiresAt?: string;
+        requiresOnboarding?: boolean;
     }>('auth/oauth/finalize', { nonce });
     return {
-        user: result.user
+        user: result.user,
+        requiresOnboarding: result.requiresOnboarding === true
     };
 }
 
@@ -121,7 +132,24 @@ export async function cloudAuthStatus() {
         user?: CloudUser;
         username?: string;
         subscriptionTier?: string;
+        requiresOnboarding?: boolean;
     }>('auth/status', {});
+}
+
+export async function cloudCompleteOnboarding(username: string, password: string) {
+    const result = await requestCommand<{
+        token: string;
+        user: CloudUser;
+        expiresAt?: string;
+        requiresOnboarding?: boolean;
+    }>('auth/onboarding/complete', {
+        username,
+        password
+    });
+    return {
+        user: result.user,
+        requiresOnboarding: result.requiresOnboarding === true
+    };
 }
 
 export async function cloudListProjects() {

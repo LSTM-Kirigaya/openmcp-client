@@ -1,7 +1,38 @@
 <template>
     <div class="setting-section cloud-account-section">
         <h2>{{ t('cloud-account-title') }}</h2>
-        <div class="setting-options" v-if="!isCloudLoggedIn">
+        <div class="setting-options" v-if="cloudAuthState.loggedIn && cloudAuthState.requiresOnboarding">
+            <div class="setting-option cloud-onboarding-hint">
+                <span class="option-title">Onboarding</span>
+                <span class="hint-text">首次通过 OAuth 登录后，需要先确认用户名并设置密码，之后才能继续使用云端项目与用户名密码登录。</span>
+            </div>
+            <div class="setting-option">
+                <span class="option-title">{{ t('cloud-register-email') }}</span>
+                <span>{{ cloudAuthState.user?.email || '-' }}</span>
+            </div>
+            <div class="setting-option">
+                <span class="option-title">{{ t('cloud-register-username') }}</span>
+                <div style="width: 320px;">
+                    <el-input v-model="onboardingUsername" :placeholder="t('cloud-register-username-placeholder')" />
+                </div>
+            </div>
+            <div class="setting-option">
+                <span class="option-title">{{ t('cloud-password') }}</span>
+                <div style="width: 320px;">
+                    <el-input v-model="onboardingPassword" type="password" show-password :placeholder="t('cloud-password-placeholder')" />
+                </div>
+            </div>
+            <div class="setting-option actions">
+                <el-button type="primary" :loading="cloudAuthState.loading" @click="handleCompleteOnboarding">
+                    完成设置
+                </el-button>
+                <el-button :loading="cloudAuthState.loading" @click="handleLogout">
+                    {{ t('cloud-logout') }}
+                </el-button>
+            </div>
+        </div>
+
+        <div class="setting-options" v-else-if="!isCloudLoggedIn">
             <div class="setting-option">
                 <span class="option-title">{{ t('cloud-auth-mode') }}</span>
                 <el-segmented v-model="authMode" :options="authModes" />
@@ -93,6 +124,7 @@ import {
     cloudAccountRefresh,
     cloudAccountRegister,
     cloudAuthState,
+    completeCloudOnboarding,
     isCloudLoggedIn,
     refreshCloudAuthStatus,
     setCloudSession
@@ -106,6 +138,8 @@ const identifier = ref('');
 const registerEmail = ref('');
 const registerUsername = ref('');
 const password = ref('');
+const onboardingUsername = ref('');
+const onboardingPassword = ref('');
 
 const authModes = computed(() => [
     { label: t('cloud-auth-mode-login'), value: 'login' },
@@ -148,6 +182,20 @@ async function handleRegister() {
         ElMessage.success(t('cloud-register-success'));
     } catch (err: any) {
         ElMessage.error(err?.message || t('cloud-register-failed'));
+    }
+}
+
+async function handleCompleteOnboarding() {
+    if (!onboardingUsername.value || !onboardingPassword.value) {
+        ElMessage.warning('请输入用户名和密码');
+        return;
+    }
+    try {
+        await completeCloudOnboarding(onboardingUsername.value, onboardingPassword.value);
+        onboardingPassword.value = '';
+        ElMessage.success('账号设置完成');
+    } catch (err: any) {
+        ElMessage.error(err?.message || '完成账号设置失败');
     }
 }
 
@@ -198,8 +246,13 @@ async function handleGithubLogin() {
         }
         const nonce = await waitForOAuthNonce(popup);
         const result = await cloudExchangeOAuthNonce(nonce);
-        setCloudSession(result.user);
-        ElMessage.success(t('cloud-login-success'));
+        setCloudSession(result.user, result.requiresOnboarding);
+        onboardingUsername.value = result.user.username || '';
+        if (result.requiresOnboarding) {
+            ElMessage.success('GitHub 登录成功，请先完成账号设置');
+        } else {
+            ElMessage.success(t('cloud-login-success'));
+        }
     } catch (err: any) {
         ElMessage.error(err?.message || t('cloud-oauth-failed'));
     } finally {
@@ -223,6 +276,7 @@ async function handleLogout() {
 
 onMounted(async () => {
     await refreshCloudAuthStatus();
+    onboardingUsername.value = cloudAuthState.user?.username || '';
 });
 </script>
 
@@ -247,7 +301,14 @@ onMounted(async () => {
     gap: 8px !important;
 }
 
-.cloud-manage-hint .hint-text {
+.cloud-onboarding-hint {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px !important;
+}
+
+.cloud-manage-hint .hint-text,
+.cloud-onboarding-hint .hint-text {
     font-size: 13px;
     color: var(--el-text-color-secondary);
     line-height: 1.5;

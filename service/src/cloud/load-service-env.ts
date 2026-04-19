@@ -4,18 +4,23 @@ import { fileURLToPath } from 'node:url';
 
 let loaded = false;
 
-/** 读取 service 包根目录下的 .env（不覆盖已在环境中的变量） */
-export function loadServiceDotEnv(): void {
-  if (loaded) {
+function resolveMode(): string {
+  const appEnv = String(process.env.OPENMCP_APP_ENV || '').trim().toLowerCase();
+  if (appEnv) {
+    return appEnv;
+  }
+  const nodeEnv = String(process.env.NODE_ENV || '').trim().toLowerCase();
+  if (nodeEnv) {
+    return nodeEnv;
+  }
+  return 'development';
+}
+
+function loadEnvFile(filePath: string): void {
+  if (!existsSync(filePath)) {
     return;
   }
-  loaded = true;
-  const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
-  const p = join(root, '.env');
-  if (!existsSync(p)) {
-    return;
-  }
-  const text = readFileSync(p, 'utf8');
+  const text = readFileSync(filePath, 'utf8');
   for (const line of text.split(/\r?\n/)) {
     const t = line.trim();
     if (!t || t.startsWith('#')) continue;
@@ -32,5 +37,24 @@ export function loadServiceDotEnv(): void {
     if (process.env[k] === undefined) {
       process.env[k] = v;
     }
+  }
+}
+
+/** 读取 service 包根目录下的环境文件，不覆盖已在环境中的变量 */
+export function loadServiceDotEnv(): void {
+  if (loaded) {
+    return;
+  }
+  loaded = true;
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+  const mode = resolveMode();
+  for (const file of [
+    `.env.${mode}.local`,
+    `.env.${mode}`,
+    '.env.local',
+    '.env'
+  ]) {
+    loadEnvFile(join(root, file));
   }
 }

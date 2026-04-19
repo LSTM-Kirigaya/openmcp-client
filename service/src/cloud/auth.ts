@@ -2,11 +2,13 @@ import { createApiClient, createOAuthClient } from './http-client.js';
 import {
   clearToken as clearTokenStore,
   getExpiresAt,
+  getRequiresOnboarding,
   getRefreshToken,
   getToken as getAccessToken,
   getUser,
   isLoggedIn as isLoggedInStore,
   setToken as setTokenAccessOnly,
+  setRequiresOnboarding,
   setTokenPair,
   setUser,
   type StoredUser
@@ -31,6 +33,7 @@ export interface LoginResponse {
     email?: string;
   };
   expiresAt: string;
+  requiresOnboarding: boolean;
 }
 
 export interface AuthStatusResponse {
@@ -43,6 +46,7 @@ export interface AuthStatusResponse {
   };
   subscriptionTier?: string;
   expiresAt?: string;
+  requiresOnboarding?: boolean;
 }
 
 export interface OAuthAuthorizeResponse {
@@ -75,6 +79,7 @@ type BackendTokens = {
 type BackendLoginResponse = BackendCommonResponse<{
   user: StoredUser & { id?: string; username?: string; email?: string };
   tokens: BackendTokens;
+  requires_onboarding?: boolean;
 }>;
 
 type BackendDeviceStartResponse = BackendCommonResponse<{
@@ -89,12 +94,14 @@ type BackendDeviceStartResponse = BackendCommonResponse<{
 type BackendDeviceTokenResponse = BackendCommonResponse<{
   user: StoredUser & { id?: string; username?: string; email?: string };
   tokens: BackendTokens;
+  requires_onboarding?: boolean;
 }>;
 
 type BackendMeProfileResponse = BackendCommonResponse<{
   id?: string;
   username?: string;
   email?: string;
+  requires_onboarding?: boolean;
 }>;
 
 type BackendMeSubscriptionResponse = BackendCommonResponse<{
@@ -133,6 +140,7 @@ function decodeJwtUserFromAccessToken(token: string | null): StoredUser | null {
 function mapBackendLogin(resp: BackendLoginResponse): LoginResponse {
   const tokens = resp.data.tokens;
   const user = resp.data.user;
+  const requiresOnboarding = resp.data.requires_onboarding === true;
 
   // 映射到 service 现有 controller 输出结构：token/user/expiresAt
   setTokenPair({
@@ -143,6 +151,7 @@ function mapBackendLogin(resp: BackendLoginResponse): LoginResponse {
       username: (user as any).username,
       email: (user as any).email
     },
+    requiresOnboarding,
     ...(tokens.expires_in !== undefined ? { expiresIn: tokens.expires_in } : {})
   });
 
@@ -154,7 +163,8 @@ function mapBackendLogin(resp: BackendLoginResponse): LoginResponse {
       username: String((user as any).username ?? ''),
       email: (user as any).email
     },
-    expiresAt: expires ?? new Date().toISOString()
+    expiresAt: expires ?? new Date().toISOString(),
+    requiresOnboarding
   };
 }
 
@@ -232,6 +242,7 @@ export async function checkAuthStatus(): Promise<AuthStatusResponse> {
   const loggedIn = isLoggedInStore();
   let user = getUser();
   let subscriptionTier: string | undefined;
+  let requiresOnboarding = getRequiresOnboarding();
 
   if (loggedIn) {
     const client = createApiClient();
@@ -249,6 +260,8 @@ export async function checkAuthStatus(): Promise<AuthStatusResponse> {
           };
           setUser(user);
         }
+        requiresOnboarding = profile?.requires_onboarding === true;
+        setRequiresOnboarding(requiresOnboarding);
       } catch {
         // ignore: 仍然返回本地登录态
       }
@@ -285,7 +298,8 @@ export async function checkAuthStatus(): Promise<AuthStatusResponse> {
         }
       : undefined,
     subscriptionTier,
-    expiresAt: getExpiresAt() ?? undefined
+    expiresAt: getExpiresAt() ?? undefined,
+    requiresOnboarding
   };
 }
 
@@ -311,7 +325,8 @@ export async function refreshToken(): Promise<LoginResponse> {
   setTokenPair({
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
-    expiresIn: tokens.expires_in
+    expiresIn: tokens.expires_in,
+    requiresOnboarding: getRequiresOnboarding()
   });
 
   // 后端 refresh 不返回 user；但 token-store 里会保留上次 login 的 user 信息
@@ -324,7 +339,8 @@ export async function refreshToken(): Promise<LoginResponse> {
       username: String(userStore?.username ?? ''),
       email: userStore?.email
     },
-    expiresAt: getExpiresAt() ?? new Date().toISOString()
+    expiresAt: getExpiresAt() ?? new Date().toISOString(),
+    requiresOnboarding: getRequiresOnboarding()
   };
 }
 
@@ -397,11 +413,13 @@ export function setTokenPairFromExternal(params: {
   accessToken: string;
   refreshToken: string;
   user?: StoredUser | null;
+  requiresOnboarding?: boolean;
 }): void {
   setTokenPair({
     accessToken: params.accessToken,
     refreshToken: params.refreshToken,
-    user: params.user ?? null
+    user: params.user ?? null,
+    requiresOnboarding: params.requiresOnboarding === true
   });
 }
 
@@ -418,6 +436,7 @@ export async function oauthFinalizeByNonce(nonce: string): Promise<LoginResponse
   const resp = await client.get<BackendCommonResponse<{
     user: StoredUser & { id?: string; username?: string; email?: string };
     tokens: BackendTokens;
+    requires_onboarding?: boolean;
   }>>('/auth/oauth/tokens', {
     params: { nonce }
   });
@@ -432,7 +451,8 @@ export async function oauthFinalizeByNonce(nonce: string): Promise<LoginResponse
   setTokenPair({
     accessToken: data.tokens.access_token,
     refreshToken: data.tokens.refresh_token,
-    user: mappedUser
+    user: mappedUser,
+    requiresOnboarding: data.requires_onboarding === true
   });
 
   return {
@@ -442,7 +462,8 @@ export async function oauthFinalizeByNonce(nonce: string): Promise<LoginResponse
       username: String((mappedUser as any).username ?? ''),
       email: (mappedUser as any).email
     },
-    expiresAt: getExpiresAt() ?? new Date().toISOString()
+    expiresAt: getExpiresAt() ?? new Date().toISOString(),
+    requiresOnboarding: data.requires_onboarding === true
   };
 }
 
@@ -503,7 +524,8 @@ export async function pollDeviceToken(deviceCode: string): Promise<LoginResponse
       id: (user as any).id,
       username: (user as any).username,
       email: (user as any).email
-    }
+    },
+    requiresOnboarding: d.requires_onboarding === true
   });
 
   return {
@@ -513,6 +535,16 @@ export async function pollDeviceToken(deviceCode: string): Promise<LoginResponse
       username: String((user as any).username ?? ''),
       email: (user as any).email
     },
-    expiresAt: getExpiresAt() ?? new Date().toISOString()
+    expiresAt: getExpiresAt() ?? new Date().toISOString(),
+    requiresOnboarding: d.requires_onboarding === true
   };
+}
+
+export async function completeOnboarding(username: string, password: string): Promise<LoginResponse> {
+  const client = createApiClient();
+  const resp = await client.post<BackendLoginResponse>('/auth/onboarding/complete', {
+    username,
+    password
+  });
+  return mapBackendLogin(resp.data);
 }

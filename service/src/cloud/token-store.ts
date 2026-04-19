@@ -12,6 +12,7 @@ let accessToken: string | null = null;
 let refreshToken: string | null = null;
 let expiresAt: string | null = null;
 let user: StoredUser | null = null;
+let requiresOnboarding = false;
 
 function getTokenPath(): string {
   return getTokenFilePath();
@@ -50,7 +51,8 @@ function saveToDisk(): void {
     accessToken,
     refreshToken,
     expiresAt,
-    user
+    user,
+    requiresOnboarding
   };
   fs.writeFileSync(tokenPath, JSON.stringify(snapshot, null, 2), 'utf8');
 }
@@ -72,11 +74,13 @@ function loadFromDisk(): void {
       refreshToken?: string | null;
       expiresAt?: string | null;
       user?: StoredUser | null;
+      requiresOnboarding?: boolean;
     };
     accessToken = typeof parsed.accessToken === 'string' ? parsed.accessToken : null;
     refreshToken = typeof parsed.refreshToken === 'string' ? parsed.refreshToken : null;
     expiresAt = typeof parsed.expiresAt === 'string' ? parsed.expiresAt : null;
     user = parsed.user ?? null;
+    requiresOnboarding = parsed.requiresOnboarding === true;
 
     // 如果 expiresAt 不存在但 accessToken 有效，就从 JWT exp 推断
     if (accessToken && (!expiresAt || expiresAt === null)) {
@@ -156,16 +160,23 @@ export function setUser(u: StoredUser | null): void {
   if (accessToken) saveToDisk();
 }
 
+export function setRequiresOnboarding(next: boolean): void {
+  requiresOnboarding = next === true;
+  if (accessToken) saveToDisk();
+}
+
 export function setTokenPair(params: {
   accessToken?: string | null;
   refreshToken?: string | null;
   expiresIn?: number | string | null;
   user?: StoredUser | null;
+  requiresOnboarding?: boolean;
 }): void {
   if ('accessToken' in params) accessToken = params.accessToken ?? null;
   if ('refreshToken' in params) refreshToken = params.refreshToken ?? null;
   if ('expiresIn' in params) setExpiresAt(params.expiresIn ?? null);
   if ('user' in params) setUser(params.user ?? null);
+  if ('requiresOnboarding' in params) setRequiresOnboarding(params.requiresOnboarding === true);
 
   // 如果 expiresIn 没提供（或传了 null），就用 JWT exp 补全
   if (accessToken && (!('expiresIn' in params) || params.expiresIn == null)) {
@@ -192,6 +203,10 @@ export function getUser(): StoredUser | null {
   return user;
 }
 
+export function getRequiresOnboarding(): boolean {
+  return requiresOnboarding;
+}
+
 /**
  * 兼容旧逻辑：仅设置 access token（不包含 refresh token）。
  * 这样仍可用于调用需要 Authorization header 的接口；但 refresh/logout-all 可能无法完成。
@@ -212,6 +227,7 @@ export function clearToken(): void {
   refreshToken = null;
   expiresAt = null;
   user = null;
+  requiresOnboarding = false;
   clearDisk();
 }
 

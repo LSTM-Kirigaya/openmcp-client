@@ -9,6 +9,7 @@ import {
     logoutAll as apiLogoutAll,
     checkAuthStatus as apiCheckAuthStatus,
     refreshToken as apiRefreshToken,
+    completeOnboarding as apiCompleteOnboarding,
     getToken,
     setToken,
     clearToken,
@@ -64,7 +65,8 @@ export class AuthController {
                 data: {
                     token: result.token,
                     user: result.user,
-                    expiresAt: result.expiresAt
+                    expiresAt: result.expiresAt,
+                    requiresOnboarding: result.requiresOnboarding
                 }
             };
         } catch (error: any) {
@@ -94,7 +96,8 @@ export class AuthController {
                 data: {
                     token: result.token,
                     user: result.user,
-                    expiresAt: result.expiresAt
+                    expiresAt: result.expiresAt,
+                    requiresOnboarding: result.requiresOnboarding
                 }
             };
         } catch (error: any) {
@@ -205,7 +208,8 @@ export class AuthController {
                 data: {
                     token: result.token,
                     user: result.user,
-                    expiresAt: result.expiresAt
+                    expiresAt: result.expiresAt,
+                    requiresOnboarding: result.requiresOnboarding
                 }
             };
         } catch (error: any) {
@@ -240,9 +244,38 @@ export class AuthController {
         }
     }
 
+    @Controller('auth/onboarding/complete')
+    async completeOnboarding(data: RequestData, webview: PostMessageble) {
+        const { username, password } = data;
+        if (!username || !password) {
+            return {
+                code: 400,
+                msg: 'username and password are required'
+            };
+        }
+        try {
+            const result = await apiCompleteOnboarding(String(username), String(password));
+            return {
+                code: 200,
+                msg: 'ok',
+                data: {
+                    token: result.token,
+                    user: result.user,
+                    expiresAt: result.expiresAt,
+                    requiresOnboarding: result.requiresOnboarding
+                }
+            };
+        } catch (error: any) {
+            return {
+                code: error.response?.status || 500,
+                msg: error.response?.data?.message || error.message || 'Complete onboarding failed'
+            };
+        }
+    }
+
     @Controller('auth/set-token-pair')
     async setTokenPairController(data: RequestData, webview: PostMessageble) {
-        const { accessToken, refreshToken, user } = data;
+        const { accessToken, refreshToken, user, requiresOnboarding } = data;
         if (!accessToken || !refreshToken) {
             return {
                 code: 400,
@@ -253,7 +286,8 @@ export class AuthController {
             setTokenPairFromExternal({
                 accessToken: String(accessToken),
                 refreshToken: String(refreshToken),
-                user: user ?? null
+                user: user ?? null,
+                requiresOnboarding: requiresOnboarding === true
             });
             return {
                 code: 200,
@@ -310,7 +344,8 @@ export class AuthController {
                 data: {
                     token: result.token,
                     user: result.user,
-                    expiresAt: result.expiresAt
+                    expiresAt: result.expiresAt,
+                    requiresOnboarding: result.requiresOnboarding
                 }
             };
         } catch (error: any) {
