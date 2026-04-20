@@ -357,8 +357,9 @@ watch(
 
 function memberDisplay(row: CloudProjectMember) {
 	const u = row.user;
-	if (u?.username) {
-		return u.email ? `${u.username} (${u.email})` : u.username;
+	const displayName = u?.nickname || u?.username;
+	if (displayName) {
+		return u?.email ? `${displayName} (${u.email})` : displayName;
 	}
 	return row.user_id;
 }

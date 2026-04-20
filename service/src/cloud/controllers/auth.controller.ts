@@ -49,16 +49,16 @@ function buildOAuthFriendlyError(error: any): string {
 export class AuthController {
     @Controller('auth/register')
     async register(data: RequestData, webview: PostMessageble) {
-        const { email, username, password } = data;
-        if (!email || !username || !password) {
+        const { email, username, nickname, password } = data;
+        if (!email || !username || !nickname || !password) {
             return {
                 code: 400,
-                msg: 'Email, username and password are required'
+                msg: 'Email, username, nickname and password are required'
             };
         }
 
         try {
-            const result = await apiRegister(String(email), String(username), String(password));
+            const result = await apiRegister(String(email), String(username), String(nickname), String(password));
             return {
                 code: 200,
                 msg: 'ok',
@@ -246,15 +246,15 @@ export class AuthController {
 
     @Controller('auth/onboarding/complete')
     async completeOnboarding(data: RequestData, webview: PostMessageble) {
-        const { username, password } = data;
-        if (!username || !password) {
+        const { email, username, nickname, password } = data;
+        if (!email || !username || !nickname || !password) {
             return {
                 code: 400,
-                msg: 'username and password are required'
+                msg: 'email, username, nickname and password are required'
             };
         }
         try {
-            const result = await apiCompleteOnboarding(String(username), String(password));
+            const result = await apiCompleteOnboarding(String(email), String(username), String(nickname), String(password));
             return {
                 code: 200,
                 msg: 'ok',

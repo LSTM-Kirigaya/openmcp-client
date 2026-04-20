@@ -4,6 +4,8 @@ export interface CloudUser {
     id: string;
     email: string;
     username: string;
+    nickname?: string;
+    avatar_url?: string | null;
 }
 
 export interface CloudAuthResult {
@@ -80,7 +82,7 @@ export async function cloudLogin(identifier: string, password: string) {
     };
 }
 
-export async function cloudRegister(email: string, username: string, password: string) {
+export async function cloudRegister(email: string, username: string, nickname: string, password: string) {
     const result = await requestCommand<{
         token: string;
         user: CloudUser;
@@ -89,6 +91,7 @@ export async function cloudRegister(email: string, username: string, password: s
     }>('auth/register', {
         email,
         username,
+        nickname,
         password
     });
     return {
@@ -136,14 +139,16 @@ export async function cloudAuthStatus() {
     }>('auth/status', {});
 }
 
-export async function cloudCompleteOnboarding(username: string, password: string) {
+export async function cloudCompleteOnboarding(email: string, username: string, nickname: string, password: string) {
     const result = await requestCommand<{
         token: string;
         user: CloudUser;
         expiresAt?: string;
         requiresOnboarding?: boolean;
     }>('auth/onboarding/complete', {
+        email,
         username,
+        nickname,
         password
     });
     return {
@@ -191,6 +196,7 @@ export interface CloudProjectMember {
     user?: {
         id: string;
         username: string;
+        nickname?: string;
         email?: string;
         avatar_url?: string | null;
     };

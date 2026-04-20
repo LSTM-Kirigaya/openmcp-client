@@ -66,10 +66,10 @@ export async function cloudAccountLogin(identifier: string, password: string) {
     }
 }
 
-export async function cloudAccountRegister(email: string, username: string, password: string) {
+export async function cloudAccountRegister(email: string, username: string, nickname: string, password: string) {
     cloudAuthState.loading = true;
     try {
-        const result = await cloudRegister(email, username, password);
+        const result = await cloudRegister(email, username, nickname, password);
         setCloudSession(result.user, result.requiresOnboarding);
         return result.user;
     } finally {
@@ -100,10 +100,10 @@ export function setCloudSession(user: CloudUser, requiresOnboarding = false) {
     cloudAuthState.requiresOnboarding = requiresOnboarding;
 }
 
-export async function completeCloudOnboarding(username: string, password: string) {
+export async function completeCloudOnboarding(email: string, username: string, nickname: string, password: string) {
     cloudAuthState.loading = true;
     try {
-        const result = await cloudCompleteOnboarding(username, password);
+        const result = await cloudCompleteOnboarding(email, username, nickname, password);
         setCloudSession(result.user, result.requiresOnboarding);
         return result.user;
     } finally {

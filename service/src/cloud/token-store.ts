@@ -5,7 +5,9 @@ import { ensureParentDir, getLegacyTokenFilePath, getTokenFilePath } from '../st
 export interface StoredUser {
   id?: string;
   username?: string;
+  nickname?: string;
   email?: string;
+  avatar_url?: string | null;
 }
 
 let accessToken: string | null = null;

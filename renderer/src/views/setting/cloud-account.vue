@@ -8,12 +8,20 @@
             </div>
             <div class="setting-option">
                 <span class="option-title">{{ t('cloud-register-email') }}</span>
-                <span>{{ cloudAuthState.user?.email || '-' }}</span>
+                <div style="width: 320px;">
+                    <el-input v-model="onboardingEmail" :placeholder="t('cloud-register-email-placeholder')" />
+                </div>
             </div>
             <div class="setting-option">
                 <span class="option-title">{{ t('cloud-register-username') }}</span>
                 <div style="width: 320px;">
                     <el-input v-model="onboardingUsername" :placeholder="t('cloud-register-username-placeholder')" />
+                </div>
+            </div>
+            <div class="setting-option">
+                <span class="option-title">{{ t('cloud-register-nickname') }}</span>
+                <div style="width: 320px;">
+                    <el-input v-model="onboardingNickname" :placeholder="t('cloud-register-nickname-placeholder')" />
                 </div>
             </div>
             <div class="setting-option">
@@ -58,6 +66,12 @@
                     <el-input v-model="registerUsername" :placeholder="t('cloud-register-username-placeholder')" />
                 </div>
             </div>
+            <div v-if="authMode === 'register'" class="setting-option">
+                <span class="option-title">{{ t('cloud-register-nickname') }}</span>
+                <div style="width: 320px;">
+                    <el-input v-model="registerNickname" :placeholder="t('cloud-register-nickname-placeholder')" />
+                </div>
+            </div>
             <div class="setting-option">
                 <span class="option-title">{{ t('cloud-password') }}</span>
                 <div style="width: 320px;">
@@ -78,6 +92,13 @@
                     @click="handleGithubLogin"
                 >
                     {{ t('cloud-login-github') }}
+                </el-button>
+                <el-button
+                    v-if="authMode === 'login'"
+                    :loading="cloudAuthState.loading"
+                    @click="handleWatchaLogin"
+                >
+                    Watcha 登录
                 </el-button>
             </div>
         </div>
@@ -137,8 +158,11 @@ const authMode = ref<'login' | 'register'>('login');
 const identifier = ref('');
 const registerEmail = ref('');
 const registerUsername = ref('');
+const registerNickname = ref('');
 const password = ref('');
+const onboardingEmail = ref('');
 const onboardingUsername = ref('');
+const onboardingNickname = ref('');
 const onboardingPassword = ref('');
 
 const authModes = computed(() => [
@@ -151,10 +175,11 @@ const currentUserDisplay = computed(() => {
     if (!user) {
         return '-';
     }
+    const displayName = user.nickname || user.username;
     if (user.email) {
-        return `${user.username} (${user.email})`;
+        return `${displayName} (${user.email})`;
     }
-    return user.username || '-';
+    return displayName || '-';
 });
 
 async function handleLogin() {
@@ -172,12 +197,12 @@ async function handleLogin() {
 }
 
 async function handleRegister() {
-    if (!registerEmail.value || !registerUsername.value || !password.value) {
+    if (!registerEmail.value || !registerUsername.value || !registerNickname.value || !password.value) {
         ElMessage.warning(t('cloud-register-required'));
         return;
     }
     try {
-        await cloudAccountRegister(registerEmail.value, registerUsername.value, password.value);
+        await cloudAccountRegister(registerEmail.value, registerUsername.value, registerNickname.value, password.value);
         password.value = '';
         ElMessage.success(t('cloud-register-success'));
     } catch (err: any) {
@@ -186,12 +211,12 @@ async function handleRegister() {
 }
 
 async function handleCompleteOnboarding() {
-    if (!onboardingUsername.value || !onboardingPassword.value) {
-        ElMessage.warning('请输入用户名和密码');
+    if (!onboardingEmail.value || !onboardingUsername.value || !onboardingNickname.value || !onboardingPassword.value) {
+        ElMessage.warning('请输入邮箱、用户名、昵称和密码');
         return;
     }
     try {
-        await completeCloudOnboarding(onboardingUsername.value, onboardingPassword.value);
+        await completeCloudOnboarding(onboardingEmail.value, onboardingUsername.value, onboardingNickname.value, onboardingPassword.value);
         onboardingPassword.value = '';
         ElMessage.success('账号设置完成');
     } catch (err: any) {
@@ -247,7 +272,9 @@ async function handleGithubLogin() {
         const nonce = await waitForOAuthNonce(popup);
         const result = await cloudExchangeOAuthNonce(nonce);
         setCloudSession(result.user, result.requiresOnboarding);
+        onboardingEmail.value = result.user.email || '';
         onboardingUsername.value = result.user.username || '';
+        onboardingNickname.value = result.user.nickname || '';
         if (result.requiresOnboarding) {
             ElMessage.success('GitHub 登录成功，请先完成账号设置');
         } else {
@@ -255,6 +282,33 @@ async function handleGithubLogin() {
         }
     } catch (err: any) {
         ElMessage.error(err?.message || t('cloud-oauth-failed'));
+    } finally {
+        cloudAuthState.loading = false;
+    }
+}
+
+async function handleWatchaLogin() {
+    cloudAuthState.loading = true;
+    try {
+        const redirectUri = `${window.location.origin}${window.location.pathname}`;
+        const url = await cloudGetOAuthUrl('watcha', redirectUri, randomState());
+        const popup = window.open(url, 'openmcp_watcha_oauth', 'width=760,height=780');
+        if (!popup) {
+            throw new Error(t('cloud-oauth-popup-blocked'));
+        }
+        const nonce = await waitForOAuthNonce(popup);
+        const result = await cloudExchangeOAuthNonce(nonce);
+        setCloudSession(result.user, result.requiresOnboarding);
+        onboardingEmail.value = result.user.email || '';
+        onboardingUsername.value = result.user.username || '';
+        onboardingNickname.value = result.user.nickname || '';
+        if (result.requiresOnboarding) {
+            ElMessage.success('Watcha 登录成功，请先完成账号设置');
+        } else {
+            ElMessage.success('Watcha 登录成功');
+        }
+    } catch (err: any) {
+        ElMessage.error(err?.message || 'Watcha 登录失败');
     } finally {
         cloudAuthState.loading = false;
     }
@@ -276,7 +330,9 @@ async function handleLogout() {
 
 onMounted(async () => {
     await refreshCloudAuthStatus();
+    onboardingEmail.value = cloudAuthState.user?.email || '';
     onboardingUsername.value = cloudAuthState.user?.username || '';
+    onboardingNickname.value = cloudAuthState.user?.nickname || '';
 });
 </script>
 
