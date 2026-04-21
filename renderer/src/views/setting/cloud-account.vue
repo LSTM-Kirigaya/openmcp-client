@@ -98,7 +98,7 @@
                     :loading="cloudAuthState.loading"
                     @click="handleWatchaLogin"
                 >
-                    Watcha 登录
+                    观猹登录
                 </el-button>
             </div>
         </div>
@@ -303,12 +303,12 @@ async function handleWatchaLogin() {
         onboardingUsername.value = result.user.username || '';
         onboardingNickname.value = result.user.nickname || '';
         if (result.requiresOnboarding) {
-            ElMessage.success('Watcha 登录成功，请先完成账号设置');
+            ElMessage.success('观猹登录成功，请先完成账号设置');
         } else {
-            ElMessage.success('Watcha 登录成功');
+            ElMessage.success('观猹登录成功');
         }
     } catch (err: any) {
-        ElMessage.error(err?.message || 'Watcha 登录失败');
+        ElMessage.error(err?.message || '观猹登录失败');
     } finally {
         cloudAuthState.loading = false;
     }
