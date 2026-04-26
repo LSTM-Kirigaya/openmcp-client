@@ -132,6 +132,18 @@ export const llms = [
 		userModel: 'moonshot-v1-8k'
 	},
 	{
+		id: 'minimax',
+		name: 'MiniMax',
+		baseUrl: 'https://api.minimax.io/v1',
+		models: ['MiniMax-M2.7', 'MiniMax-M2.7-highspeed', 'MiniMax-M2.5', 'MiniMax-M2.5-highspeed'],
+		provider: 'MiniMax',
+		isOpenAICompatible: true,
+		description: 'MiniMax large language models with 204K context window',
+		website: 'https://www.minimaxi.com',
+		userToken: '',
+		userModel: 'MiniMax-M2.7'
+	},
+	{
 		id: 'openrouter',
 		name: 'OpenRouter',
 		baseUrl: 'https://openrouter.ai/api/v1',
