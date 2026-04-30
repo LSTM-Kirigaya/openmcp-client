@@ -1,5 +1,5 @@
 <template>
-    <div class="message-text tool_calls" :class="[currentMessageLevel]">
+    <div class="message-text tool_calls" :class="[currentMessageLevel, { calling: callingTools }]">
         
         <!-- 工具的消息 -->
         <div v-if="props.message.content" class="tool-call-message" v-html="markdownToHtml(props.message.content)"></div>
@@ -355,6 +355,13 @@ async function copyResponse(toolIndex: number) {
 .message-text.tool_calls.info .tool-arguments,
 .message-text.tool_calls.info .tool-result {
     border: 1px solid var(--sidebar-item-border);
+}
+
+/* 工具调用中状态：去掉外层气泡边框，让工具调用直接以独立卡片展示 */
+.message-text.tool_calls.calling {
+    border: none;
+    background: transparent;
+    padding: 0;
 }
 
 /* tool-result 内部不重复设背景，透明继承父级 */

@@ -31,7 +31,9 @@
             </div>
 
             <!-- 正在加载的部分实时解析 markdown -->
-            <div v-if="isLoading" class="message-item assistant">
+            <!-- 当已有正在等待的 tool_calls 消息时，不再重复显示 StreamingBox，
+                 避免 toolcall.vue 和 StreamingBox 同时出现造成视觉冲突 -->
+            <div v-if="isLoading && !hasPendingToolCalls" class="message-item assistant">
                 <AskUserQuestion
                     v-if="pendingQuestion"
                     :questions="pendingQuestion.questions"
@@ -57,7 +59,7 @@ import { ref, defineProps, nextTick, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { type ScrollbarInstance } from 'element-plus';
 import { tabs } from '../panel';
-import type { ChatStorage, IRenderMessage } from './chat-box/chat';
+import { MessageState, type ChatStorage, type IRenderMessage } from './chat-box/chat';
 
 import * as Message from './message';
 import AskUserQuestion from './message/ask-user-question.vue';
@@ -92,6 +94,14 @@ const tabStorage = tab.storage as ChatStorage;
 const pendingQuestion = computed(() => {
     const p = (tabStorage as any)._pendingAskUserQuestion;
     return p && p.questions ? p : null;
+});
+
+// 检查最后一个渲染消息是否是正在等待 tool results 的 assistant/tool_calls
+const hasPendingToolCalls = computed(() => {
+    const lastMessage = props.renderMessages[props.renderMessages.length - 1];
+    return lastMessage && 
+           lastMessage.role === 'assistant/tool_calls' && 
+           lastMessage.extraInfo.state === MessageState.Unknown;
 });
 
 const chatContainerRef = ref<any>(null);
