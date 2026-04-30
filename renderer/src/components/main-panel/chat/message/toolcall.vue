@@ -2,9 +2,14 @@
     <div class="message-role">
         <span class="message-reminder" v-if="callingTools">
             Agent {{ t('using-tool') }}
-            <span class="tool-loading iconfont icon-double-loading">
-            </span>
         </span>
+    </div>
+    <!-- Loading 时显示 thinking 容器样式 -->
+    <div v-if="callingTools" class="thinking-container tool-calls-loading">
+        <div class="thinking-header">
+            <span class="thinking-icon tool-loading iconfont icon-double-loading"></span>
+            <span class="thinking-label">{{ t('using-tool') }}</span>
+        </div>
     </div>
     <div class="message-text tool_calls" :class="[currentMessageLevel]">
         
@@ -709,5 +714,58 @@ async function copyResponse(toolIndex: number) {
     font-size: var(--chat-font-size-sm);
     color: var(--el-text-color-secondary);
     margin-top: 2px;
+}
+
+/* Thinking / Loading 容器样式 */
+.thinking-container {
+    border: 1px solid var(--sidebar-item-border);
+    border-radius: 8px;
+    background: var(--el-input-bg-color, var(--el-fill-color-blank));
+    overflow: hidden;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+.tool-calls-loading {
+    max-width: 300px;
+}
+
+.thinking-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--sidebar-item-selected);
+    border-bottom: 1px solid var(--sidebar-item-border);
+    font-size: var(--chat-font-size-sm);
+    color: var(--el-text-color-secondary);
+    min-height: 36px;
+}
+
+.thinking-icon {
+    font-size: 16px;
+    color: var(--main-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+}
+
+.thinking-label {
+    font-weight: 500;
+    color: var(--foreground);
+}
+
+.thinking-body {
+    padding: 10px 12px;
+    font-size: var(--chat-font-size);
+    line-height: 1.5;
+    color: var(--foreground);
+    min-height: 40px;
+}
+
+.thinking-body :deep(.typing-cursor) {
+    color: var(--main-color);
 }
 </style>
