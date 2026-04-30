@@ -101,7 +101,10 @@
                                 <div v-for="(item, index) in props.message.toolResults[toolIndex]" :key="index" class="response-item">
                                     <ToolcallResultItem :item="item"
                                         @update:item="value => updateToolCallResultItem(value, toolIndex, index)"
-                                        @update:ocr-done="value => collposePanel()" />
+                                        @update:ocr-done="value => collposePanel()"
+                                        @plan-approve="handlePlanApprove"
+                                        @plan-reject="handlePlanReject"
+                                        @plan-replan="handlePlanReplan" />
                                 </div>
                             </div>
                         </div>
@@ -272,10 +275,22 @@ function collectErrors(toolResult: ToolCallContent[]) {
     }
 }
 
-const emits = defineEmits(['update:tool-result']);
+const emits = defineEmits(['update:tool-result', 'plan-approve', 'plan-reject', 'plan-replan']);
 
 function updateToolCallResultItem(value: any, toolIndex: number, index: number) {
     emits('update:tool-result', value, toolIndex, index);
+}
+
+function handlePlanApprove(meta: any) {
+    emits('plan-approve', meta);
+}
+
+function handlePlanReject(feedback: string, meta: any) {
+    emits('plan-reject', feedback, meta);
+}
+
+function handlePlanReplan(meta: any) {
+    emits('plan-replan', meta);
 }
 
 function parseArguments(args: string | undefined): object {

@@ -17,6 +17,7 @@ export enum MessageState {
     ParseJsonError = 'parse json error',
     NoToolFunction = 'no tool function',
     InvalidXml = 'invalid xml',
+    AwaitingUserInput = 'awaiting user input',
 }
 
 export interface IExtraInfo {
@@ -86,6 +87,12 @@ export interface ChatStorage {
     parallelMode?: boolean
     parallelChats?: ParallelChatInstance[]
     selectedModels?: string[]
+    /** Plan mode state */
+    planMode?: {
+        isPlanMode: boolean;
+        planContent: string | null;
+        planFilePath: string | null;
+    }
 }
 
 export type ToolCall = OpenAI.Chat.Completions.ChatCompletionChunk.Choice.Delta.ToolCall;

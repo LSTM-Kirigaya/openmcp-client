@@ -23,13 +23,21 @@
                 <!-- 助手调用的工具部分 -->
                 <div class="message-content" v-else-if="message.role === 'assistant/tool_calls'">
                     <Message.Toolcall :message="message" :tab-id="props.tabId"
-                        @update:tool-result="(value, toolIndex, index) => message.toolResults[toolIndex][index] = value" />
+                        @update:tool-result="(value, toolIndex, index) => message.toolResults[toolIndex][index] = value"
+                        @plan-approve="handlePlanApprove"
+                        @plan-reject="handlePlanReject"
+                        @plan-replan="handlePlanReplan" />
                 </div>
             </div>
 
             <!-- 正在加载的部分实时解析 markdown -->
             <div v-if="isLoading" class="message-item assistant">
-                <Message.StreamingBox :streaming-content="streamingContent" :tab-id="props.tabId" />
+                <AskUserQuestion
+                    v-if="pendingQuestion"
+                    :questions="pendingQuestion.questions"
+                    @answer="handleAskUserQuestionAnswer"
+                />
+                <Message.StreamingBox v-else :streaming-content="streamingContent" :tab-id="props.tabId" />
             </div>
         </div>
     </el-scrollbar>
@@ -45,15 +53,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, defineProps, nextTick, watch } from 'vue';
+import { ref, defineProps, nextTick, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { type ScrollbarInstance } from 'element-plus';
 import { tabs } from '../panel';
 import type { ChatStorage, IRenderMessage } from './chat-box/chat';
 
 import * as Message from './message';
+import AskUserQuestion from './message/ask-user-question.vue';
+import { resolveAskUserQuestion } from '@/api/plan-mode';
 
 const { t } = useI18n();
+
+const emits = defineEmits(['plan-approve', 'plan-reject', 'plan-replan']);
 
 const props = defineProps({
     tabId: {
@@ -76,6 +88,11 @@ const props = defineProps({
 
 const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as ChatStorage;
+
+const pendingQuestion = computed(() => {
+    const p = (tabStorage as any)._pendingAskUserQuestion;
+    return p && p.questions ? p : null;
+});
 
 const chatContainerRef = ref<any>(null);
 const messageListRef = ref<any>(null);
@@ -107,6 +124,22 @@ async function scrollToBottom() {
     } catch (error) {
         console.error('Scroll to bottom failed:', error);
     }
+}
+
+function handlePlanApprove() {
+    emits('plan-approve');
+}
+
+function handlePlanReject(feedback: string) {
+    emits('plan-reject', feedback);
+}
+
+function handlePlanReplan() {
+    emits('plan-replan');
+}
+
+function handleAskUserQuestionAnswer(answers: Record<string, string>) {
+    resolveAskUserQuestion(tabStorage.id, answers);
 }
 
 defineExpose({

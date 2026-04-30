@@ -35,6 +35,15 @@
             </div>
         </div>
 
+        <div v-else-if="isPlanApproval" class="tool-plan-approval">
+            <PlanApproval 
+                :plan="planApprovalContent"
+                @approve="handleApprove"
+                @reject="handleReject"
+                @replan="handleReplan"
+            />
+        </div>
+
         <div v-else class="tool-other">
             <pre class="tool-other-json">{{ formatOtherItem(props.item) }}</pre>
         </div>
@@ -45,11 +54,13 @@
 import { useMessageBridge } from '@/api/message-bridge';
 import type { ToolCallContent } from '@/hook/type';
 import { getBlobUrlByFilename } from '@/hook/util';
-import { defineComponent, type PropType, defineProps, ref, defineEmits } from 'vue';
+import { defineComponent, type PropType, defineProps, ref, defineEmits, computed } from 'vue';
 import JsonRender from '@/components/json-render/index.vue';
+import PlanApproval from './plan-approval.vue';
+import { isPlanApprovalMeta } from '@/api/plan-mode';
 
 defineComponent({ name: 'toolcall-result-item' });
-const emits = defineEmits(['update:item', 'update:ocr-done']);
+const emits = defineEmits(['update:item', 'update:ocr-done', 'plan-approve', 'plan-reject', 'plan-replan']);
 
 function formatOtherItem(item: ToolCallContent): string {
     try {
@@ -67,8 +78,28 @@ const props = defineProps({
     }
 });
 
-const metaInfo = props.item._meta || {};
-const { ocr = false, workerId = '' } = metaInfo;
+const metaInfo = computed(() => (props.item as any)._meta || {});
+const { ocr = false, workerId = '' } = metaInfo.value;
+
+const isPlanApproval = computed(() => isPlanApprovalMeta(metaInfo.value));
+const planApprovalContent = computed(() => {
+    if (isPlanApproval.value) {
+        return (metaInfo.value as any).plan || '';
+    }
+    return '';
+});
+
+function handleApprove() {
+    emits('plan-approve', metaInfo.value);
+}
+
+function handleReject(feedback: string) {
+    emits('plan-reject', feedback, metaInfo.value);
+}
+
+function handleReplan() {
+    emits('plan-replan', metaInfo.value);
+}
 
 // 确认当前已经完成，如果没有完成，说明
 const progress = ref(0);

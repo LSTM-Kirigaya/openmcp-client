@@ -12,6 +12,7 @@ import { BatchValidationController } from "../batch-validation/batch-validation.
 import { DebuggerMcpController } from "../debugger-mcp/debugger-mcp.controller.js";
 import { AuthController } from "../auth/auth.controller.js";
 import { CloudBackupController } from "../cloud-backup/cloud-backup.controller.js";
+import { PlanModeController } from "../plan-mode/plan-mode.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
 
 export const ModuleControllers = [
@@ -26,7 +27,8 @@ export const ModuleControllers = [
     BatchValidationController,
     DebuggerMcpController,
     AuthController,
-    CloudBackupController
+    CloudBackupController,
+    PlanModeController
 ];
 
 export async function routeMessage(command: string, data: any, webview: PostMessageble) {

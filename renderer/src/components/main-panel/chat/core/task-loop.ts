@@ -7,6 +7,7 @@ import { llmManager, llms, type BasicLlmDescription } from "@/views/setting/llm"
 import { redLog } from "@/views/setting/util";
 import { ElMessage } from "element-plus";
 import { getToolCallIndexAdapter, handleToolCalls, type IToolCallIndex, type ToolCallResult } from "./handle-tool-calls";
+import { ENTER_PLAN_MODE_TOOL, EXIT_PLAN_MODE_TOOL, PLAN_MODE_SYSTEM_PROMPT, ASK_USER_QUESTION_TOOL } from "@/api/plan-mode";
 import { getPlatform } from "@/api/platform";
 import { getSystemPrompt } from "../chat-box/options/system-prompt";
 import { mcpSetting } from "@/hook/mcp";
@@ -331,6 +332,19 @@ export class TaskLoop {
         if (skillContent) {
             tools = [...tools, READ_SKILL_FILE_TOOL];
         }
+
+        // 添加 Plan Mode 内置工具
+        const isPlanMode = tabStorage.planMode?.isPlanMode ?? false;
+        if (isPlanMode) {
+            // 在 plan mode 中始终提供 ExitPlanMode
+            tools = [...tools, EXIT_PLAN_MODE_TOOL];
+        } else {
+            // 在非 plan mode 中始终提供 EnterPlanMode
+            tools = [...tools, ENTER_PLAN_MODE_TOOL];
+        }
+
+        // 始终提供 AskUserQuestion
+        tools = [...tools, ASK_USER_QUESTION_TOOL];
 
         const userMessages = [];
 
@@ -734,7 +748,7 @@ export class TaskLoop {
                         break;
                     }
 
-                    let toolCallResult = await handleToolCalls(toolCall);
+                    let toolCallResult = await handleToolCalls(toolCall, tabStorage);
 
                     if (this.aborted) {
                         this.aborted = false;

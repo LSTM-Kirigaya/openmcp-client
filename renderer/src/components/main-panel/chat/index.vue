@@ -22,6 +22,9 @@
             :streaming-content="streamingContent"
             :is-loading="isLoading"
             ref="singleChatRef"
+            @plan-approve="handlePlanApprove"
+            @plan-reject="handlePlanReject"
+            @plan-replan="handlePlanReplan"
         />
 
         <!-- 并行聊天模式 -->
@@ -691,9 +694,30 @@ provide('parallelChats', parallelChats);
 provide('updateChatRenderMessages', updateChatRenderMessages);
 
 const chatContext = {
-    handleSend: undefined
+    handleSend: undefined as any,
+    handlePlanApprove: undefined as any,
+    handlePlanReject: undefined as any,
+    handlePlanReplan: undefined as any
 };
 provide('chatContext', chatContext);
+
+function handlePlanApprove() {
+    if (chatContext.handlePlanApprove) {
+        chatContext.handlePlanApprove();
+    }
+}
+
+function handlePlanReject(feedback: string) {
+    if (chatContext.handlePlanReject) {
+        chatContext.handlePlanReject(feedback);
+    }
+}
+
+function handlePlanReplan() {
+    if (chatContext.handlePlanReplan) {
+        chatContext.handlePlanReplan();
+    }
+}
 
 // 组件卸载时清理临时配置
 onBeforeUnmount(() => {

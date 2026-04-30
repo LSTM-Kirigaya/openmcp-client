@@ -59,6 +59,11 @@ import { ElMessage } from 'element-plus';
 import { v4 as uuidv4 } from 'uuid';
 import { listSkills, loadSkillContent, type SkillMetadata } from '@/api/skill';
 import { mcpSetting } from '@/hook/mcp';
+import {
+    EXIT_PLAN_MODE_APPROVED_PROMPT,
+    EXIT_PLAN_MODE_REJECTED_PROMPT,
+    EXIT_PLAN_MODE_REPLAN_PROMPT
+} from '@/api/plan-mode';
 
 const { t } = useI18n();
 
@@ -133,6 +138,9 @@ const parallelChats = inject('parallelChats') as Ref<any[]>;
 const updateChatRenderMessages = inject('updateChatRenderMessages') as (chat: any, streamingToolCalls?: ToolCall[]) => Promise<void>;
 
 chatContext.handleSend = handleSend;
+chatContext.handlePlanApprove = handlePlanApprove;
+chatContext.handlePlanReject = handlePlanReject;
+chatContext.handlePlanReplan = handlePlanReplan;
 
 /** 解析 /skillname 格式，返回 [skillName, actualMessage] */
 function parseSlashCommand(text: string): { skillName: string; actualMessage: string } | null {
@@ -481,6 +489,25 @@ function handleAbort() {
         isLoading.value = false;
         ElMessage.info('请求已中止');
     }
+}
+
+async function handlePlanApprove() {
+    // 退出 plan mode
+    if (tabStorage.planMode) {
+        tabStorage.planMode.isPlanMode = false;
+    }
+    // 发送批准消息，触发 AI 实施
+    await handleSend(EXIT_PLAN_MODE_APPROVED_PROMPT);
+}
+
+async function handlePlanReject(feedback: string) {
+    // 保持 plan mode，发送反馈消息
+    await handleSend(EXIT_PLAN_MODE_REJECTED_PROMPT(feedback));
+}
+
+async function handlePlanReplan() {
+    // 保持 plan mode，发送 replan 消息
+    await handleSend(EXIT_PLAN_MODE_REPLAN_PROMPT);
 }
 
 

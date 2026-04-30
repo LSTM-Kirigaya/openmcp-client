@@ -1,9 +1,10 @@
 import type { ToolCallContent, ToolCallResponse } from "@/hook/type";
-import { MessageState, type ToolCall } from "../chat-box/chat";
+import { MessageState, type ToolCall, type ChatStorage } from "../chat-box/chat";
 import { mcpClientAdapter } from "@/views/connect/core";
 import { readSkillFile } from "@/api/skill";
 import type { BasicLlmDescription } from "@/views/setting/llm";
 import type OpenAI from "openai";
+import { readPlan, writePlan, getPlanFilePath, type PlanApprovalMeta, createAskUserQuestionPromise, type AskUserQuestionMeta, type AskUserQuestionInput } from "@/api/plan-mode";
 
 export interface TaskLoopChatOption {
     id?: string
@@ -26,7 +27,7 @@ export interface ToolCallResult {
 
 export type IToolCallIndex = number;
 
-export async function handleToolCalls(toolCall: ToolCall): Promise<ToolCallResult> {
+export async function handleToolCalls(toolCall: ToolCall, tabStorage?: ChatStorage): Promise<ToolCallResult> {
     if (!toolCall.function) {
         return {
             index: toolCall.index,
@@ -76,6 +77,159 @@ export async function handleToolCalls(toolCall: ToolCall): Promise<ToolCallResul
             function: toolCall.function,
             timecost,
             ...response
+        };
+    }
+
+    // 内置工具 EnterPlanMode
+    if (toolName === 'EnterPlanMode') {
+        const start = Date.now();
+        if (tabStorage) {
+            if (!tabStorage.planMode) {
+                tabStorage.planMode = { isPlanMode: false, planContent: null, planFilePath: null };
+            }
+            tabStorage.planMode.isPlanMode = true;
+            tabStorage.planMode.planFilePath = await getPlanFilePath(tabStorage.id);
+        }
+        const timecost = Date.now() - start;
+        return {
+            index: toolCall.index,
+            id: toolCall.id,
+            function: toolCall.function,
+            timecost,
+            content: [{
+                type: 'text',
+                text: 'Entered plan mode. You should now focus on exploring the codebase and designing an implementation approach.\n\nIn plan mode, you should:\n1. Thoroughly explore the codebase to understand existing patterns\n2. Identify similar features and architectural approaches\n3. Consider multiple approaches and their trade-offs\n4. Use AskUserQuestion if you need to clarify the approach\n5. Design a concrete implementation strategy\n6. When ready, use ExitPlanMode to present your plan for approval\n\nRemember: DO NOT write or edit any files yet. This is a read-only exploration and planning phase.'
+            }],
+            state: MessageState.Success
+        };
+    }
+
+    // 内置工具 AskUserQuestion
+    if (toolName === 'AskUserQuestion') {
+        const start = Date.now();
+        const questions = (toolArgs?.questions || []) as AskUserQuestionInput['questions'];
+
+        if (!questions || questions.length === 0) {
+            return {
+                index: toolCall.index,
+                id: toolCall.id,
+                function: toolCall.function,
+                timecost: Date.now() - start,
+                content: [{
+                    type: 'error',
+                    text: 'No questions provided. Please provide at least one question with options.'
+                }],
+                state: MessageState.ToolCall
+            };
+        }
+
+        const meta: AskUserQuestionMeta = {
+            type: 'ask_user_question',
+            questions,
+            awaitingAnswer: true
+        };
+
+        // 保存问题到 tabStorage，前端会检测到并渲染交互 UI
+        if (tabStorage) {
+            (tabStorage as any)._pendingAskUserQuestion = {
+                questions,
+                toolCallId: toolCall.id,
+                toolCallIndex: toolCall.index
+            };
+        }
+
+        // 等待用户回答（Promise 阻塞）
+        const answers = await createAskUserQuestionPromise(tabStorage!.id);
+
+        // 用户回答后清除 pending 状态
+        if (tabStorage) {
+            delete (tabStorage as any)._pendingAskUserQuestion;
+        }
+
+        const timecost = Date.now() - start;
+        const answersText = Object.entries(answers)
+            .map(([q, a]) => `"${q}"="${a}"`)
+            .join(', ');
+
+        return {
+            index: toolCall.index,
+            id: toolCall.id,
+            function: toolCall.function,
+            timecost,
+            content: [{
+                type: 'text',
+                text: `User has answered your questions: ${answersText}. You can now continue with the user's answers in mind.`
+            }],
+            state: MessageState.Success
+        };
+    }
+
+    // 内置工具 ExitPlanMode
+    if (toolName === 'ExitPlanMode') {
+        const start = Date.now();
+        let planContent: string | null = null;
+        let isInPlanMode = false;
+
+        if (tabStorage?.planMode?.isPlanMode) {
+            isInPlanMode = true;
+            // 优先从参数获取 plan
+            if (toolArgs?.plan && typeof toolArgs.plan === 'string') {
+                planContent = toolArgs.plan;
+                // 同时写入文件
+                await writePlan(tabStorage!.id, toolArgs.plan);
+            } else {
+                // 从文件读取
+                planContent = await readPlan(tabStorage!.id);
+            }
+        }
+
+        const timecost = Date.now() - start;
+
+        if (!isInPlanMode) {
+            return {
+                index: toolCall.index,
+                id: toolCall.id,
+                function: toolCall.function,
+                timecost,
+                content: [{
+                    type: 'error',
+                    text: 'You are not in plan mode. This tool is only for exiting plan mode after writing a plan. If your plan was already approved, continue with implementation.'
+                }],
+                state: MessageState.ToolCall
+            };
+        }
+
+        if (!planContent || planContent.trim() === '') {
+            return {
+                index: toolCall.index,
+                id: toolCall.id,
+                function: toolCall.function,
+                timecost,
+                content: [{
+                    type: 'text',
+                    text: 'No plan found. Please write your plan to the plan file first before calling ExitPlanMode.'
+                }],
+                state: MessageState.ToolCall
+            };
+        }
+
+        const meta: PlanApprovalMeta = {
+            type: 'plan_approval',
+            plan: planContent,
+            sessionId: tabStorage!.id
+        };
+
+        return {
+            index: toolCall.index,
+            id: toolCall.id,
+            function: toolCall.function,
+            timecost,
+            content: [{
+                type: 'text',
+                text: `Plan ready for approval:\n\n${planContent}`,
+                _meta: meta as any
+            }],
+            state: MessageState.Success
         };
     }
 
