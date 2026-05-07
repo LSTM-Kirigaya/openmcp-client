@@ -1,15 +1,15 @@
 # 命令参考
 
-下列为顶层命令；子命令与选项以 **`openmcp-cli <command> --help`** 为准（程序内描述最准确）。
+下列为顶层命令；子命令与选项以 **`openmcp <command> --help`** 为准（程序内描述最准确）。
 
 ## 全局
 
 ```bash
-openmcp-cli --help
-openmcp-cli -V
+openmcp --help
+openmcp -V
 ```
 
-程序名在代码中为 `openmcp-cli`；`package.json` 的 `bin` 同时提供 **`openmcp`** 与 **`openmcp-cli`**。
+程序名在代码中为 `openmcp`；`package.json` 的 `bin` 提供 **`openmcp`**。
 
 ---
 
@@ -25,7 +25,7 @@ openmcp-cli -V
 | `restart` | 重启 |
 | `status` | 是否运行、PID 等 |
 
-常用：`openmcp-cli gateway start -p 8282`
+常用：`openmcp gateway start -p 8282`
 
 ---
 

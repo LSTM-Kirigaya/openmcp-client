@@ -109,11 +109,11 @@ gw(
         const providerFields = Object.keys(PROVIDER_FIELD_MAP).join(', ');
 
         console.log('──────────────────────────────────────');
-        console.log('使用 "openmcp-cli setting general set <key> <value>" 修改配置');
+        console.log('使用 "openmcp setting general set <key> <value>" 修改配置');
         console.log('');
         console.log('示例:');
-        console.log('  openmcp-cli setting general set deepseek.api-key sk-xxx');
-        console.log('  openmcp-cli setting general set MCP_TIMEOUT_SEC 120');
+        console.log('  openmcp setting general set deepseek.api-key sk-xxx');
+        console.log('  openmcp setting general set MCP_TIMEOUT_SEC 120');
         console.log('');
         console.log(`提供商支持的字段: ${providerFields}`);
         console.log('');

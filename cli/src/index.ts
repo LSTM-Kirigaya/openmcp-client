@@ -12,7 +12,7 @@ import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
 const program = new Command();
 
 program
-  .name('openmcp-cli')
+  .name('openmcp')
   .description('OpenMCP CLI — Gateway 管理与 MCP 全量能力')
   .version('0.2.0')
   .addHelpText('after', HELP_PROGRAM_AFTER)

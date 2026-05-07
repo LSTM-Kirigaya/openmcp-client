@@ -20,7 +20,7 @@ export function diagnoseResponse(command: string, response: RestFulResponse): st
     advice.push('Service execution failed. Check gateway, MCP process path, URL, command, and cwd.');
   }
   if (includesAny(msg, ['clientid', 'client id'])) {
-    advice.push('Session is missing. Run `openmcp-cli mcp session list` or reconnect with `openmcp-cli mcp session connect`.');
+    advice.push('Session is missing. Run `openmcp mcp session list` or reconnect with `openmcp mcp session connect`.');
   }
   if (advice.length === 0 && code !== 200) {
     advice.push(`Command \`${command}\` failed. Check request arguments and gateway logs.`);
@@ -32,7 +32,7 @@ export function diagnoseThrownError(error: unknown): string[] {
   const text = error instanceof Error ? error.message : String(error);
   const advice: string[] = [];
   if (includesAny(text, ['gateway', 'ws://', 'econnrefused', 'websocket'])) {
-    advice.push('Gateway is unreachable. Run `openmcp-cli gateway start` and check the `-g` address.');
+    advice.push('Gateway is unreachable. Run `openmcp gateway start` and check the `-g` address.');
   }
   if (includesAny(text, ['json'])) {
     advice.push('JSON parsing failed. Check `--data`, `--args`, or config file content.');

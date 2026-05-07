@@ -1,4 +1,4 @@
-# OpenMCP CLI（`openmcp-cli`）
+# OpenMCP CLI（`openmcp`）
 
 命令行入口，用于**启动 Gateway / Web UI**、以及通过 **WebSocket** 调用与 VSCode 扩展、Web 前端相同的 **service 路由**（`routeMessage`），便于脚本化与本地调试。
 
@@ -9,16 +9,16 @@
 
 ## 从 npm 安装
 
-发布到 npm 后，全局安装即可使用（命令名为 `openmcp-cli` 或 `openmcp`）：
+发布到 npm 后，全局安装即可使用（命令名为 `openmcp`）：
 
 ```bash
-npm install -g openmcp-cli
-openmcp-cli --help
+npm install -g @agent-ruler/openmcp
+openmcp --help
 ```
 
 依赖里的 `@openmcp/gateway` 使用 **semver**（`^0.0.1`），以便发布到 npm 后能被正常解析；`workspace:*` 仅适用于仓库内 Yarn。
 
-**尚未发布到 npm 时，用 tarball 试装（推荐）**：`openmcp-cli` 依赖 `@openmcp/gateway`，单独 `npm install -g openmcp-cli-0.1.0.tgz` 会从 registry 拉 gateway，**会 404**。请一次性安装三个本地包（npm 会从本地 tarball 满足依赖）：
+**尚未发布到 npm 时，用 tarball 试装（推荐）**：`@agent-ruler/openmcp` 依赖 `@openmcp/gateway`，单独 `npm install -g agent-ruler-openmcp-0.1.1.tgz` 会从 registry 拉 gateway，**会 404**。请一次性安装三个本地包（npm 会从本地 tarball 满足依赖）：
 
 ```bash
 # 在仓库根目录：构建并打三个包
@@ -26,13 +26,13 @@ node scripts/pack-npm-test.mjs
 
 # 在任意空目录（路径按你本机调整）
 mkdir omcp-try && cd omcp-try && npm init -y
-npm install ../service/openmcp-service-0.0.1.tgz ../gateway/openmcp-gateway-0.0.1.tgz ../cli/openmcp-cli-0.1.0.tgz
-npx openmcp-cli --help
+npm install ../service/openmcp-service-0.0.1.tgz ../gateway/openmcp-gateway-0.0.1.tgz ../cli/agent-ruler-openmcp-0.1.1.tgz
+npx openmcp --help
 ```
 
 仓库根目录也可执行：`yarn pack:npm-test`。
 
-**已发布到 npm 后**：`npm install -g openmcp-cli` 即可；或用 **Verdaccio** 在本地 registry 演练发布顺序（service → gateway → cli）。
+**已发布到 npm 后**：`npm install -g @agent-ruler/openmcp` 即可；或用 **Verdaccio** 在本地 registry 演练发布顺序（service → gateway → cli）。
 
 ## 安装与本地运行（本仓库开发）
 
@@ -50,11 +50,11 @@ yarn build
 
 ```bash
 # 直接执行（开发时常用）
-node ./bin/openmcp-cli.js --help
+node ./bin/openmcp.js --help
 
 # 在 cli 目录下通过 package.json 的 bin 调用
-yarn openmcp-cli --help
-# 若上式不可用，可改用：yarn run openmcp-cli --help
+yarn openmcp --help
+# 若上式不可用，可改用：yarn run openmcp --help
 ```
 
 将 `cli` 链到全局或发布前，需先 `yarn build` 生成 `dist/`。
@@ -64,13 +64,13 @@ yarn openmcp-cli --help
 1. 启动 Gateway（默认端口 **8282**，与 `gateway` 包一致）：
 
    ```bash
-   openmcp-cli gateway start
+   openmcp gateway start
    ```
 
 2. 在已连接 MCP 的前提下，列出工具（需替换真实 `clientId`）：
 
    ```bash
-   openmcp-cli mcp tools-list --client-id "<uuid>"
+   openmcp mcp tools-list --client-id "<uuid>"
    ```
 
 更完整的用法、前置条件与典型流程见 **[使用说明](docs/usage.md)**。

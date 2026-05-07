@@ -10,7 +10,7 @@
 | `src/lib/service-manager.ts` | Gateway/Web UI 进程启停、PID 文件 |
 | `src/lib/service-commands.ts` | service 命令清单（供对照与文档维护） |
 | `src/lib/cli-helpers.ts` | JSON 解析、打印、`withGateway` 封装 |
-| `bin/openmcp-cli.js` | 入口 shebang，加载 `dist/index.js` |
+| `bin/openmcp.js` | 入口 shebang，加载 `dist/index.js` |
 | `dist/` | `yarn build` 输出，运行依赖此目录 |
 
 ## 构建
@@ -34,13 +34,13 @@ yarn dev
 1. 构建后执行：
 
    ```bash
-   node ./bin/openmcp-cli.js gateway --help
+   node ./bin/openmcp.js gateway --help
    ```
 
 2. 使用 Node 调试器（示例）：
 
    ```bash
-   node --inspect-brk ./bin/openmcp-cli.js mcp sessions list
+   node --inspect-brk ./bin/openmcp.js mcp sessions list
    ```
 
    在 Chrome 打开 `chrome://inspect` 连接调试。

@@ -22,7 +22,7 @@ function gw(cmd: Command): Command {
 
 const ERR_NEED_FILE_OR_DATA =
   'Please provide JSON with --file or --data.\n' +
-  'See: openmcp-cli mcp server add --help';
+  'See: openmcp mcp server add --help';
 
 function parseAnyJson(raw: string): unknown {
   try {
@@ -86,11 +86,11 @@ export const mcpServerCommand = new Command('server')
   .description('Manage local MCP Server configuration')
   .addHelpText('after', `
 Examples:
-  openmcp-cli mcp server list
-  openmcp-cli mcp server get --id <ID>
-  openmcp-cli mcp server add --file ./my-server.json
-  openmcp-cli mcp server edit --id <ID> --file ./patch.json
-  openmcp-cli mcp server delete --id <ID>
+  openmcp mcp server list
+  openmcp mcp server get --id <ID>
+  openmcp mcp server add --file ./my-server.json
+  openmcp mcp server edit --id <ID> --file ./patch.json
+  openmcp mcp server delete --id <ID>
 `);
 
 gw(
@@ -114,7 +114,7 @@ gw(
           }
           if (servers.length === 0) {
             console.log('No MCP Server configured.');
-            console.log('Add one with: openmcp-cli mcp server add --file ./my-server.json');
+            console.log('Add one with: openmcp mcp server add --file ./my-server.json');
             return;
           }
           for (const server of servers) {

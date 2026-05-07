@@ -32,13 +32,13 @@ export function buildGatewayUnreachableError(gatewayUrl: string, underlying?: st
   if (urlLooksLikeDefaultGateway(gatewayUrl)) {
     lines.push('');
     lines.push(`默认 WebSocket 为 ws://localhost:${DEFAULT_PORT}。请先启动 Gateway，例如：`);
-    lines.push(`  yarn openmcp-cli gateway start`);
-    lines.push(`  # 或前台运行： openmcp-cli gateway run -p ${DEFAULT_PORT}`);
+    lines.push(`  yarn openmcp gateway start`);
+    lines.push(`  # 或前台运行： openmcp gateway run -p ${DEFAULT_PORT}`);
   }
 
   lines.push('');
   lines.push('若 Gateway 已启动但使用了其它端口，请为子命令指定 -g，例如：');
-  lines.push(`  openmcp-cli mcp connect --config-file ./mcp.json -g ws://127.0.0.1:9000`);
+  lines.push(`  openmcp mcp connect --config-file ./mcp.json -g ws://127.0.0.1:9000`);
 
   if (underlying && underlying.trim()) {
     lines.push('');

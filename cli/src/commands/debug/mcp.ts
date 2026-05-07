@@ -118,10 +118,10 @@ mcpRawCommand
   .description('[已迁移] 请使用 "mcp session list/current/recent/use"')
   .action(() => {
     console.log('此命令已迁移，请使用:');
-    console.log('  openmcp-cli mcp session list       列出活跃会话');
-    console.log('  openmcp-cli mcp session current     查看当前默认会话');
-    console.log('  openmcp-cli mcp session recent      查看最近连接记录');
-    console.log('  openmcp-cli mcp session use         切换默认会话');
+    console.log('  openmcp mcp session list       列出活跃会话');
+    console.log('  openmcp mcp session current     查看当前默认会话');
+    console.log('  openmcp mcp session recent      查看最近连接记录');
+    console.log('  openmcp mcp session use         切换默认会话');
   });
 
 /* ── config ── */

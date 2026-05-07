@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
 	},
 	base: mode === 'website' ? '/mcp/' : '/',
 	server: {
-		// openmcp-cli 会用 PORT 环境变量指定 Web UI 端口
+		// openmcp 会用 PORT 环境变量指定 Web UI 端口
 		port: process.env.PORT ? Number(process.env.PORT) : undefined,
 	},
 	build: {

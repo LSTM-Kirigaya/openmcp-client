@@ -8,7 +8,7 @@ import WebSocket from 'ws';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const CLI_ROOT = path.resolve(__dirname, '..');
-export const CLI_BIN = path.join(CLI_ROOT, 'bin', 'openmcp-cli.js');
+export const CLI_BIN = path.join(CLI_ROOT, 'bin', 'openmcp.js');
 const NODE = process.execPath;
 
 export const TEST_GATEWAY_PORT = 19282;

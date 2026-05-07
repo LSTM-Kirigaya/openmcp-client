@@ -110,7 +110,7 @@ async function runWebForeground(options: any) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`❌ ${message}`);
-    console.error(`请先启动 Gateway：openmcp-cli gateway start -p ${gatewayPort}`);
+    console.error(`请先启动 Gateway：openmcp gateway start -p ${gatewayPort}`);
     process.exit(1);
     return;
   }
@@ -178,7 +178,7 @@ async function startWebBackground(options: any) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`❌ ${message}`);
-    console.error(`请先启动 Gateway：openmcp-cli gateway start -p ${gatewayPort}`);
+    console.error(`请先启动 Gateway：openmcp gateway start -p ${gatewayPort}`);
     process.exit(1);
     return;
   }
@@ -203,7 +203,7 @@ async function startWebBackground(options: any) {
 🌐 Web UI:     ${url}
 🔌 Gateway:    ${wsUrlForPort(gatewayPort)}
 🧩 Mode:       ${devMode ? 'development (vite)' : 'production (static)'}
-📝 Use 'openmcp-cli webui status' to check
+📝 Use 'openmcp webui status' to check
   `);
 
   setTimeout(() => {

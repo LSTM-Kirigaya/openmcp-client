@@ -29,7 +29,7 @@ async function ensureAllDown() {
   }
 }
 
-describe('openmcp-cli start (gateway + webui)', { timeout: 120_000 }, () => {
+describe('openmcp start (gateway + webui)', { timeout: 120_000 }, () => {
   before(async () => {
     assertCliBuilt();
     await ensureAllDown();

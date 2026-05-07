@@ -21,14 +21,14 @@ OpenMCP Gateway 管理命令：
 云端后端地址默认由 service/.env.development 与 service/.env.production 提供；也可用 OPENMCP_API_BASE_URL、service/.env.local 或 %USERPROFILE%\\.openmcp\\gateway.env 覆盖。
 
 示例：
-  openmcp-cli gateway run           # 前台运行
-  openmcp-cli gateway start         # 后台启动
-  openmcp-cli gateway stop         # 停止
-  openmcp-cli gateway restart      # 重启
-  openmcp-cli gateway status       # 查看状态
-  openmcp-cli gateway logs-dir     # 日志目录路径
-  openmcp-cli gateway logs -n 500  # 最近 500 行
-  openmcp-cli gateway start -p 9000  # 自定义端口
+  openmcp gateway run           # 前台运行
+  openmcp gateway start         # 后台启动
+  openmcp gateway stop         # 停止
+  openmcp gateway restart      # 重启
+  openmcp gateway status       # 查看状态
+  openmcp gateway logs-dir     # 日志目录路径
+  openmcp gateway logs -n 500  # 最近 500 行
+  openmcp gateway start -p 9000  # 自定义端口
   `)
   .addHelpText('after', HELP_GATEWAY);
 
@@ -69,10 +69,10 @@ gatewayCommand
 
     console.log(`
 💡 Tip: 
-   - Use 'openmcp-cli gateway status' to check if running
-   - Use 'openmcp-cli gateway stop' to stop
-   - Use 'openmcp-cli gateway run' to run in foreground
-   - File logs: 'openmcp-cli gateway logs-dir' / 'openmcp-cli gateway logs'
+   - Use 'openmcp gateway status' to check if running
+   - Use 'openmcp gateway stop' to stop
+   - Use 'openmcp gateway run' to run in foreground
+   - File logs: 'openmcp gateway logs-dir' / 'openmcp gateway logs'
     `);
   });
 
@@ -140,7 +140,7 @@ gatewayCommand
 ║  Status:   ❌ Not Running             ║
 ╚═══════════════════════════════════════╝
 
-💡 Use 'openmcp-cli gateway start' to start
+💡 Use 'openmcp gateway start' to start
       `);
     }
   });

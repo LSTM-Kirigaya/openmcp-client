@@ -29,3 +29,4 @@ resources/changelog/**
 **/dataset/*
 test/sdk/.yarn
 _npm_try
+**/.npmrc

@@ -416,7 +416,7 @@ function doStartService(port: number, detached: boolean = false): { pid: number 
   if (!fs.existsSync(GATEWAY_ENTRY)) {
     console.error(`❌ 找不到 Gateway 构建产物：${GATEWAY_ENTRY}`);
     console.error(
-      '   请确认已安装 @openmcp/gateway（npm install openmcp-cli 时会一并安装）；若从源码开发，请在 gateway 目录执行：yarn build'
+      '   请确认已安装 @openmcp/gateway（npm install @agent-ruler/openmcp 时会一并安装）；若从源码开发，请在 gateway 目录执行：yarn build'
     );
     return { pid: 0 };
   }

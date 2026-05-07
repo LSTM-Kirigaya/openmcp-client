@@ -34,7 +34,7 @@ async function resolveLlmProvider(
   if (!Array.isArray(llmInfo) || llmInfo.length === 0) {
     throw new Error(
       '当前 settings 中未配置任何 LLM 提供商。\n' +
-      '请先在 Web UI 中添加提供商，或通过 "openmcp-cli setting llm provider add" 命令添加。'
+      '请先在 Web UI 中添加提供商，或通过 "openmcp setting llm provider add" 命令添加。'
     );
   }
 
@@ -48,7 +48,7 @@ async function resolveLlmProvider(
       `在 settings 中未找到提供商 "${providerId}"。\n\n` +
       `settings 中已配置的提供商:\n${available}\n\n` +
       '提示: --provider 的值必须是 settings 中已有的提供商 id 或 name。\n' +
-      '使用 "openmcp-cli setting llm provider list" 查看详情。'
+      '使用 "openmcp setting llm provider list" 查看详情。'
     );
   }
   return found;
@@ -67,11 +67,11 @@ const providerCmd = new Command('provider')
   .description('LLM 提供商管理')
   .addHelpText('after', `
 示例:
-  查看所有提供商:     openmcp-cli setting llm provider list
-  设置 DeepSeek Key:  openmcp-cli setting llm provider update --id deepseek --api-key sk-xxx
-  设置 OpenAI Key:    openmcp-cli setting llm provider update --id openai --api-key sk-xxx
-  添加新提供商:       openmcp-cli setting llm provider add --id my-llm --name "My LLM"
-  删除提供商:         openmcp-cli setting llm provider delete --id my-llm
+  查看所有提供商:     openmcp setting llm provider list
+  设置 DeepSeek Key:  openmcp setting llm provider update --id deepseek --api-key sk-xxx
+  设置 OpenAI Key:    openmcp setting llm provider update --id openai --api-key sk-xxx
+  添加新提供商:       openmcp setting llm provider add --id my-llm --name "My LLM"
+  删除提供商:         openmcp setting llm provider delete --id my-llm
 `);
 
 gw(
@@ -91,7 +91,7 @@ gw(
 
         if (!Array.isArray(llmInfo) || llmInfo.length === 0) {
           console.log('当前 settings 中尚未配置任何 LLM 提供商。');
-          console.log('使用 "openmcp-cli setting llm provider add" 添加提供商。');
+          console.log('使用 "openmcp setting llm provider add" 添加提供商。');
           return;
         }
 
@@ -112,14 +112,14 @@ gw(
         console.log('─'.repeat(50));
         console.log('常用操作:');
         if (needKeyProviders.length > 0) {
-          console.log(`  设置 API Key:    openmcp-cli setting llm provider update --id ${needKeyProviders[0]} --api-key <你的Key>`);
+          console.log(`  设置 API Key:    openmcp setting llm provider update --id ${needKeyProviders[0]} --api-key <你的Key>`);
         } else {
-          console.log('  设置 API Key:    openmcp-cli setting llm provider update --id <提供商ID> --api-key <你的Key>');
+          console.log('  设置 API Key:    openmcp setting llm provider update --id <提供商ID> --api-key <你的Key>');
         }
-        console.log('  修改 Base URL:   openmcp-cli setting llm provider update --id <提供商ID> --base-url <新地址>');
-        console.log('  添加提供商:      openmcp-cli setting llm provider add --id <ID> --name <名称>');
-        console.log('  删除提供商:      openmcp-cli setting llm provider delete --id <提供商ID>');
-        console.log('  测试连通性:      openmcp-cli setting llm test --provider <提供商ID>');
+        console.log('  修改 Base URL:   openmcp setting llm provider update --id <提供商ID> --base-url <新地址>');
+        console.log('  添加提供商:      openmcp setting llm provider add --id <ID> --name <名称>');
+        console.log('  删除提供商:      openmcp setting llm provider delete --id <提供商ID>');
+        console.log('  测试连通性:      openmcp setting llm test --provider <提供商ID>');
         console.log('');
       });
     })
@@ -180,10 +180,10 @@ gw(
     .option('--api-key <key>', '新的 API Key')
     .addHelpText('after', `
 示例:
-  设置 API Key:                 openmcp-cli setting llm provider update --id deepseek --api-key sk-xxx
-  修改 Base URL:                openmcp-cli setting llm provider update --id openai --base-url https://api.openai.com/v1
-  同时修改 Key 和 Base URL:    openmcp-cli setting llm provider update --id qwen --api-key sk-xxx --base-url https://new-url.com/v1
-  修改显示名称:                 openmcp-cli setting llm provider update --id deepseek --name "DeepSeek V3"
+  设置 API Key:                 openmcp setting llm provider update --id deepseek --api-key sk-xxx
+  修改 Base URL:                openmcp setting llm provider update --id openai --base-url https://api.openai.com/v1
+  同时修改 Key 和 Base URL:    openmcp setting llm provider update --id qwen --api-key sk-xxx --base-url https://new-url.com/v1
+  修改显示名称:                 openmcp setting llm provider update --id deepseek --name "DeepSeek V3"
 `)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
@@ -198,9 +198,9 @@ gw(
           console.log(`  --name <name>      设置显示名称`);
           console.log('');
           console.log(`示例:`);
-          console.log(`  openmcp-cli setting llm provider update --id ${options.id} --api-key sk-xxx`);
-          console.log(`  openmcp-cli setting llm provider update --id ${options.id} --base-url https://api.example.com/v1`);
-          console.log(`  openmcp-cli setting llm provider update --id ${options.id} --api-key sk-xxx --base-url https://api.example.com/v1`);
+          console.log(`  openmcp setting llm provider update --id ${options.id} --api-key sk-xxx`);
+          console.log(`  openmcp setting llm provider update --id ${options.id} --base-url https://api.example.com/v1`);
+          console.log(`  openmcp setting llm provider update --id ${options.id} --api-key sk-xxx --base-url https://api.example.com/v1`);
           process.exitCode = 1;
           return;
         }
@@ -213,7 +213,7 @@ gw(
           const available = llmInfo.map(p => `  · ${p.id}  (${p.name})`).join('\n');
           console.error(`未找到提供商 "${options.id}"。`);
           if (available) console.error(`\n已配置的提供商:\n${available}`);
-          console.error(`\n使用 "openmcp-cli setting llm provider list" 查看所有提供商。`);
+          console.error(`\n使用 "openmcp setting llm provider list" 查看所有提供商。`);
           process.exitCode = 1;
           return;
         }
@@ -308,7 +308,7 @@ gw(
 
         if (!provider.userToken) {
           console.error(`提供商 "${provider.id}" (${provider.name}) 的 API Key 未设置。`);
-          console.error(`请先配置: openmcp-cli setting llm provider update --id ${provider.id} --api-key <你的API Key>`);
+          console.error(`请先配置: openmcp setting llm provider update --id ${provider.id} --api-key <你的API Key>`);
           process.exitCode = 1;
           return;
         }
@@ -454,7 +454,7 @@ gw(
           console.error(`提供商 "${provider.id}" (${provider.name}) 的 API Key 未设置。`);
           console.error('');
           console.error('请先配置:');
-          console.error(`  openmcp-cli setting llm provider update --id ${provider.id} --api-key <你的API Key>`);
+          console.error(`  openmcp setting llm provider update --id ${provider.id} --api-key <你的API Key>`);
           process.exitCode = 1;
           return;
         }

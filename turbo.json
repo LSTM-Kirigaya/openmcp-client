@@ -5,7 +5,7 @@
             "cache": false
         },
         "build": {
-            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build", "@openmcp/gateway#build", "openmcp-cli#build", "@openmcp/sdk#build", "//#build:task-loop"],
+            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build", "@openmcp/gateway#build", "@agent-ruler/openmcp#build", "@openmcp/sdk#build", "//#build:task-loop"],
             "cache": false
         },
         "//#build:task-loop": {
@@ -37,7 +37,7 @@
             "dependsOn": ["@openmcp/service#build"],
             "cache": false
         },
-        "openmcp-cli#build": {
+        "@agent-ruler/openmcp#build": {
             "cache": false
         },
         "@openmcp/sdk#build": {

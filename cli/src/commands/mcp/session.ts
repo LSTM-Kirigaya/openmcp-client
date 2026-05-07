@@ -33,11 +33,11 @@ export const mcpSessionCommand = new Command('session')
   .description('Manage MCP runtime sessions')
   .addHelpText('after', `
 Examples:
-  openmcp-cli mcp session list
-  openmcp-cli mcp session connect --id <SERVER_ID>
-  openmcp-cli mcp session disconnect
-  openmcp-cli mcp session current
-  openmcp-cli mcp session use --client-id <ID>
+  openmcp mcp session list
+  openmcp mcp session connect --id <SERVER_ID>
+  openmcp mcp session disconnect
+  openmcp mcp session current
+  openmcp mcp session use --client-id <ID>
 `);
 
 gw(
