@@ -71,10 +71,6 @@ export interface BatchValidationStorage {
     sourceTabIndex: number;
     /** 批量验证日志结果（用于日志面板持久化恢复） */
     resultGroups: BatchValidationResultGroup[];
-    /** 云端项目中的当前集合元数据 */
-    cloudCaseId?: string;
-    cloudCaseName?: string;
-    cloudProjectId?: string;
     /** @deprecated 仅用于从旧数据迁移，迁移后不再使用 */
     testCasesByTabIndex?: Record<number, BatchValidationTestCase>;
     /** @deprecated 请使用 selectedCaseIndex */

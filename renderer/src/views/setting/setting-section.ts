@@ -22,10 +22,6 @@ export const settingSections = reactive({
 		{
 			value: 'appearance',
 			label: computed(() => t('appearance-setting'))
-		},
-		{
-			value: 'cloud-account',
-			label: computed(() => t('cloud-account-menu'))
 		}
 	]
 });

@@ -1,8 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { Command } from 'commander';
-import { gatewayUserLogDir } from '@openmcp/gateway';
-import { runService, startService, stopService, restartService, statusService } from '../lib/index.js';
+import { gatewayUserLogDir, runService, startService, stopService, restartService, statusService } from '../lib/index.js';
 import { HELP_GATEWAY } from '../lib/help-text.js';
 
 export const gatewayCommand = new Command('gateway')

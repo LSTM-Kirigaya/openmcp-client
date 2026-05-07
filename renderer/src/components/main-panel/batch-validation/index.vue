@@ -22,35 +22,6 @@
                     </el-button-group>
                 </div>
             </div>
-            <div v-if="cloudContext.mode === 'cloud'" class="batch-cloud-toolbar">
-                <div class="batch-cloud-toolbar-top">
-                    <el-tag type="warning">{{ t('runtime-mode-cloud') }}</el-tag>
-                    <span class="batch-cloud-toolbar-current">
-                        {{ currentCloudCaseLabel }}
-                    </span>
-                </div>
-                <div class="batch-cloud-toolbar-actions">
-                    <el-button size="small" :disabled="!canUseCloudBatchValidation" :loading="cloudCaseSaving"
-                        @click="saveBatchValidationToCloud">
-                        {{ t('batch-validation-cloud-save') }}
-                    </el-button>
-                    <el-button size="small" :disabled="!canUseCloudBatchValidation" :loading="cloudCasesLoading"
-                        @click="openCloudCasesDialog">
-                        {{ t('batch-validation-cloud-open') }}
-                    </el-button>
-                    <el-button size="small" :disabled="!currentCloudCaseLinked" :loading="cloudCaseUpdating"
-                        @click="updateBatchValidationInCloud">
-                        {{ t('batch-validation-cloud-update') }}
-                    </el-button>
-                    <el-button size="small" type="danger" :disabled="!currentCloudCaseLinked"
-                        :loading="cloudCaseDeleting" @click="deleteCurrentCloudCase">
-                        {{ t('batch-validation-cloud-delete') }}
-                    </el-button>
-                </div>
-                <div v-if="cloudUnavailableReason" class="batch-cloud-toolbar-hint">
-                    {{ cloudUnavailableReason }}
-                </div>
-            </div>
             <div class="list-container">
                 <el-scrollbar>
                     <div class="list-inner">
@@ -280,26 +251,6 @@
                     </div>
                 </Transition>
             </Teleport>
-            <el-dialog v-model="cloudCasesDialogVisible" :title="t('batch-validation-cloud-open')" width="640px"
-                class="batch-cloud-dialog" destroy-on-close>
-                <div v-if="cloudCasesLoading" class="batch-cloud-dialog-empty">{{ t('loading') }}</div>
-                <div v-else-if="cloudSavedCases.length === 0" class="batch-cloud-dialog-empty">
-                    {{ t('batch-validation-cloud-empty') }}
-                </div>
-                <div v-else class="batch-cloud-case-list">
-                    <div v-for="item in cloudSavedCases" :key="item.id" class="batch-cloud-case-item">
-                        <div class="batch-cloud-case-main">
-                            <div class="batch-cloud-case-name">{{ item.name }}</div>
-                            <div class="batch-cloud-case-desc">{{ item.description || '-' }}</div>
-                        </div>
-                        <div class="batch-cloud-case-actions">
-                            <el-button size="small" @click="loadBatchValidationFromCloud(item.id)">
-                                {{ t('batch-validation-cloud-load') }}
-                            </el-button>
-                        </div>
-                    </div>
-                </div>
-            </el-dialog>
     </div>
 </template>
 
@@ -319,16 +270,6 @@ import { mcpClientAdapter } from '@/views/connect/core';
 import BatchValidationInput from './batch-validation-input.vue';
 import BatchValidationAgentTrace from './batch-validation-agent-trace.vue';
 import { markdownToHtml } from '../chat/markdown/markdown';
-import { cloudContext } from '@/hook/cloud-context';
-import { isCloudLoggedIn } from '@/hook/cloud-auth';
-import {
-    cloudCreateBatchValidationCase,
-    cloudDeleteBatchValidationCase,
-    cloudGetBatchValidationCase,
-    cloudListBatchValidationCases,
-    cloudUpdateBatchValidationCase,
-    type CloudBatchValidationCase
-} from '@/api/cloud';
 import type {
     BatchValidationStorage,
     BatchValidationTestCase,
@@ -383,32 +324,6 @@ const results = ref<ValidationResult[]>([]);
 const resultGroupsWithStats = ref<ResultGroup[]>(tabStorage.resultGroups ?? []);
 /** 从右往左拉出的配置抽屉（pass/score、描述等） */
 const settingsDrawerVisible = ref(false);
-const cloudCasesDialogVisible = ref(false);
-const cloudCasesLoading = ref(false);
-const cloudCaseSaving = ref(false);
-const cloudCaseUpdating = ref(false);
-const cloudCaseDeleting = ref(false);
-const cloudSavedCases = ref<CloudBatchValidationCase[]>([]);
-const canUseCloudBatchValidation = computed(() =>
-    cloudContext.mode === 'cloud' && isCloudLoggedIn.value && !!cloudContext.currentProjectId
-);
-const currentCloudCaseLinked = computed(() =>
-    !!tabStorage.cloudCaseId &&
-    !!tabStorage.cloudProjectId &&
-    tabStorage.cloudProjectId === cloudContext.currentProjectId
-);
-const currentCloudCaseLabel = computed(() => {
-    if (currentCloudCaseLinked.value && tabStorage.cloudCaseName) {
-        return `${t('batch-validation-cloud-current')}: ${tabStorage.cloudCaseName}`;
-    }
-    return t('batch-validation-cloud-not-linked');
-});
-const cloudUnavailableReason = computed(() => {
-    if (cloudContext.mode !== 'cloud') return '';
-    if (!isCloudLoggedIn.value) return t('batch-validation-cloud-login-first');
-    if (!cloudContext.currentProjectId) return t('cloud-select-project-first');
-    return '';
-});
 
 const chatTabs = computed(() => {
     return tabs.content
@@ -497,12 +412,6 @@ function syncCurrentInputRichContent() {
     }
 }
 
-function clearCloudCaseBinding() {
-    tabStorage.cloudCaseId = '';
-    tabStorage.cloudCaseName = '';
-    tabStorage.cloudProjectId = '';
-}
-
 function parseJSONSafely<T>(raw: string | undefined, fallback: T): T {
     if (!raw || String(raw).trim() === '') {
         return fallback;
@@ -512,24 +421,6 @@ function parseJSONSafely<T>(raw: string | undefined, fallback: T): T {
     } catch {
         return fallback;
     }
-}
-
-function buildBatchValidationCloudPayload(name: string) {
-    if (draftTestCase.value) {
-        commitDraftToCase();
-    }
-    syncCurrentInputRichContent();
-    const presetsPayload = JSON.stringify({
-        comprehensivePresets: tabStorage.comprehensivePresets ?? [],
-        currentPresetId: tabStorage.currentPresetId ?? ''
-    });
-    return {
-        name,
-        description: currentTestCase.value?.description ?? '',
-        test_cases_json: JSON.stringify(tabStorage.testCases ?? []),
-        presets_json: presetsPayload,
-        result_groups_json: JSON.stringify(tabStorage.resultGroups ?? [])
-    };
 }
 
 function applyResultGroupsToCases() {
@@ -546,10 +437,7 @@ function applyResultGroupsToCases() {
     resultGroupsWithStats.value = tabStorage.resultGroups ?? [];
 }
 
-function applyBatchValidationSnapshot(storage: Partial<BatchValidationStorage>, options?: {
-    cloudCase?: Pick<CloudBatchValidationCase, 'id' | 'name' | 'project_id'>;
-    clearCloudBinding?: boolean;
-}) {
+function applyBatchValidationSnapshot(storage: Partial<BatchValidationStorage>) {
     if (Array.isArray(storage.testCases)) {
         tabStorage.testCases = storage.testCases.map((item) => ({ ...item }));
     }
@@ -582,42 +470,8 @@ function applyBatchValidationSnapshot(storage: Partial<BatchValidationStorage>, 
     if (storage.currentPresetId !== undefined) {
         tabStorage.currentPresetId = storage.currentPresetId;
     }
-    if (options?.cloudCase) {
-        tabStorage.cloudCaseId = options.cloudCase.id;
-        tabStorage.cloudCaseName = options.cloudCase.name;
-        tabStorage.cloudProjectId = options.cloudCase.project_id;
-    } else if (options?.clearCloudBinding) {
-        clearCloudCaseBinding();
-    }
     ensureBatchValidationStorage(tab.storage);
     applyResultGroupsToCases();
-}
-
-function applyCloudBatchValidationCase(item: CloudBatchValidationCase) {
-    const presetsPayload = parseJSONSafely<{
-        comprehensivePresets?: BatchValidationStorage['comprehensivePresets'];
-        currentPresetId?: string;
-    } | BatchValidationStorage['comprehensivePresets']>(item.presets_json, []);
-    const normalizedPresets = Array.isArray(presetsPayload)
-        ? { comprehensivePresets: presetsPayload, currentPresetId: '' }
-        : {
-            comprehensivePresets: presetsPayload.comprehensivePresets ?? [],
-            currentPresetId: presetsPayload.currentPresetId ?? ''
-        };
-    applyBatchValidationSnapshot({
-        testCases: parseJSONSafely<BatchValidationStorage['testCases']>(item.test_cases_json, []),
-        selectedCaseIndex: 0,
-        comprehensiveSelectedIndices: [],
-        comprehensivePresets: normalizedPresets.comprehensivePresets,
-        currentPresetId: normalizedPresets.currentPresetId,
-        resultGroups: parseJSONSafely<BatchValidationStorage['resultGroups']>(item.result_groups_json, [])
-    }, {
-        cloudCase: {
-            id: item.id,
-            name: item.name,
-            project_id: item.project_id
-        }
-    });
 }
 
 /** 将草稿持久化到当前选中的测试用例位 */
@@ -906,159 +760,6 @@ function isDialogCancel(error: unknown): boolean {
     return error === 'cancel' || error === 'close';
 }
 
-async function fetchCloudBatchValidationCases() {
-    if (!canUseCloudBatchValidation.value) {
-        cloudSavedCases.value = [];
-        return;
-    }
-    cloudCasesLoading.value = true;
-    try {
-        cloudSavedCases.value = await cloudListBatchValidationCases(cloudContext.currentProjectId);
-    } finally {
-        cloudCasesLoading.value = false;
-    }
-}
-
-async function openCloudCasesDialog() {
-    if (!canUseCloudBatchValidation.value) {
-        ElMessage.warning(cloudUnavailableReason.value || t('cloud-select-project-first'));
-        return;
-    }
-    cloudCasesDialogVisible.value = true;
-    try {
-        await fetchCloudBatchValidationCases();
-    } catch (error) {
-        ElMessage.error(String(error));
-    }
-}
-
-async function loadBatchValidationFromCloud(caseId: string) {
-    if (!canUseCloudBatchValidation.value) {
-        ElMessage.warning(cloudUnavailableReason.value || t('cloud-select-project-first'));
-        return;
-    }
-    try {
-        await ElMessageBox.confirm(
-            t('batch-validation-cloud-load-confirm'),
-            t('batch-validation-cloud-open'),
-            {
-                confirmButtonText: t('confirm'),
-                cancelButtonText: t('cancel'),
-                type: 'warning'
-            }
-        );
-    } catch {
-        return;
-    }
-    cloudCasesLoading.value = true;
-    try {
-        const item = await cloudGetBatchValidationCase(cloudContext.currentProjectId, caseId);
-        applyCloudBatchValidationCase(item);
-        draftTestCase.value = null;
-        cloudCasesDialogVisible.value = false;
-        ElMessage.success(t('batch-validation-cloud-loaded'));
-    } catch (error) {
-        ElMessage.error(String(error));
-    } finally {
-        cloudCasesLoading.value = false;
-    }
-}
-
-async function saveBatchValidationToCloud() {
-    if (!canUseCloudBatchValidation.value) {
-        ElMessage.warning(cloudUnavailableReason.value || t('cloud-select-project-first'));
-        return;
-    }
-    const defaultName = tabStorage.cloudCaseName || `${t('batch-validation')} ${new Date().toLocaleString()}`;
-    try {
-        const { value } = await ElMessageBox.prompt(
-            t('batch-validation-cloud-name-prompt'),
-            t('batch-validation-cloud-save'),
-            {
-                confirmButtonText: t('confirm'),
-                cancelButtonText: t('cancel'),
-                inputValue: defaultName,
-                inputPlaceholder: t('enter-test-case-name')
-            }
-        );
-        const name = value?.trim();
-        if (!name) {
-            ElMessage.warning(t('please-enter-test-case-name'));
-            return;
-        }
-        cloudCaseSaving.value = true;
-        const created = await cloudCreateBatchValidationCase(
-            cloudContext.currentProjectId,
-            buildBatchValidationCloudPayload(name)
-        );
-        tabStorage.cloudCaseId = created.id;
-        tabStorage.cloudCaseName = created.name;
-        tabStorage.cloudProjectId = created.project_id;
-        await fetchCloudBatchValidationCases();
-        ElMessage.success(t('batch-validation-cloud-saved'));
-    } catch (error) {
-        if (!isDialogCancel(error)) {
-            ElMessage.error(String(error));
-        }
-    } finally {
-        cloudCaseSaving.value = false;
-    }
-}
-
-async function updateBatchValidationInCloud() {
-    if (!currentCloudCaseLinked.value || !tabStorage.cloudCaseId) {
-        ElMessage.warning(t('batch-validation-cloud-not-linked'));
-        return;
-    }
-    cloudCaseUpdating.value = true;
-    try {
-        const updated = await cloudUpdateBatchValidationCase(
-            cloudContext.currentProjectId,
-            tabStorage.cloudCaseId,
-            buildBatchValidationCloudPayload(tabStorage.cloudCaseName || `${t('batch-validation')} ${new Date().toLocaleString()}`)
-        );
-        tabStorage.cloudCaseName = updated.name;
-        tabStorage.cloudProjectId = updated.project_id;
-        await fetchCloudBatchValidationCases();
-        ElMessage.success(t('batch-validation-cloud-updated'));
-    } catch (error) {
-        ElMessage.error(String(error));
-    } finally {
-        cloudCaseUpdating.value = false;
-    }
-}
-
-async function deleteCurrentCloudCase() {
-    if (!currentCloudCaseLinked.value || !tabStorage.cloudCaseId) {
-        ElMessage.warning(t('batch-validation-cloud-not-linked'));
-        return;
-    }
-    try {
-        await ElMessageBox.confirm(
-            t('batch-validation-cloud-delete-confirm', { name: tabStorage.cloudCaseName || '' }),
-            t('batch-validation-cloud-delete'),
-            {
-                confirmButtonText: t('confirm'),
-                cancelButtonText: t('cancel'),
-                type: 'warning'
-            }
-        );
-    } catch {
-        return;
-    }
-    cloudCaseDeleting.value = true;
-    try {
-        await cloudDeleteBatchValidationCase(cloudContext.currentProjectId, tabStorage.cloudCaseId);
-        clearCloudCaseBinding();
-        await fetchCloudBatchValidationCases();
-        ElMessage.success(t('batch-validation-cloud-deleted'));
-    } catch (error) {
-        ElMessage.error(String(error));
-    } finally {
-        cloudCaseDeleting.value = false;
-    }
-}
-
 async function runValidation(comprehensive = false) {
     if (draftTestCase.value) {
         commitDraftToCase();
@@ -1330,14 +1031,11 @@ watch(() => tabStorage.testCases?.length ?? 0, (len) => {
 // 批量验证持久化：从 JSON 归档加载（新 tab 或切换到此 tab 时），变更时防抖写入
 const bridge = useMessageBridge();
 async function loadBatchValidationFromDuckDb() {
-    if (cloudContext.mode === 'cloud') {
-        return;
-    }
     const clientId = mcpClientAdapter.masterNode?.clientId;
     if (!clientId) return;
     const res = await bridge.commandRequest<{ storage: BatchValidationStorage }>('batch-validation/load', { clientId });
     if (res.code === 200 && res.msg?.storage) {
-        applyBatchValidationSnapshot(res.msg.storage, { clearCloudBinding: false });
+        applyBatchValidationSnapshot(res.msg.storage);
     }
 }
 onMounted(() => {
@@ -1357,9 +1055,6 @@ watch(
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 function flushSave() {
-    if (cloudContext.mode === 'cloud') {
-        return;
-    }
     const clientId = mcpClientAdapter.masterNode?.clientId;
     if (saveTimer) {
         clearTimeout(saveTimer);
@@ -1377,9 +1072,6 @@ function flushSave() {
     });
 }
 function scheduleSaveToDuckDb() {
-    if (cloudContext.mode === 'cloud') {
-        return;
-    }
     const clientId = mcpClientAdapter.masterNode?.clientId;
     if (!clientId) return;
     if (saveTimer) clearTimeout(saveTimer);
@@ -1401,26 +1093,7 @@ watch(
     { deep: true }
 );
 
-watch(
-    () => [cloudContext.mode, cloudContext.currentProjectId, isCloudLoggedIn.value],
-    ([mode, projectId]) => {
-        if (mode !== 'cloud') {
-            void loadBatchValidationFromDuckDb();
-            return;
-        }
-        if (tabStorage.cloudProjectId && tabStorage.cloudProjectId !== projectId) {
-            clearCloudCaseBinding();
-        }
-        if (canUseCloudBatchValidation.value) {
-            void fetchCloudBatchValidationCases().catch((error) => {
-                ElMessage.error(String(error));
-            });
-        } else {
-            cloudSavedCases.value = [];
-        }
-    },
-    { immediate: true }
-);
+
 </script>
 
 <style scoped>
@@ -1691,40 +1364,6 @@ watch(
 .batch-list-panel .list-add-btn-wrap {
     margin: 3px;
     width: calc(100% - 6px);
-}
-
-.batch-cloud-toolbar {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 0 13px 12px;
-    border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.batch-cloud-toolbar-top {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-}
-
-.batch-cloud-toolbar-current {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.batch-cloud-toolbar-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.batch-cloud-toolbar-hint {
-    font-size: 12px;
-    color: var(--el-color-warning);
 }
 
 .batch-list-panel .list-header-btn-group {
@@ -2015,53 +1654,6 @@ watch(
 
 .settings-drawer-mode-select {
     width: 100%;
-}
-
-.batch-cloud-dialog-empty {
-    min-height: 120px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--el-text-color-secondary);
-}
-
-.batch-cloud-case-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.batch-cloud-case-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid var(--el-border-color-light);
-    border-radius: 10px;
-    background: var(--el-fill-color-blank);
-}
-
-.batch-cloud-case-main {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.batch-cloud-case-name {
-    font-weight: 600;
-    color: var(--el-text-color-primary);
-}
-
-.batch-cloud-case-desc {
-    font-size: 12px;
-    color: var(--el-text-color-secondary);
-    word-break: break-word;
-}
-
-.batch-cloud-case-actions {
-    flex-shrink: 0;
 }
 
 /* 抽屉从右往左滑入 */

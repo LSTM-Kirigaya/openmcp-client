@@ -43,19 +43,6 @@ openmcp-cli -V
 
 ---
 
-## `cloud`
-
-云能力入口（当前仅认证登录，对应 `AuthController`）。
-
-| 子命令 | 说明 |
-|--------|------|
-| `auth login` | `-u` / `-p`，账号密码登录 |
-| `auth oauth <channel>` | 获取 OAuth 授权链接（如 `github`，支持 `--open` 自动打开浏览器） |
-
-默认 `-g ws://localhost:8282`。
-
----
-
 ## `connection`
 
 本地连接资源管理。默认作用于 `user` scope；若要操作工作区连接，显式传 `--scope workspace --workspace <path>`。
@@ -76,12 +63,11 @@ openmcp-cli -V
 
 | 子命令 | 说明 |
 |--------|------|
-| `list/get/save/delete` | 本地 `user/workspace` 或云端 `cloud` 统一 CRUD |
+| `list/get/save/delete` | 本地 `user/workspace` 统一 CRUD |
 
 说明：
 
 - 本地 scope 推荐用 `--connection-id` 指定所属连接；若当前已有默认会话，也可用 `--client-id`
-- `--scope cloud` 时需传 `--project-id`，底层映射到 `spec-cases` 中的 `tool_case`
 
 ---
 
@@ -91,12 +77,11 @@ openmcp-cli -V
 
 | 子命令 | 说明 |
 |--------|------|
-| `list/get/save/delete` | 本地 `user/workspace` 或云端 `cloud` 统一 CRUD |
+| `list/get/save/delete` | 本地 `user/workspace` 统一 CRUD |
 
 说明：
 
 - 本地 scope 会读写统一的 `validation-suites` 目录
-- `--scope cloud` 时需传 `--project-id`，底层映射到 `batch-validation-cases`
 
 ---
 

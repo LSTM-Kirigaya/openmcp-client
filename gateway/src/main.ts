@@ -12,7 +12,7 @@ export interface VSCodeMessage {
 }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const devHome = join(__dirname, '..', '..');
+const devHome = process.env.OPENMCP_RUNNING_CWD || join(__dirname, '..', '..');
 
 export type MessageHandler = (message: VSCodeMessage) => void;
 

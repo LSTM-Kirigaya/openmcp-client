@@ -5,7 +5,7 @@
 | 路径 | 说明 |
 |------|------|
 | `src/index.ts` | Commander 入口，注册各子命令 |
-| `src/commands/` | 各命令模块（`gateway`、`mcp`、`cloud`、`llm` 等） |
+| `src/commands/` | 各命令模块（`gateway`、`mcp`、`llm` 等） |
 | `src/lib/message-bridge.ts` | WebSocket 客户端，请求/响应与 `_id` 配对 |
 | `src/lib/service-manager.ts` | Gateway/Web UI 进程启停、PID 文件 |
 | `src/lib/service-commands.ts` | service 命令清单（供对照与文档维护） |
@@ -45,7 +45,7 @@ yarn dev
 
    在 Chrome 打开 `chrome://inspect` 连接调试。
 
-3. 确认 **Gateway 已启动** 后再调试 `mcp`、`cloud`、`llm` 等需 WebSocket 的命令；否则 `MessageBridge` 会连接失败。
+3. 确认 **Gateway 已启动** 后再调试 `mcp`、`llm` 等需 WebSocket 的命令；否则 `MessageBridge` 会连接失败。
 
 ## 与 monorepo 其它包的关系
 

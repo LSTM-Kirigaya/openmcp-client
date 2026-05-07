@@ -1,6 +1,4 @@
-import type { CloudProject } from '@/api/cloud';
-
-/** 与本地 Server 编辑/添加一致的连接表单（云端保存时再映射为 transport + endpoint） */
+/** 与本地 Server 编辑/添加一致的连接表单 */
 export interface McpConnectionFormState {
 	name: string;
 	connectionType: string;
@@ -22,61 +20,6 @@ export function createEmptyMcpConnectionForm(): McpConnectionFormState {
 		oauth: '',
 		envList: [],
 		description: ''
-	};
-}
-
-export function cloudProjectToConnectionForm(project: CloudProject): McpConnectionFormState {
-	let connectionType: string;
-	if (project.transport === 'stdio') {
-		connectionType = 'STDIO';
-	} else if (project.transport === 'sse') {
-		connectionType = 'SSE';
-	} else {
-		connectionType = 'STREAMABLE_HTTP';
-	}
-	return {
-		name: project.name || '',
-		connectionType,
-		cmdText: project.transport === 'stdio' ? project.endpoint : '',
-		cwd: '',
-		url: project.transport === 'stdio' ? '' : project.endpoint,
-		oauth: '',
-		envList: [],
-		description: project.description || ''
-	};
-}
-
-export type CloudProjectWritePayload = {
-	name: string;
-	transport: 'stdio' | 'sse' | 'http';
-	endpoint: string;
-	description?: string;
-	enabled: boolean;
-};
-
-export function connectionFormToCloudWritePayload(
-	form: McpConnectionFormState,
-	opts: { enabled: boolean }
-): CloudProjectWritePayload {
-	let transport: 'stdio' | 'sse' | 'http';
-	let endpoint: string;
-	if (form.connectionType === 'STDIO') {
-		transport = 'stdio';
-		endpoint = form.cmdText.trim();
-	} else if (form.connectionType === 'SSE') {
-		transport = 'sse';
-		endpoint = form.url.trim();
-	} else {
-		transport = 'http';
-		endpoint = form.url.trim();
-	}
-	const description = (form.description ?? '').trim();
-	return {
-		name: form.name.trim(),
-		transport,
-		endpoint,
-		description: description || undefined,
-		enabled: opts.enabled
 	};
 }
 

@@ -4,7 +4,7 @@
 
 ### Gateway
 
-除 `gateway run|start|stop|restart|status` 以及仅本地打印帮助外，**`mcp`、`llm`、`cloud` 等多数命令**都需要 Gateway 进程在运行，且 WebSocket 地址可达（默认 **`ws://localhost:8282`**）。
+除 `gateway run|start|stop|restart|status` 以及仅本地打印帮助外，**`mcp`、`llm` 等多数命令**都需要 Gateway 进程在运行，且 WebSocket 地址可达（默认 **`ws://localhost:8282`**）。
 
 若 Gateway 监听其它端口，请在各命令上加：
 
@@ -98,12 +98,9 @@ openmcp-cli validation-suite save --connection-id <connectionId> -f ./suite.json
 openmcp-cli connection list --scope workspace --workspace .
 openmcp-cli test-case list --scope workspace --workspace . --connection-id <connectionId>
 
-# 云端 scope
-openmcp-cli test-case list --scope cloud --project-id <projectId>
-openmcp-cli validation-suite list --scope cloud --project-id <projectId>
 ```
 
-`test-case` 与 `validation-suite` 默认都是 `user` scope；切到 `workspace` / `cloud` 时需要显式传 `--scope`。
+`test-case` 与 `validation-suite` 默认都是 `user` scope；切到 `workspace` 时需要显式传 `--scope`。
 
 ### 5. 配置生命周期与调试留痕
 

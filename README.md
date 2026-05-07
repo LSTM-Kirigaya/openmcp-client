@@ -143,7 +143,6 @@ Click [here](https://openmcp.kirigaya.cn/preview/join.html) to learn how to make
 | `all` | Support saving user's server debugging work | `Iteration` | 100% | `Done` |
 | `render` | High-risk operation permission confirmation | `MVP` | 0% | `P1` |
 | `service` | Hot update for connected MCP servers | `MVP` | 0% | `P1` |
-| `service` | Cloud sync for system configuration | `MVP` | 0% | `P1` |
 | `all` | System prompt management module | `Iteration` | 100% | `Done` |
 | `service` | Tool-wise logging system | `MVP` | 0% | `P1` |
 | `service` | MCP security checks (prevent prompt injection, etc.) | `MVP` | 0% | `P1` |

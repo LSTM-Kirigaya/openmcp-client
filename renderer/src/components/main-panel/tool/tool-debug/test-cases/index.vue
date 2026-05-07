@@ -5,9 +5,6 @@
                 <span class="iconfont icon-tool"></span>
                 {{ t('test-cases-management') }}
             </h3>
-            <el-tag v-if="cloudContext.mode === 'cloud'" type="warning">
-                {{ t('runtime-mode-cloud') }}
-            </el-tag>
             <div class="header-actions">
                 <el-select v-model="statusFilter" class="header-status-filter" :placeholder="t('filter-by-status')"
                     style="width: 110px;">
@@ -35,10 +32,6 @@
                 </el-button-group>
             </div>
         </div>
-        <div v-if="cloudContext.mode === 'cloud' && !cloudContext.currentProjectId" class="no-test-cases-text">
-            {{ t('cloud-select-project-first') }}
-        </div>
-
         <div class="test-cases-list">
             <el-scrollbar height="100%">
                 <div v-if="testCases.length === 0" class="no-test-cases-text">{{ t('no-test-cases') }}</div>
@@ -96,7 +89,7 @@
             </el-scrollbar>
         </div>
 
-        <!-- 测试用例详情/编辑对话框 -->
+        <!-- 测试用例详情/编辑对话�?-->
         <el-dialog v-model="dialogVisible" :title="isEditing ? t('edit-test-case') : t('create-test-case')" width="60%"
             :close-on-click-modal="false" class="test-case-dialog">
             <el-form :model="currentTestCaseForm" label-position="top" ref="formRef">
@@ -158,7 +151,7 @@
             </template>
         </el-dialog>
 
-        <!-- 测试结果详情对话框 -->
+        <!-- 测试结果详情对话�?-->
         <el-dialog v-model="resultDialogVisible" :title="t('test-result-details')" width="70%" class="test-result-dialog">
             <div v-if="selectedTestCase" class="test-result-container">
                 <div class="result-section">
@@ -184,14 +177,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, type FormInstance } from 'element-plus';
 import { tabs } from '../../../panel';
 import type { ToolStorage, TestCase } from '../../tools';
 import { mcpClientAdapter } from '@/views/connect/core';
-import { cloudContext } from '@/hook/cloud-context';
-import { isCloudLoggedIn } from '@/hook/cloud-auth';
 import {
     createTestCase,
     deleteTestCase,
@@ -213,7 +204,7 @@ const props = defineProps({
 const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as ToolStorage;
 
-// 初始化 server 级测试用例存储
+// 初始�?server 级测试用例存�?
 try { initTestCasesStore(mcpClientAdapter.masterNode); } catch { /* 已初始化忽略 */ }
 
 /** 状态筛选：全部 | 成功 | 失败 | 超时 */
@@ -305,7 +296,7 @@ function handleEditTestCase(testCase: TestCase) {
 }
 
 function handleToolChange() {
-    // 工具变更时重置输入
+    // 工具变更时重置输�?
     inputJson.value = '{}';
 }
 
@@ -341,14 +332,6 @@ function copyFromCurrentForm() {
     } catch (e) {
         ElMessage.error(t('copy-failed'));
     }
-}
-
-function getFriendlyCloudErrorMessage(error: unknown): string {
-    const message = error instanceof Error ? error.message : String(error ?? '');
-    if (/401|unauthorized|token|expired|鉴权|未授权/i.test(message)) {
-        return '云端登录已过期，请先刷新令牌或重新登录后再试。';
-    }
-    return message || t('error');
 }
 
 async function handleSaveTestCase() {
@@ -400,7 +383,7 @@ async function handleSaveTestCase() {
             });
             ElMessage.success(t('test-case-updated'));
         } else {
-            // 创建新测试用例
+            // 创建新测试用�?
             const newTestCase: TestCase = {
                 id: `test_${now}_${Math.random().toString(36).substr(2, 9)}`,
                 name: currentTestCaseForm.value.name,
@@ -418,7 +401,7 @@ async function handleSaveTestCase() {
 
         dialogVisible.value = false;
     } catch (error) {
-        ElMessage.error(getFriendlyCloudErrorMessage(error));
+        ElMessage.error(error instanceof Error ? error.message : t('error'));
     } finally {
         savingTestCase.value = false;
     }
@@ -434,7 +417,7 @@ async function handleRunTest(testCase: TestCase) {
     try {
         const response = await mcpClientAdapter.callTool(testCase.toolName, testCase.input);
 
-        // 无预期输出时，工具调用成功即视为通过；有预期输出时进行比对
+        // 无预期输出时，工具调用成功即视为通过；有预期输出时进行比�?
         const hasExpected = testCase.expectedOutput !== undefined && testCase.expectedOutput !== null;
         const isMatch = !hasExpected || isToolCallResponseEqual(response, testCase.expectedOutput);
         const newStatus = isMatch ? 'passed' : 'failed';
@@ -470,7 +453,7 @@ async function handleRunTest(testCase: TestCase) {
     }
 }
 
-/** 比较两次工具调用结果是否等价（忽略键序等差异） */
+/** 比较两次工具调用结果是否等价（忽略键序等差异�?*/
 function isToolCallResponseEqual(a: any, b: any): boolean {
     if (a === b) return true;
     if (a == null || b == null) return false;
@@ -531,14 +514,6 @@ function formatTime(timestamp: number): string {
     return date.toLocaleString();
 }
 
-watch(
-    () => [cloudContext.mode, cloudContext.currentProjectId, isCloudLoggedIn.value],
-    () => {
-        void loadTestCases();
-    },
-    { immediate: true }
-);
-
 </script>
 
 <style scoped>
@@ -592,7 +567,7 @@ watch(
     background-color: var(--sidebar);
 }
 
-/* 与工具调试 run-debug 按钮组一致：次要按钮 + 主按钮，首尾 8px 圆角 */
+/* 与工具调�?run-debug 按钮组一致：次要按钮 + 主按钮，首尾 8px 圆角 */
 .header-button-group {
     display: inline-flex;
 }
@@ -640,7 +615,7 @@ watch(
     padding: 8px 0;
 }
 
-/* 与 tool-logger output-content / tool-call-block 风格一致 */
+/* �?tool-logger output-content / tool-call-block 风格一�?*/
 .test-case-item {
     background-color: var(--sidebar);
     border-radius: 0.5em;
@@ -710,7 +685,7 @@ watch(
     display: inline-flex;
 }
 
-/* 与工具调试 executor-actions 次要按钮风格一致 */
+/* 与工具调�?executor-actions 次要按钮风格一�?*/
 .test-case-actions .btn-edit,
 .test-case-actions .btn-view {
     border-color: var(--el-border-color);
@@ -759,7 +734,7 @@ watch(
     display: inline-flex;
 }
 
-/* 与工具调试 executor-actions 次要按钮组一致 */
+/* 与工具调�?executor-actions 次要按钮组一�?*/
 .json-editor .btn-secondary {
     border-radius: 0;
     border-color: var(--el-border-color);
@@ -783,7 +758,7 @@ watch(
     border-bottom-right-radius: 8px !important;
 }
 
-/* 编辑/创建对话框底部：与工具调试 footer 按钮组一致 */
+/* 编辑/创建对话框底部：与工具调�?footer 按钮组一�?*/
 .test-cases-container :deep(.test-case-dialog .el-dialog__footer) .dialog-footer-group {
     display: inline-flex;
 }

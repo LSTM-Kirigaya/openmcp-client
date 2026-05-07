@@ -10,12 +10,6 @@ import { RefluxController } from "../feedback/reflux.controller.js";
 import { SkillController } from "../skill/skill.controller.js";
 import { BatchValidationController } from "../batch-validation/batch-validation.controller.js";
 import { DebuggerMcpController } from "../debugger-mcp/debugger-mcp.controller.js";
-import { AuthController } from "../cloud/controllers/auth.controller.js";
-import { ProjectsController } from "../cloud/controllers/projects.controller.js";
-import { ProjectMembersController } from "../cloud/controllers/project-members.controller.js";
-import { ProjectInvitesController } from "../cloud/controllers/project-invites.controller.js";
-import { SpecCasesController } from "../cloud/controllers/spec-cases.controller.js";
-import { BatchValidationCasesController } from "../cloud/controllers/batch-validation-cases.controller.js";
 import { LocalStorageController } from "../storage/storage.controller.js";
 import { ServerConfigController } from "../mcp/server-config.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
@@ -31,12 +25,6 @@ export const ModuleControllers = [
     SkillController,
     BatchValidationController,
     DebuggerMcpController,
-    AuthController,
-    ProjectsController,
-    ProjectMembersController,
-    ProjectInvitesController,
-    SpecCasesController,
-    BatchValidationCasesController,
     LocalStorageController,
     ServerConfigController
 ];

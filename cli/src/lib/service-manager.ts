@@ -1,5 +1,4 @@
 import { spawn, ChildProcess, exec } from 'child_process';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fs from 'fs';
@@ -8,34 +7,40 @@ import WebSocket from 'ws';
 import http from 'http';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const nodeRequire = createRequire(import.meta.url);
-
 /** 当前 Node 可执行文件（避免 Windows 上 spawn('node') 因 PATH 找不到而 ENOENT） */
 const NODE = process.execPath;
 
-/** cli/dist/lib -> 上三级：npm 下为 node_modules/@openmcp，开发时为仓库根 */
-const REPO_ROOT = path.join(__dirname, '..', '..', '..');
+/** cli/dist/lib -> cli 包根；开发时 repo root 是其上级，发布包运行时优先使用 vendor */
+const PACKAGE_ROOT = path.join(__dirname, '..', '..');
+const REPO_ROOT = path.join(PACKAGE_ROOT, '..');
+const VENDOR_ROOT = path.join(PACKAGE_ROOT, 'vendor');
 
 function resolveGatewayDir(): string {
-  try {
-    const pkg = nodeRequire.resolve('@openmcp/gateway/package.json');
-    const dir = path.dirname(pkg);
-    const entry = path.join(dir, 'dist', 'main.js');
-    // 如果安装包缺少产物（如某些环境只包含 src），回退到仓库本地 gateway。
-    if (!fs.existsSync(entry)) {
-      return path.join(REPO_ROOT, 'gateway');
-    }
-    return dir;
-  } catch {
-    return path.join(REPO_ROOT, 'gateway');
+  const vendored = path.join(VENDOR_ROOT, 'gateway');
+  if (fs.existsSync(path.join(vendored, 'dist', 'main.js'))) {
+    return vendored;
   }
+  return path.join(REPO_ROOT, 'gateway');
 }
 
 const GATEWAY_DIR = resolveGatewayDir();
 const RENDERER_DIR = path.join(REPO_ROOT, 'renderer');
-const RENDERER_DIST_DIR = path.join(RENDERER_DIR, 'dist');
+
+function resolveRendererDistDir(): string {
+  const vendored = path.join(VENDOR_ROOT, 'renderer', 'dist');
+  if (fs.existsSync(vendored)) {
+    return vendored;
+  }
+  return path.join(REPO_ROOT, 'renderer', 'dist');
+}
+
+const RENDERER_DIST_DIR = resolveRendererDistDir();
 const GATEWAY_ENTRY = path.join(GATEWAY_DIR, 'dist', 'main.js');
 const STATIC_WEB_SERVER_ENTRY = path.join(__dirname, 'static-web-server.js');
+
+export function gatewayUserLogDir(): string {
+  return path.join(os.homedir(), '.openmcp', 'logs', 'gateway');
+}
 
 /** 可选：用户目录下 KEY=VALUE 行文件，供后台启动的 Gateway 继承（避免 PowerShell 与 cmd 环境变量语法混淆） */
 export function gatewayEnvFilePath(): string {
@@ -94,6 +99,7 @@ function buildGatewayChildEnv(port: number): NodeJS.ProcessEnv {
   return {
     ...fromFile,
     ...process.env,
+    OPENMCP_RUNNING_CWD: process.cwd(),
     PORT: String(port)
   } as NodeJS.ProcessEnv;
 }

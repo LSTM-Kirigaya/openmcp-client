@@ -523,11 +523,8 @@ function saveAsTestCase() {
     saveTestCaseDialogVisible.value = true;
 }
 
-function getFriendlyCloudErrorMessage(error: unknown): string {
+function getFriendlyErrorMessage(error: unknown): string {
     const message = error instanceof Error ? error.message : String(error ?? '');
-    if (/401|unauthorized|token|expired|鉴权|未授权/i.test(message)) {
-        return '云端登录已过期，请先刷新令牌或重新登录后再试。';
-    }
     return message || t('error');
 }
 
@@ -566,7 +563,7 @@ async function onSaveTestCaseConfirm() {
         saveTestCaseDialogVisible.value = false;
         ElMessage.success(t('test-case-saved-successfully'));
     } catch (error) {
-        ElMessage.error(getFriendlyCloudErrorMessage(error));
+        ElMessage.error(getFriendlyErrorMessage(error));
     } finally {
         saveTestCaseSaving.value = false;
     }
