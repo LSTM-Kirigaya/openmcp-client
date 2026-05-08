@@ -5,7 +5,7 @@ CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment.
 ## Installation
 
 ```bash
-npm install -g openmcp-cli
+npm install -g @agent-ruler/openmcp
 ```
 
 ## Requirements
@@ -19,7 +19,7 @@ npm install -g openmcp-cli
 ### Initialize a new project
 
 ```bash
-openmcp init my-project
+omc init my-project
 cd my-project
 ```
 
@@ -28,43 +28,43 @@ cd my-project
 Start both service (backend) and renderer (frontend) in development mode:
 
 ```bash
-openmcp dev
+omc dev
 ```
 
 Start only the backend service:
 
 ```bash
-openmcp dev --service-only
+omc dev --service-only
 ```
 
 Start only the frontend renderer:
 
 ```bash
-openmcp dev --renderer-only
+omc dev --renderer-only
 ```
 
 Specify a custom port for the service:
 
 ```bash
-openmcp dev --port 9000
+omc dev --port 9000
 ```
 
 ### Start production mode
 
 ```bash
-openmcp start
+omc start
 ```
 
 ### Check for updates
 
 ```bash
-openmcp update --check
+omc update --check
 ```
 
 ### Update to latest version
 
 ```bash
-openmcp update
+omc update
 ```
 
 ## Commands
@@ -99,13 +99,13 @@ my-project/
 
 1. **Create a new project:**
    ```bash
-   openmcp init my-project
+   omc init my-project
    cd my-project
    ```
 
 2. **Start development servers:**
    ```bash
-   openmcp dev
+   omc dev
    ```
    
    This will start:
@@ -127,7 +127,7 @@ my-project/
 If port 8282 is already in use, you can specify a different port:
 
 ```bash
-openmcp dev --port 9000
+omc dev --port 9000
 ```
 
 ### Permission denied on global install
@@ -136,7 +136,7 @@ If you encounter permission issues when installing globally:
 
 ```bash
 # Option 1: Use npx (no global install needed)
-npx openmcp-cli init my-project
+npx @agent-ruler/openmcp init my-project
 
 # Option 2: Change npm's default directory
 # See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally

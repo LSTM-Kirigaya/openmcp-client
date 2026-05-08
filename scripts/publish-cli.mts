@@ -110,9 +110,9 @@ async function main() {
     // 设置可执行权限
     log('\nStep 3/3: 设置可执行权限...');
     try {
-      const binPath = path.join(CLI_DIR, 'bin', 'openmcp');
+      const binPath = path.join(CLI_DIR, 'bin', 'omc');
       fs.chmodSync(binPath, 0o755);
-      log('  ✓ bin/openmcp 已设为可执行');
+      log('  ✓ bin/omc 已设为可执行');
     } catch {
       log('  ⚠ 警告: 无法设置可执行权限');
     }

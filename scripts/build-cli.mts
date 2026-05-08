@@ -62,9 +62,9 @@ async function main() {
   // Step 4: Make entry script executable
   log('\nStep 3/4: Setting up executable permissions...');
   try {
-    const binPath = join(cliDir, 'bin', 'openmcp');
+    const binPath = join(cliDir, 'bin', 'omc');
     await fs.chmod(binPath, 0o755);
-    log('  ✓ Made bin/openmcp executable');
+    log('  ✓ Made bin/omc executable');
   } catch (err) {
     log('  ⚠ Warning: Could not set executable permissions');
   }
@@ -82,7 +82,7 @@ async function main() {
   // Step 6: Create a test link (optional)
   log('\nOptional: Testing CLI locally...');
   try {
-    const version = execSync('node bin/openmcp --version', {
+    const version = execSync('node bin/omc --version', {
       cwd: cliDir,
       encoding: 'utf-8'
     }).trim();
@@ -98,7 +98,7 @@ async function main() {
   log('\nTo test the CLI locally:');
   log(`  cd ${cliDir}`);
   log('  npm link');
-  log('  openmcp --help');
+  log('  omc --help');
   log('\nTo publish to npm:');
   log(`  cd ${cliDir}`);
   log('  npm publish');

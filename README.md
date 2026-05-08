@@ -206,7 +206,7 @@ Quickly setup and run OpenMCP development environment with a single command:
 
 ```bash
 # Install CLI globally
-npm install -g openmcp-cli
+npm install -g @agent-ruler/openmcp
 
 # Create a new project
 openmcp init my-project

@@ -53,8 +53,8 @@ PORT=8282
 
   console.log(chalk.bold('Next steps:'));
   console.log(`  ${chalk.cyan('cd')} ${projectName}`);
-  console.log(`  ${chalk.cyan('openmcp dev')}     ${chalk.gray('# Start development servers')}`);
-  console.log(`  ${chalk.cyan('openmcp start')}   ${chalk.gray('# Start production mode')}`);
+  console.log(`  ${chalk.cyan('omc dev')}     ${chalk.gray('# Start development servers')}`);
+  console.log(`  ${chalk.cyan('omc start')}   ${chalk.gray('# Start production mode')}`);
   console.log('');
 
   console.log(chalk.bold('Documentation:'));

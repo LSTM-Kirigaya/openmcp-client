@@ -2,14 +2,14 @@
 
 ## 项目概述
 
-OpenMCP CLI 是一个命令行工具，允许用户通过 `npm install -g openmcp-cli` 全局安装，并使用 `openmcp` 命令快速搭建和运行 OpenMCP 开发环境。
+OpenMCP CLI 是一个命令行工具，允许用户通过 `npm install -g @agent-ruler/openmcp` 全局安装，并使用 `omc` 命令快速搭建和运行 OpenMCP 开发环境。
 
 ## 功能特性
 
-- ✅ `openmcp init` - 一键初始化 OpenMCP 项目
-- ✅ `openmcp dev` - 启动开发模式（前后端并行运行）
-- ✅ `openmcp start` - 启动生产模式
-- ✅ `openmcp update` - 检查并更新到最新版本
+- ✅ `omc init` - 一键初始化 OpenMCP 项目
+- ✅ `omc dev` - 启动开发模式（前后端并行运行）
+- ✅ `omc start` - 启动生产模式
+- ✅ `omc update` - 检查并更新到最新版本
 - ✅ 支持 npm/yarn/pnpm 多种包管理器
 - ✅ 自动检测项目结构
 - ✅ 友好的错误提示和日志输出
@@ -19,7 +19,7 @@ OpenMCP CLI 是一个命令行工具，允许用户通过 `npm install -g openmc
 ```
 cli/
 ├── bin/
-│   └── openmcp          # CLI 入口脚本 (可执行)
+│   └── omc          # CLI 入口脚本 (可执行)
 ├── src/
 │   ├── index.ts             # 主入口，命令注册
 │   ├── commands/
@@ -53,7 +53,7 @@ npm install
 npm run build
 
 # 测试构建结果
-node bin/openmcp --version
+node bin/omc --version
 ```
 
 ### 2. 完整构建（推荐）
@@ -113,12 +113,12 @@ npm run test:cli
 cd cli
 npm link
 
-# 现在可以在任意位置使用 openmcp 命令
-openmcp --version
-openmcp --help
+# 现在可以在任意位置使用 omc 命令
+omc --version
+omc --help
 
 # 解除链接（测试完成后）
-npm unlink -g openmcp
+npm unlink -g @agent-ruler/openmcp
 ```
 
 ### 4. 发布到 npm
@@ -138,14 +138,14 @@ npm publish --access public  # 如果是 scoped 包 (@scope/name)
 
 ```bash
 # 全局安装测试
-npm install -g openmcp-cli
+npm install -g @agent-ruler/openmcp
 
 # 验证安装
-openmcp --version
-which openmcp
+omc --version
+which omc
 
 # 卸载
-npm uninstall -g openmcp
+npm uninstall -g omc
 ```
 
 ## 用户使用指南
@@ -153,14 +153,14 @@ npm uninstall -g openmcp
 ### 安装
 
 ```bash
-npm install -g openmcp-cli
+npm install -g @agent-ruler/openmcp
 ```
 
 ### 创建新项目
 
 ```bash
 # 创建新项目
-openmcp init my-mcp-project
+omc init my-mcp-project
 
 # 进入项目目录
 cd my-mcp-project
@@ -170,36 +170,36 @@ cd my-mcp-project
 
 ```bash
 # 启动前后端（推荐）
-openmcp dev
+omc dev
 
 # 只启动后端服务
-openmcp dev --service-only
+omc dev --service-only
 
 # 只启动前端渲染器
-openmcp dev --renderer-only
+omc dev --renderer-only
 
 # 指定端口
-openmcp dev --port 9000
+omc dev --port 9000
 ```
 
 ### 生产模式
 
 ```bash
 # 构建并启动生产服务
-openmcp start
+omc start
 
 # 指定端口
-openmcp start --port 9000
+omc start --port 9000
 ```
 
 ### 更新项目
 
 ```bash
 # 检查更新
-openmcp update --check
+omc update --check
 
 # 更新到最新版本
-openmcp update
+omc update
 ```
 
 ## 常见问题
@@ -209,7 +209,7 @@ openmcp update
 **解决方案：**
 ```bash
 # 方法 1: 使用 npx（无需全局安装）
-npx openmcp-cli init my-project
+npx @agent-ruler/openmcp init my-project
 
 # 方法 2: 修改 npm 默认目录
 # 参考: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally
@@ -226,11 +226,11 @@ npx openmcp-cli init my-project
 npm config get prefix
 
 # 确认可执行文件存在
-ls -la $(npm config get prefix)/bin/openmcp
+ls -la $(npm config get prefix)/bin/omc
 
 # 重新安装
-npm uninstall -g openmcp
-npm install -g openmcp-cli
+npm uninstall -g omc
+npm install -g @agent-ruler/openmcp
 ```
 
 ### Q3: 项目初始化失败
@@ -257,7 +257,7 @@ npm install
 
 ## 后续扩展计划
 
-- [ ] 支持自定义模板（`openmcp init --template vue`）
+- [ ] 支持自定义模板（`omc init --template vue`）
 - [ ] 支持项目配置导入/导出
 - [ ] 集成 Docker 部署
 - [ ] 支持插件系统
@@ -267,4 +267,4 @@ npm install
 
 - [OpenMCP 官方文档](https://openmcp.kirigaya.cn)
 - [GitHub 仓库](https://github.com/LSTM-Kirigaya/openmcpent)
-- [npm 包页面](https://www.npmjs.com/package/openmcp)
+- [npm 包页面](https://www.npmjs.com/package/omc)

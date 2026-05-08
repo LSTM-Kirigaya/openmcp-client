@@ -11,7 +11,7 @@ import { version } from './utils/version.js';
 const program = new Command();
 
 program
-  .name('openmcp')
+  .name('omc')
   .description('CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment')
   .version(version, '-v, --version', 'Display version number');
 
@@ -54,10 +54,10 @@ program
 program.on('--help', () => {
   console.log('');
   console.log(chalk.cyan('Examples:'));
-  console.log('  $ openmcp init my-project        # Create a new project');
-  console.log('  $ cd my-project && openmcp dev   # Start development servers');
-  console.log('  $ openmcp dev -s                 # Start only backend service');
-  console.log('  $ openmcp start                  # Start production mode');
+  console.log('  $ omc init my-project        # Create a new project');
+  console.log('  $ cd my-project && omc dev   # Start development servers');
+  console.log('  $ omc dev -s                 # Start only backend service');
+  console.log('  $ omc start                  # Start production mode');
   console.log('');
   console.log(chalk.cyan('Documentation:'));
   console.log('  https://openmcp.kirigaya.cn');

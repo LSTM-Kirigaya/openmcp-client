@@ -38,7 +38,7 @@ if (fs.existsSync(distPath)) {
   console.error('     npm install && npm run build');
   console.error('');
   console.error('  2. If you installed from npm:');
-  console.error('     npm uninstall -g openmcp');
-  console.error('     npm install -g openmcp-cli');
+  console.error('     npm uninstall -g omc');
+  console.error('     npm install -g @agent-ruler/openmcp');
   process.exit(1);
 }

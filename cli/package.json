@@ -1,11 +1,11 @@
 {
-  "name": "openmcp-cli",
-  "version": "0.1.0",
+  "name": "@agent-ruler/openmcp",
+  "version": "1.0.0",
   "description": "CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "openmcp": "bin/openmcp"
+    "omc": "bin/omc"
   },
   "files": [
     "bin/",

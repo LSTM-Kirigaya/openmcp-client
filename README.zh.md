@@ -205,7 +205,7 @@ flowchart TD
 
 ```bash
 # 全局安装 CLI
-npm install -g openmcp-cli
+npm install -g @agent-ruler/openmcp
 
 # 创建新项目
 openmcp init my-project
