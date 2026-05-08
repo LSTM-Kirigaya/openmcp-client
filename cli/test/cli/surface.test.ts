@@ -57,6 +57,52 @@ describe('cli surface', { timeout: 120_000 }, () => {
     assert.doesNotMatch(r.stdout, /debug tool run/);
   });
 
+  it('missing required option prints command help', async () => {
+    const r = await cli(['debug', 'tool', 'call']);
+    assert.notEqual(r.exitCode, 0);
+    const output = `${r.stdout}\n${r.stderr}`;
+    assert.match(output, /required option '--name <name>' not specified/);
+    assert.match(output, /Usage: openmcp debug tool call/);
+    assert.match(output, /--args <json>/);
+  });
+
+  it('tool call help explains JSON args', async () => {
+    const r = await cli(['debug', 'tool', 'call', '--help']);
+    assert.equal(r.exitCode, 0, r.stderr);
+    assert.match(r.stdout, /--args must be a JSON object/);
+    assert.match(r.stdout, /openmcp debug tool call --name echo --args '\{"message":"hi"\}'/);
+    assert.match(r.stdout, /PowerShell/);
+    assert.match(r.stdout, /--args '\{\\"message\\":\\"hi\\"\}'/);
+  });
+
+  it('tool call accepts PowerShell-stripped JSON-like args', async () => {
+    const r = await cli([
+      'debug', 'tool', 'call',
+      '--client-id', 'surface-test-client',
+      '--name', 'echo',
+      '--args', '{message:hi}',
+      '-g', 'ws://127.0.0.1:65534',
+    ]);
+    const output = `${r.stdout}\n${r.stderr}`;
+    assert.notEqual(r.exitCode, 0);
+    assert.doesNotMatch(output, /Invalid JSON/);
+    assert.match(output, /ECONNREFUSED|Gateway/);
+  });
+
+  it('invalid tool args reports --args instead of --data', async () => {
+    const r = await cli([
+      'debug', 'tool', 'call',
+      '--client-id', 'surface-test-client',
+      '--name', 'echo',
+      '--args', '{message:',
+      '-g', 'ws://127.0.0.1:65534',
+    ]);
+    const output = `${r.stdout}\n${r.stderr}`;
+    assert.notEqual(r.exitCode, 0);
+    assert.match(output, /Invalid JSON for --args/);
+    assert.doesNotMatch(output, /Invalid JSON for --data/);
+  });
+
   it('docs do not mention removed top-level command examples', () => {
     const docs = [
       'README.md',

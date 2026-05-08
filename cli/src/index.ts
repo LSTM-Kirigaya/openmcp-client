@@ -27,6 +27,14 @@ function readPackageVersion(): string {
 
 const program = new Command();
 
+function enableHelpAfterErrors(command: Command): void {
+  command.showHelpAfterError();
+  command.showSuggestionAfterError();
+  for (const child of command.commands) {
+    enableHelpAfterErrors(child);
+  }
+}
+
 program
   .name('openmcp')
   .description('OpenMCP CLI — Gateway 管理与 MCP 全量能力')
@@ -39,5 +47,7 @@ program
   .addCommand(webCommand)
   .addCommand(startCommand)
   .addCommand(skillsCmd);
+
+enableHelpAfterErrors(program);
 
 program.parse();

@@ -78,7 +78,9 @@ describe('debug tool', { timeout: 180_000 }, () => {
       120_000,
     );
     assert.notEqual(r.exitCode, 0);
-    assert.match(`${r.stderr}\n${r.stdout}`, /Invalid JSON/);
+    const output = `${r.stderr}\n${r.stdout}`;
+    assert.match(output, /Invalid JSON for --args/);
+    assert.doesNotMatch(output, /Invalid JSON for --data/);
   });
 
   it('fails cleanly for missing tool', async () => {

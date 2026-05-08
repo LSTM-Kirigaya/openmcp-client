@@ -34,7 +34,11 @@ export function diagnoseThrownError(error: unknown): string[] {
   if (includesAny(text, ['gateway', 'ws://', 'econnrefused', 'websocket'])) {
     advice.push('Gateway is unreachable. Run `openmcp gateway start` and check the `-g` address.');
   }
-  if (includesAny(text, ['json'])) {
+  if (includesAny(text, ['Invalid JSON for --args'])) {
+    advice.push('Tool arguments must be a JSON object. In PowerShell, complex inline JSON may need escaped quotes, e.g. `--args \'{\\"message\\":\\"hi\\"}\'`.');
+  } else if (includesAny(text, ['Invalid JSON for --data'])) {
+    advice.push('The `--data` value must be a JSON object. For large or complex data, prefer a JSON file when the command supports `--file`.');
+  } else if (includesAny(text, ['json'])) {
     advice.push('JSON parsing failed. Check `--data`, `--args`, or config file content.');
   }
   if (includesAny(text, ['timeout'])) {

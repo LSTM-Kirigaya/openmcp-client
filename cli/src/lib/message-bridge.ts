@@ -19,6 +19,11 @@ export interface RestFulResponse<T = any> {
 
 export type CommandHandler = (data: any) => void;
 
+function isVerboseConnectionLogEnabled(): boolean {
+  const value = (process.env.OPENMCP_CLI_VERBOSE || '').toLowerCase();
+  return value === '1' || value === 'true' || value === 'yes';
+}
+
 export class MessageBridge {
   private ws: WebSocket | null = null;
   private handlers = new Map<string, Set<CommandHandler>>();
@@ -53,7 +58,9 @@ export class MessageBridge {
 
       this.ws.on('open', () => {
         this.socketEverOpened = true;
-        console.log(`✅ Connected to ${this.wsUrl}`);
+        if (isVerboseConnectionLogEnabled()) {
+          console.error(`✅ Connected to ${this.wsUrl}`);
+        }
         finish(true);
       });
 
@@ -80,8 +87,8 @@ export class MessageBridge {
       });
 
       this.ws.on('close', () => {
-        if (this.socketEverOpened) {
-          console.log('🔌 Connection closed');
+        if (this.socketEverOpened && isVerboseConnectionLogEnabled()) {
+          console.error('🔌 Connection closed');
         }
         finish(false);
       });
