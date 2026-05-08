@@ -358,8 +358,9 @@ gw(
         }
 
         const modelData = modelsRes.msg as any;
-        const modelIds: string[] = Array.isArray(modelData?.data)
-          ? modelData.data.map((m: any) => m.id).filter(Boolean)
+        const modelRows = Array.isArray(modelData) ? modelData : modelData?.data;
+        const modelIds: string[] = Array.isArray(modelRows)
+          ? modelRows.map((m: any) => m.id).filter(Boolean)
           : [];
 
         if (modelIds.length === 0) {

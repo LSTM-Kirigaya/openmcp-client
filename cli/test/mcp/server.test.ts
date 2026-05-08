@@ -9,11 +9,12 @@ import {
   extractJson,
   cleanupTmpFiles,
   deleteServer,
+  writeTmpJson,
 } from '../_helpers.js';
 
 /** `mcp server get` 前后可能被 Gateway 连接日志包裹，仅对「完整配置」后的 JSON 做解析 */
 function extractServerGetJson(stdout: string): Record<string, unknown> | null {
-  const parts = stdout.split('完整配置:\n');
+  const parts = stdout.split(/(?:完整配置|Full config):\r?\n/);
   const tail = parts.length >= 2 ? (parts[parts.length - 1] ?? '') : stdout;
   const parsed = extractJson(tail);
   return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
@@ -24,6 +25,7 @@ function extractServerGetJson(stdout: string): Record<string, unknown> | null {
 describe('mcp server local CRUD', { timeout: 180_000 }, () => {
   let serverId = '';
   let deletedServerId = '';
+  let aggregateServerId = '';
 
   before(async () => {
     assertCliBuilt();
@@ -32,6 +34,7 @@ describe('mcp server local CRUD', { timeout: 180_000 }, () => {
 
   after(async () => {
     if (serverId) await deleteServer(serverId).catch(() => {});
+    if (aggregateServerId) await deleteServer(aggregateServerId).catch(() => {});
     cleanupTmpFiles();
   });
 
@@ -53,8 +56,8 @@ describe('mcp server local CRUD', { timeout: 180_000 }, () => {
     assert.ok(serverId.length > 0);
   });
 
-  it('list: --json --scope local includes new server by ID', async () => {
-    const r = await cli(withGw(['mcp', 'server', 'list', '--json', '--scope', 'local']));
+  it('list: --json includes new server by ID', async () => {
+    const r = await cli(withGw(['mcp', 'server', 'list', '--json']));
     assert.equal(r.exitCode, 0, r.stderr);
     const list = extractJson(r.stdout);
     assert.ok(Array.isArray(list), `expected JSON array, got:\n${r.stdout}`);
@@ -120,6 +123,38 @@ describe('mcp server local CRUD', { timeout: 180_000 }, () => {
     const cfg = extractServerGetJson(gr.stdout);
     assert.equal(cfg?.command, 'echo');
     assert.deepEqual(cfg?.args, ['hello']);
+  });
+
+  it('add: supports mcpServers aggregate config with --mcp-server', async () => {
+    const file = writeTmpJson({
+      mcpServers: {
+        everything: {
+          command: 'npx',
+          args: ['-y', '@modelcontextprotocol/server-everything'],
+        },
+      },
+    }, 'aggregate-server');
+    const r = await cli(withGw([
+      'mcp',
+      'server',
+      'add',
+      '--file',
+      file,
+      '--mcp-server',
+      'everything',
+      '--name',
+      'aggregate-everything',
+    ]));
+    assert.equal(r.exitCode, 0, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+    const m = r.stdout.match(/\(([^)]+)\)\s*$/m);
+    assert.ok(m, `expected ID in output:\n${r.stdout}`);
+    aggregateServerId = m[1];
+
+    const gr = await cli(withGw(['mcp', 'server', 'get', '--id', aggregateServerId]));
+    assert.equal(gr.exitCode, 0, gr.stderr);
+    const cfg = extractServerGetJson(gr.stdout);
+    assert.equal(cfg?.name, 'aggregate-everything');
+    assert.equal(cfg?.connectionType, 'STDIO');
   });
 
   it('delete: succeeds', async () => {

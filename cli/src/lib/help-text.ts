@@ -13,9 +13,10 @@ Common examples:
   openmcp mcp session list
   openmcp debug tool list
   openmcp debug tool test-case list --connection-id <id>
-  openmcp debug tool run
+  openmcp debug tool call --name echo --args '{"message":"hi"}'
   openmcp debug batch run -f ./batch-body.json
   openmcp debug mcp ping
+  openmcp skills list
 `;
 
 export const HELP_WEB = `

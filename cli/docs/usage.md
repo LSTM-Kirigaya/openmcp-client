@@ -32,7 +32,7 @@ openmcp gateway run -p 8282
 
 ### 2. 建立连接并拿到 clientId（支持扁平配置与 mcpServers）
 
-`mcp connect` 的 `--config-file` 支持两种格式：
+`mcp server add` 的 `--file` 支持两种格式：
 
 - 扁平 `McpOptions`（`connectionType`、`command`、`args`、`url`...）
 - 聚合 `mcpServers`（Cursor / VSCode 常见格式，必要时加 `--mcp-server <name>`）
@@ -40,20 +40,22 @@ openmcp gateway run -p 8282
 完整示例见：
 
 ```bash
-openmcp mcp connect --help
+openmcp mcp server add --help
 ```
 
 **方式 A：配置文件**
 
 ```bash
-openmcp mcp connect --config-file ./my-mcp.json
-openmcp mcp connect --config-file ./mcp-servers.json --mcp-server my-server
+openmcp mcp server add --file ./my-mcp.json
+openmcp mcp server add --file ./mcp-servers.json --mcp-server my-server
+openmcp mcp session connect --id <serverId>
 ```
 
 **方式 B：命令行参数**
 
 ```bash
-openmcp mcp connect --type STDIO --command npx --args-json "[\"-y\",\"@modelcontextprotocol/server-everything\"]"
+openmcp mcp server add --data "{\"connectionType\":\"STDIO\",\"command\":\"npx\",\"args\":[\"-y\",\"@modelcontextprotocol/server-everything\"]}"
+openmcp mcp session connect --id <serverId>
 ```
 
 成功时响应里的 `msg.clientId` 会被记录为默认会话。
@@ -61,26 +63,26 @@ openmcp mcp connect --type STDIO --command npx --args-json "[\"-y\",\"@modelcont
 如果希望把连接、测试用例、验证套件都落到统一的本地仓储，推荐先把连接保存成资源，再通过资源建立会话：
 
 ```bash
-openmcp connection save -f ./my-mcp.json --name my-local
-openmcp connection list
-openmcp connection connect --id <connectionId>
+openmcp mcp server add --file ./my-mcp.json --name my-local
+openmcp mcp server list
+openmcp mcp session connect --id <serverId>
 ```
 
 ### 3. 会话管理（可选）
 
 ```bash
-openmcp mcp sessions current
-openmcp mcp sessions recent --limit 10
-openmcp mcp sessions list
-openmcp mcp sessions use --client-id "<uuid>"
+openmcp mcp session current
+openmcp mcp session recent --limit 10
+openmcp mcp session list
+openmcp mcp session use --client-id "<uuid>"
 ```
 
 ### 4. 调用 tools/prompts/resources
 
 ```bash
-openmcp mcp tools-list
-openmcp mcp tools-call --name echo --args "{\"message\":\"hi\"}"
-openmcp validation tool --tool-name echo
+openmcp debug tool list
+openmcp debug tool call --name echo --args "{\"message\":\"hi\"}"
+openmcp debug tool test-case list --client-id "<uuid>"
 ```
 
 如果要显式指定目标连接，可加 `--client-id <uuid>`。
@@ -89,31 +91,31 @@ openmcp validation tool --tool-name echo
 
 ```bash
 # 本地 user scope
-openmcp test-case list --connection-id <connectionId>
-openmcp test-case save --connection-id <connectionId> -f ./tool-case.json
-openmcp validation-suite list --connection-id <connectionId>
-openmcp validation-suite save --connection-id <connectionId> -f ./suite.json
+openmcp debug tool test-case list --client-id <clientId>
+openmcp debug tool test-case save --client-id <clientId> -f ./tool-case.json
+openmcp debug batch list --client-id <clientId>
+openmcp debug batch save --client-id <clientId> -f ./suite.json
 
 # 工作区 scope
-openmcp connection list --scope workspace --workspace .
-openmcp test-case list --scope workspace --workspace . --connection-id <connectionId>
+openmcp debug tool test-case list --scope workspace --workspace . --client-id <clientId>
+openmcp debug batch list --scope workspace --workspace . --client-id <clientId>
 
 ```
 
-`test-case` 与 `validation-suite` 默认都是 `user` scope；切到 `workspace` 时需要显式传 `--scope`。
+`debug tool test-case` 与 `debug batch` 默认都是 `user` scope；切到 `workspace` 时需要显式传 `--scope`。
 
 ### 5. 配置生命周期与调试留痕
 
 ```bash
 # 配置校验 / 模板 / 导出 / env 预览
-openmcp mcp config validate -f ./mcp.json
-openmcp mcp config init --template stdio -o ./mcp-template.json
-openmcp mcp config export --client-id "<uuid>" -o ./exported.json
-openmcp mcp config env-preview -f ./mcp.json
+openmcp debug mcp config validate -f ./mcp.json
+openmcp debug mcp config init --template stdio -o ./mcp-template.json
+openmcp debug mcp config export --client-id "<uuid>" -o ./exported.json
+openmcp debug mcp config env-preview -f ./mcp.json
 
 # 历史与回放
-openmcp mcp history list --limit 20
-openmcp mcp history replay --failed --limit 1
+openmcp debug mcp history list --limit 20
+openmcp debug mcp history replay --failed --limit 1
 ```
 
 ## Web UI 与一键启动
@@ -125,12 +127,12 @@ openmcp mcp history replay --failed --limit 1
 
 ## 大 JSON 与超时
 
-- 对请求体较大的场景，优先使用各子命令提供的 `-f` 读文件能力（如 `llm chat-sync`、`validation batch`）。
-- `mcp connect` 默认超时较长；其它子命令如需更细粒度控制，建议拆分调用并结合历史回放定位问题。
+- 对请求体较大的场景，优先使用各子命令提供的 `-f` 读文件能力（如 `setting llm chat`、`debug batch run`）。
+- `mcp session connect` 默认超时较长；其它子命令如需更细粒度控制，建议拆分调用并结合历史回放定位问题。
 
 ## 流式 LLM
 
 `llm/chat/completions` 为**流式**接口，面向 Webview 的多条推送；CLI 日常请使用：
 
-- `openmcp llm chat-sync`（对应 `llm/chat/completions/sync`），或  
-- `openmcp llm chat-sync -f body.json`
+- `openmcp setting llm chat --provider <id> --model <model> -m "hello"`，或
+- `openmcp setting llm chat --provider <id> --model <model> -f body.json`

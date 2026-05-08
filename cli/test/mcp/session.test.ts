@@ -10,6 +10,7 @@ import {
   addTestServer,
   deleteServer,
   disconnectSession,
+  ensureEverythingServerPackageCached,
 } from '../_helpers.js';
 
 const SESSION_SERVER_CONFIG = {
@@ -27,6 +28,7 @@ describe('mcp session lifecycle', { timeout: 180_000 }, () => {
   before(async () => {
     assertCliBuilt();
     await ensureGatewayRunning();
+    await ensureEverythingServerPackageCached();
     serverId = await addTestServer(SESSION_SERVER_CONFIG);
   });
 
@@ -63,6 +65,24 @@ describe('mcp session lifecycle', { timeout: 180_000 }, () => {
     const r = await cli(['mcp', 'session', 'current']);
     assert.equal(r.exitCode, 0, r.stderr);
     const body = extractJson(r.stdout);
+    assert.equal(body?.currentClientId, clientId, JSON.stringify(body));
+  });
+
+  it('session recent: includes connected session', async () => {
+    const r = await cli(['mcp', 'session', 'recent', '--limit', '5']);
+    assert.equal(r.exitCode, 0, r.stderr);
+    const body = extractJson(r.stdout);
+    assert.equal(body?.currentClientId, clientId, JSON.stringify(body));
+    assert.ok(
+      body?.recent?.some((s: { clientId?: string }) => s.clientId === clientId),
+      JSON.stringify(body),
+    );
+  });
+
+  it('session use: switches default session', async () => {
+    const use = await cli(['mcp', 'session', 'use', '--client-id', clientId]);
+    assert.equal(use.exitCode, 0, use.stderr);
+    const body = extractJson(use.stdout);
     assert.equal(body?.currentClientId, clientId, JSON.stringify(body));
   });
 

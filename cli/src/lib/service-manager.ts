@@ -16,22 +16,22 @@ const REPO_ROOT = path.join(PACKAGE_ROOT, '..');
 const VENDOR_ROOT = path.join(PACKAGE_ROOT, 'vendor');
 
 function resolveGatewayDir(): string {
-  const vendored = path.join(VENDOR_ROOT, 'gateway');
-  if (fs.existsSync(path.join(vendored, 'dist', 'main.js'))) {
-    return vendored;
+  const repoGateway = path.join(REPO_ROOT, 'gateway');
+  if (fs.existsSync(path.join(repoGateway, 'dist', 'main.js'))) {
+    return repoGateway;
   }
-  return path.join(REPO_ROOT, 'gateway');
+  return path.join(VENDOR_ROOT, 'gateway');
 }
 
 const GATEWAY_DIR = resolveGatewayDir();
 const RENDERER_DIR = path.join(REPO_ROOT, 'renderer');
 
 function resolveRendererDistDir(): string {
-  const vendored = path.join(VENDOR_ROOT, 'renderer', 'dist');
-  if (fs.existsSync(vendored)) {
-    return vendored;
+  const repoRendererDist = path.join(REPO_ROOT, 'renderer', 'dist');
+  if (fs.existsSync(repoRendererDist)) {
+    return repoRendererDist;
   }
-  return path.join(REPO_ROOT, 'renderer', 'dist');
+  return path.join(VENDOR_ROOT, 'renderer', 'dist');
 }
 
 const RENDERER_DIST_DIR = resolveRendererDistDir();
@@ -573,7 +573,7 @@ export async function stopService(port: number = 8282): Promise<boolean> {
 export async function restartService(port: number = 8282): Promise<boolean> {
   console.log(`🔄 Restarting Gateway...`);
   
-  await stopService();
+  await stopService(port);
   
   // 等待一下让进程完全退出
   await new Promise(resolve => setTimeout(resolve, 1000));

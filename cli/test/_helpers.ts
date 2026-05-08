@@ -10,12 +10,27 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const CLI_ROOT = path.resolve(__dirname, '..');
 export const CLI_BIN = path.join(CLI_ROOT, 'bin', 'openmcp.js');
 const NODE = process.execPath;
+const NPM = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 export const TEST_GATEWAY_PORT = 19282;
 export const TEST_WEBUI_PORT = 19283;
 
+export const TEST_STATE_ROOT = process.env.OPENMCP_E2E_STATE_ROOT
+  || path.join(os.tmpdir(), 'openmcp-cli-e2e-state');
+export const TEST_HOME = path.join(TEST_STATE_ROOT, 'home');
+export const TEST_APPDATA = path.join(TEST_STATE_ROOT, 'appdata');
+export const TEST_NPM_CACHE = path.join(TEST_STATE_ROOT, 'npm-cache');
+
+for (const dir of [TEST_HOME, TEST_APPDATA, TEST_NPM_CACHE]) {
+  fs.mkdirSync(dir, { recursive: true });
+}
+
 const testEnv: NodeJS.ProcessEnv = {
   ...process.env,
+  HOME: TEST_HOME,
+  USERPROFILE: TEST_HOME,
+  APPDATA: TEST_APPDATA,
+  npm_config_cache: TEST_NPM_CACHE,
   OPENMCP_WEB_DEV: '',
 };
 
@@ -109,8 +124,50 @@ export function cli(args: string[], timeoutMs = 60_000): Promise<ExecResult> {
   });
 }
 
+let everythingCachePromise: Promise<void> | null = null;
+
+export function ensureEverythingServerPackageCached(timeoutMs = 180_000): Promise<void> {
+  if (everythingCachePromise) return everythingCachePromise;
+  everythingCachePromise = new Promise((resolve, reject) => {
+    const child = nodeSpawn(
+      NPM,
+      [
+        'exec',
+        '--yes',
+        '--package',
+        '@modelcontextprotocol/server-everything',
+        '--',
+        'node',
+        '--version',
+      ],
+      { stdio: 'pipe', env: testEnv, shell: process.platform === 'win32', windowsHide: true },
+    );
+    let stdout = '';
+    let stderr = '';
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error(`Timed out warming @modelcontextprotocol/server-everything cache\n${stdout}\n${stderr}`));
+    }, timeoutMs);
+    child.stdout?.on('data', (d: Buffer) => { stdout += d.toString(); });
+    child.stderr?.on('data', (d: Buffer) => { stderr += d.toString(); });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Failed to warm @modelcontextprotocol/server-everything cache (${code})\n${stdout}\n${stderr}`));
+      }
+    });
+  });
+  return everythingCachePromise;
+}
+
 export function spawnCli(args: string[]): ChildProcess {
   return nodeSpawn(NODE, [CLI_BIN, ...args], { stdio: 'pipe', env: testEnv });
+}
+
+export function testEnvironment(): NodeJS.ProcessEnv {
+  return { ...testEnv };
 }
 
 export function killChild(child: ChildProcess, tree = true): Promise<void> {
@@ -216,6 +273,13 @@ export function writeTmpJson(data: unknown, label = 'data'): string {
   return filePath;
 }
 
+export function writeTmpText(content: string, label = 'data', ext = '.txt'): string {
+  const filePath = path.join(os.tmpdir(), `openmcp-test-${label}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}${ext}`);
+  fs.writeFileSync(filePath, content, 'utf-8');
+  tmpFiles.push(filePath);
+  return filePath;
+}
+
 export function cleanupTmpFiles(): void {
   for (const f of tmpFiles) { try { fs.unlinkSync(f); } catch {} }
   tmpFiles.length = 0;
@@ -291,6 +355,7 @@ export async function deleteServer(id: string): Promise<void> {
 }
 
 export async function connectToServer(serverId: string): Promise<string> {
+  await ensureEverythingServerPackageCached();
   const r = await cli(withGw(['mcp', 'session', 'connect', '--id', serverId]), 120_000);
   if (r.exitCode !== 0) throw new Error(`连接失败: ${r.stdout}\n${r.stderr}`);
   const m = r.stdout.match(/clientId:\s*(\S+)/);
@@ -316,4 +381,78 @@ export async function teardownTestSession(ids: { serverId?: string; clientId?: s
   if (ids.clientId) await disconnectSession(ids.clientId).catch(() => {});
   if (ids.serverId) await deleteServer(ids.serverId).catch(() => {});
   cleanupTmpFiles();
+}
+
+// Fake OpenAI-compatible server used by deterministic LLM E2E tests.
+
+export interface FakeOpenAiServer {
+  baseUrl: string;
+  port: number;
+  close: () => Promise<void>;
+}
+
+export function startFakeOpenAiServer(): Promise<FakeOpenAiServer> {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk: Buffer) => chunks.push(chunk));
+      req.on('end', () => {
+        const raw = Buffer.concat(chunks).toString('utf-8');
+        let body: any = {};
+        try { body = raw ? JSON.parse(raw) : {}; } catch {}
+
+        if (req.method === 'GET' && req.url === '/v1/models') {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            object: 'list',
+            data: [
+              { id: 'fake-model', object: 'model', created: 0, owned_by: 'openmcp-e2e' },
+              { id: 'fake-judge', object: 'model', created: 0, owned_by: 'openmcp-e2e' },
+            ],
+          }));
+          return;
+        }
+
+        if (req.method === 'POST' && req.url === '/v1/chat/completions') {
+          const messages = Array.isArray(body.messages) ? body.messages : [];
+          const text = JSON.stringify(messages);
+          const lowerText = text.toLowerCase();
+          const content = lowerText.includes('score this result')
+            ? 'Score: 8'
+            : text.includes('"result"') || text.includes('result')
+              ? JSON.stringify({ reasoning: 'fake judge', result: 'pass', reason: 'matched' })
+              : 'fake chat ok';
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            id: 'chatcmpl-openmcp-e2e',
+            object: 'chat.completion',
+            created: Math.floor(Date.now() / 1000),
+            model: body.model || 'fake-model',
+            choices: [
+              { index: 0, message: { role: 'assistant', content }, finish_reason: 'stop' },
+            ],
+            usage: { prompt_tokens: 3, completion_tokens: 2, total_tokens: 5 },
+          }));
+          return;
+        }
+
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: { message: `Unhandled ${req.method} ${req.url}` } }));
+      });
+    });
+
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => {
+      const addr = server.address();
+      if (!addr || typeof addr === 'string') {
+        reject(new Error('Fake OpenAI server did not bind to a TCP port'));
+        return;
+      }
+      resolve({
+        baseUrl: `http://127.0.0.1:${addr.port}/v1`,
+        port: addr.port,
+        close: () => new Promise<void>((done) => server.close(() => done())),
+      });
+    });
+  });
 }

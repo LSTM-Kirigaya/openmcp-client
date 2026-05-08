@@ -28,7 +28,6 @@ gw(
     .requiredOption('--model <name>', '模型名称')
     .option('-m, --message <text>', '初始用户消息')
     .option('-f, --file <path>', '从 JSON 文件读取 messages 数组')
-    .option('--max-turns <n>', '最大交互轮次', '10')
     .action(async (options) => {
       try {
         const clientId = requireClientId(options.clientId);
@@ -80,12 +79,21 @@ gw(
           }
 
           const body = {
-            clientId,
-            baseURL: provider.baseUrl,
-            apiKey: provider.userToken,
-            model: options.model,
             messages,
-            maxTurns: Number(options.maxTurns) || 10,
+            testCases: [
+              {
+                id: 'debug-chat-smoke',
+                name: 'Debug chat smoke',
+                expectedCriteria: 'The assistant response should address the user message.'
+              }
+            ],
+            evaluationMode: 'pass-fail',
+            llmConfig: {
+              baseURL: provider.baseUrl,
+              apiKey: provider.userToken,
+              model: options.model,
+              temperature: 0
+            },
           };
 
           console.log(`交互测试: ${provider.name} | ${options.model}`);

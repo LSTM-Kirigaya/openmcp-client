@@ -79,7 +79,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('tools/call', { clientId, toolName: options.name, toolArgs });
           printResponse('tools/call', res);
-          if (res.code !== 200) process.exitCode = 1;
+          if (res.code !== 200 || (res.msg as any)?.isError) process.exitCode = 1;
         });
       } catch (error) {
         printThrown(error);

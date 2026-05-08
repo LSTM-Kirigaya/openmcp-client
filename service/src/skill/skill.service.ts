@@ -185,7 +185,11 @@ function loadSkillByName(skillName?: string): SkillContent | null {
             if (fs.existsSync(path.join(subDir, 'SKILL.md'))) {
                 skillDir = subDir;
             } else {
-                return null;
+                const byMetadata = listSkills().find((item) => item.name === skillName || item.dirName === skillName);
+                if (!byMetadata?.dirName) {
+                    return null;
+                }
+                skillDir = path.join(resolved, byMetadata.dirName);
             }
         } else {
             const skillList = listSkills();
@@ -211,7 +215,7 @@ export function loadSkillContent(skillName?: string): SkillContent | null {
  * Read a referenced file within a skill directory (for progressive disclosure)
  */
 export function readSkillFile(skillName: string, filePath: string): { content: string } | { error: string } {
-    const skill = loadSkillContent();
+    const skill = loadSkillContent(skillName);
     if (!skill) {
         return { error: 'Skill path not configured' };
     }

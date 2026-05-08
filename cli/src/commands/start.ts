@@ -1,7 +1,12 @@
 import { Command } from 'commander';
 import open from 'open';
-import { startService, startRenderer, stopAll } from '../lib/index.js';
+import { startService, startRenderer, startRendererStatic, stopAll } from '../lib/index.js';
 import { HELP_START } from '../lib/help-text.js';
+
+function isWebDevModeEnabled(): boolean {
+  const value = (process.env.OPENMCP_WEB_DEV || '').toLowerCase();
+  return value === '1' || value === 'true' || value === 'yes';
+}
 
 export const startCommand = new Command('start')
   .description('一键启动 Gateway + Web UI，并可选打开浏览器。')
@@ -20,14 +25,15 @@ export const startCommand = new Command('start')
 ╚═══════════════════════════════════════╝
     `);
 
-    // Start gateway
-    startService(gatewayPort);
+    await startService(gatewayPort);
 
-    // Wait a bit for gateway to start
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Start renderer
-    startRenderer(webPort, gatewayPort);
+    const renderer = isWebDevModeEnabled()
+      ? startRenderer(webPort, gatewayPort)
+      : startRendererStatic(webPort, gatewayPort);
+    if (!renderer) {
+      process.exit(1);
+      return;
+    }
 
     // renderer 在 `mode=website` 时 base 为 `/mcp/`，因此需要打开该路径
     const url = `http://localhost:${webPort}/mcp/`;
@@ -35,6 +41,7 @@ export const startCommand = new Command('start')
     console.log(`
 🌐 Web UI:     ${url}
 🔌 Gateway:    ws://localhost:${gatewayPort}
+🧩 Mode:       ${isWebDevModeEnabled() ? 'development (vite)' : 'production (static)'}
 📝 Press Ctrl+C to stop all services
     `);
 

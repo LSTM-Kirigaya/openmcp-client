@@ -112,7 +112,7 @@ export function requireClientId(explicit?: string): string {
   if (explicit && explicit.trim()) return explicit.trim();
   const current = getCurrentClientId();
   if (current) return current;
-  throw new Error('缺少 --client-id，且当前没有默认会话。请先执行 mcp connect 或 mcp sessions use。');
+  throw new Error('缺少 --client-id，且当前没有默认会话。请先执行 mcp session connect 或 mcp session use。');
 }
 
 export function getSessionByClientId(clientId: string): SessionRecord | undefined {

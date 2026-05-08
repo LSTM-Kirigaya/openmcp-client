@@ -70,7 +70,7 @@ yarn openmcp --help
 2. 在已连接 MCP 的前提下，列出工具（需替换真实 `clientId`）：
 
    ```bash
-   openmcp mcp tools-list --client-id "<uuid>"
+   openmcp debug tool list --client-id "<uuid>"
    ```
 
 更完整的用法、前置条件与典型流程见 **[使用说明](docs/usage.md)**。
@@ -81,14 +81,9 @@ yarn openmcp --help
 |------|------|
 | `gateway` | 前台/后台启停 Gateway、查看状态 |
 | `webui` / `start` | 拉起 Web UI（及可选 Gateway） |
-| `connection` | 本地连接资源管理（`user/workspace`） |
-| `test-case` | 测试用例资源管理（`user/workspace`） |
-| `validation-suite` | 批量验证套件管理（`user/workspace`） |
-| `rpc`（别名 `call`） | **任意** service 命令 + JSON 请求体 |
-| `mcp` | 连接、断开、ping、环境变量、tools/prompts/resources |
-| `llm` | 模型列表、同步聊天等 |
-| `setting` | 读写应用设置 |
-| `validation` | 工具测试用例执行与批量验证 |
+| `mcp` | Server 配置与运行会话管理 |
+| `debug` | ping、环境变量、tools/prompts/resources、测试用例与批量验证 |
+| `setting` | 通用设置与 LLM provider/model/chat |
 | `skills` | 技能包列表与读文件 |
 
 完整子命令与参数说明见 **[命令参考](docs/commands.md)**。

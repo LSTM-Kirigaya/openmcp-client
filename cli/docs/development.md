@@ -40,7 +40,7 @@ yarn dev
 2. 使用 Node 调试器（示例）：
 
    ```bash
-   node --inspect-brk ./bin/openmcp.js mcp sessions list
+   node --inspect-brk ./bin/openmcp.js mcp session list
    ```
 
    在 Chrome 打开 `chrome://inspect` 连接调试。
@@ -66,7 +66,7 @@ yarn dev
 ## 常见问题
 
 **Q: WebSocket 命令报超时？**  
-A: 检查 Gateway 与 service 是否阻塞、MCP 子进程是否无响应；同时可用 `mcp history list --failed` 定位失败请求并回放。
+A: 检查 Gateway 与 service 是否阻塞、MCP 子进程是否无响应；同时可用 `debug mcp history list --failed` 定位失败请求并回放。
 
 **Q: Gateway `start` 提示已运行但端口不对？**  
 A: `status` 中端口展示为简化逻辑时，以实际 `gateway` 监听与 `-p` 为准；多实例需自行协调端口与 PID 文件（当前 PID 文件位于 `cli` 包内路径，见 `service-manager.ts`）。
