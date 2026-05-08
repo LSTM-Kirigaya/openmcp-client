@@ -1,6 +1,6 @@
 {
   "name": "@agent-ruler/openmcp",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "OpenMCP CLI - MCP Server Gateway & Debug Tool",
   "type": "module",
   "files": [

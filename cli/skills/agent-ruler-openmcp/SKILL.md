@@ -14,7 +14,6 @@ Use this skill to help users install and operate the `@agent-ruler/openmcp` npm 
 - Minimum Node.js: `>=18`
 - Default Gateway WebSocket: `ws://localhost:8282`
 - Default Gateway logs directory: `%USERPROFILE%\.openmcp\logs\gateway` on Windows, `~/.openmcp/logs/gateway` on Unix-like systems
-- Common typo: `@open-ruler/openmcp` is not the package used by this repo; use `@agent-ruler/openmcp`
 
 ## Install Or Upgrade
 
