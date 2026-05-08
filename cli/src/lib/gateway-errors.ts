@@ -31,9 +31,12 @@ export function buildGatewayUnreachableError(gatewayUrl: string, underlying?: st
 
   if (urlLooksLikeDefaultGateway(gatewayUrl)) {
     lines.push('');
-    lines.push(`默认 WebSocket 为 ws://localhost:${DEFAULT_PORT}。请先启动 Gateway，例如：`);
-    lines.push(`  yarn openmcp gateway start`);
-    lines.push(`  # 或前台运行： openmcp gateway run -p ${DEFAULT_PORT}`);
+    lines.push(`默认 WebSocket 为 ws://localhost:${DEFAULT_PORT}。请先启动 Gateway：`);
+    lines.push(`  openmcp gateway start`);
+    lines.push(`  # 或前台运行并查看日志：openmcp gateway run -p ${DEFAULT_PORT}`);
+    lines.push('');
+    lines.push('如果提示 openmcp 不是可识别命令，请先安装或重新安装 CLI：');
+    lines.push('  npm install -g @agent-ruler/openmcp');
   }
 
   lines.push('');
@@ -44,6 +47,9 @@ export function buildGatewayUnreachableError(gatewayUrl: string, underlying?: st
     lines.push('');
     lines.push(`底层错误：${underlying}`);
   }
+
+  lines.push('');
+  lines.push('如果仍无法解决，请复制本次完整报错（包含堆栈、Node.js 版本与执行命令）反馈给 OpenMCP 维护者。');
 
   return new Error(lines.join('\n'));
 }

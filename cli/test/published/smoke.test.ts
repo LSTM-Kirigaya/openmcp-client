@@ -4,6 +4,7 @@ import { spawn as nodeSpawn } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   extractJson,
   isGatewayReachable,
@@ -17,6 +18,11 @@ import {
 const NPM = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const NPX = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 const PUBLISHED_PORT = 19382;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const cliPackageJson = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '..', '..', 'package.json'), 'utf-8'),
+) as { name: string; version: string };
+const PUBLISHED_PACKAGE = `${cliPackageJson.name}@${cliPackageJson.version}`;
 
 interface ExecResult {
   stdout: string;
@@ -68,7 +74,7 @@ function openmcp(args: string[], cwd: string, timeoutMs?: number) {
   return execFile(NPX, ['openmcp', ...args], cwd, timeoutMs);
 }
 
-describe('published @agent-ruler/openmcp@0.1.2 smoke', { timeout: 600_000 }, () => {
+describe(`published ${PUBLISHED_PACKAGE} smoke`, { timeout: 600_000 }, () => {
   let projectDir = '';
   let serverId = '';
   let clientId = '';
@@ -83,7 +89,7 @@ describe('published @agent-ruler/openmcp@0.1.2 smoke', { timeout: 600_000 }, () 
     assert.equal(init.exitCode, 0, `npm init failed:\n${init.stdout}\n${init.stderr}`);
 
     const install = await npm(
-      ['install', '@agent-ruler/openmcp@0.1.2', '--no-audit', '--no-fund'],
+      ['install', PUBLISHED_PACKAGE, '--no-audit', '--no-fund'],
       projectDir,
       600_000,
     );
@@ -131,7 +137,7 @@ describe('published @agent-ruler/openmcp@0.1.2 smoke', { timeout: 600_000 }, () 
 
     const version = await openmcp(['--version'], projectDir, 60_000);
     assert.equal(version.exitCode, 0, `version failed:\n${version.stdout}\n${version.stderr}`);
-    assert.equal(version.stdout.trim(), '0.1.2');
+    assert.equal(version.stdout.trim(), cliPackageJson.version);
   });
 
   it('published gateway starts, reports status, then serves MCP ping', async () => {

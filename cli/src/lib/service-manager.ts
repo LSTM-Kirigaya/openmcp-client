@@ -36,10 +36,111 @@ function resolveRendererDistDir(): string {
 
 const RENDERER_DIST_DIR = resolveRendererDistDir();
 const GATEWAY_ENTRY = path.join(GATEWAY_DIR, 'dist', 'main.js');
+const VENDORED_GATEWAY_DIR = path.join(VENDOR_ROOT, 'gateway');
+const VENDORED_SERVICE_ENTRY = path.join(VENDOR_ROOT, 'service', 'dist', 'index.js');
 const STATIC_WEB_SERVER_ENTRY = path.join(__dirname, 'static-web-server.js');
 
 export function gatewayUserLogDir(): string {
   return path.join(os.homedir(), '.openmcp', 'logs', 'gateway');
+}
+
+export function gatewayStartupLogFile(): string {
+  return path.join(gatewayUserLogDir(), 'gateway-startup.log');
+}
+
+function ensureGatewayUserLogDir(): string {
+  const dir = gatewayUserLogDir();
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function appendGatewayStartupLog(message: string): void {
+  try {
+    ensureGatewayUserLogDir();
+    fs.appendFileSync(gatewayStartupLogFile(), message, 'utf-8');
+  } catch {
+    // Logging must never prevent startup.
+  }
+}
+
+function tailTextFile(filePath: string, lineCount = 80): string {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return '';
+    }
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    const lines = raw.split(/\r?\n/);
+    return lines.slice(Math.max(0, lines.length - lineCount)).join('\n').trim();
+  } catch {
+    return '';
+  }
+}
+
+export function tailGatewayStartupLog(lineCount = 80): string {
+  return tailTextFile(gatewayStartupLogFile(), lineCount);
+}
+
+function isUsingVendoredGateway(): boolean {
+  return path.resolve(GATEWAY_DIR) === path.resolve(VENDORED_GATEWAY_DIR);
+}
+
+function validateGatewayRuntime(): boolean {
+  if (!fs.existsSync(GATEWAY_ENTRY)) {
+    console.error(`❌ 找不到 Gateway 构建产物：${GATEWAY_ENTRY}`);
+    console.error(
+      '   请确认 CLI 安装完整（推荐 npm install -g @agent-ruler/openmcp）；若从源码开发，请在 gateway 目录执行：npm run build'
+    );
+    return false;
+  }
+
+  if (isUsingVendoredGateway() && !fs.existsSync(VENDORED_SERVICE_ENTRY)) {
+    console.error(`❌ 发布包缺少 Service 构建产物：${VENDORED_SERVICE_ENTRY}`);
+    console.error('   请重新安装 CLI：npm install -g @agent-ruler/openmcp');
+    console.error('   如果仍然失败，请把此错误和 npm 包版本反馈给 OpenMCP 维护者。');
+    appendGatewayStartupLog(
+      `\n[${new Date().toISOString()}] Missing vendored service entry: ${VENDORED_SERVICE_ENTRY}\n`
+    );
+    return false;
+  }
+
+  return true;
+}
+
+function openGatewayStartupLogForChild(port: number): number | undefined {
+  try {
+    ensureGatewayUserLogDir();
+    const filePath = gatewayStartupLogFile();
+    fs.appendFileSync(
+      filePath,
+      [
+        '',
+        `===== ${new Date().toISOString()} openmcp gateway start =====`,
+        `port=${port}`,
+        `node=${NODE}`,
+        `gatewayDir=${GATEWAY_DIR}`,
+        `gatewayEntry=${GATEWAY_ENTRY}`,
+        ''
+      ].join('\n'),
+      'utf-8'
+    );
+    return fs.openSync(filePath, 'a');
+  } catch {
+    return undefined;
+  }
+}
+
+function printGatewayStartupFailureHint(): void {
+  const startupLog = gatewayStartupLogFile();
+  console.log(`   启动日志：${startupLog}`);
+  console.log(`   可运行：openmcp gateway logs -n 200`);
+
+  const tail = tailGatewayStartupLog(60);
+  if (tail) {
+    console.log('');
+    console.log('── Gateway startup log tail ──');
+    console.log(tail);
+    console.log('──────────────────────────────');
+  }
 }
 
 /** 可选：用户目录下 KEY=VALUE 行文件，供后台启动的 Gateway 继承（避免 PowerShell 与 cmd 环境变量语法混淆） */
@@ -413,27 +514,42 @@ async function findPidByListeningPort(port: number): Promise<number | null> {
  * 启动 Gateway 服务
  */
 function doStartService(port: number, detached: boolean = false): { pid: number } {
-  if (!fs.existsSync(GATEWAY_ENTRY)) {
-    console.error(`❌ 找不到 Gateway 构建产物：${GATEWAY_ENTRY}`);
-    console.error(
-      '   请确认已安装 @openmcp/gateway（npm install @agent-ruler/openmcp 时会一并安装）；若从源码开发，请在 gateway 目录执行：yarn build'
-    );
+  if (!validateGatewayRuntime()) {
     return { pid: 0 };
   }
 
   const env = buildGatewayChildEnv(port);
 
   if (detached) {
+    const logFd = openGatewayStartupLogForChild(port);
     const child = spawn(NODE, ['dist/main.js'], {
       cwd: GATEWAY_DIR,
       env,
       detached: true,
-      stdio: 'ignore'
+      stdio: ['ignore', logFd ?? 'ignore', logFd ?? 'ignore'],
+      windowsHide: true
     });
 
     attachSpawnErrorHandler(child, 'Gateway');
+    child.on('error', (err) => {
+      appendGatewayStartupLog(
+        `[${new Date().toISOString()}] Failed to spawn Gateway: ${err.message}\n`
+      );
+    });
+    child.on('exit', (code, signal) => {
+      appendGatewayStartupLog(
+        `[${new Date().toISOString()}] Gateway process exited: code=${code ?? '-'} signal=${signal ?? '-'}\n`
+      );
+    });
 
     child.unref();
+    if (logFd !== undefined) {
+      try {
+        fs.closeSync(logFd);
+      } catch {
+        // ignore
+      }
+    }
 
     const pid = child.pid || 0;
     if (pid) {
@@ -447,7 +563,8 @@ function doStartService(port: number, detached: boolean = false): { pid: number 
     cwd: GATEWAY_DIR,
     env,
     stdio: 'inherit',
-    shell: process.platform === 'win32'
+    shell: process.platform === 'win32',
+    windowsHide: false
   });
 
   attachSpawnErrorHandler(foregroundProcess, 'Gateway');
@@ -512,6 +629,7 @@ export async function startService(port: number = 8282): Promise<{ pid: number }
     console.log(`✅ Gateway is reachable at ws://localhost:${port}`);
   } else {
     console.log(`⚠️  Gateway may have failed to start`);
+    printGatewayStartupFailureHint();
   }
   
   return result;
@@ -626,8 +744,8 @@ export function startRenderer(port: number = 8283, gatewayPort: number = 8282): 
     VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
   };
 
-  const yarnCmd = process.platform === 'win32' ? 'yarn.cmd' : 'yarn';
-  currentRenderer = spawn(yarnCmd, ['run', 'serve:website'], {
+  const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  currentRenderer = spawn(npmCmd, ['run', 'serve:website'], {
     cwd: RENDERER_DIR,
     env,
     stdio: 'inherit',
@@ -650,7 +768,7 @@ export function startRenderer(port: number = 8283, gatewayPort: number = 8282): 
 export function startRendererStatic(port: number = 8283, gatewayPort: number = 8282): ChildProcess | null {
   if (!fs.existsSync(RENDERER_DIST_DIR)) {
     console.error(`❌ renderer dist not found: ${RENDERER_DIST_DIR}`);
-    console.error(`   请先构建：cd ${RENDERER_DIR} && yarn run build:website`);
+    console.error(`   请先构建：cd ${RENDERER_DIR} && npm run build:website`);
     return null;
   }
 
@@ -713,9 +831,9 @@ export async function startRendererBackground(port: number = 8283, gatewayPort: 
     VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
   };
   const isWin = process.platform === 'win32';
-  const command = isWin ? 'powershell.exe' : 'yarn';
+  const command = isWin ? 'powershell.exe' : 'npm';
   const args = isWin
-    ? ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', `yarn run serve:website -- --port ${port} --strictPort`]
+    ? ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', `npm run serve:website -- --port ${port} --strictPort`]
     : ['run', 'serve:website', '--', '--port', String(port), '--strictPort'];
 
   const child = spawn(command, args, {
@@ -764,7 +882,7 @@ export async function startRendererStaticBackground(port: number = 8283, gateway
 
   if (!fs.existsSync(RENDERER_DIST_DIR)) {
     console.error(`❌ renderer dist not found: ${RENDERER_DIST_DIR}`);
-    console.error(`   请先构建：cd ${RENDERER_DIR} && yarn run build:website`);
+    console.error(`   请先构建：cd ${RENDERER_DIR} && npm run build:website`);
     return { pid: 0 };
   }
 

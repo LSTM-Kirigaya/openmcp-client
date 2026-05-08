@@ -16,7 +16,7 @@ npm install -g @agent-ruler/openmcp
 openmcp --help
 ```
 
-依赖里的 `@openmcp/gateway` 使用 **semver**（`^0.0.1`），以便发布到 npm 后能被正常解析；`workspace:*` 仅适用于仓库内 Yarn。
+依赖里的 `@openmcp/gateway` 使用 **semver**（`^0.0.1`），以便发布到 npm 后能被正常解析；`workspace:*` 仅适用于仓库内工作区依赖。
 
 **尚未发布到 npm 时，用 tarball 试装（推荐）**：`@agent-ruler/openmcp` 依赖 `@openmcp/gateway`，单独 `npm install -g agent-ruler-openmcp-0.1.1.tgz` 会从 registry 拉 gateway，**会 404**。请一次性安装三个本地包（npm 会从本地 tarball 满足依赖）：
 
@@ -30,21 +30,21 @@ npm install ../service/openmcp-service-0.0.1.tgz ../gateway/openmcp-gateway-0.0.
 npx openmcp --help
 ```
 
-仓库根目录也可执行：`yarn pack:npm-test`。
+仓库根目录也可执行：`npm run pack:npm-test`。
 
 **已发布到 npm 后**：`npm install -g @agent-ruler/openmcp` 即可；或用 **Verdaccio** 在本地 registry 演练发布顺序（service → gateway → cli）。
 
 ## 安装与本地运行（本仓库开发）
 
-文档以 **Yarn** 为例（经典 Yarn 1 或 Yarn Berry 均可）。在仓库根目录安装依赖后，进入 `cli` 目录构建：
+文档以 **npm** 为例。在仓库根目录安装依赖后，进入 `cli` 目录构建：
 
 ```bash
 cd cli
-yarn install
-yarn build
+npm install
+npm run build
 ```
 
-若已在 monorepo 根目录执行过 `yarn`，通常只需在 `cli` 下执行 `yarn build`。
+若已在 monorepo 根目录执行过 `npm install`，通常只需在 `cli` 下执行 `npm run build`。
 
 全局/本地调用二选一：
 
@@ -52,12 +52,12 @@ yarn build
 # 直接执行（开发时常用）
 node ./bin/openmcp.js --help
 
-# 在 cli 目录下通过 package.json 的 bin 调用
-yarn openmcp --help
-# 若上式不可用，可改用：yarn run openmcp --help
+# 链接到全局后模拟 npm 全局安装
+npm link
+openmcp --help
 ```
 
-将 `cli` 链到全局或发布前，需先 `yarn build` 生成 `dist/`。
+将 `cli` 链到全局或发布前，需先 `npm run build` 生成 `dist/`。
 
 ## 一分钟上手
 
@@ -92,7 +92,7 @@ yarn openmcp --help
 
 ## 开发与调试
 
-本地修改 `cli/src` 后执行 `yarn build`，或使用 `yarn dev`（`tsc --watch`）边改边编译。调试技巧、与 Gateway/Service 的对应关系见 **[开发与调试](docs/development.md)**。
+本地修改 `cli/src` 后执行 `npm run build`，或使用 `npm run dev`（`tsc --watch`）边改边编译。调试技巧、与 Gateway/Service 的对应关系见 **[开发与调试](docs/development.md)**。
 
 ## 文档索引
 
