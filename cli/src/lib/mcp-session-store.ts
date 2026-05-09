@@ -103,16 +103,31 @@ export function removeSession(clientId: string): void {
   const state = readState();
   state.recent = state.recent.filter((s) => s.clientId !== clientId);
   if (state.currentClientId === clientId) {
-    state.currentClientId = state.recent[0]?.clientId;
+    delete state.currentClientId;
   }
   writeState(state);
+}
+
+export function reconcileGatewaySessions(gateway: string, activeClientIds: string[]): void {
+  const active = new Set(activeClientIds);
+  const state = readState();
+  const before = state.recent.length;
+  state.recent = state.recent.filter((session) => session.gateway !== gateway || active.has(session.clientId));
+  let changed = state.recent.length !== before;
+  if (state.currentClientId && !state.recent.some((session) => session.clientId === state.currentClientId)) {
+    delete state.currentClientId;
+    changed = true;
+  }
+  if (changed) {
+    writeState(state);
+  }
 }
 
 export function requireClientId(explicit?: string): string {
   if (explicit && explicit.trim()) return explicit.trim();
   const current = getCurrentClientId();
   if (current) return current;
-  throw new Error('缺少 --client-id，且当前没有默认会话。请先执行 mcp session connect 或 mcp session use。');
+  throw new Error('Missing --client-id and there is no current default session. Run `openmcp mcp session connect --id <SERVER_ID>` first, or pass `--client-id` explicitly.');
 }
 
 export function getSessionByClientId(clientId: string): SessionRecord | undefined {

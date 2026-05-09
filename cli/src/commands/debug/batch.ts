@@ -1,6 +1,5 @@
-import fs from 'node:fs';
 import { Command } from 'commander';
-import { DEFAULT_GATEWAY, printResponse, withGateway } from '../../lib/cli-helpers.js';
+import { DEFAULT_GATEWAY, parseJsonData, printResponse, readJsonObjectFile, withGateway } from '../../lib/cli-helpers.js';
 import { diagnoseThrownError } from '../../lib/error-diagnose.js';
 import { parseResourceScope, toLocalScopePayload } from '../../lib/storage-scope.js';
 
@@ -16,18 +15,38 @@ function printThrown(error: unknown): void {
   process.exitCode = 1;
 }
 
-function loadObjectInput(options: { file?: string; data?: string }): Record<string, unknown> {
-  const raw = options.file
-    ? fs.readFileSync(options.file, 'utf-8')
-    : options.data;
-  if (!raw) {
-    throw new Error('Please provide JSON with --file or --data');
+const BATCH_RUN_HELP = `
+Input format:
+  --data and --file must contain a JSON object. A file uses the same JSON shape as --data.
+
+Example request:
+  {"messages":[{"role":"assistant","content":"The result is correct."}],"testCases":[{"id":"case-1","expectedCriteria":"The answer should be correct."}],"evaluationMode":"pass-fail","llmConfig":{"baseURL":"http://127.0.0.1:11434/v1","apiKey":"sk-xxx","model":"judge-model"}}
+
+Examples:
+  openmcp debug batch run --data '{"messages":[{"role":"assistant","content":"ok"}],"testCases":[{"id":"case-1","expectedCriteria":"should be ok"}],"evaluationMode":"pass-fail","llmConfig":{"baseURL":"http://127.0.0.1:11434/v1","apiKey":"sk-xxx","model":"judge-model"}}'
+  openmcp debug batch run --file ./batch-run.json
+`;
+
+const BATCH_SAVE_HELP = `
+Input format:
+  --data and --file must contain one validation suite JSON object.
+
+Example suite:
+  {"id":"suite-1","name":"Echo suite","storage":{"testCases":[{"id":"case-1","input":"hello","criteria":["contains greeting"]}],"selectedCaseIndex":0,"evaluationMode":"pass-fail"}}
+
+Examples:
+  openmcp debug batch save --data '{"id":"suite-1","name":"Echo suite","storage":{"testCases":[]}}'
+  openmcp debug batch save --file ./suite.json
+`;
+
+function loadObjectInput(options: { file?: string; data?: string }, helpCommand: string): Record<string, unknown> {
+  if (options.file) {
+    return readJsonObjectFile(options.file);
   }
-  const parsed = JSON.parse(raw);
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Input must be a JSON object');
+  if (!options.data) {
+    throw new Error(`Please provide JSON with --file or --data.\nSee: ${helpCommand} --help`);
   }
-  return parsed as Record<string, unknown>;
+  return parseJsonData(options.data, '--data');
 }
 
 function target(options: { connectionId?: string; clientId?: string }) {
@@ -45,9 +64,10 @@ gw(
     .description('Run batch validation')
     .option('-f, --file <path>', 'JSON request file')
     .option('--data <json>', 'inline JSON request')
+    .addHelpText('after', BATCH_RUN_HELP)
     .action(async (options) => {
       try {
-        const body = loadObjectInput(options);
+        const body = loadObjectInput(options, 'openmcp debug batch run');
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('batch-validation/run', body, 120000);
           printResponse('batch-validation/run', res);
@@ -120,10 +140,11 @@ gw(
     .option('--client-id <id>', 'clientId')
     .option('-f, --file <path>', 'JSON file')
     .option('--data <json>', 'inline JSON')
+    .addHelpText('after', BATCH_SAVE_HELP)
     .action(async (options) => {
       try {
         const scope = parseResourceScope(options.scope);
-        const suite = loadObjectInput(options);
+        const suite = loadObjectInput(options, 'openmcp debug batch save');
         if (options.suiteId) suite.id = options.suiteId;
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('validation-suites/upsert', {

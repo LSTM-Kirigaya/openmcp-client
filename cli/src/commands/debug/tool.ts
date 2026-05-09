@@ -1,8 +1,7 @@
-import fs from 'node:fs';
 import { Command } from 'commander';
-import { DEFAULT_GATEWAY, parseJsonData, printResponse, withGateway } from '../../lib/cli-helpers.js';
-import { rememberSession, requireClientId } from '../../lib/mcp-session-store.js';
-import { diagnoseThrownError } from '../../lib/error-diagnose.js';
+import { DEFAULT_GATEWAY, parseJsonData, printResponse, readJsonObjectFile, withGateway } from '../../lib/cli-helpers.js';
+import { rememberSession, removeSession, requireClientId } from '../../lib/mcp-session-store.js';
+import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 import { parseResourceScope, toLocalScopePayload } from '../../lib/storage-scope.js';
 
 function gw(cmd: Command): Command {
@@ -24,17 +23,13 @@ function resolveClientId(options: { clientId?: string; gateway: string }): strin
 }
 
 function loadObjectInput(options: { file?: string; data?: string }): Record<string, unknown> {
-  const raw = options.file
-    ? fs.readFileSync(options.file, 'utf-8')
-    : options.data;
-  if (!raw) {
-    throw new Error('Please provide JSON with --file or --data');
+  if (options.file) {
+    return readJsonObjectFile(options.file);
   }
-  const parsed = JSON.parse(raw);
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Input must be a JSON object');
+  if (!options.data) {
+    throw new Error('Please provide JSON with --file or --data.\nSee: openmcp debug tool test-case save --help');
   }
-  return parsed as Record<string, unknown>;
+  return parseJsonData(options.data, '--data');
 }
 
 function responseText(value: unknown): string {
@@ -99,6 +94,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('tools/list', { clientId });
           printResponse('tools/list', res);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {
@@ -138,6 +134,7 @@ Notes:
           const res = await bridge.commandRequest('tools/call', { clientId, toolName: options.name, toolArgs });
           printResponse('tools/call', res);
           printToolCallAdvice(options.name, options.args, res.msg);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200 || (res.msg as any)?.isError) process.exitCode = 1;
         });
       } catch (error) {
@@ -149,6 +146,18 @@ Notes:
 const testCaseCmd = new Command('test-case')
   .alias('test-cases')
   .description('Manage local tool test cases');
+
+const TOOL_TEST_CASE_SAVE_HELP = `
+Input format:
+  --data and --file must contain one tool test case JSON object. A file uses the same JSON shape as --data.
+
+Example test case:
+  {"id":"echo-case","name":"Echo case","toolName":"echo","input":{"message":"hi"},"expectedOutput":"hi"}
+
+Examples:
+  openmcp debug tool test-case save --data '{"id":"echo-case","name":"Echo case","toolName":"echo","input":{"message":"hi"},"expectedOutput":"hi"}'
+  openmcp debug tool test-case save --file ./tool-case.json
+`;
 
 gw(
   testCaseCmd
@@ -210,6 +219,7 @@ gw(
     .option('--client-id <id>', 'clientId')
     .option('-f, --file <path>', 'JSON file')
     .option('--data <json>', 'inline JSON')
+    .addHelpText('after', TOOL_TEST_CASE_SAVE_HELP)
     .action(async (options) => {
       try {
         const scope = parseResourceScope(options.scope);

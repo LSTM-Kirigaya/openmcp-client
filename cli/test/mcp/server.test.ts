@@ -1,5 +1,6 @@
 ﻿import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import os from 'node:os';
 import {
   cli,
@@ -26,6 +27,7 @@ describe('mcp server local CRUD', { timeout: 180_000 }, () => {
   let serverId = '';
   let deletedServerId = '';
   let aggregateServerId = '';
+  let bomServerId = '';
 
   before(async () => {
     assertCliBuilt();
@@ -35,6 +37,7 @@ describe('mcp server local CRUD', { timeout: 180_000 }, () => {
   after(async () => {
     if (serverId) await deleteServer(serverId).catch(() => {});
     if (aggregateServerId) await deleteServer(aggregateServerId).catch(() => {});
+    if (bomServerId) await deleteServer(bomServerId).catch(() => {});
     cleanupTmpFiles();
   });
 
@@ -155,6 +158,30 @@ describe('mcp server local CRUD', { timeout: 180_000 }, () => {
     const cfg = extractServerGetJson(gr.stdout);
     assert.equal(cfg?.name, 'aggregate-everything');
     assert.equal(cfg?.connectionType, 'STDIO');
+  });
+
+  it('edit: accepts UTF-8 BOM JSON files', async () => {
+    const file = writeTmpJson({
+      connectionType: 'STDIO',
+      command: 'node',
+      args: ['--version'],
+      name: 'bom-json-server',
+    }, 'bom-server');
+    const add = await cli(withGw(['mcp', 'server', 'add', '--file', file]));
+    assert.equal(add.exitCode, 0, `stdout:\n${add.stdout}\nstderr:\n${add.stderr}`);
+    const m = add.stdout.match(/\(([^)]+)\)\s*$/m);
+    assert.ok(m, `expected ID in output:\n${add.stdout}`);
+    bomServerId = m[1];
+
+    const patchFile = writeTmpJson({ name: 'bom-json-server-edited' }, 'bom-patch');
+    const raw = fs.readFileSync(patchFile);
+    fs.writeFileSync(patchFile, Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), raw]));
+
+    const edit = await cli(withGw(['mcp', 'server', 'edit', '--id', bomServerId, '--file', patchFile]));
+    assert.equal(edit.exitCode, 0, `stdout:\n${edit.stdout}\nstderr:\n${edit.stderr}`);
+    const get = await cli(withGw(['mcp', 'server', 'get', '--id', bomServerId]));
+    const cfg = extractServerGetJson(get.stdout);
+    assert.equal(cfg?.name, 'bom-json-server-edited');
   });
 
   it('delete: succeeds', async () => {

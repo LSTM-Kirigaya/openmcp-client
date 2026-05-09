@@ -18,10 +18,11 @@ import {
 import {
   getSessionByClientId,
   rememberSession,
+  removeSession,
   requireClientId
 } from '../../lib/mcp-session-store.js';
 import { findRpcHistoryById, getRpcHistoryPath, queryRpcHistory } from '../../lib/rpc-history.js';
-import { diagnoseThrownError } from '../../lib/error-diagnose.js';
+import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
@@ -42,6 +43,41 @@ function printThrown(error: unknown): void {
   process.exitCode = 1;
 }
 
+function parseCsv(value?: string): string[] {
+  return String(value || '')
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function shouldRedactEnvKey(key: string): boolean {
+  return /(api[-_]?key|token|secret|password|passwd|authorization|credential)/i.test(key);
+}
+
+function maskEnvValue(key: string, value: string, showSecrets: boolean): string {
+  if (showSecrets || !shouldRedactEnvKey(key)) return value;
+  if (value.length <= 8) return '***';
+  return `${value.slice(0, 4)}***${value.slice(-4)}`;
+}
+
+function selectEnvPreview(
+  env: Record<string, string>,
+  injectedKeys: string[],
+  options: { keys?: string; showProcessEnv?: boolean; showSecrets?: boolean }
+): Record<string, string> {
+  const selectedKeys = options.showProcessEnv
+    ? Object.keys(env).sort()
+    : Array.from(new Set([...injectedKeys, ...parseCsv(options.keys)])).sort();
+
+  const selected: Record<string, string> = {};
+  for (const key of selectedKeys) {
+    if (Object.prototype.hasOwnProperty.call(env, key)) {
+      selected[key] = maskEnvValue(key, env[key], Boolean(options.showSecrets));
+    }
+  }
+  return selected;
+}
+
 export const mcpRawCommand = new Command('mcp')
   .description('MCP 原生协议命令：ping、会话、配置、历史等');
 
@@ -58,6 +94,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('ping', { clientId });
           printResponse('ping', res);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {
@@ -79,6 +116,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('server/version', { clientId });
           printResponse('server/version', res);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {
@@ -126,12 +164,31 @@ mcpRawCommand
 
 /* ── config ── */
 
-const configCmd = new Command('config').description('MCP 配置生命周期：校验、模板、导出、env 预览');
+const MCP_CONFIG_HELP = `
+Config file format:
+  Direct OpenMCP shape:
+    {"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}
+    {"connectionType":"SSE","url":"http://127.0.0.1:3000/sse"}
+    {"connectionType":"STREAMABLE_HTTP","url":"http://127.0.0.1:8080/mcp"}
+
+  mcpServers shape:
+    {"mcpServers":{"everything":{"command":"npx","args":["-y","@modelcontextprotocol/server-everything"],"env":{"API_KEY":"..."}}}}
+
+Examples:
+  openmcp debug mcp config init --template stdio -o ./mcp.json
+  openmcp debug mcp config validate -f ./mcp.json
+  openmcp debug mcp config env-preview -f ./mcp.json --mcp-server everything
+`;
+
+const configCmd = new Command('config')
+  .description('MCP 配置生命周期：校验、模板、导出、env 预览')
+  .addHelpText('after', MCP_CONFIG_HELP);
 
 configCmd
   .command('validate')
   .description('校验配置文件结构与连接字段')
   .requiredOption('-f, --file <path>', '配置文件路径')
+  .addHelpText('after', MCP_CONFIG_HELP)
   .action((options) => {
     try {
       const config = readJsonFile(options.file);
@@ -187,15 +244,21 @@ configCmd
   .description('展示配置解析后的 env 注入结果')
   .requiredOption('-f, --file <path>', '配置文件路径')
   .option('--mcp-server <name>', '聚合配置时指定 server')
+  .option('--keys <keys>', 'comma-separated env keys to include in mergedEnv')
+  .option('--show-process-env', 'include the full merged process env in output', false)
+  .option('--show-secrets', 'do not redact secret-looking env values', false)
+  .addHelpText('after', MCP_CONFIG_HELP)
   .action((options) => {
     try {
       const config = readJsonFile(options.file);
       const payload = resolvePayloadFromConfig(config, options.mcpServer as string | undefined);
       const preview = previewMergedEnv(payload);
+      const mergedEnv = selectEnvPreview(preview.env, preview.injectedKeys, options);
       printJson({
         connectionType: payload.connectionType,
         injectedKeys: preview.injectedKeys,
-        mergedEnv: preview.env
+        mergedEnv,
+        omittedKeys: Math.max(0, Object.keys(preview.env).length - Object.keys(mergedEnv).length)
       });
     } catch (error) {
       printThrown(error);

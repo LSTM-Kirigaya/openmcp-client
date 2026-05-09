@@ -75,6 +75,77 @@ describe('cli surface', { timeout: 120_000 }, () => {
     assert.match(r.stdout, /--args '\{\\"message\\":\\"hi\\"\}'/);
   });
 
+  it('mcp server add/edit help explains JSON config shapes', async () => {
+    const add = await cli(['mcp', 'server', 'add', '--help']);
+    assert.equal(add.exitCode, 0, add.stderr);
+    assert.match(add.stdout, /Direct OpenMCP server object/);
+    assert.match(add.stdout, /"connectionType":"STDIO"/);
+    assert.match(add.stdout, /"command":"npx"/);
+    assert.match(add.stdout, /mcpServers file format is also accepted/);
+    assert.match(add.stdout, /STDIO uses command \+ args/);
+
+    const edit = await cli(['mcp', 'server', 'edit', '--help']);
+    assert.equal(edit.exitCode, 0, edit.stderr);
+    assert.match(edit.stdout, /Patch format/);
+    assert.match(edit.stdout, /Include only fields you want to change/);
+    assert.match(edit.stdout, /"connectionType":"SSE"/);
+  });
+
+  it('mcp server rejects STDIO command mistakenly placed in url', async () => {
+    const badData = '{"type":"stdio","url":"npx -y @modelcontextprotocol/server-everything"}';
+    const r = await cli([
+      'mcp', 'server', 'add',
+      '--data', badData,
+      '-g', 'ws://127.0.0.1:65534',
+    ]);
+    const output = `${r.stdout}\n${r.stderr}`;
+    assert.notEqual(r.exitCode, 0);
+    assert.match(output, /Invalid STDIO server config/);
+    assert.match(output, /command and args, not url/);
+    assert.doesNotMatch(output, /ECONNREFUSED/);
+  });
+
+  it('JSON and file input help includes concrete examples', async () => {
+    const cases: Array<{ args: string[]; patterns: RegExp[] }> = [
+      {
+        args: ['debug', 'batch', 'run', '--help'],
+        patterns: [/Example request/, /"messages":/, /"llmConfig":/],
+      },
+      {
+        args: ['debug', 'batch', 'save', '--help'],
+        patterns: [/Example suite/, /"storage":/, /openmcp debug batch save --file/],
+      },
+      {
+        args: ['debug', 'tool', 'test-case', 'save', '--help'],
+        patterns: [/Example test case/, /"toolName":"echo"/, /openmcp debug tool test-case save --file/],
+      },
+      {
+        args: ['debug', 'prompt', 'get', '--help'],
+        patterns: [/prompt arguments/, /openmcp debug prompt list/, /"city":"Shanghai"/],
+      },
+      {
+        args: ['debug', 'mcp', 'config', 'validate', '--help'],
+        patterns: [/Config file format/, /"connectionType":"STDIO"/, /"mcpServers":/],
+      },
+      {
+        args: ['setting', 'general', 'save', '--help'],
+        patterns: [/full settings JSON object/, /setting general set/, /"MCP_TIMEOUT_SEC":120/],
+      },
+      {
+        args: ['setting', 'llm', 'chat', '--help'],
+        patterns: [/messages array/, /"role":"user"/, /openmcp setting llm chat/],
+      },
+    ];
+
+    for (const item of cases) {
+      const r = await cli(item.args);
+      assert.equal(r.exitCode, 0, `stderr for ${item.args.join(' ')}:\n${r.stderr}`);
+      for (const pattern of item.patterns) {
+        assert.match(r.stdout, pattern, `missing ${pattern} in ${item.args.join(' ')}:\n${r.stdout}`);
+      }
+    }
+  });
+
   it('tool call accepts PowerShell-stripped JSON-like args', async () => {
     const r = await cli([
       'debug', 'tool', 'call',

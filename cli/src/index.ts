@@ -12,6 +12,7 @@ import {
   skillsCmd
 } from './commands/index.js';
 import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
+import { diagnoseThrownError } from './lib/error-diagnose.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -50,4 +51,13 @@ program
 
 enableHelpAfterErrors(program);
 
-program.parse();
+try {
+  await program.parseAsync(process.argv);
+} catch (error) {
+  const text = error instanceof Error ? error.message : String(error);
+  console.error(text);
+  for (const tip of diagnoseThrownError(error)) {
+    console.error(`[diagnose] ${tip}`);
+  }
+  process.exitCode = 1;
+}

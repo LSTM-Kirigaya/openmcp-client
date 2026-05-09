@@ -380,7 +380,7 @@ export class McpClient {
             });
         }
 
-        this.connectionResult.reuseConntion = msg.reuseConntion;
+        this.connectionResult.reuseConntion = msg.reuseConnection ?? msg.reuseConntion;
         this.connectionResult.status = msg.status;
         this.connectionResult.clientId = msg.clientId;
         this.connectionResult.name = msg.name;

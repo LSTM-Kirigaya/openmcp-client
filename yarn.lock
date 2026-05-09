@@ -3,7 +3,7 @@
 
 
 "@agent-ruler/openmcp@file:K:\\code\\jinhui\\openmcp\\openmcp-client\\cli":
-  version "0.1.5"
+  version "0.1.6"
   resolved "file:cli"
   dependencies:
     "@modelcontextprotocol/sdk" "^1.18.2"

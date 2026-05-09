@@ -1,7 +1,6 @@
-import fs from 'node:fs';
 import { Command } from 'commander';
-import { DEFAULT_GATEWAY, printJson, withGateway } from '../../lib/cli-helpers.js';
-import { resolvePayloadFromConfig } from '../../lib/mcp-config.js';
+import { DEFAULT_GATEWAY, parseJsonData, printJson, readJsonObjectFile, withGateway } from '../../lib/cli-helpers.js';
+import { normalizeConnectionType, resolvePayloadFromConfig } from '../../lib/mcp-config.js';
 
 interface ServerItem {
   id: string;
@@ -24,27 +23,149 @@ const ERR_NEED_FILE_OR_DATA =
   'Please provide JSON with --file or --data.\n' +
   'See: openmcp mcp server add --help';
 
-function parseAnyJson(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    throw new Error('Failed to parse JSON');
-  }
+const SERVER_INPUT_HELP = `
+Input format:
+  --data and --file must contain a JSON object. A file uses the same JSON shape as --data.
+
+Direct OpenMCP server object:
+  STDIO:
+    {"name":"everything","connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}
+  SSE:
+    {"name":"remote-sse","connectionType":"SSE","url":"http://127.0.0.1:3000/sse"}
+  Streamable HTTP:
+    {"name":"remote-http","connectionType":"STREAMABLE_HTTP","url":"http://127.0.0.1:8080/mcp"}
+
+mcpServers file format is also accepted:
+  {"mcpServers":{"everything":{"command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}}}
+
+Notes:
+  - Direct config uses connectionType. The aliases type/transport are accepted and normalized.
+  - STDIO uses command + args. Do not put a shell command in url.
+  - Use --mcp-server <name> when an mcpServers file contains multiple entries.
+  - In PowerShell, prefer --file for complex JSON, or escape inline quotes with backslashes.
+`;
+
+const SERVER_ADD_HELP = `
+Examples:
+  openmcp mcp server add --data '{"name":"everything","connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}'
+  openmcp mcp server add --file ./my-server.json
+  openmcp mcp server add --file ./mcp-servers.json --mcp-server everything
+
+${SERVER_INPUT_HELP}`;
+
+const SERVER_EDIT_HELP = `
+Examples:
+  openmcp mcp server edit --id <ID> --data '{"name":"everything-renamed"}'
+  openmcp mcp server edit --id <ID> --data '{"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}'
+  openmcp mcp server edit --id <ID> --data '{"connectionType":"SSE","url":"http://127.0.0.1:3000/sse"}'
+  openmcp mcp server edit --id <ID> --file ./patch.json
+
+Patch format:
+  The JSON object is merged into the existing server. Include only fields you want to change.
+  For STDIO, use command and args. Example patch file:
+    {"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}
+
+${SERVER_INPUT_HELP}`;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
-function readAnyJsonFile(filePath: string): unknown {
-  return parseAnyJson(fs.readFileSync(filePath, 'utf-8'));
+function hasText(value: unknown): value is string {
+  return typeof value === 'string' && value.trim() !== '';
+}
+
+function getExplicitConnectionType(payload: Record<string, unknown>): string | undefined {
+  if (hasText(payload.connectionType)) return payload.connectionType;
+  if (hasText(payload.type)) return payload.type;
+  if (hasText(payload.transport)) return payload.transport;
+  return undefined;
+}
+
+function normalizeServerInput(input: Record<string, unknown>, mode: 'add' | 'edit'): Record<string, unknown> {
+  const payload = { ...input };
+  const explicitType = getExplicitConnectionType(payload);
+  if (explicitType) {
+    const normalized = normalizeConnectionType(explicitType);
+    if (!normalized) {
+      throw new Error([
+        `Invalid connectionType: ${explicitType}`,
+        'Expected one of: STDIO, SSE, STREAMABLE_HTTP.',
+        'Example: --data \'{"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}\''
+      ].join('\n'));
+    }
+    payload.connectionType = normalized;
+  } else if (mode === 'add') {
+    if (hasText(payload.command)) payload.connectionType = 'STDIO';
+    else if (hasText(payload.url)) payload.connectionType = 'SSE';
+  }
+
+  delete payload.type;
+  delete payload.transport;
+  validateServerInput(payload, mode);
+  return payload;
+}
+
+function validateServerInput(payload: Record<string, unknown>, mode: 'add' | 'edit'): void {
+  if (payload.connectionType !== undefined && typeof payload.connectionType !== 'string') {
+    throw new Error('Invalid connectionType: value must be a string such as STDIO, SSE, or STREAMABLE_HTTP.');
+  }
+  const type = normalizeConnectionType(payload.connectionType);
+  const hasCommand = hasText(payload.command);
+  const hasUrl = hasText(payload.url);
+
+  if (payload.args !== undefined && !Array.isArray(payload.args)) {
+    throw new Error([
+      'Invalid server args: args must be a JSON array of strings.',
+      'Example: --data \'{"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}\''
+    ].join('\n'));
+  }
+
+  if (payload.env !== undefined && !isPlainObject(payload.env)) {
+    throw new Error('Invalid server env: env must be a JSON object, for example {"OPENMCP_API_KEY":"..."}');
+  }
+
+  if (type === 'STDIO') {
+    if (hasUrl && !hasCommand) {
+      throw new Error([
+        'Invalid STDIO server config: STDIO uses command and args, not url.',
+        'Use: --data \'{"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}\'',
+        'Use url only for SSE or STREAMABLE_HTTP servers.'
+      ].join('\n'));
+    }
+    if (mode === 'add' && !hasCommand) {
+      throw new Error([
+        'Invalid STDIO server config: command is required.',
+        'Example: --data \'{"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}\''
+      ].join('\n'));
+    }
+  }
+
+  if ((type === 'SSE' || type === 'STREAMABLE_HTTP') && mode === 'add' && !hasUrl) {
+    throw new Error([
+      `Invalid ${type} server config: url is required.`,
+      'Example: --data \'{"connectionType":"SSE","url":"http://127.0.0.1:3000/sse"}\''
+    ].join('\n'));
+  }
+
+  if (mode === 'add' && !type) {
+    throw new Error([
+      'Invalid server config: connectionType could not be determined.',
+      'Use connectionType with one of STDIO, SSE, STREAMABLE_HTTP.',
+      'Example: --data \'{"connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}\''
+    ].join('\n'));
+  }
 }
 
 function loadEntryFromOptions(options: {
   file?: string;
   data?: string;
   mcpServer?: string;
-}): Record<string, unknown> {
+}, mode: 'add' | 'edit'): Record<string, unknown> {
   const source = typeof options.file === 'string' && options.file.trim()
-    ? readAnyJsonFile(options.file)
+    ? readJsonObjectFile(options.file)
     : typeof options.data === 'string' && options.data.trim()
-      ? parseAnyJson(options.data)
+      ? parseJsonData(options.data, '--data')
       : undefined;
   if (source === undefined) {
     throw new Error(ERR_NEED_FILE_OR_DATA);
@@ -52,9 +173,9 @@ function loadEntryFromOptions(options: {
   if (source && typeof source === 'object' && !Array.isArray(source)) {
     const maybeRecord = source as Record<string, unknown>;
     if (maybeRecord.mcpServers) {
-      return resolvePayloadFromConfig(maybeRecord, options.mcpServer) as Record<string, unknown>;
+      return normalizeServerInput(resolvePayloadFromConfig(maybeRecord, options.mcpServer) as Record<string, unknown>, mode);
     }
-    return maybeRecord;
+    return normalizeServerInput(maybeRecord, mode);
   }
   throw new Error('Connection definition must be a JSON object');
 }
@@ -163,9 +284,10 @@ gw(
     .option('--data <json>', 'Inline JSON config')
     .option('--name <name>', 'Override display name')
     .option('--mcp-server <name>', 'Server name inside an mcpServers config')
+    .addHelpText('after', SERVER_ADD_HELP)
     .action(async (options) => {
       try {
-        const entry = loadEntryFromOptions(options);
+        const entry = loadEntryFromOptions(options, 'add');
         if (options.name) entry.name = options.name;
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('servers/save', { ...entry, scope: 'local' });
@@ -192,9 +314,10 @@ gw(
     .option('--file <path>', 'JSON patch file')
     .option('--data <json>', 'Inline JSON patch')
     .option('--mcp-server <name>', 'Server name inside an mcpServers config')
+    .addHelpText('after', SERVER_EDIT_HELP)
     .action(async (options) => {
       try {
-        const patch = loadEntryFromOptions(options);
+        const patch = loadEntryFromOptions(options, 'edit');
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('servers/save', {
             ...patch,

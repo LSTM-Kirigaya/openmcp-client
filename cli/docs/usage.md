@@ -37,6 +37,14 @@ openmcp gateway run -p 8282
 - 扁平 `McpOptions`（`connectionType`、`command`、`args`、`url`...）
 - 聚合 `mcpServers`（Cursor / VSCode 常见格式，必要时加 `--mcp-server <name>`）
 
+扁平 STDIO 配置示例：
+
+```json
+{"name":"everything","connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}
+```
+
+注意：STDIO 使用 `command` + `args`，不要把 `npx -y ...` 写到 `url`。`url` 只用于 `SSE` 或 `STREAMABLE_HTTP`。
+
 完整示例见：
 
 ```bash

@@ -5,6 +5,22 @@ function includesAny(text: string, needles: string[]): boolean {
   return needles.some((n) => lower.includes(n.toLowerCase()));
 }
 
+export function isMissingSessionMessage(text: string): boolean {
+  return includesAny(text, [
+    'mcp client',
+    '尚未连接',
+    'not connected',
+    'clientid',
+    'client id',
+    'session is missing'
+  ]);
+}
+
+export function isMissingSessionResponse(response: RestFulResponse): boolean {
+  const msg = typeof response.msg === 'string' ? response.msg : JSON.stringify(response.msg);
+  return isMissingSessionMessage(msg);
+}
+
 export function diagnoseResponse(command: string, response: RestFulResponse): string[] {
   const advice: string[] = [];
   const msg = typeof response.msg === 'string' ? response.msg : JSON.stringify(response.msg);
@@ -19,8 +35,8 @@ export function diagnoseResponse(command: string, response: RestFulResponse): st
   if (code >= 500 || includesAny(msg, ['econnrefused', 'spawn', 'not found'])) {
     advice.push('Service execution failed. Check gateway, MCP process path, URL, command, and cwd.');
   }
-  if (includesAny(msg, ['clientid', 'client id'])) {
-    advice.push('Session is missing. Run `openmcp mcp session list` or reconnect with `openmcp mcp session connect`.');
+  if (isMissingSessionMessage(msg)) {
+    advice.push('No active MCP session is connected. Run `openmcp mcp session list` to inspect live sessions, then reconnect with `openmcp mcp session connect --id <SERVER_ID>`.');
   }
   if (advice.length === 0 && code !== 200) {
     advice.push(`Command \`${command}\` failed. Check request arguments and gateway logs.`);

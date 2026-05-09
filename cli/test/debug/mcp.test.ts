@@ -100,6 +100,8 @@ describe('debug mcp', { timeout: 180_000 }, () => {
     const j = extractJson(r.stdout);
     assert.equal(j.connectionType, 'STDIO');
     assert.ok(j.injectedKeys.includes('OPENMCP_E2E_ENV'), JSON.stringify(j));
+    assert.deepEqual(j.mergedEnv, { OPENMCP_E2E_ENV: 'yes' }, JSON.stringify(j));
+    assert.ok(j.omittedKeys > 0, JSON.stringify(j));
   });
 
   it('config export writes mcpServers config for current session', async () => {

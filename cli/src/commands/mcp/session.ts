@@ -10,11 +10,12 @@ import {
   getRecentSessions,
   getSessionStorePath,
   rememberSession,
+  reconcileGatewaySessions,
   removeSession,
   requireClientId,
   setCurrentClientId
 } from '../../lib/mcp-session-store.js';
-import { diagnoseThrownError } from '../../lib/error-diagnose.js';
+import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
@@ -49,6 +50,15 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('connect/list', {});
           printResponse('connect/list', res);
+          if (res.code === 200) {
+            const sessions = Array.isArray(res.msg) ? res.msg : [];
+            reconcileGatewaySessions(
+              options.gateway,
+              sessions
+                .map((session: any) => session?.clientId)
+                .filter((clientId: unknown): clientId is string => typeof clientId === 'string')
+            );
+          }
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {
@@ -57,37 +67,43 @@ gw(
     })
 );
 
-mcpSessionCommand
-  .command('current')
-  .description('Show current default session')
-  .action(() => {
-    printJson({
-      currentClientId: getCurrentClientId() ?? null,
-      storePath: getSessionStorePath()
-    });
-  });
+gw(
+  mcpSessionCommand
+    .command('current')
+    .description('Show current default session')
+    .action(() => {
+      printJson({
+        currentClientId: getCurrentClientId() ?? null,
+        storePath: getSessionStorePath()
+      });
+    })
+);
 
-mcpSessionCommand
-  .command('recent')
-  .description('Show recent sessions')
-  .option('--limit <n>', 'Result limit, default 20', '20')
-  .action((options) => {
-    const limit = Number(options.limit || 20);
-    printJson({
-      currentClientId: getCurrentClientId() ?? null,
-      recent: getRecentSessions(limit),
-      storePath: getSessionStorePath()
-    });
-  });
+gw(
+  mcpSessionCommand
+    .command('recent')
+    .description('Show recent sessions')
+    .option('--limit <n>', 'Result limit, default 20', '20')
+    .action((options) => {
+      const limit = Number(options.limit || 20);
+      printJson({
+        currentClientId: getCurrentClientId() ?? null,
+        recent: getRecentSessions(limit),
+        storePath: getSessionStorePath()
+      });
+    })
+);
 
-mcpSessionCommand
-  .command('use')
-  .description('Switch default session')
-  .requiredOption('--client-id <id>', 'Target clientId')
-  .action((options) => {
-    setCurrentClientId(options.clientId);
-    printJson({ ok: true, currentClientId: options.clientId });
-  });
+gw(
+  mcpSessionCommand
+    .command('use')
+    .description('Switch default session')
+    .requiredOption('--client-id <id>', 'Target clientId')
+    .action((options) => {
+      setCurrentClientId(options.clientId);
+      printJson({ ok: true, currentClientId: options.clientId });
+    })
+);
 
 gw(
   mcpSessionCommand
@@ -127,11 +143,10 @@ gw(
     .action(async (options) => {
       try {
         const clientId = requireClientId(options.clientId);
-        rememberSession(clientId, options.gateway);
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('disconnect', { clientId });
           printResponse('disconnect', res);
-          if (res.code === 200) removeSession(clientId);
+          if (res.code === 200 || isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {

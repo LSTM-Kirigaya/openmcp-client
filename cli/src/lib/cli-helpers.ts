@@ -225,6 +225,10 @@ function assertPlainJsonObject(value: unknown, optionName: string): Record<strin
   return value as Record<string, unknown>;
 }
 
+function stripJsonBom(raw: string): string {
+  return raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
+}
+
 function invalidJsonError(optionName: string, raw: string): Error {
   return new Error([
     `Invalid JSON for ${optionName}`,
@@ -238,7 +242,7 @@ export function parseJsonData(raw?: string, optionName = '--data'): Record<strin
   if (!raw || raw.trim() === '') {
     return {};
   }
-  const trimmed = raw.trim();
+  const trimmed = stripJsonBom(raw).trim();
   try {
     return assertPlainJsonObject(JSON.parse(trimmed), optionName);
   } catch {
@@ -248,9 +252,17 @@ export function parseJsonData(raw?: string, optionName = '--data'): Record<strin
   }
 }
 
-export function readJsonFile(path: string): Record<string, unknown> {
-  const text = fs.readFileSync(path, 'utf-8');
-  return JSON.parse(text) as Record<string, unknown>;
+export function readJsonFile(path: string): any {
+  const text = stripJsonBom(fs.readFileSync(path, 'utf-8'));
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw invalidJsonError(path, text.trim());
+  }
+}
+
+export function readJsonObjectFile(path: string): Record<string, unknown> {
+  return assertPlainJsonObject(readJsonFile(path), path);
 }
 
 export function writeJsonFile(path: string, value: unknown): void {

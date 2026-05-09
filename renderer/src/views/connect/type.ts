@@ -10,6 +10,7 @@ export interface ConnectionTypeOptionItem {
 export interface IConnectionResult {
     info?: string
     success: boolean
+    reuseConnection?: boolean
     reuseConntion: boolean
     status: string
     clientId: string

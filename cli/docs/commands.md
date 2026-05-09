@@ -62,6 +62,14 @@ MCP Server 配置与运行会话管理。
 
 `mcp server add` 支持扁平 JSON 配置，也支持 `mcpServers` 聚合配置并通过 `--mcp-server` 选择目标。
 
+`mcp server add/edit --data` 和 `--file` 都必须是 JSON 对象；文件内容和 `--data` 的结构一致。扁平格式使用 `connectionType`：
+
+```json
+{"name":"everything","connectionType":"STDIO","command":"npx","args":["-y","@modelcontextprotocol/server-everything"]}
+```
+
+STDIO 要写 `command` + `args`，不要把 `npx -y ...` 放进 `url`；`url` 只用于 `SSE` 或 `STREAMABLE_HTTP`。
+
 ---
 
 ## `debug`

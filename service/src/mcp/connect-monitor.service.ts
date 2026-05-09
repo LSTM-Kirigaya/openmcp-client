@@ -53,6 +53,10 @@ export class McpServerConnectMonitor {
 
         switch (normalizeConnectionType(options.connectionType)) {
             case 'STDIO':
+                if (!this.filePath || !fs.existsSync(this.filePath) || !fs.statSync(this.filePath).isFile()) {
+                    logger.debug({ uuid, filePath: this.filePath }, 'Skip STDIO monitor because target file does not exist');
+                    break;
+                }
                 console.log('monitor on ' + this.filePath);
                 this.setupStdioMonitor(onchange);
                 break;

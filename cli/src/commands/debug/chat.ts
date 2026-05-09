@@ -19,6 +19,19 @@ function printThrown(error: unknown): void {
 export const chatCommand = new Command('chat')
   .description('交互测试：使用 LLM Agent 测试 MCP Server');
 
+const CHAT_START_HELP = `
+Input format:
+  Use -m for a single user message.
+  Use --file for either a messages array or an object with a messages array.
+
+Example messages file:
+  [{"role":"user","content":"Use the connected MCP tools to answer hello."}]
+
+Examples:
+  openmcp debug chat start --provider deepseek --model deepseek-chat -m "hello"
+  openmcp debug chat start --provider deepseek --model deepseek-chat --file ./messages.json
+`;
+
 gw(
   chatCommand
     .command('start')
@@ -28,6 +41,7 @@ gw(
     .requiredOption('--model <name>', '模型名称')
     .option('-m, --message <text>', '初始用户消息')
     .option('-f, --file <path>', '从 JSON 文件读取 messages 数组')
+    .addHelpText('after', CHAT_START_HELP)
     .action(async (options) => {
       try {
         const clientId = requireClientId(options.clientId);

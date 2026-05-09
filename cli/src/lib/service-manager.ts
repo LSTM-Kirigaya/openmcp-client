@@ -35,10 +35,21 @@ function resolveRendererDistDir(): string {
 }
 
 const RENDERER_DIST_DIR = resolveRendererDistDir();
+const RENDERER_STATIC_CWD = fs.existsSync(path.dirname(RENDERER_DIST_DIR))
+  ? path.dirname(RENDERER_DIST_DIR)
+  : PACKAGE_ROOT;
 const GATEWAY_ENTRY = path.join(GATEWAY_DIR, 'dist', 'main.js');
 const VENDORED_GATEWAY_DIR = path.join(VENDOR_ROOT, 'gateway');
 const VENDORED_SERVICE_ENTRY = path.join(VENDOR_ROOT, 'service', 'dist', 'index.js');
 const STATIC_WEB_SERVER_ENTRY = path.join(__dirname, 'static-web-server.js');
+
+function printRendererDistMissingHint(): void {
+  if (fs.existsSync(RENDERER_DIR)) {
+    console.error(`   请先构建：cd ${RENDERER_DIR} && npm run build:website`);
+    return;
+  }
+  console.error('   发布包缺少 vendor/renderer/dist，请重新安装或重新发布 @agent-ruler/openmcp。');
+}
 
 export function gatewayUserLogDir(): string {
   return path.join(os.homedir(), '.openmcp', 'logs', 'gateway');
@@ -292,9 +303,9 @@ function attachSpawnErrorHandler(proc: ChildProcess, label: string): void {
   proc.on('error', (err: NodeJS.ErrnoException) => {
     console.error(`❌ 无法启动 ${label}：${err.message}`);
     if (err.code === 'ENOENT') {
-      console.error(
-        `   常见于找不到可执行文件。Gateway 使用当前 Node（${NODE}）启动；若仍失败请检查 gateway 目录与构建产物是否存在。`
-      );
+      console.error(`   当前 Node: ${NODE}`);
+      console.error('   常见原因：可执行文件不存在、工作目录不存在，或发布包缺少 vendor 构建产物。');
+      console.error('   请检查上方命令对应的 cwd、dist/vendor 目录，以及 npm 包是否安装完整。');
     }
   });
 }
@@ -635,53 +646,60 @@ export async function startService(port: number = 8282): Promise<{ pid: number }
   return result;
 }
 
+async function stopGatewayByPortLookup(port: number): Promise<boolean> {
+  const detectedPid = await findPidByListeningPort(port);
+  if (detectedPid) {
+    console.log(`⚠️  No local PID record found, fallback to port detection (PID: ${detectedPid}).`);
+    const success = await killProcess(detectedPid);
+    if (success) {
+      console.log(`✅ Gateway stopped by port lookup`);
+      removePidFile();
+      return true;
+    }
+    console.log(`❌ Failed to stop detected process (PID: ${detectedPid}).`);
+    console.log(`   This may require elevated privilege or a different user session.`);
+    return false;
+  }
+
+  console.log(`⚠️  Gateway is reachable at ws://localhost:${port}, but PID could not be resolved from port.`);
+  console.log(`   Please stop it from the terminal/session where it was started.`);
+  return false;
+}
+
 /**
  * 停止 Gateway
  */
 export async function stopService(port: number = 8282): Promise<boolean> {
   const { pid } = readPidMeta(port);
-  
+
   if (!pid) {
     if (await isGatewayReachable(port)) {
-      const detectedPid = await findPidByListeningPort(port);
-      if (detectedPid) {
-        console.log(`⚠️  No local PID record found, fallback to port detection (PID: ${detectedPid}).`);
-        const success = await killProcess(detectedPid);
-        if (success) {
-          console.log(`✅ Gateway stopped by port lookup`);
-          removePidFile();
-          return true;
-        }
-        console.log(`❌ Failed to stop detected process (PID: ${detectedPid}).`);
-        console.log(`   This may require elevated privilege or a different user session.`);
-        return false;
-      }
-
-      console.log(`⚠️  Gateway is reachable at ws://localhost:${port}, but PID could not be resolved from port.`);
-      console.log(`   Please stop it from the terminal/session where it was started.`);
-      return false;
+      return stopGatewayByPortLookup(port);
     }
     console.log(`ℹ️  No Gateway PID found. Is it running?`);
     return false;
   }
-  
+
   if (!(await isProcessRunning(pid))) {
     console.log(`ℹ️  Gateway process (PID: ${pid}) is not running`);
     removePidFile();
+    if (await isGatewayReachable(port)) {
+      return stopGatewayByPortLookup(port);
+    }
     return false;
   }
-  
+
   console.log(`🛑 Stopping Gateway (PID: ${pid})...`);
-  
+
   const success = await killProcess(pid);
-  
+
   if (success) {
     console.log(`✅ Gateway stopped`);
     removePidFile();
   } else {
     console.log(`❌ Failed to stop Gateway`);
   }
-  
+
   return success;
 }
 
@@ -768,7 +786,7 @@ export function startRenderer(port: number = 8283, gatewayPort: number = 8282): 
 export function startRendererStatic(port: number = 8283, gatewayPort: number = 8282): ChildProcess | null {
   if (!fs.existsSync(RENDERER_DIST_DIR)) {
     console.error(`❌ renderer dist not found: ${RENDERER_DIST_DIR}`);
-    console.error(`   请先构建：cd ${RENDERER_DIR} && npm run build:website`);
+    printRendererDistMissingHint();
     return null;
   }
 
@@ -783,7 +801,7 @@ export function startRendererStatic(port: number = 8283, gatewayPort: number = 8
   };
 
   currentRenderer = spawn(NODE, [STATIC_WEB_SERVER_ENTRY], {
-    cwd: RENDERER_DIR,
+    cwd: RENDERER_STATIC_CWD,
     env,
     stdio: 'inherit',
     shell: false,
@@ -882,7 +900,7 @@ export async function startRendererStaticBackground(port: number = 8283, gateway
 
   if (!fs.existsSync(RENDERER_DIST_DIR)) {
     console.error(`❌ renderer dist not found: ${RENDERER_DIST_DIR}`);
-    console.error(`   请先构建：cd ${RENDERER_DIR} && npm run build:website`);
+    printRendererDistMissingHint();
     return { pid: 0 };
   }
 
@@ -894,7 +912,7 @@ export async function startRendererStaticBackground(port: number = 8283, gateway
   };
 
   const child = spawn(NODE, [STATIC_WEB_SERVER_ENTRY], {
-    cwd: RENDERER_DIR,
+    cwd: RENDERER_STATIC_CWD,
     env,
     detached: true,
     stdio: 'ignore',

@@ -61,6 +61,19 @@ function gw(cmd: Command): Command {
 export const llmCommand = new Command('llm')
   .description('大模型 API 管理：提供商、模型、测试、对话');
 
+const LLM_CHAT_HELP = `
+Input format:
+  Use -m for one user message.
+  Use --file for either a messages array or an object with a messages array.
+
+Example messages file:
+  [{"role":"user","content":"hello"}]
+
+Examples:
+  openmcp setting llm chat --provider deepseek --model deepseek-chat -m "hello"
+  openmcp setting llm chat --provider deepseek --model deepseek-chat --file ./messages.json
+`;
+
 /* ── provider list ── */
 
 const providerCmd = new Command('provider')
@@ -440,6 +453,7 @@ gw(
     .option('-m, --message <text>', '快捷发送单条用户消息')
     .option('-f, --file <path>', '从 JSON 文件读取 messages 数组')
     .option('--temperature <number>', '温度参数', parseFloat)
+    .addHelpText('after', LLM_CHAT_HELP)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         let provider: LlmProviderInfo;

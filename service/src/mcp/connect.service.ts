@@ -280,20 +280,53 @@ async function initNpm(option: McpOptions, cwd: string, webview?: PostMessageble
 }
 
 
+function normalizeForStableStringify(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map(normalizeForStableStringify);
+    }
+    if (value && typeof value === 'object') {
+        const out: Record<string, unknown> = {};
+        for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+            const item = (value as Record<string, unknown>)[key];
+            if (item !== undefined) {
+                out[key] = normalizeForStableStringify(item);
+            }
+        }
+        return out;
+    }
+    return value;
+}
+
+function stableStringify(value: unknown): string {
+    return JSON.stringify(normalizeForStableStringify(value)) ?? '';
+}
+
+function connectionIdentity(option: McpOptions): Record<string, unknown> {
+    return {
+        connectionType: normalizeConnectionType(option.connectionType) || option.connectionType,
+        command: option.command,
+        args: option.args,
+        url: option.url,
+        cwd: option.cwd,
+        env: option.env,
+        clientName: option.clientName,
+        clientVersion: option.clientVersion
+    };
+}
+
 async function deterministicUUID(input: string) {
-    // 使用Web Crypto API进行哈希
     const msgBuffer = new TextEncoder().encode(input);
     const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    // 格式化为UUID (版本5)
+    const bytes = new Uint8Array(hashBuffer).slice(0, 16);
+    bytes[6] = (bytes[6] & 0x0f) | 0x50;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hashHex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
     return [
         hashHex.substring(0, 8),
-        hashHex.substring(8, 4),
-        '5' + hashHex.substring(13, 3), // 设置版本为5
-        '8' + hashHex.substring(17, 3), // 设置变体
-        hashHex.substring(20, 12)
+        hashHex.substring(8, 12),
+        hashHex.substring(12, 16),
+        hashHex.substring(16, 20),
+        hashHex.substring(20, 32)
     ].join('-');
 }
 
@@ -311,20 +344,29 @@ export async function connectService(
         // 预处理字符串
         await preprocessCommand(option, webview);
 
-        // 通过 option 字符串进行 hash，得到唯一的 uuid
-        const uuid = await deterministicUUID(JSON.stringify(option));
-
-        const reuseConntion = clientMap.has(uuid);
-
-        // if (!clientMap.has(uuid)) {
-        // 	const client = await connect(option);
-        // 	clientMap.set(uuid, client);
-        // }
-        // const client = clientMap.get(uuid)!;
-
-        {
-            clientMap.get(uuid)?.disconnect();
-            clientMonitorMap.get(uuid)?.close();
+        const uuid = await deterministicUUID(stableStringify(connectionIdentity(option)));
+        const existingClient = clientMap.get(uuid);
+        if (existingClient) {
+            const versionInfo = existingClient.getServerVersion();
+            rememberClientStorageBinding({
+                clientId: uuid,
+                connectionId: option.connectionId,
+                connectionKey: option.connectionId || versionInfo?.name || 'default',
+                scope: option.storageScope,
+                workspacePath: option.workspacePath,
+                serverName: versionInfo?.name || 'default'
+            });
+            return {
+                code: 200,
+                msg: {
+                    status: 'success',
+                    clientId: uuid,
+                    reuseConnection: true,
+                    reuseConntion: true,
+                    name: versionInfo?.name || 'unknown',
+                    version: versionInfo?.version || 'unknown'
+                }
+            };
         }
 
         const client = await connect(option);
@@ -349,7 +391,8 @@ export async function connectService(
             msg: {
                 status: 'success',
                 clientId: uuid,
-                reuseConntion,
+                reuseConnection: false,
+                reuseConntion: false,
                 name: versionInfo?.name || 'unknown',
                 version: versionInfo?.version || 'unknown'
             }

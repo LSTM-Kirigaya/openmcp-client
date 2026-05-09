@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import { printResponse, withGateway, DEFAULT_GATEWAY } from '../../lib/cli-helpers.js';
-import { rememberSession, requireClientId } from '../../lib/mcp-session-store.js';
-import { diagnoseThrownError } from '../../lib/error-diagnose.js';
+import { rememberSession, removeSession, requireClientId } from '../../lib/mcp-session-store.js';
+import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
@@ -36,6 +36,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('resources/list', { clientId });
           printResponse('resources/list', res);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {
@@ -56,6 +57,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('resources/read', { clientId, resourceUri: options.uri });
           printResponse('resources/read', res);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {
@@ -75,6 +77,7 @@ gw(
         await withGateway(options.gateway, async (bridge) => {
           const res = await bridge.commandRequest('resources/templates/list', { clientId });
           printResponse('resources/templates/list', res);
+          if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200) process.exitCode = 1;
         });
       } catch (error) {

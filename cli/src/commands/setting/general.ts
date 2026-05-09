@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonFile } from '../../lib/cli-helpers.js';
+import { printJson, withGateway, DEFAULT_GATEWAY, parseJsonData, readJsonObjectFile } from '../../lib/cli-helpers.js';
 
 type GatewayResponse = {
   code: number;
@@ -54,6 +54,17 @@ function parseValue(raw: string): unknown {
 
 export const generalCommand = new Command('general')
   .description('通用设置：语言、超时、代理等');
+
+const GENERAL_SAVE_HELP = `
+Input format:
+  --data and --file must contain a full settings JSON object.
+  This command saves the whole settings object. For one value, prefer:
+    openmcp setting general set <key> <value>
+
+Examples:
+  openmcp setting general save --data '{"LANG":"zh-CN","MCP_TIMEOUT_SEC":120}'
+  openmcp setting general save --file ./settings.json
+`;
 
 /* ── list ── */
 
@@ -214,10 +225,14 @@ gw(
     .description('从文件导入完整设置（整包覆盖）')
     .option('-f, --file <path>', 'JSON 文件')
     .option('-d, --data <json>', '内联 JSON')
+    .addHelpText('after', GENERAL_SAVE_HELP)
     .action(async (options) => {
       let body: Record<string, unknown> = {};
+      if (!options.data && !options.file) {
+        throw new Error('Please provide settings JSON with --file or --data.\nSee: openmcp setting general save --help');
+      }
       if (options.data) body = { ...body, ...parseJsonData(options.data) };
-      if (options.file) body = { ...body, ...readJsonFile(options.file) };
+      if (options.file) body = { ...body, ...readJsonObjectFile(options.file) };
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('setting/save', body);
         printJson(res);

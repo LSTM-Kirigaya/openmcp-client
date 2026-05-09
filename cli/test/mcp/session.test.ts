@@ -47,6 +47,16 @@ describe('mcp session lifecycle', { timeout: 180_000 }, () => {
     connectedClientId = clientId;
   });
 
+  it('connect: same server reuses existing clientId', async () => {
+    const r = await cli(withGw(['mcp', 'session', 'connect', '--id', serverId]), 120_000);
+    assert.equal(r.exitCode, 0, `stderr:\n${r.stderr}\nstdout:\n${r.stdout}`);
+    const m = r.stdout.match(/clientId:\s*(\S+)/);
+    assert.ok(m, `expected clientId in output:\n${r.stdout}`);
+    assert.equal(m[1], clientId, r.stdout);
+    const body = extractJson(r.stdout);
+    assert.equal(body?.msg?.reuseConnection, true, JSON.stringify(body));
+  });
+
   it('session list: code 200 and session present', async () => {
     const r = await cli(withGw(['mcp', 'session', 'list']));
     assert.equal(r.exitCode, 0, r.stderr);
@@ -90,6 +100,13 @@ describe('mcp session lifecycle', { timeout: 180_000 }, () => {
     const r = await cli(withGw(['mcp', 'session', 'disconnect', '--client-id', clientId]));
     assert.equal(r.exitCode, 0, `stderr:\n${r.stderr}\nstdout:\n${r.stdout}`);
     clientId = '';
+  });
+
+  it('session current: disconnect clears stale current session', async () => {
+    const r = await cli(withGw(['mcp', 'session', 'current']));
+    assert.equal(r.exitCode, 0, r.stderr);
+    const body = extractJson(r.stdout);
+    assert.equal(body?.currentClientId, null, JSON.stringify(body));
   });
 
   it('session list: clientId no longer active', async () => {
