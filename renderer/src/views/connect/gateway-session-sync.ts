@@ -1,0 +1,78 @@
+import { useMessageBridge } from '@/api/message-bridge';
+import { mcpClientAdapter } from './core';
+import { panelLoaded } from '@/hook/panel';
+
+export interface GatewaySessionItem {
+	clientId: string;
+	name: string;
+	version: string;
+}
+
+export function normalizeConnectListPayload(res: { msg?: unknown; data?: unknown }): GatewaySessionItem[] {
+	const payload = res.msg ?? res.data;
+	if (Array.isArray(payload)) {
+		return payload as GatewaySessionItem[];
+	}
+	return [];
+}
+
+/**
+ * 拉取 Gateway connect/list，同步 mcpClientAdapter.clients（与 CLI 一致）。
+ * 若已有活跃会话且面板尚未加载，则拉取 panel/load，避免 Debug 里点了「工具」后 v-if="panelLoaded" 整块不渲染导致白屏。
+ */
+export async function fetchAndApplyGatewaySessions(previousSelectedId: string): Promise<{
+	list: GatewaySessionItem[];
+	selectedClientId: string;
+	error?: string;
+}> {
+	const bridge = useMessageBridge();
+	const res = await bridge.commandRequest('connect/list', {});
+	if (res.code !== 200) {
+		const msg = res.msg != null ? String(res.msg) : '';
+		return {
+			list: [],
+			selectedClientId: '',
+			error: msg || 'connect/list failed'
+		};
+	}
+	const list = normalizeConnectListPayload(res);
+	const ids = new Set(list.map(s => s.clientId));
+
+	for (let i = mcpClientAdapter.clients.length - 1; i >= 0; i--) {
+		if (!ids.has(mcpClientAdapter.clients[i].clientId)) {
+			mcpClientAdapter.clients.splice(i, 1);
+		}
+	}
+
+	if (list.length === 0) {
+		mcpClientAdapter.currentClientIndex = 0;
+		return { list, selectedClientId: '' };
+	}
+
+	for (const s of list) {
+		if (!mcpClientAdapter.clients.some(c => c.clientId === s.clientId)) {
+			await mcpClientAdapter.attachExistingGatewaySession(s);
+		}
+	}
+
+	const finalOrdered: typeof mcpClientAdapter.clients = [];
+	for (const s of list) {
+		const c = mcpClientAdapter.clients.find(cl => cl.clientId === s.clientId);
+		if (c) {
+			finalOrdered.push(c);
+		}
+	}
+	mcpClientAdapter.clients.splice(0, mcpClientAdapter.clients.length, ...finalOrdered);
+
+	let nextSelected = previousSelectedId;
+	if (!nextSelected || !ids.has(nextSelected)) {
+		nextSelected = list[0].clientId;
+	}
+	mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.findIndex(c => c.clientId === nextSelected);
+
+	if (list.length > 0 && !panelLoaded.value) {
+		await mcpClientAdapter.loadPanels();
+	}
+
+	return { list, selectedClientId: nextSelected };
+}

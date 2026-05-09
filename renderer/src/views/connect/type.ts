@@ -10,6 +10,7 @@ export interface ConnectionTypeOptionItem {
 export interface IConnectionResult {
     info?: string
     success: boolean
+    reuseConnection?: boolean
     reuseConntion: boolean
     status: string
     clientId: string
@@ -46,7 +47,10 @@ export interface McpOptions {
 
     // 特殊功能
     enableDatasetReflux?: boolean;
-    datasetName?: string
+    datasetName?: string;
+    connectionId?: string;
+    storageScope?: 'user' | 'workspace';
+    workspacePath?: string;
 }
 
 export interface EnvItem {
@@ -69,7 +73,10 @@ export interface IConnectionArgs {
     oauth?: string;
     env?: Record<string, string>;
     enableDatasetReflux?: boolean;
-    datasetName?: string
+    datasetName?: string;
+    connectionId?: string;
+    storageScope?: 'user' | 'workspace';
+    workspacePath?: string;
 }
 
 

@@ -13,6 +13,8 @@ import { DebuggerMcpController } from "../debugger-mcp/debugger-mcp.controller.j
 import { AuthController } from "../auth/auth.controller.js";
 import { CloudBackupController } from "../cloud-backup/cloud-backup.controller.js";
 import { PlanModeController } from "../plan-mode/plan-mode.controller.js";
+import { LocalStorageController } from "../storage/storage.controller.js";
+import { ServerConfigController } from "../mcp/server-config.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
 
 export const ModuleControllers = [
@@ -28,7 +30,9 @@ export const ModuleControllers = [
     DebuggerMcpController,
     AuthController,
     CloudBackupController,
-    PlanModeController
+    PlanModeController,
+    LocalStorageController,
+    ServerConfigController
 ];
 
 export async function routeMessage(command: string, data: any, webview: PostMessageble) {
@@ -64,5 +68,14 @@ export async function routeMessage(command: string, data: any, webview: PostMess
             return payload;
         }
     }
-    return
+    // 未注册命令也返回明确错误，避免客户端一直等待直到超时
+    const payload = {
+        _id: data?._id,
+        code: 404,
+        msg: `Command not found: ${command}`
+    };
+    webview.postMessage({
+        command, data: payload
+    });
+    return payload;
 }

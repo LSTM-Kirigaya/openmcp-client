@@ -12,6 +12,15 @@ const logger = pino({
   
 });
 
+function normalizeConnectionType(type?: string): 'STDIO' | 'SSE' | 'STREAMABLE_HTTP' | undefined {
+    if (!type) return undefined;
+    const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+    if (normalized === 'STDIO') return 'STDIO';
+    if (normalized === 'SSE') return 'SSE';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+    return undefined;
+}
+
 function getFilePath(options: {
     cwd?: string;
     args?: string[];
@@ -42,8 +51,12 @@ export class McpServerConnectMonitor {
         // 记录实例创建
         // logger.info({ uuid, connectionType: options.connectionType }, 'Created new connection monitor instance');
 
-        switch (options.connectionType) {
+        switch (normalizeConnectionType(options.connectionType)) {
             case 'STDIO':
+                if (!this.filePath || !fs.existsSync(this.filePath) || !fs.statSync(this.filePath).isFile()) {
+                    logger.debug({ uuid, filePath: this.filePath }, 'Skip STDIO monitor because target file does not exist');
+                    break;
+                }
                 console.log('monitor on ' + this.filePath);
                 this.setupStdioMonitor(onchange);
                 break;

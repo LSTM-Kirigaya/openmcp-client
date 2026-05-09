@@ -5,7 +5,7 @@
             "cache": false
         },
         "build": {
-            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build", "//#build:task-loop"],
+            "dependsOn": ["@openmcp/renderer#build", "@openmcp/service#build", "@openmcp/gateway#build", "@agent-ruler/openmcp#build", "@openmcp/sdk#build", "//#build:task-loop"],
             "cache": false
         },
         "//#build:task-loop": {
@@ -22,15 +22,26 @@
         "@openmcp/renderer#build": {
             "cache": false
         },
-        "@openmcp/service#serve": {
-            "persistent": true,
-            "cache": false
-        },
-        "@openmcp/service#dev": {
-            "persistent": true,
-            "cache": false
-        },
         "@openmcp/service#build": {
+            "cache": false
+        },
+        "@openmcp/gateway#serve": {
+            "persistent": true,
+            "cache": false
+        },
+        "@openmcp/gateway#dev": {
+            "persistent": true,
+            "cache": false
+        },
+        "@openmcp/gateway#build": {
+            "dependsOn": ["@openmcp/service#build"],
+            "cache": false
+        },
+        "@agent-ruler/openmcp#build": {
+            "cache": false
+        },
+        "@openmcp/sdk#build": {
+            "dependsOn": ["@openmcp/service#build", "//#build:task-loop"],
             "cache": false
         }
     }

@@ -1,7 +1,10 @@
 import * as fs from 'fs';
-import * as path from 'path';
-import * as os from 'os';
 import type { DebuggerMcpConfig } from './debugger-mcp.dto.js';
+import {
+    ensureParentDir,
+    getDebuggerMcpConfigPath,
+    getLegacyDebuggerMcpConfigPath
+} from '../storage/paths.js';
 
 const DEFAULT_CONFIG: DebuggerMcpConfig = {
     enabled: false,
@@ -10,9 +13,15 @@ const DEFAULT_CONFIG: DebuggerMcpConfig = {
 };
 
 function getConfigPath() {
-    const configDir = path.join(os.homedir(), '.openmcp');
-    if (!fs.existsSync(configDir)) fs.mkdirSync(configDir, { recursive: true });
-    return path.join(configDir, 'debugger-mcp.json');
+    const configPath = getDebuggerMcpConfigPath();
+    ensureParentDir(configPath);
+    if (!fs.existsSync(configPath)) {
+        const legacyPath = getLegacyDebuggerMcpConfigPath();
+        if (legacyPath !== configPath && fs.existsSync(legacyPath)) {
+            fs.copyFileSync(legacyPath, configPath);
+        }
+    }
+    return configPath;
 }
 
 export function loadDebuggerMcpConfig(): DebuggerMcpConfig {

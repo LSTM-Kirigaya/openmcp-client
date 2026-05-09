@@ -402,6 +402,78 @@ function createEmptyTestCase(): TestCase {
     return { id: uuidv4(), name: '', description: '', input: '', criteria: [''], evaluationMode: 'pass-fail' };
 }
 
+function syncCurrentInputRichContent() {
+    const tc = formModel.value;
+    if (!tc) return;
+    const inputRef = tcInputRefs.get(tc.id);
+    const richContent = inputRef?.editorRef?.extractRichContent?.() ?? [];
+    if (richContent.length > 0) {
+        tc.inputRichContent = richContent;
+    }
+}
+
+function parseJSONSafely<T>(raw: string | undefined, fallback: T): T {
+    if (!raw || String(raw).trim() === '') {
+        return fallback;
+    }
+    try {
+        return JSON.parse(String(raw)) as T;
+    } catch {
+        return fallback;
+    }
+}
+
+function applyResultGroupsToCases() {
+    const tcArr = tabStorage.testCases ?? [];
+    for (const tc of tcArr) {
+        delete (tc as any).lastResultGroup;
+    }
+    for (const group of tabStorage.resultGroups ?? []) {
+        const idx = group.testCaseIndex;
+        if (idx >= 0 && idx < tcArr.length) {
+            (tcArr[idx] as any).lastResultGroup = group;
+        }
+    }
+    resultGroupsWithStats.value = tabStorage.resultGroups ?? [];
+}
+
+function applyBatchValidationSnapshot(storage: Partial<BatchValidationStorage>) {
+    if (Array.isArray(storage.testCases)) {
+        tabStorage.testCases = storage.testCases.map((item) => ({ ...item }));
+    }
+    if (typeof storage.selectedCaseIndex === 'number') {
+        tabStorage.selectedCaseIndex = storage.selectedCaseIndex;
+    } else if ((tabStorage.testCases ?? []).length > 0) {
+        tabStorage.selectedCaseIndex = Math.min(
+            tabStorage.selectedCaseIndex ?? 0,
+            Math.max(0, (tabStorage.testCases ?? []).length - 1)
+        );
+    } else {
+        tabStorage.selectedCaseIndex = 0;
+    }
+    if (typeof storage.sourceTabIndex === 'number') {
+        tabStorage.sourceTabIndex = storage.sourceTabIndex;
+    }
+    if (Array.isArray(storage.resultGroups)) {
+        tabStorage.resultGroups = storage.resultGroups.map((group) => ({ ...group }));
+    } else if (!tabStorage.resultGroups) {
+        tabStorage.resultGroups = [];
+    }
+    if (Array.isArray(storage.comprehensiveSelectedIndices)) {
+        tabStorage.comprehensiveSelectedIndices = [...storage.comprehensiveSelectedIndices];
+    } else {
+        tabStorage.comprehensiveSelectedIndices = [];
+    }
+    if (Array.isArray(storage.comprehensivePresets)) {
+        tabStorage.comprehensivePresets = storage.comprehensivePresets.map((item) => ({ ...item }));
+    }
+    if (storage.currentPresetId !== undefined) {
+        tabStorage.currentPresetId = storage.currentPresetId;
+    }
+    ensureBatchValidationStorage(tab.storage);
+    applyResultGroupsToCases();
+}
+
 /** 将草稿持久化到当前选中的测试用例位 */
 function commitDraftToCase() {
     const draft = draftTestCase.value;
@@ -639,12 +711,7 @@ function selectTestCase(caseIndex: number) {
         commitDraftToCase();
     }
     // 切换前提取当前编辑器富文本并保存到当前用例
-    const curTc = formModel.value;
-    if (curTc) {
-        const inputRef = tcInputRefs.get(curTc.id);
-        const richContent = inputRef?.editorRef?.extractRichContent?.() ?? [];
-        if (richContent.length > 0) curTc.inputRichContent = richContent;
-    }
+    syncCurrentInputRichContent();
     tabStorage.selectedCaseIndex = caseIndex;
 }
 
@@ -659,12 +726,7 @@ function addTestCaseFromList() {
     if (draftTestCase.value) {
         commitDraftToCase();
     }
-    const curTc = formModel.value;
-    if (curTc) {
-        const inputRef = tcInputRefs.get(curTc.id);
-        const richContent = inputRef?.editorRef?.extractRichContent?.() ?? [];
-        if (richContent.length > 0) curTc.inputRichContent = richContent;
-    }
+    syncCurrentInputRichContent();
     const arr = tabStorage.testCases || [];
     const next = createEmptyTestCase();
     tabStorage.testCases = [...arr, next];
@@ -694,16 +756,15 @@ function messagesToTrace(messages: ChatMessage[]): Array<{ role: string; content
     });
 }
 
+function isDialogCancel(error: unknown): boolean {
+    return error === 'cancel' || error === 'close';
+}
+
 async function runValidation(comprehensive = false) {
     if (draftTestCase.value) {
         commitDraftToCase();
     }
-    const curTc = formModel.value;
-    if (curTc) {
-        const inputRef = tcInputRefs.get(curTc.id);
-        const richContent = inputRef?.editorRef?.extractRichContent?.() ?? [];
-        if (richContent.length > 0) curTc.inputRichContent = richContent;
-    }
+    syncCurrentInputRichContent();
     if (!canRun.value) return;
 
     const llm = llms[llmManager.currentModelIndex] ?? llms[0];
@@ -974,18 +1035,7 @@ async function loadBatchValidationFromDuckDb() {
     if (!clientId) return;
     const res = await bridge.commandRequest<{ storage: BatchValidationStorage }>('batch-validation/load', { clientId });
     if (res.code === 200 && res.msg?.storage) {
-        Object.assign(tab.storage, res.msg.storage);
-        ensureBatchValidationStorage(tab.storage);
-        // 迁移：将旧的 resultGroups 按 testCaseIndex 写入各用例的 lastResultGroup
-        const groups = tabStorage.resultGroups ?? [];
-        const tcArr = tabStorage.testCases ?? [];
-        for (const g of groups) {
-            const idx = g.testCaseIndex;
-            if (idx >= 0 && idx < tcArr.length && !(tcArr[idx] as any).lastResultGroup) {
-                (tcArr[idx] as any).lastResultGroup = g;
-            }
-        }
-        resultGroupsWithStats.value = groups;
+        applyBatchValidationSnapshot(res.msg.storage);
     }
 }
 onMounted(() => {
@@ -1006,11 +1056,11 @@ watch(
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 function flushSave() {
     const clientId = mcpClientAdapter.masterNode?.clientId;
-    if (!clientId) return;
     if (saveTimer) {
         clearTimeout(saveTimer);
         saveTimer = null;
     }
+    if (!clientId) return;
     bridge.commandRequest('batch-validation/save', {
         clientId,
         storage: {
@@ -1042,6 +1092,8 @@ watch(
     () => scheduleSaveToDuckDb(),
     { deep: true }
 );
+
+
 </script>
 
 <style scoped>

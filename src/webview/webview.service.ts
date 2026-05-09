@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as fspath from 'path';
 import { ConnectionType, detachMcpOptionAsItem, exportFile, McpOptions, panels, updateInstalledConnectionConfig, updateWorkspaceConnectionConfig } from '../global.js';
-import { routeMessage, disconnectService } from '../../openmcp-sdk/service/index.js';
+import { routeMessage, disconnectService } from '@openmcp/service';
 
 export function getWebviewContent(context: vscode.ExtensionContext, panel: vscode.WebviewPanel): string | undefined {
     const viewRoot = fspath.join(context.extensionPath, 'openmcp-sdk', 'renderer');

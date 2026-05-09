@@ -1,0 +1,32 @@
+{
+	"name": "@openmcp/sdk",
+	"version": "0.0.1",
+	"description": "OpenMCP SDK - Embeddable MCP Client for Node.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs",
+			"types": "./dist/types/index.d.ts"
+		}
+	},
+	"scripts": {
+		"build": "rollup -c",
+		"postbuild": "node scripts/copy-d-ts.mjs",
+		"clean": "rm -rf dist"
+	},
+	"author": "LSTM-Kirigaya",
+	"license": "MIT",
+	"dependencies": {
+		"@openmcp/service": "file:../service"
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^29.0.2",
+		"@rollup/plugin-node-resolve": "^16.0.3",
+		"@rollup/plugin-typescript": "^12.3.0",
+		"rollup": "^4.59.0",
+		"typescript": "^5.9.3"
+	}
+}

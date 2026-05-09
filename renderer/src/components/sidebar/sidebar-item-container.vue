@@ -3,7 +3,7 @@
 		<div v-for="(item, index) of sidebarItems" :key="index"
 			:id="`sidebar-${item.ident}`"
 		>
-			<el-tooltip :content="t(item.ident)" placement="right" effect="light">
+			<el-tooltip :content="t(item.labelKey ?? item.ident)" placement="right" effect="light">
 				<div class="sidebar-option-item" :class="{ 'active': isActive(item.ident) }"
 					@click="gotoOption(item.ident)">
 					<span :class="`iconfont ${item.icon}`"></span>

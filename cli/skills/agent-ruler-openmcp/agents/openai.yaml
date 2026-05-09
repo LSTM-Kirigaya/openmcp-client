@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Ruler OpenMCP"
+  short_description: "Install and use the OpenMCP CLI"
+  default_prompt: "Use $agent-ruler-openmcp to install @agent-ruler/openmcp and run the OpenMCP CLI workflow."

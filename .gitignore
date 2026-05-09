@@ -4,6 +4,8 @@ node_modules
 .vscode-test/
 *.vsix
 .env
+.env.local
+.env.*.local
 .release-notes-temp.md
 openmcp-sdk
 .DS_Store
@@ -30,3 +32,6 @@ resources/changelog/**
 # Agent tooling logs (do not commit)
 .agent-e2e-log.txt
 .agent-git-summary.txt
+test/sdk/.yarn
+_npm_try
+**/.npmrc

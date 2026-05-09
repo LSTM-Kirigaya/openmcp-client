@@ -36,17 +36,20 @@ export async function loadTestCases() {
     }
 }
 
-export function createTestCase(testCase: TestCase) {
+export async function createTestCase(testCase: TestCase) {
     testCasesState.value = [...testCasesState.value, testCase];
-    saveTestCases();
+    await saveTestCases();
 }
 
-export function updateTestCase(id: string, patch: Partial<TestCase>) {
+export async function updateTestCase(id: string, patch: Partial<TestCase>, options?: { persist?: boolean }) {
     testCasesState.value = testCasesState.value.map(tc => tc.id === id ? { ...tc, ...patch } : tc);
-    saveTestCases();
+    if (options?.persist === false) {
+        return;
+    }
+    await saveTestCases();
 }
 
-export function deleteTestCase(id: string) {
+export async function deleteTestCase(id: string) {
     testCasesState.value = testCasesState.value.filter(tc => tc.id !== id);
-    saveTestCases();
+    await saveTestCases();
 }

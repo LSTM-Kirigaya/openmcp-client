@@ -53,7 +53,7 @@ function messagesToTrace(messages: Array<{ role: string; content: string }>): Ar
     }));
 }
 
-async function runSimpleAgent(
+export async function runSimpleAgent(
     clientId: string,
     userInput: string,
     llmConfig: { baseURL: string; apiKey: string; model: string }
@@ -111,7 +111,7 @@ async function runSimpleAgent(
         }
 
         for (const tc of toolCalls) {
-            const fn = tc.function ?? tc;
+            const fn = (tc as any).function ?? tc;
             const name = fn?.name ?? (tc as { name?: string }).name ?? '';
             const argsStr = fn?.arguments ?? (tc as { arguments?: string }).arguments ?? '{}';
             const toolCallId = (tc as { id?: string }).id ?? `call_${i}_${name}`;
@@ -189,7 +189,7 @@ async function createMcpServerInstance(config: DebuggerMcpConfig) {
             inputSchema: z.object({
                 clientId: z.string().describe('The MCP client ID'),
                 toolName: z.string().describe('Tool name to call'),
-                toolArgs: z.record(z.unknown()).optional().describe('Tool arguments as JSON object')
+                toolArgs: z.record(z.string(), z.unknown()).optional().describe('Tool arguments as JSON object')
             }) as unknown as z.ZodRawShape
         },
             async (args: Record<string, unknown>) => {

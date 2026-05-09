@@ -1,57 +1,71 @@
 {
   "name": "@agent-ruler/openmcp",
-  "version": "1.0.0",
-  "description": "CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "omc": "bin/omc"
-  },
+  "version": "0.1.8",
+  "description": "OpenMCP CLI - MCP Server Gateway & Debug Tool",
+  "type": "module",
   "files": [
-    "bin/",
-    "dist/",
-    "templates/",
-    "README.md"
+    "dist",
+    "bin",
+    "vendor"
   ],
+  "main": "dist/index.js",
+  "bin": {
+    "openmcp": "bin/openmcp.js"
+  },
   "scripts": {
     "build": "tsc",
+    "build:publish": "node scripts/clean-publish.mjs && npm --prefix ../service run build && npm --prefix ../gateway run build && npm --prefix ../renderer run build && npm run build && node scripts/prepare-publish.mjs",
     "dev": "tsc --watch",
-    "prepublishOnly": "npm run build",
-    "typecheck": "tsc --noEmit"
+    "prepack": "npm run build:publish",
+    "test": "tsx --test --test-concurrency=1 test/cli/surface.test.ts test/gateway/start.test.ts test/gateway/stop.test.ts test/gateway/restart.test.ts test/gateway/status.test.ts test/gateway/run.test.ts test/gateway/logs-dir.test.ts test/gateway/logs.test.ts test/setting/general.test.ts test/setting/llm.test.ts test/setting/skills.test.ts test/mcp/server.test.ts test/mcp/session.test.ts test/debug/resource.test.ts test/debug/prompt.test.ts test/debug/tool.test.ts test/debug/mcp.test.ts test/debug/batch.test.ts test/debug/chat.test.ts test/webui/start.test.ts test/webui/stop.test.ts test/webui/status.test.ts test/webui/restart.test.ts test/webui/run.test.ts test/start/start.test.ts",
+    "test:gateway": "tsx --test --test-concurrency=1 test/gateway/start.test.ts test/gateway/stop.test.ts test/gateway/restart.test.ts test/gateway/status.test.ts test/gateway/run.test.ts test/gateway/logs-dir.test.ts test/gateway/logs.test.ts",
+    "test:setting": "tsx --test --test-concurrency=1 test/setting/general.test.ts test/setting/llm.test.ts test/setting/skills.test.ts",
+    "test:mcp": "tsx --test --test-concurrency=1 test/mcp/server.test.ts test/mcp/session.test.ts",
+    "test:debug": "tsx --test --test-concurrency=1 test/debug/resource.test.ts test/debug/prompt.test.ts test/debug/tool.test.ts test/debug/mcp.test.ts test/debug/batch.test.ts test/debug/chat.test.ts",
+    "test:webui": "tsx --test --test-concurrency=1 test/webui/start.test.ts test/webui/stop.test.ts test/webui/status.test.ts test/webui/restart.test.ts test/webui/run.test.ts",
+    "test:start": "tsx --test --test-concurrency=1 test/start/start.test.ts",
+    "test:surface": "tsx --test --test-concurrency=1 test/cli/surface.test.ts",
+    "test:published": "tsx --test --test-concurrency=1 test/published/smoke.test.ts"
   },
   "keywords": [
-    "openmcp",
     "mcp",
     "cli",
-    "model-context-protocol",
-    "development",
-    "vscode-extension"
+    "gateway",
+    "openmcp"
   ],
   "author": "kirigaya",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/LSTM-Kirigaya/openmcp-client.git",
-    "directory": "cli"
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.2",
+    "@seald-io/nedb": "^4.1.1",
+    "axios": "^1.9.0",
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "commander": "^11.1.0",
+    "express": "^5.2.1",
+    "https-proxy-agent": "^7.0.6",
+    "open": "^10.1.0",
+    "openai": "^5.0.1",
+    "pako": "^2.1.0",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0",
+    "rotating-file-stream": "^3.2.5",
+    "strict-url-sanitise": "^0.0.1",
+    "tesseract.js": "^6.0.1",
+    "uuid": "^11.1.0",
+    "vue": "^3.5.13",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/node": "^20.11.0",
+    "@types/uuid": "^9.0.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.4.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "commander": "^12.1.0",
-    "chalk": "^5.3.0",
-    "ora": "^8.1.0",
-    "inquirer": "^12.1.0",
-    "fs-extra": "^11.2.0",
-    "cross-spawn": "^7.0.6",
-    "tar": "^7.4.3",
-    "node-fetch": "^3.3.2"
-  },
-  "devDependencies": {
-    "@types/cross-spawn": "^6.0.6",
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.10.0",
-    "@types/tar": "^6.1.13",
-    "typescript": "^5.7.2"
   }
 }

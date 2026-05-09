@@ -1,0 +1,41 @@
+{
+	"name": "@openmcp/gateway",
+	"version": "0.0.1",
+	"description": "OpenMCP Gateway - WebSocket entry point",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"serve": "nodemon --watch src --ext ts --exec \"tsx src/main.ts\"",
+		"dev": "nodemon --watch src --ext ts --exec \"tsx src/main.ts\"",
+		"build": "tsc",
+		"build:watch": "tsc --watch",
+		"start": "node dist/main.js",
+		"start:prod": "NODE_ENV=production node dist/main.js",
+		"debug": "tsx --inspect src/main.ts",
+		"clean": "rm -rf dist",
+		"lint": "eslint src --ext .ts,.tsx",
+		"typecheck": "tsc --noEmit",
+		"prepublishOnly": "npm run build"
+	},
+	"author": "LSTM-Kirigaya",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/debug": "^4.1.12",
+		"@types/node": "^22.7.5",
+		"@types/ws": "^8.18.0",
+		"nodemon": "^3.1.10",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"@openmcp/service": "^0.0.1",
+		"pino": "^9.6.0",
+		"pino-pretty": "^13.0.0",
+		"rotating-file-stream": "^3.2.5",
+		"ws": "^8.18.1"
+	}
+}

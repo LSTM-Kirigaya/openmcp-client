@@ -461,5 +461,14 @@
     "batch-validation-collapse-detail": "Collapse",
     "batch-validation-last-run-summary": "Last run",
     "chat-tab": "Chat",
-    "add": "Add"
+    "add": "Add",
+    "server-tab": "Сервер",
+    "session-tab": "Сеанс",
+    "local-servers": "Локальные серверы",
+    "no-local-servers": "Нет конфигураций локальных серверов",
+    "no-active-sessions": "Нет активных сеансов",
+    "unnamed-server": "Сервер без имени",
+    "delete-success": "Удалено",
+    "delete-failed": "Не удалось удалить",
+    "load-servers-failed": "Не удалось загрузить список серверов"
 }

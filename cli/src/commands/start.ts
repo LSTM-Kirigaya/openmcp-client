@@ -1,111 +1,70 @@
-import { resolve, join } from 'path';
-import { existsSync } from 'fs';
-import chalk from 'chalk';
-import { logger } from '../utils/logger.js';
-import { runParallel } from '../utils/spawn.js';
+import { Command } from 'commander';
+import open from 'open';
+import { startService, startRenderer, startRendererStatic, stopAll } from '../lib/index.js';
+import { HELP_START } from '../lib/help-text.js';
 
-interface StartOptions {
-  port: string;
+function isWebDevModeEnabled(): boolean {
+  const value = (process.env.OPENMCP_WEB_DEV || '').toLowerCase();
+  return value === '1' || value === 'true' || value === 'yes';
 }
 
-export async function startCommand(projectPath: string, options: StartOptions): Promise<void> {
-  const resolvedPath = resolve(projectPath);
+export const startCommand = new Command('start')
+  .description('一键启动 Gateway + Web UI，并可选打开浏览器。')
+  .addHelpText('after', HELP_START)
+  .option('-p, --port <port>', 'Web UI 端口', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway 端口', '8282')
+  .option('-b, --browser <browser>', '浏览器名称（传给 open 包）')
+  .action(async (options) => {
+    const webPort = parseInt(options.port, 10);
+    const gatewayPort = parseInt(options.gatewayPort, 10);
 
-  logger.title('🚀 Starting OpenMCP Production Mode\n');
+    console.log(`
+╔═══════════════════════════════════════╗
+║      OpenMCP                         ║
+║      Gateway + Web UI                 ║
+╚═══════════════════════════════════════╝
+    `);
 
-  // 验证项目结构
-  const serviceDistDir = join(resolvedPath, 'service', 'dist');
-  const rendererDistDir = join(resolvedPath, 'renderer', 'dist');
-  const packageJsonPath = join(resolvedPath, 'package.json');
+    await startService(gatewayPort);
 
-  if (!existsSync(packageJsonPath)) {
-    logger.error(`No package.json found in ${resolvedPath}`);
-    logger.info('Make sure you are in an OpenMCP project directory.');
-    process.exit(1);
-  }
+    const renderer = isWebDevModeEnabled()
+      ? startRenderer(webPort, gatewayPort)
+      : startRendererStatic(webPort, gatewayPort);
+    if (!renderer) {
+      process.exit(1);
+      return;
+    }
 
-  // 检查是否已构建
-  let needsBuild = false;
-  
-  if (!existsSync(serviceDistDir)) {
-    logger.warning('Service build not found. Need to build first.');
-    needsBuild = true;
-  }
-  
-  if (!existsSync(rendererDistDir)) {
-    logger.warning('Renderer build not found. Need to build first.');
-    needsBuild = true;
-  }
+    // renderer 在 `mode=website` 时 base 为 `/mcp/`，因此需要打开该路径
+    const url = `http://localhost:${webPort}/mcp/`;
 
-  // 检测包管理器
-  let packageManager = 'npm';
-  if (existsSync(join(resolvedPath, 'yarn.lock'))) {
-    packageManager = 'yarn';
-  } else if (existsSync(join(resolvedPath, 'pnpm-lock.yaml'))) {
-    packageManager = 'pnpm';
-  }
+    console.log(`
+🌐 Web UI:     ${url}
+🔌 Gateway:    ws://localhost:${gatewayPort}
+🧩 Mode:       ${isWebDevModeEnabled() ? 'development (vite)' : 'production (static)'}
+📝 Press Ctrl+C to stop all services
+    `);
 
-  // 如果需要构建，先执行构建
-  if (needsBuild) {
-    logger.info('Building project...\n');
-    const { spawnAsync } = await import('../utils/spawn.js');
-    const buildResult = await spawnAsync(packageManager, ['run', 'build'], {
-      cwd: resolvedPath,
-      stdio: 'inherit'
+    // Open browser
+    setTimeout(() => {
+      console.log(`\n🚀 Opening browser...`);
+      if (options.browser) {
+        open(url, { app: { name: options.browser } });
+      } else {
+        open(url);
+      }
+    }, 3000);
+
+    // Handle graceful shutdown
+    process.on('SIGINT', async () => {
+      console.log('\n🛑 Stopping all services...');
+      await stopAll();
+      process.exit(0);
     });
 
-    if (buildResult.exitCode !== 0) {
-      logger.error('Build failed. Please fix the errors and try again.');
-      process.exit(1);
-    }
-  }
-
-  const tasks: Array<{
-    name: string;
-    command: string;
-    args: string[];
-    options: { cwd: string; env: NodeJS.ProcessEnv };
-  }> = [];
-
-  // 配置 Service 生产任务
-  tasks.push({
-    name: 'Service (Backend)',
-    command: 'node',
-    args: ['dist/main.js'],
-    options: {
-      cwd: join(resolvedPath, 'service'),
-      env: {
-        ...process.env,
-        PORT: options.port,
-        NODE_ENV: 'production'
-      }
-    }
+    process.on('SIGTERM', async () => {
+      console.log('\n🛑 Stopping all services...');
+      await stopAll();
+      process.exit(0);
+    });
   });
-
-  // 配置 Renderer 生产任务（使用 preview 模式）
-  tasks.push({
-    name: 'Renderer (Frontend)',
-    command: packageManager,
-    args: ['run', 'preview'],
-    options: {
-      cwd: join(resolvedPath, 'renderer'),
-      env: {
-        ...process.env,
-        NODE_ENV: 'production'
-      }
-    }
-  });
-
-  logger.info(`Using package manager: ${chalk.cyan(packageManager)}`);
-  logger.info(`Project path: ${chalk.cyan(resolvedPath)}`);
-  logger.info(`Service port: ${chalk.cyan(options.port)}`);
-  logger.newline();
-  logger.info('Press Ctrl+C to stop all services\n');
-
-  // 并行启动所有服务
-  await runParallel(tasks, (name, exitCode) => {
-    if (exitCode !== 0 && exitCode !== null) {
-      logger.error(`${name} exited with error code ${exitCode}`);
-    }
-  });
-}

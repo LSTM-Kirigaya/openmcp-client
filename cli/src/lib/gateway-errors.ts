@@ -1,0 +1,55 @@
+/**
+ * Gateway WebSocket 不可达时的用户可读错误（中文）。
+ */
+
+const DEFAULT_PORT = 8282;
+
+/** 是否像「默认本机 Gateway」（便于提示先启动 gateway start） */
+function urlLooksLikeDefaultGateway(url: string): boolean {
+  if (url.includes(`:${DEFAULT_PORT}`)) {
+    return true;
+  }
+  try {
+    const u = new URL(url);
+    const host = u.hostname.toLowerCase();
+    const local = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+    return local && u.port === String(DEFAULT_PORT);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 构建「连不上 Gateway」时的完整说明（用于 throw 或打印）。
+ */
+export function buildGatewayUnreachableError(gatewayUrl: string, underlying?: string): Error {
+  const lines: string[] = [
+    `无法连接到 OpenMCP Gateway：${gatewayUrl}`,
+    '',
+    '常见原因：本机尚未启动 Gateway 进程，或地址/端口与 Gateway 实际监听不一致。'
+  ];
+
+  if (urlLooksLikeDefaultGateway(gatewayUrl)) {
+    lines.push('');
+    lines.push(`默认 WebSocket 为 ws://localhost:${DEFAULT_PORT}。请先启动 Gateway：`);
+    lines.push(`  openmcp gateway start`);
+    lines.push(`  # 或前台运行并查看日志：openmcp gateway run -p ${DEFAULT_PORT}`);
+    lines.push('');
+    lines.push('如果提示 openmcp 不是可识别命令，请先安装或重新安装 CLI：');
+    lines.push('  npm install -g @agent-ruler/openmcp');
+  }
+
+  lines.push('');
+  lines.push('若 Gateway 已启动但使用了其它端口，请为子命令指定 -g，例如：');
+  lines.push(`  openmcp mcp server list -g ws://127.0.0.1:9000`);
+
+  if (underlying && underlying.trim()) {
+    lines.push('');
+    lines.push(`底层错误：${underlying}`);
+  }
+
+  lines.push('');
+  lines.push('如果仍无法解决，请复制本次完整报错（包含堆栈、Node.js 版本与执行命令）反馈给 OpenMCP 维护者。');
+
+  return new Error(lines.join('\n'));
+}

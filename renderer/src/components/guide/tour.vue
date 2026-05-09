@@ -58,7 +58,7 @@
         </el-tour-step>
 
         <el-tour-step
-            :target="mcpClientAdapter.clients[0].connectionSettingRef"
+            :target="tourConnectSettingTarget"
             :prev-button-props="{ children: t('prev-step') }"
             :next-button-props="{ children: t('next-step') }"
             :show-close="false"
@@ -79,7 +79,7 @@
         </el-tour-step>
 
         <el-tour-step
-            :target="mcpClientAdapter.clients[0].connectionLogRef"
+            :target="tourConnectLogTarget"
             :prev-button-props="{ children: t('prev-step') }"
             :next-button-props="{ children: t('next-step') }"
             :show-close="false"
@@ -287,7 +287,7 @@ Face your fears, create the future
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import TourTitle from './tour-title.vue';
 
 import { useI18n } from 'vue-i18n';
@@ -306,6 +306,14 @@ const { t } = useI18n();
 const router = useRouter();
 
 const baseUrl = import.meta.env.BASE_URL;
+
+/** 无会话时避免访问 clients[0] 导致引导渲染崩溃 */
+const tourConnectSettingTarget = computed(
+	() => mcpClientAdapter.clients[0]?.connectionSettingRef
+);
+const tourConnectLogTarget = computed(
+	() => mcpClientAdapter.clients[0]?.connectionLogRef
+);
 
 function finishTour() {
     openTour.value = false;

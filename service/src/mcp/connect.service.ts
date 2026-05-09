@@ -2,7 +2,7 @@ import { exec, execSync, spawnSync } from 'node:child_process';
 import { RequestClientType, RequestData } from '../common/index.dto.js';
 import { connect } from './client.service.js';
 import { RestfulResponse } from '../common/index.dto.js';
-import { McpOptions } from './client.dto.js';
+import { ConnectionType, McpOptions } from './client.dto.js';
 import { McpServerConnectMonitor } from './connect-monitor.service.js';
 import * as crypto from 'node:crypto';
 import path from 'node:path';
@@ -11,8 +11,23 @@ import * as os from 'os';
 import { PostMessageble } from '../hook/adapter.js';
 import chalk from 'chalk';
 import { FORBIDDEN_MONITOR } from '../hook/setting.js';
+import { releaseClientStorageBinding, rememberClientStorageBinding } from '../storage/client-binding.js';
 
 export const clientMap: Map<string, RequestClientType> = new Map();
+export interface ConnectedSessionInfo {
+    clientId: string;
+    name: string;
+    version: string;
+}
+function normalizeConnectionType(type?: string): ConnectionType | undefined {
+    if (!type) return undefined;
+    const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+    if (normalized === 'STDIO') return 'STDIO';
+    if (normalized === 'SSE') return 'SSE';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+    return undefined;
+}
+
 export function getClient(clientId?: string): RequestClientType | undefined {
     return clientMap.get(clientId || '');
 }
@@ -149,7 +164,8 @@ async function preprocessCommand(option: McpOptions, webview?: PostMessageble) {
         option.cwd = option.cwd.replace('~', process.env.HOME || '');
     }
 
-    if (option.connectionType === 'SSE' || option.connectionType === 'STREAMABLE_HTTP') {
+    const connectionType = normalizeConnectionType(option.connectionType);
+    if (connectionType === 'SSE' || connectionType === 'STREAMABLE_HTTP') {
         return;
     }
 
@@ -264,20 +280,53 @@ async function initNpm(option: McpOptions, cwd: string, webview?: PostMessageble
 }
 
 
+function normalizeForStableStringify(value: unknown): unknown {
+    if (Array.isArray(value)) {
+        return value.map(normalizeForStableStringify);
+    }
+    if (value && typeof value === 'object') {
+        const out: Record<string, unknown> = {};
+        for (const key of Object.keys(value as Record<string, unknown>).sort()) {
+            const item = (value as Record<string, unknown>)[key];
+            if (item !== undefined) {
+                out[key] = normalizeForStableStringify(item);
+            }
+        }
+        return out;
+    }
+    return value;
+}
+
+function stableStringify(value: unknown): string {
+    return JSON.stringify(normalizeForStableStringify(value)) ?? '';
+}
+
+function connectionIdentity(option: McpOptions): Record<string, unknown> {
+    return {
+        connectionType: normalizeConnectionType(option.connectionType) || option.connectionType,
+        command: option.command,
+        args: option.args,
+        url: option.url,
+        cwd: option.cwd,
+        env: option.env,
+        clientName: option.clientName,
+        clientVersion: option.clientVersion
+    };
+}
+
 async function deterministicUUID(input: string) {
-    // 使用Web Crypto API进行哈希
     const msgBuffer = new TextEncoder().encode(input);
     const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    // 格式化为UUID (版本5)
+    const bytes = new Uint8Array(hashBuffer).slice(0, 16);
+    bytes[6] = (bytes[6] & 0x0f) | 0x50;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    const hashHex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
     return [
         hashHex.substring(0, 8),
-        hashHex.substring(8, 4),
-        '5' + hashHex.substring(13, 3), // 设置版本为5
-        '8' + hashHex.substring(17, 3), // 设置变体
-        hashHex.substring(20, 12)
+        hashHex.substring(8, 12),
+        hashHex.substring(12, 16),
+        hashHex.substring(16, 20),
+        hashHex.substring(20, 32)
     ].join('-');
 }
 
@@ -287,41 +336,63 @@ export async function connectService(
     webview?: PostMessageble
 ): Promise<RestfulResponse> {
     try {
+        const normalizedType = normalizeConnectionType(option.connectionType);
+        if (normalizedType) {
+            option.connectionType = normalizedType;
+        }
 
         // 预处理字符串
         await preprocessCommand(option, webview);
 
-        // 通过 option 字符串进行 hash，得到唯一的 uuid
-        const uuid = await deterministicUUID(JSON.stringify(option));
-
-        const reuseConntion = clientMap.has(uuid);
-
-        // if (!clientMap.has(uuid)) {
-        // 	const client = await connect(option);
-        // 	clientMap.set(uuid, client);
-        // }
-        // const client = clientMap.get(uuid)!;
-
-        {
-            clientMap.get(uuid)?.disconnect();
-            clientMonitorMap.get(uuid)?.close();
+        const uuid = await deterministicUUID(stableStringify(connectionIdentity(option)));
+        const existingClient = clientMap.get(uuid);
+        if (existingClient) {
+            const versionInfo = existingClient.getServerVersion();
+            rememberClientStorageBinding({
+                clientId: uuid,
+                connectionId: option.connectionId,
+                connectionKey: option.connectionId || versionInfo?.name || 'default',
+                scope: option.storageScope,
+                workspacePath: option.workspacePath,
+                serverName: versionInfo?.name || 'default'
+            });
+            return {
+                code: 200,
+                msg: {
+                    status: 'success',
+                    clientId: uuid,
+                    reuseConnection: true,
+                    reuseConntion: true,
+                    name: versionInfo?.name || 'unknown',
+                    version: versionInfo?.version || 'unknown'
+                }
+            };
         }
 
         const client = await connect(option);
         clientMap.set(uuid, client);
         
         // 只有 stdio 才需要监听        
-        if (option.connectionType === 'STDIO' && !FORBIDDEN_MONITOR) {
+        if (normalizeConnectionType(option.connectionType) === 'STDIO' && !FORBIDDEN_MONITOR) {
             clientMonitorMap.set(uuid, new McpServerConnectMonitor(uuid, option, updateClientMap, webview));
         }
 
         const versionInfo = client.getServerVersion();        
+        rememberClientStorageBinding({
+            clientId: uuid,
+            connectionId: option.connectionId,
+            connectionKey: option.connectionId || versionInfo?.name || 'default',
+            scope: option.storageScope,
+            workspacePath: option.workspacePath,
+            serverName: versionInfo?.name || 'default'
+        });
         const connectResult = {
             code: 200,
             msg: {
                 status: 'success',
                 clientId: uuid,
-                reuseConntion,
+                reuseConnection: false,
+                reuseConntion: false,
                 name: versionInfo?.name || 'unknown',
                 version: versionInfo?.version || 'unknown'
             }
@@ -383,6 +454,7 @@ export async function disconnectService(data: RequestData) {
         clientMap.delete(clientId);
         clientMonitorMap.get(clientId)?.close();
         clientMonitorMap.delete(clientId);
+        releaseClientStorageBinding(clientId);
 
         return {
             code: 200,
@@ -394,4 +466,24 @@ export async function disconnectService(data: RequestData) {
             msg: `Failed to disconnect: ${error}`
         };
     }
+}
+
+export async function listConnectedSessionsService() {
+    const sessions: ConnectedSessionInfo[] = [];
+    for (const [clientId, client] of clientMap.entries()) {
+        if (!client) {
+            continue;
+        }
+        const versionInfo = client.getServerVersion();
+        sessions.push({
+            clientId,
+            name: versionInfo?.name || 'unknown',
+            version: versionInfo?.version || 'unknown'
+        });
+    }
+
+    return {
+        code: 200,
+        msg: sessions
+    };
 }

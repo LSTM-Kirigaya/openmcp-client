@@ -1,0 +1,92 @@
+import { RestFulResponse } from './message-bridge.js';
+
+function includesAny(text: string, needles: string[]): boolean {
+  const lower = text.toLowerCase();
+  return needles.some((n) => lower.includes(n.toLowerCase()));
+}
+
+function extractValidationPaths(text: string): string[] {
+  const paths = new Set<string>();
+  const re = /"path"\s*:\s*\[\s*"([^"]+)"/g;
+  for (const match of text.matchAll(re)) {
+    if (match[1]) paths.add(match[1]);
+  }
+  return [...paths];
+}
+
+export function isMissingSessionMessage(text: string): boolean {
+  return includesAny(text, [
+    'mcp client',
+    '尚未连接',
+    'not connected',
+    'clientid',
+    'client id',
+    'session is missing'
+  ]);
+}
+
+export function isMissingSessionResponse(response: RestFulResponse): boolean {
+  const msg = typeof response.msg === 'string' ? response.msg : JSON.stringify(response.msg);
+  return isMissingSessionMessage(msg);
+}
+
+export function diagnoseResponse(command: string, response: RestFulResponse): string[] {
+  const advice: string[] = [];
+  const msg = typeof response.msg === 'string' ? response.msg : JSON.stringify(response.msg);
+  const code = response.code;
+  const promptArgsRejected = command === 'prompts/get' && includesAny(msg, ['invalid arguments for prompt', 'input validation error']);
+  const toolArgsRejected = command === 'tools/call' && includesAny(msg, ['invalid arguments for tool', 'input validation error']);
+
+  if (code === 404 || includesAny(msg, ['command not found'])) {
+    advice.push('The command may not exist in the running service. Check the command name and rebuild/restart gateway.');
+  }
+  if (code === 408 || includesAny(msg, ['timeout', 'timed out'])) {
+    advice.push('The request timed out. Check the target service or increase the command timeout.');
+  }
+  if (promptArgsRejected) {
+    const missing = extractValidationPaths(msg);
+    advice.push('Prompt arguments were rejected by the MCP server.');
+    if (missing.length > 0) {
+      advice.push(`Missing or invalid prompt argument(s): ${missing.join(', ')}.`);
+    }
+    advice.push('Run `openmcp debug prompt list` to inspect required arguments.');
+    advice.push('Pass arguments with `--data`, for example: `openmcp debug prompt get --prompt-id <PROMPT_ID> --data \'{"key":"value"}\'`.');
+  }
+  if (toolArgsRejected) {
+    const missing = extractValidationPaths(msg);
+    advice.push('Tool arguments were rejected by the MCP server.');
+    if (missing.length > 0) {
+      advice.push(`Missing or invalid tool argument(s): ${missing.join(', ')}.`);
+    }
+    advice.push('Run `openmcp debug tool list` to inspect tool names and inputSchema.');
+  }
+  if (!promptArgsRejected && !toolArgsRejected && (code >= 500 || includesAny(msg, ['econnrefused', 'spawn', 'not found']))) {
+    advice.push('Service execution failed. Check gateway, MCP process path, URL, command, and cwd.');
+  }
+  if (isMissingSessionMessage(msg)) {
+    advice.push('No active MCP session is connected. Run `openmcp mcp session list` to inspect live sessions, then reconnect with `openmcp mcp session connect --id <SERVER_ID>`.');
+  }
+  if (advice.length === 0 && code !== 200) {
+    advice.push(`Command \`${command}\` failed. Check request arguments and gateway logs.`);
+  }
+  return advice;
+}
+
+export function diagnoseThrownError(error: unknown): string[] {
+  const text = error instanceof Error ? error.message : String(error);
+  const advice: string[] = [];
+  if (includesAny(text, ['gateway', 'ws://', 'econnrefused', 'websocket'])) {
+    advice.push('Gateway is unreachable. Run `openmcp gateway start` and check the `-g` address.');
+  }
+  if (includesAny(text, ['Invalid JSON for --args'])) {
+    advice.push('Tool arguments must be a JSON object. In PowerShell, complex inline JSON may need escaped quotes, e.g. `--args \'{\\"message\\":\\"hi\\"}\'`.');
+  } else if (includesAny(text, ['Invalid JSON for --data'])) {
+    advice.push('The `--data` value must be a JSON object. For large or complex data, prefer a JSON file when the command supports `--file`.');
+  } else if (includesAny(text, ['json'])) {
+    advice.push('JSON parsing failed. Check `--data`, `--args`, or config file content.');
+  }
+  if (includesAny(text, ['timeout'])) {
+    advice.push('The request timed out. Try again later or adjust the timeout.');
+  }
+  return advice;
+}

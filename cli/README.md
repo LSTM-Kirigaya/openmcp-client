@@ -1,160 +1,107 @@
-# OpenMCP CLI
+# OpenMCP CLI（`openmcp`）
 
-CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment.
+命令行入口，用于**启动 Gateway / Web UI**、以及通过 **WebSocket** 调用与 VSCode 扩展、Web 前端相同的 **service 路由**（`routeMessage`），便于脚本化与本地调试。
 
-## Installation
+## 环境要求
+
+- Node.js **≥ 18**
+- 多数子命令依赖 **Gateway 已启动**（默认 `ws://localhost:8282`）
+
+## 从 npm 安装
+
+发布到 npm 后，全局安装即可使用（命令名为 `openmcp`）：
 
 ```bash
 npm install -g @agent-ruler/openmcp
+openmcp --help
 ```
 
-## Requirements
+依赖里的 `@openmcp/gateway` 使用 **semver**（`^0.0.1`），以便发布到 npm 后能被正常解析；`workspace:*` 仅适用于仓库内工作区依赖。
 
-- Node.js >= 18.0.0
-- Git
-- npm, yarn, or pnpm
-
-## Usage
-
-### Initialize a new project
+**尚未发布到 npm 时，用 tarball 试装（推荐）**：`@agent-ruler/openmcp` 依赖 `@openmcp/gateway`，单独 `npm install -g agent-ruler-openmcp-0.1.1.tgz` 会从 registry 拉 gateway，**会 404**。请一次性安装三个本地包（npm 会从本地 tarball 满足依赖）：
 
 ```bash
-omc init my-project
-cd my-project
+# 在仓库根目录：构建并打三个包
+node scripts/pack-npm-test.mjs
+
+# 在任意空目录（路径按你本机调整）
+mkdir omcp-try && cd omcp-try && npm init -y
+npm install ../service/openmcp-service-0.0.1.tgz ../gateway/openmcp-gateway-0.0.1.tgz ../cli/agent-ruler-openmcp-0.1.1.tgz
+npx openmcp --help
 ```
 
-### Start development mode
+仓库根目录也可执行：`npm run pack:npm-test`。
 
-Start both service (backend) and renderer (frontend) in development mode:
+**已发布到 npm 后**：`npm install -g @agent-ruler/openmcp` 即可；或用 **Verdaccio** 在本地 registry 演练发布顺序（service → gateway → cli）。
+
+## 安装与本地运行（本仓库开发）
+
+文档以 **npm** 为例。在仓库根目录安装依赖后，进入 `cli` 目录构建：
 
 ```bash
-omc dev
+cd cli
+npm install
+npm run build
 ```
 
-Start only the backend service:
+若已在 monorepo 根目录执行过 `npm install`，通常只需在 `cli` 下执行 `npm run build`。
+
+全局/本地调用二选一：
 
 ```bash
-omc dev --service-only
+# 直接执行（开发时常用）
+node ./bin/openmcp.js --help
+
+# 链接到全局后模拟 npm 全局安装
+npm link
+openmcp --help
 ```
 
-Start only the frontend renderer:
+将 `cli` 链到全局或发布前，需先 `npm run build` 生成 `dist/`。
 
-```bash
-omc dev --renderer-only
-```
+## 一分钟上手
 
-Specify a custom port for the service:
+1. 启动 Gateway（默认端口 **8282**，与 `gateway` 包一致）：
 
-```bash
-omc dev --port 9000
-```
-
-### Start production mode
-
-```bash
-omc start
-```
-
-### Check for updates
-
-```bash
-omc update --check
-```
-
-### Update to latest version
-
-```bash
-omc update
-```
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `init [project-name]` | Initialize a new OpenMCP project |
-| `dev [project-path]` | Start development servers (service + renderer) |
-| `start [project-path]` | Start production servers |
-| `update [project-path]` | Update project to the latest version |
-| `-v, --version` | Display version number |
-| `-h, --help` | Display help information |
-
-## Project Structure
-
-After initialization, your project will have the following structure:
-
-```
-my-project/
-├── service/          # Backend service (Node.js + WebSocket)
-│   ├── src/
-│   └── package.json
-├── renderer/         # Frontend UI (Vue 3 + Vite)
-│   ├── src/
-│   └── package.json
-├── src/              # VSCode extension source
-├── package.json      # Root package.json
-└── ...
-```
-
-## Development Workflow
-
-1. **Create a new project:**
    ```bash
-   omc init my-project
-   cd my-project
+   openmcp gateway start
    ```
 
-2. **Start development servers:**
+2. 在已连接 MCP 的前提下，列出工具（需替换真实 `clientId`）：
+
    ```bash
-   omc dev
+   openmcp debug tool list --client-id "<uuid>"
    ```
-   
-   This will start:
-   - Service (Backend) on port 8282
-   - Renderer (Frontend) on port 5173 (Vite default)
 
-3. **Open your browser:**
-   
-   Navigate to `http://localhost:5173` to access the OpenMCP interface.
+更完整的用法、前置条件与典型流程见 **[使用说明](docs/usage.md)**。
 
-4. **Make changes:**
-   
-   Both service and renderer support hot-reload during development.
+## 命令总览
 
-## Troubleshooting
+| 分组 | 说明 |
+|------|------|
+| `gateway` | 前台/后台启停 Gateway、查看状态 |
+| `webui` / `start` | 拉起 Web UI（及可选 Gateway） |
+| `mcp` | Server 配置与运行会话管理 |
+| `debug` | ping、环境变量、tools/prompts/resources、测试用例与批量验证 |
+| `setting` | 通用设置与 LLM provider/model/chat |
+| `skills` | 技能包列表与读文件 |
 
-### Port already in use
+完整子命令与参数说明见 **[命令参考](docs/commands.md)**。
 
-If port 8282 is already in use, you can specify a different port:
+资源命令默认使用 `--scope user`；若要操作工作区资源，请显式传 `--scope workspace --workspace <path>`。
 
-```bash
-omc dev --port 9000
-```
+## 开发与调试
 
-### Permission denied on global install
+本地修改 `cli/src` 后执行 `npm run build`，或使用 `npm run dev`（`tsc --watch`）边改边编译。调试技巧、与 Gateway/Service 的对应关系见 **[开发与调试](docs/development.md)**。
 
-If you encounter permission issues when installing globally:
+## 文档索引
 
-```bash
-# Option 1: Use npx (no global install needed)
-npx @agent-ruler/openmcp init my-project
+| 文档 | 内容 |
+|------|------|
+| [docs/usage.md](docs/usage.md) | 使用前提、Gateway 地址、常见流程 |
+| [docs/commands.md](docs/commands.md) | 各命令与子命令说明 |
+| [docs/development.md](docs/development.md) | 开发、构建、调试、与仓库其它模块关系 |
 
-# Option 2: Change npm's default directory
-# See: https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally
-```
+## 与 VSCode / Web 的一致性
 
-### Git not found
-
-Make sure Git is installed and available in your PATH:
-
-```bash
-git --version
-```
-
-## License
-
-MIT
-
-## Links
-
-- [OpenMCP Documentation](https://openmcp.kirigaya.cn)
-- [GitHub Repository](https://github.com/LSTM-Kirigaya/openmcpent)
+CLI 通过 WebSocket 发送 `{ command, data }`，由 Gateway 调用 `service` 中的 `@Controller` 注册项；与渲染层 `MessageBridge` 走**同一套路由**，并非另一套 HTTP API。

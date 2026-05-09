@@ -1,7 +1,7 @@
 import { Controller } from '../common/index.js';
 import { PostMessageble } from '../hook/adapter.js';
 import { RequestData } from '../common/index.dto.js';
-import { connectService, getClient, clientMap, clientMonitorMap, disconnectService } from './connect.service.js';
+import { connectService, getClient, disconnectService, listConnectedSessionsService } from './connect.service.js';
 
 export class ConnectController {
 
@@ -60,6 +60,12 @@ export class ConnectController {
     @Controller('disconnect')
     async disconnect(data: RequestData, webview: PostMessageble) {
         const res = await disconnectService(data);
+        return res;
+    }
+
+    @Controller('connect/list')
+    async list(data: RequestData, webview: PostMessageble) {
+        const res = await listConnectedSessionsService();
         return res;
     }
 }

@@ -14,10 +14,6 @@
         "noEmitHelpers": false,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "types": [
-            "./service/task-loop.d.ts"
-        ],
-        // 允许访问 openmcp-sdk 目录
         "paths": {
             "@openmcp-sdk/*": [
                 "./openmcp-sdk/*"
@@ -29,8 +25,6 @@
     ],
     "exclude": [
         "node_modules",
-        "dist",
-        "service",
-        "renderer"
+        "dist"
     ]
 }

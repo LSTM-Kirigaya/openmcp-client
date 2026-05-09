@@ -1,17 +1,31 @@
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import { DEFAULT_LANG } from '../hook/setting.js';
 import { IConfig } from './setting.dto.js';
 import { llms } from '../hook/llm.js';
+import {
+    ensureParentDir,
+    getLegacySettingsFilePath,
+    getLegacyTourKeyPath,
+    getSettingsFilePath,
+    getTourKeyPath
+} from '../storage/paths.js';
 
 function getConfigurationPath() {
-    const homeDir = os.homedir();
-    const configDir = path.join(homeDir, '.openmcp');
-    if (!fs.existsSync(configDir)) {
-        fs.mkdirSync(configDir, { recursive: true });
+    const configPath = getSettingsFilePath();
+    ensureParentDir(configPath);
+    return configPath;
+}
+
+function readConfigFromDisk(configPath: string): IConfig | undefined {
+    try {
+        if (!fs.existsSync(configPath)) {
+            return undefined;
+        }
+        return JSON.parse(fs.readFileSync(configPath, 'utf-8')) as IConfig;
+    } catch {
+        return undefined;
     }
-    return path.join(configDir, 'setting.json');
 }
 
 function getDefaultConfig() {
@@ -28,13 +42,6 @@ function getDefaultConfig() {
 
 function createConfig(): IConfig {
     const configPath = getConfigurationPath();
-    const configDir = path.dirname(configPath);
-    
-    // 确保配置目录存在
-    if (configDir && !fs.existsSync(configDir)) {
-        fs.mkdirSync(configDir, { recursive: true });
-    }
-    
     // 写入默认配置
     const defaultConfig = getDefaultConfig();
     fs.writeFileSync(configPath, JSON.stringify(defaultConfig, null, 2), 'utf-8');
@@ -43,14 +50,21 @@ function createConfig(): IConfig {
 
 export function loadSetting(): IConfig {
     const configPath = getConfigurationPath();
+    const legacyPath = getLegacySettingsFilePath();
     
+    if (!fs.existsSync(configPath) && fs.existsSync(legacyPath)) {
+        const legacyConfig = readConfigFromDisk(legacyPath);
+        if (legacyConfig) {
+            saveSetting(legacyConfig);
+        }
+    }
+
     if (!fs.existsSync(configPath)) {
         return createConfig();
     }
     
     try {
-        const configData = fs.readFileSync(configPath, 'utf-8');
-        const config = JSON.parse(configData) as IConfig;
+        const config = readConfigFromDisk(configPath) || createConfig();
         
         if (!config.LLM_INFO || (Array.isArray(config.LLM_INFO) && config.LLM_INFO.length === 0)) {
             config.LLM_INFO = llms;
@@ -101,6 +115,7 @@ export function saveSetting(config: Partial<IConfig>): void {
     const configPath = getConfigurationPath();
 
     try {
+        ensureParentDir(configPath);
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
     } catch (error) {
         console.error('Error saving config file:', error);
@@ -109,10 +124,15 @@ export function saveSetting(config: Partial<IConfig>): void {
 }
 
 export function getTour() {
-    const configPath = getConfigurationPath();
-    const KEY = path.join(path.dirname(configPath), 'KEY');
+    const KEY = getTourKeyPath();
+    const legacyKey = getLegacyTourKeyPath();
     console.log(KEY);
     
+    if (!fs.existsSync(KEY) && fs.existsSync(legacyKey)) {
+        ensureParentDir(KEY);
+        fs.copyFileSync(legacyKey, KEY);
+    }
+
     if (!fs.existsSync(KEY)) {
         return {
             userHasReadGuide: false
@@ -124,12 +144,12 @@ export function getTour() {
 }
 
 export function setTour(userHasReadGuide: boolean): void {
-    const configPath = getConfigurationPath();
-    const KEY = path.join(path.dirname(configPath), 'KEY');
+    const KEY = getTourKeyPath();
     if (userHasReadGuide) {
         const key = `直面恐惧，创造未来
 Face your fears, create the future
 恐怖に直面し、未来を創り出す`;
+        ensureParentDir(KEY);
         fs.writeFileSync(KEY, key, 'utf-8');
     }
 }

@@ -52,8 +52,10 @@ onMounted(async () => {
 
 	pinkLog('OpenMCP Client 启动');
 
-	// 跳转到首页
-	if (route.name !== 'debug') {
+	// 仅当访问根路径时跳转到 debug 页面，其他路由（如 /connect）保持不变
+	const currentPath = window.location.pathname;
+	const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
+	if (currentPath === '/' || currentPath === base || currentPath === base + '/') {
 		const targetRoute = import.meta.env.BASE_URL + 'debug';
 		console.log('go to ' + targetRoute);
 		router.push(targetRoute);

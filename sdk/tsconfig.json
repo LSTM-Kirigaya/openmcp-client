@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./dist",
+        "declaration": true,
+        "declarationDir": "./dist/types",
+        "experimentalDecorators": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": false,             // 必须为 false，让插件能产出代码给 Rollup
+        "allowImportingTsExtensions": false, // 关闭它，我们不需要在导入时写 .ts 后缀
+        "typeRoots": [
+            "./node_modules/@types"
+        ]
+    },
+    "include": [
+        "src/**/*",
+        "../service/src/**/*",
+        "../service/task-loop.d.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

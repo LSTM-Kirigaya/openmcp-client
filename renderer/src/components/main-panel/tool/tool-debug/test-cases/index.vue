@@ -32,7 +32,6 @@
                 </el-button-group>
             </div>
         </div>
-
         <div class="test-cases-list">
             <el-scrollbar height="100%">
                 <div v-if="testCases.length === 0" class="no-test-cases-text">{{ t('no-test-cases') }}</div>
@@ -90,7 +89,7 @@
             </el-scrollbar>
         </div>
 
-        <!-- 测试用例详情/编辑对话框 -->
+        <!-- 测试用例详情/编辑对话�?-->
         <el-dialog v-model="dialogVisible" :title="isEditing ? t('edit-test-case') : t('create-test-case')" width="60%"
             :close-on-click-modal="false" class="test-case-dialog">
             <el-form :model="currentTestCaseForm" label-position="top" ref="formRef">
@@ -144,14 +143,15 @@
                     <el-button @click="dialogVisible = false" class="btn-secondary btn-cancel">
                         {{ t('cancel') }}
                     </el-button>
-                    <el-button type="primary" @click="handleSaveTestCase" class="btn-save">
+                    <el-button type="primary" @click="handleSaveTestCase" class="btn-save" :loading="savingTestCase"
+                        :disabled="savingTestCase">
                         {{ t('save') }}
                     </el-button>
                 </el-button-group>
             </template>
         </el-dialog>
 
-        <!-- 测试结果详情对话框 -->
+        <!-- 测试结果详情对话�?-->
         <el-dialog v-model="resultDialogVisible" :title="t('test-result-details')" width="70%" class="test-result-dialog">
             <div v-if="selectedTestCase" class="test-result-container">
                 <div class="result-section">
@@ -183,7 +183,14 @@ import { ElMessage, type FormInstance } from 'element-plus';
 import { tabs } from '../../../panel';
 import type { ToolStorage, TestCase } from '../../tools';
 import { mcpClientAdapter } from '@/views/connect/core';
-import { initTestCasesStore, testCasesState, saveTestCases, updateTestCase } from './store';
+import {
+    createTestCase,
+    deleteTestCase,
+    initTestCasesStore,
+    loadTestCases,
+    testCasesState,
+    updateTestCase
+} from './store';
 
 const { t } = useI18n();
 
@@ -197,7 +204,7 @@ const props = defineProps({
 const tab = tabs.content[props.tabId];
 const tabStorage = tab.storage as ToolStorage;
 
-// 初始化 server 级测试用例存储
+// 初始�?server 级测试用例存�?
 try { initTestCasesStore(mcpClientAdapter.masterNode); } catch { /* 已初始化忽略 */ }
 
 /** 状态筛选：全部 | 成功 | 失败 | 超时 */
@@ -220,6 +227,7 @@ const dialogVisible = ref(false);
 const resultDialogVisible = ref(false);
 const isEditing = ref(false);
 const runningAll = ref(false);
+const savingTestCase = ref(false);
 const formRef = ref<FormInstance>();
 
 interface TestCaseForm {
@@ -278,7 +286,7 @@ function handleEditTestCase(testCase: TestCase) {
     currentTestCaseForm.value = {
         name: testCase.name,
         toolName: testCase.toolName,
-        description: testCase.description,
+        description: testCase.description ?? '',
         input: { ...testCase.input }
     };
     inputJson.value = JSON.stringify(testCase.input, null, 2);
@@ -288,7 +296,7 @@ function handleEditTestCase(testCase: TestCase) {
 }
 
 function handleToolChange() {
-    // 工具变更时重置输入
+    // 工具变更时重置输�?
     inputJson.value = '{}';
 }
 
@@ -326,7 +334,10 @@ function copyFromCurrentForm() {
     }
 }
 
-function handleSaveTestCase() {
+async function handleSaveTestCase() {
+    if (savingTestCase.value) {
+        return;
+    }
     // 验证
     if (!currentTestCaseForm.value.name) {
         ElMessage.error(t('please-enter-test-case-name'));
@@ -359,68 +370,63 @@ function handleSaveTestCase() {
 
     const now = Date.now();
 
-    if (isEditing.value && selectedTestCase.value) {
-        // 编辑现有测试用例
-        const index = testCasesState.value.findIndex(tc => tc.id === selectedTestCase.value!.id);
-        if (index !== -1) {
-            testCasesState.value[index] = {
-                ...testCasesState.value[index],
+    savingTestCase.value = true;
+    try {
+        if (isEditing.value && selectedTestCase.value) {
+            await updateTestCase(selectedTestCase.value.id, {
                 name: currentTestCaseForm.value.name,
                 toolName: currentTestCaseForm.value.toolName,
-                description: currentTestCaseForm.value.description,
+                description: currentTestCaseForm.value.description ?? '',
                 input: parsedInput,
                 expectedOutput: parsedExpected,
                 updatedAt: now
+            });
+            ElMessage.success(t('test-case-updated'));
+        } else {
+            // 创建新测试用�?
+            const newTestCase: TestCase = {
+                id: `test_${now}_${Math.random().toString(36).substr(2, 9)}`,
+                name: currentTestCaseForm.value.name,
+                toolName: currentTestCaseForm.value.toolName,
+                description: currentTestCaseForm.value.description ?? '',
+                input: parsedInput,
+                status: 'pending',
+                createdAt: now,
+                updatedAt: now,
+                ...(parsedExpected !== undefined ? { expectedOutput: parsedExpected } : {})
             };
+            await createTestCase(newTestCase);
+            ElMessage.success(t('test-case-created'));
         }
-        saveTestCases();
-        ElMessage.success(t('test-case-updated'));
-    } else {
-        // 创建新测试用例
-        const newTestCase: TestCase = {
-            id: `test_${now}_${Math.random().toString(36).substr(2, 9)}`,
-            name: currentTestCaseForm.value.name,
-            toolName: currentTestCaseForm.value.toolName,
-            description: currentTestCaseForm.value.description,
-            input: parsedInput,
-            status: 'pending',
-            createdAt: now,
-            updatedAt: now,
-            ...(parsedExpected !== undefined ? { expectedOutput: parsedExpected } : {})
-        };
-        testCasesState.value.push(newTestCase);
-        saveTestCases();
-        ElMessage.success(t('test-case-created'));
-    }
 
-    dialogVisible.value = false;
+        dialogVisible.value = false;
+    } catch (error) {
+        ElMessage.error(error instanceof Error ? error.message : t('error'));
+    } finally {
+        savingTestCase.value = false;
+    }
 }
 
-function handleDeleteTestCase(id: string) {
-    const index = testCasesState.value.findIndex(tc => tc.id === id);
-    if (index !== -1) {
-        testCasesState.value.splice(index, 1);
-        saveTestCases();
-        ElMessage.success(t('test-case-deleted'));
-    }
+async function handleDeleteTestCase(id: string) {
+    await deleteTestCase(id);
+    ElMessage.success(t('test-case-deleted'));
 }
 
 async function handleRunTest(testCase: TestCase) {
-    updateTestCase(testCase.id, { status: 'running' });
+    await updateTestCase(testCase.id, { status: 'running' }, { persist: false });
     try {
         const response = await mcpClientAdapter.callTool(testCase.toolName, testCase.input);
 
-        // 无预期输出时，工具调用成功即视为通过；有预期输出时进行比对
+        // 无预期输出时，工具调用成功即视为通过；有预期输出时进行比�?
         const hasExpected = testCase.expectedOutput !== undefined && testCase.expectedOutput !== null;
         const isMatch = !hasExpected || isToolCallResponseEqual(response, testCase.expectedOutput);
         const newStatus = isMatch ? 'passed' : 'failed';
 
-        updateTestCase(testCase.id, {
+        await updateTestCase(testCase.id, {
             status: newStatus,
             actualOutput: response,
             updatedAt: Date.now()
-        });
-        saveTestCases();
+        }, { persist: false });
         ElMessage.success(t('test-executed-successfully'));
 
         if (!runningAll.value) {
@@ -430,15 +436,14 @@ async function handleRunTest(testCase: TestCase) {
     } catch (e: any) {
         const errMsg = e?.message ?? String(e);
         const isTimeout = /timeout|timed out|ETIMEDOUT/i.test(errMsg);
-        updateTestCase(testCase.id, {
+        await updateTestCase(testCase.id, {
             status: isTimeout ? 'timeout' : 'failed',
             actualOutput: {
                 content: [{ type: 'text', text: `Error: ${errMsg}` }],
                 isError: true
             },
             updatedAt: Date.now()
-        });
-        saveTestCases();
+        }, { persist: false });
         ElMessage.error(t('test-execution-failed'));
 
         if (!runningAll.value) {
@@ -448,7 +453,7 @@ async function handleRunTest(testCase: TestCase) {
     }
 }
 
-/** 比较两次工具调用结果是否等价（忽略键序等差异） */
+/** 比较两次工具调用结果是否等价（忽略键序等差异�?*/
 function isToolCallResponseEqual(a: any, b: any): boolean {
     if (a === b) return true;
     if (a == null || b == null) return false;
@@ -481,7 +486,6 @@ async function handleRunAllTests() {
     }
 
     runningAll.value = false;
-    saveTestCases();
     ElMessage.success(`${t('all-tests-completed')}: ${passed} ${t('passed')}, ${failed} ${t('failed')}`);
 }
 
@@ -563,7 +567,7 @@ function formatTime(timestamp: number): string {
     background-color: var(--sidebar);
 }
 
-/* 与工具调试 run-debug 按钮组一致：次要按钮 + 主按钮，首尾 8px 圆角 */
+/* 与工具调�?run-debug 按钮组一致：次要按钮 + 主按钮，首尾 8px 圆角 */
 .header-button-group {
     display: inline-flex;
 }
@@ -611,7 +615,7 @@ function formatTime(timestamp: number): string {
     padding: 8px 0;
 }
 
-/* 与 tool-logger output-content / tool-call-block 风格一致 */
+/* �?tool-logger output-content / tool-call-block 风格一�?*/
 .test-case-item {
     background-color: var(--sidebar);
     border-radius: 0.5em;
@@ -681,7 +685,7 @@ function formatTime(timestamp: number): string {
     display: inline-flex;
 }
 
-/* 与工具调试 executor-actions 次要按钮风格一致 */
+/* 与工具调�?executor-actions 次要按钮风格一�?*/
 .test-case-actions .btn-edit,
 .test-case-actions .btn-view {
     border-color: var(--el-border-color);
@@ -730,7 +734,7 @@ function formatTime(timestamp: number): string {
     display: inline-flex;
 }
 
-/* 与工具调试 executor-actions 次要按钮组一致 */
+/* 与工具调�?executor-actions 次要按钮组一�?*/
 .json-editor .btn-secondary {
     border-radius: 0;
     border-color: var(--el-border-color);
@@ -754,7 +758,7 @@ function formatTime(timestamp: number): string {
     border-bottom-right-radius: 8px !important;
 }
 
-/* 编辑/创建对话框底部：与工具调试 footer 按钮组一致 */
+/* 编辑/创建对话框底部：与工具调�?footer 按钮组一�?*/
 .test-cases-container :deep(.test-case-dialog .el-dialog__footer) .dialog-footer-group {
     display: inline-flex;
 }

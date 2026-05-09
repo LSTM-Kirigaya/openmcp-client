@@ -1,73 +1,64 @@
-#!/usr/bin/env node
-
 import { Command } from 'commander';
-import chalk from 'chalk';
-import { initCommand } from './commands/init.js';
-import { devCommand } from './commands/dev.js';
-import { startCommand } from './commands/start.js';
-import { updateCommand } from './commands/update.js';
-import { version } from './utils/version.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  settingCommand,
+  debugCommand,
+  mcpCommand,
+  gatewayCommand,
+  webCommand,
+  startCommand,
+  skillsCmd
+} from './commands/index.js';
+import { HELP_PROGRAM_AFTER } from './lib/help-text.js';
+import { diagnoseThrownError } from './lib/error-diagnose.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function readPackageVersion(): string {
+  try {
+    const pkgPath = path.resolve(__dirname, '..', 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) as { version?: string };
+    return pkg.version || '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
 
 const program = new Command();
 
+function enableHelpAfterErrors(command: Command): void {
+  command.showHelpAfterError();
+  command.showSuggestionAfterError();
+  command.allowExcessArguments(false);
+  for (const child of command.commands) {
+    enableHelpAfterErrors(child);
+  }
+}
+
 program
-  .name('omc')
-  .description('CLI tool for OpenMCP - Quickly setup and run OpenMCP development environment')
-  .version(version, '-v, --version', 'Display version number');
+  .name('openmcp')
+  .description('OpenMCP CLI — Gateway 管理与 MCP 全量能力')
+  .version(readPackageVersion())
+  .addHelpText('after', HELP_PROGRAM_AFTER)
+  .addCommand(settingCommand)
+  .addCommand(mcpCommand)
+  .addCommand(debugCommand)
+  .addCommand(gatewayCommand)
+  .addCommand(webCommand)
+  .addCommand(startCommand)
+  .addCommand(skillsCmd);
 
-// Init command - Initialize a new OpenMCP project
-program
-  .command('init')
-  .description('Initialize a new OpenMCP project in the current directory')
-  .argument('[project-name]', 'Name of the project directory to create', 'openmcp-project')
-  .option('-t, --template <template>', 'Project template to use', 'default')
-  .option('-f, --force', 'Force overwrite if directory exists', false)
-  .action(initCommand);
+enableHelpAfterErrors(program);
 
-// Dev command - Start development servers
-program
-  .command('dev')
-  .description('Start OpenMCP in development mode (service + renderer)')
-  .argument('[project-path]', 'Path to the OpenMCP project', '.')
-  .option('-s, --service-only', 'Start only the service (backend)', false)
-  .option('-r, --renderer-only', 'Start only the renderer (frontend)', false)
-  .option('-p, --port <port>', 'Service port number', '8282')
-  .action(devCommand);
-
-// Start command - Start production servers
-program
-  .command('start')
-  .description('Start OpenMCP in production mode')
-  .argument('[project-path]', 'Path to the OpenMCP project', '.')
-  .option('-p, --port <port>', 'Service port number', '8282')
-  .action(startCommand);
-
-// Update command - Update OpenMCP to latest version
-program
-  .command('update')
-  .description('Update OpenMCP project to the latest version')
-  .argument('[project-path]', 'Path to the OpenMCP project', '.')
-  .option('-c, --check', 'Check for updates without applying', false)
-  .action(updateCommand);
-
-// Help command enhancement
-program.on('--help', () => {
-  console.log('');
-  console.log(chalk.cyan('Examples:'));
-  console.log('  $ omc init my-project        # Create a new project');
-  console.log('  $ cd my-project && omc dev   # Start development servers');
-  console.log('  $ omc dev -s                 # Start only backend service');
-  console.log('  $ omc start                  # Start production mode');
-  console.log('');
-  console.log(chalk.cyan('Documentation:'));
-  console.log('  https://openmcp.kirigaya.cn');
-  console.log('');
-});
-
-// Parse arguments
-program.parse();
-
-// If no arguments provided, show help
-if (process.argv.length <= 2) {
-  program.help();
+try {
+  await program.parseAsync(process.argv);
+} catch (error) {
+  const text = error instanceof Error ? error.message : String(error);
+  console.error(text);
+  for (const tip of diagnoseThrownError(error)) {
+    console.error(`[diagnose] ${tip}`);
+  }
+  process.exitCode = 1;
 }

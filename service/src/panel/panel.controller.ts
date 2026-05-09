@@ -5,13 +5,18 @@ import { getClient } from "../mcp/connect.service.js";
 import { systemPromptDB } from "../hook/db.js";
 import { loadTabSaveConfig, saveTabSaveConfig, saveVariableConfig, loadVariableConfig, saveExtractionRulesConfig, loadExtractionRulesConfig, saveTestCasesConfig, loadTestCasesConfig } from "./panel.service.js";
 import { getBatchValidationRepository } from "./batch-validation.repository.js";
+import { getClientStorageBinding } from "../storage/client-binding.js";
+
+function getBinding(data: RequestData) {
+    return data.clientId ? getClientStorageBinding(String(data.clientId)) : undefined;
+}
 
 export class PanelController {
     @Controller('panel/save')
     async savePanel(data: RequestData, webview: PostMessageble) {
         const client = getClient(data.clientId);
         const serverInfo = client?.getServerVersion();
-        saveTabSaveConfig(serverInfo, data);
+        saveTabSaveConfig(serverInfo, data, getBinding(data));
 
         return {
             code: 200,
@@ -23,7 +28,7 @@ export class PanelController {
     async loadPanel(data: RequestData, webview: PostMessageble) {
         const client = getClient(data.clientId);
         const serverInfo = client?.getServerVersion();
-        const config = loadTabSaveConfig(serverInfo);
+        const config = loadTabSaveConfig(serverInfo, getBinding(data));
 
         return {
             code: 200,
@@ -102,7 +107,7 @@ export class PanelController {
         const { variables } = data;
         
         // 保存到 .openmcp/variables.{serverName}.json
-        saveVariableConfig(serverInfo, { variables });
+        saveVariableConfig(serverInfo, { variables }, getBinding(data));
 
         return {
             code: 200,
@@ -116,7 +121,7 @@ export class PanelController {
         const serverInfo = client?.getServerVersion();
         
         // 从 .openmcp/variables.{serverName}.json 加载
-        const config = loadVariableConfig(serverInfo);
+        const config = loadVariableConfig(serverInfo, getBinding(data));
 
         return {
             code: 200,
@@ -130,7 +135,7 @@ export class PanelController {
         const serverInfo = client?.getServerVersion();
         const { extractionRules } = data as any;
 
-        saveExtractionRulesConfig(serverInfo, { extractionRules });
+        saveExtractionRulesConfig(serverInfo, { extractionRules }, getBinding(data));
 
         return {
             code: 200,
@@ -143,7 +148,7 @@ export class PanelController {
         const client = getClient(data.clientId);
         const serverInfo = client?.getServerVersion();
 
-        const config = loadExtractionRulesConfig(serverInfo);
+        const config = loadExtractionRulesConfig(serverInfo, getBinding(data));
 
         return {
             code: 200,
@@ -157,7 +162,7 @@ export class PanelController {
         const serverInfo = client?.getServerVersion();
         const { testCases } = data as any;
 
-        saveTestCasesConfig(serverInfo, { testCases });
+        saveTestCasesConfig(serverInfo, { testCases }, getBinding(data));
 
         return {
             code: 200,
@@ -170,7 +175,7 @@ export class PanelController {
         const client = getClient(data.clientId);
         const serverInfo = client?.getServerVersion();
 
-        const config = loadTestCasesConfig(serverInfo);
+        const config = loadTestCasesConfig(serverInfo, getBinding(data));
 
         return {
             code: 200,
@@ -185,8 +190,12 @@ export class PanelController {
             return { code: 400, msg: { storage: null } };
         }
         const client = getClient(clientId);
-        const serverName = client?.getServerVersion()?.name ?? 'default';
-        const repo = getBatchValidationRepository(serverName);
+        const binding = getBinding(data);
+        const connectionKey = binding?.connectionId || binding?.connectionKey || (client?.getServerVersion()?.name ?? 'default');
+        const repo = getBatchValidationRepository(connectionKey, {
+            scope: binding?.scope,
+            workspacePath: binding?.workspacePath
+        });
         const storage = await repo.load();
         return { code: 200, msg: { storage } };
     }
@@ -199,8 +208,12 @@ export class PanelController {
             return { code: 400, msg: 'Missing clientId or storage' };
         }
         const client = getClient(clientId);
-        const serverName = client?.getServerVersion()?.name ?? 'default';
-        const repo = getBatchValidationRepository(serverName);
+        const binding = getBinding(data);
+        const connectionKey = binding?.connectionId || binding?.connectionKey || (client?.getServerVersion()?.name ?? 'default');
+        const repo = getBatchValidationRepository(connectionKey, {
+            scope: binding?.scope,
+            workspacePath: binding?.workspacePath
+        });
         await repo.save({
             testCases: Array.isArray(storage.testCases) ? storage.testCases : [],
             selectedCaseIndex: typeof storage.selectedCaseIndex === 'number' ? storage.selectedCaseIndex : 0,

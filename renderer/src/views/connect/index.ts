@@ -2,6 +2,7 @@ import { getTour, loadSetting } from "@/hook/setting";
 import { ElLoading } from "element-plus";
 import { pinkLog } from "../setting/util";
 import { mcpClientAdapter } from "./core";
+import { fetchAndApplyGatewaySessions } from "./gateway-session-sync";
 import { isConnecting } from "@/components/sidebar/connected";
 import { ref } from "vue";
 
@@ -26,11 +27,15 @@ export async function initialise() {
 
 	loading.close();
 
-    // 尝试进行初始化连接
-    await mcpClientAdapter.launch();
+	// 注册消息监听器（不再自动连接 Server）
+	await mcpClientAdapter.launch();
 
-	// loading panels
-	await mcpClientAdapter.loadPanels();
+	// WebSocket 已在 App 中 await 过；此处同步 Gateway 已有会话并必要时加载面板，避免仅打开 Debug 时「工具」白屏
+	try {
+		await fetchAndApplyGatewaySessions('');
+	} catch (e) {
+		pinkLog(`Gateway 会话同步跳过: ${e}`);
+	}
 
 	isConnecting.value = false;
 }

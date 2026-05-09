@@ -5,6 +5,7 @@ import { loadDebuggerMcpConfig, saveDebuggerMcpConfig } from './debugger-mcp-sto
 import {
     ensureDebuggerMcpServer,
     getDebuggerMcpConnectionInfo,
+    runSimpleAgent,
     stopDebuggerMcpServer
 } from './debugger-mcp.service.js';
 import type { DebuggerMcpConfig } from './debugger-mcp.dto.js';
@@ -17,6 +18,30 @@ const ALL_TOOL_NAMES = [
 ];
 
 export class DebuggerMcpController {
+    @Controller('debug-chat/run-agent')
+    async runAgent(data: RequestData, _webview: PostMessageble) {
+        const { clientId, input, llmConfig } = data as any;
+        if (!clientId || typeof clientId !== 'string') {
+            return { code: 400, msg: 'clientId is required' };
+        }
+        if (!input || typeof input !== 'string') {
+            return { code: 400, msg: 'input is required' };
+        }
+        if (!llmConfig?.baseURL || !llmConfig?.apiKey || !llmConfig?.model) {
+            return { code: 400, msg: 'llmConfig must include baseURL, apiKey, and model' };
+        }
+        try {
+            const trace = await runSimpleAgent(clientId, input, {
+                baseURL: String(llmConfig.baseURL),
+                apiKey: String(llmConfig.apiKey),
+                model: String(llmConfig.model)
+            });
+            return { code: 200, msg: { trace } };
+        } catch (error) {
+            return { code: 500, msg: error instanceof Error ? error.message : String(error) };
+        }
+    }
+
     @Controller('debugger-mcp/load')
     async loadConfig(_data: RequestData, _webview: PostMessageble) {
         const config = loadDebuggerMcpConfig();

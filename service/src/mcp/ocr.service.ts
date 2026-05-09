@@ -4,9 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { OcrWorker } from './ocr.dto.js';
 import { diskStorage, ocrDB } from '../hook/db.js';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import { RUNNING_CWD } from '../hook/setting.js';
+import { getBinaryStorageDir } from '../storage/paths.js';
 
 export const ocrWorkerStorage = new Map<string, OcrWorker>();
 
@@ -27,8 +27,7 @@ export function saveBase64ImageData(
 }
 
 export function loadBase64ImageData(fileName: string): string {
-    const homedir = os.homedir();
-    const imageStorageFolder = path.join(homedir, '.openmcp','storage');
+    const imageStorageFolder = getBinaryStorageDir();
     const filePath = path.join(imageStorageFolder, fileName);
     // 读取文件内容
     if (!fs.existsSync(filePath)) {

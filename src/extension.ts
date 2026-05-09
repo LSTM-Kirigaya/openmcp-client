@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { setRunningCWD, setVscodeWorkspace, setDefaultLang } from '../openmcp-sdk/service/index.js';
+import { setRunningCWD, setVscodeWorkspace, setDefaultLang } from '@openmcp/service';
 import { launch } from './common/entry.js';
 import { initialiseI18n, getAvailableKeys, getDefaultLanguage } from './i18n/index.js';
 import { checkNews } from './webview/webview.service.js';

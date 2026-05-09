@@ -1,27 +1,23 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",                    
-        "target": "ES6",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "strict": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "outDir": "./dist",
-        "declaration": true,
-        "declarationMap": false,
-        "experimentalDecorators": true,
-    },
-    "paths": {
-        "@/*": [
-            "src/*"
-        ]
-    },
-    "include": [
-        "src/**/*"
-    ],
-    "exclude": [
-        "node_modules",
-    ] 
+	"compilerOptions": {
+		"target": "ES6",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"declaration": true,
+		"declarationMap": false,
+		"experimentalDecorators": true
+	},
+	"include": [
+		"src/**/*",
+		"task-loop.d.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }

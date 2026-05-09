@@ -62,15 +62,18 @@
                 </template>
             </el-dialog>
             <el-dialog v-model="saveTestCaseDialogVisible" :title="t('save-as-test-case')" width="360px"
-                class="save-test-case-dialog" destroy-on-close>
-                <div class="ai-config-panel">
+                class="save-test-case-dialog" destroy-on-close append-to-body>
+                <el-form :model="saveTestCaseDraft" label-position="top" class="save-test-case-dialog-form">
                     <el-form-item :label="t('test-case-name')">
-                        <el-input v-model="saveTestCaseName" :placeholder="t('enter-test-case-name')" clearable />
+                        <el-input v-model="saveTestCaseDraft.name" :placeholder="t('enter-test-case-name')"
+                            clearable />
                     </el-form-item>
-                </div>
+                </el-form>
                 <template #footer>
                     <el-button @click="saveTestCaseDialogVisible = false">{{ t('cancel') }}</el-button>
-                    <el-button type="primary" @click="onSaveTestCaseConfirm">{{ t('confirm') }}</el-button>
+                    <el-button type="primary" :loading="saveTestCaseSaving" @click="onSaveTestCaseConfirm">
+                        {{ t('confirm') }}
+                    </el-button>
                 </template>
             </el-dialog>
             <el-drawer v-model="variableExtractionVisible" :title="t('variable-extraction')" direction="rtl"
@@ -82,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, watch, ref, computed, onMounted } from 'vue';
+import { defineComponent, watch, ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
 import { ArrowDown } from '@element-plus/icons-vue';
@@ -116,7 +119,8 @@ const aiPromptVisible = ref(false);
 const enableXmlWrapper = ref(false);
 const variableExtractionVisible = ref(false);
 const saveTestCaseDialogVisible = ref(false);
-const saveTestCaseName = ref('');
+const saveTestCaseDraft = reactive({ name: '' });
+const saveTestCaseSaving = ref(false);
 
 const { t } = useI18n();
 
@@ -502,7 +506,7 @@ function onTextareaKeydown(e: KeyboardEvent) {
 }
 
 import type { TestCase, ToolStorage as ToolStorageType } from '../../tools';
-import { initTestCasesStore, testCasesState, saveTestCases } from '../test-cases/store';
+import { initTestCasesStore, createTestCase } from '../test-cases/store';
 
 /** 当前工具下保存为测试用例时的默认名称（与直接保存时生成的名字一致） */
 function getDefaultTestCaseName(): string {
@@ -515,12 +519,17 @@ function saveAsTestCase() {
         ElMessage.warning(t('preset-requires-connection'));
         return;
     }
-    saveTestCaseName.value = getDefaultTestCaseName();
+    saveTestCaseDraft.name = getDefaultTestCaseName();
     saveTestCaseDialogVisible.value = true;
 }
 
-function onSaveTestCaseConfirm() {
-    const name = saveTestCaseName.value?.trim();
+function getFriendlyErrorMessage(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error ?? '');
+    return message || t('error');
+}
+
+async function onSaveTestCaseConfirm() {
+    const name = saveTestCaseDraft.name?.trim();
     if (!name) {
         ElMessage.warning(t('please-enter-test-case-name'));
         return;
@@ -548,10 +557,16 @@ function onSaveTestCaseConfirm() {
         newTestCase.status = 'passed';
     }
 
-    testCasesState.value = [...(testCasesState.value || []), newTestCase];
-    saveTestCases();
-    saveTestCaseDialogVisible.value = false;
-    ElMessage.success(t('test-case-saved-successfully'));
+    saveTestCaseSaving.value = true;
+    try {
+        await createTestCase(newTestCase);
+        saveTestCaseDialogVisible.value = false;
+        ElMessage.success(t('test-case-saved-successfully'));
+    } catch (error) {
+        ElMessage.error(getFriendlyErrorMessage(error));
+    } finally {
+        saveTestCaseSaving.value = false;
+    }
 }
 
 watch(currentTool, (tool) => {
@@ -653,11 +668,23 @@ defineExpose({
     margin-bottom: 15px;
 }
 
-/* 必填星号与 label 内容同一行（避免使用 #label 插槽时星号跑到上侧） */
-.tool-executor-container .el-form-item .el-form-item__label {
+/* 仅作用于工具参数表单，避免弹窗内 el-form-item 继承 label 宽度导致输入框被挤出可视区域 */
+.tool-executor-container > .el-form .el-form-item .el-form-item__label {
     display: flex;
     align-items: center;
     gap: 4px;
+    width: 100%;
+}
+
+.save-test-case-dialog-form .el-form-item {
+    margin-bottom: 0;
+}
+
+.save-test-case-dialog-form .el-form-item__content {
+    min-width: 0;
+}
+
+.save-test-case-dialog-form .el-input {
     width: 100%;
 }
 
