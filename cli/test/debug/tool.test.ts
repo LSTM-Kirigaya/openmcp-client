@@ -11,7 +11,14 @@ import {
   setupTestSession,
   teardownTestSession,
   extractJson,
+  TEST_HOME,
 } from '../_helpers.js';
+
+function writeSessionStore(value: unknown): void {
+  const storePath = path.join(TEST_HOME, '.openmcp', 'runtime', 'mcp-sessions.json');
+  fs.mkdirSync(path.dirname(storePath), { recursive: true });
+  fs.writeFileSync(storePath, JSON.stringify(value, null, 2), 'utf-8');
+}
 
 describe('debug tool', { timeout: 180_000 }, () => {
   let clientId = '';
@@ -55,6 +62,21 @@ describe('debug tool', { timeout: 180_000 }, () => {
     assert.ok(j);
     assert.equal(j.code, 200);
     assert.match(JSON.stringify(j.msg), /hello/);
+  });
+
+  it('auto-recovers default session from the only active Gateway session', async () => {
+    writeSessionStore({ recent: [] });
+    const r = await cli(
+      withGw([
+        'debug', 'tool', 'call', '--name', 'echo',
+        '-a', '{"message":"auto default"}',
+      ]),
+      120_000,
+    );
+    assert.equal(r.exitCode, 0, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+    const j = extractJson(r.stdout);
+    assert.equal(j?.code, 200, JSON.stringify(j));
+    assert.match(JSON.stringify(j.msg), /auto default/);
   });
 
   it('calls get-sum', async () => {

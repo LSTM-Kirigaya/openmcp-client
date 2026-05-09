@@ -53,7 +53,7 @@ function messagesToTrace(messages: Array<{ role: string; content: string }>): Ar
     }));
 }
 
-async function runSimpleAgent(
+export async function runSimpleAgent(
     clientId: string,
     userInput: string,
     llmConfig: { baseURL: string; apiKey: string; model: string }

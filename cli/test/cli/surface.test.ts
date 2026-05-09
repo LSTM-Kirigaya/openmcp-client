@@ -66,6 +66,18 @@ describe('cli surface', { timeout: 120_000 }, () => {
     assert.match(output, /--args <json>/);
   });
 
+  it('extra positional arguments are rejected instead of ignored', async () => {
+    const session = await cli(['mcp', 'session', 'list', 'current']);
+    assert.notEqual(session.exitCode, 0);
+    assert.match(`${session.stdout}\n${session.stderr}`, /too many arguments for 'list'/);
+
+    const tool = await cli(['debug', 'tool', 'call', '--name', '--args', '{"message":"hi"}']);
+    assert.notEqual(tool.exitCode, 0);
+    const output = `${tool.stdout}\n${tool.stderr}`;
+    assert.match(output, /too many arguments for 'call'/);
+    assert.doesNotMatch(output, /Missing --client-id/);
+  });
+
   it('tool call help explains JSON args', async () => {
     const r = await cli(['debug', 'tool', 'call', '--help']);
     assert.equal(r.exitCode, 0, r.stderr);

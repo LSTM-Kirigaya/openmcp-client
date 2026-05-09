@@ -5,6 +5,15 @@ function includesAny(text: string, needles: string[]): boolean {
   return needles.some((n) => lower.includes(n.toLowerCase()));
 }
 
+function extractValidationPaths(text: string): string[] {
+  const paths = new Set<string>();
+  const re = /"path"\s*:\s*\[\s*"([^"]+)"/g;
+  for (const match of text.matchAll(re)) {
+    if (match[1]) paths.add(match[1]);
+  }
+  return [...paths];
+}
+
 export function isMissingSessionMessage(text: string): boolean {
   return includesAny(text, [
     'mcp client',
@@ -25,6 +34,8 @@ export function diagnoseResponse(command: string, response: RestFulResponse): st
   const advice: string[] = [];
   const msg = typeof response.msg === 'string' ? response.msg : JSON.stringify(response.msg);
   const code = response.code;
+  const promptArgsRejected = command === 'prompts/get' && includesAny(msg, ['invalid arguments for prompt', 'input validation error']);
+  const toolArgsRejected = command === 'tools/call' && includesAny(msg, ['invalid arguments for tool', 'input validation error']);
 
   if (code === 404 || includesAny(msg, ['command not found'])) {
     advice.push('The command may not exist in the running service. Check the command name and rebuild/restart gateway.');
@@ -32,7 +43,24 @@ export function diagnoseResponse(command: string, response: RestFulResponse): st
   if (code === 408 || includesAny(msg, ['timeout', 'timed out'])) {
     advice.push('The request timed out. Check the target service or increase the command timeout.');
   }
-  if (code >= 500 || includesAny(msg, ['econnrefused', 'spawn', 'not found'])) {
+  if (promptArgsRejected) {
+    const missing = extractValidationPaths(msg);
+    advice.push('Prompt arguments were rejected by the MCP server.');
+    if (missing.length > 0) {
+      advice.push(`Missing or invalid prompt argument(s): ${missing.join(', ')}.`);
+    }
+    advice.push('Run `openmcp debug prompt list` to inspect required arguments.');
+    advice.push('Pass arguments with `--data`, for example: `openmcp debug prompt get --prompt-id <PROMPT_ID> --data \'{"key":"value"}\'`.');
+  }
+  if (toolArgsRejected) {
+    const missing = extractValidationPaths(msg);
+    advice.push('Tool arguments were rejected by the MCP server.');
+    if (missing.length > 0) {
+      advice.push(`Missing or invalid tool argument(s): ${missing.join(', ')}.`);
+    }
+    advice.push('Run `openmcp debug tool list` to inspect tool names and inputSchema.');
+  }
+  if (!promptArgsRejected && !toolArgsRejected && (code >= 500 || includesAny(msg, ['econnrefused', 'spawn', 'not found']))) {
     advice.push('Service execution failed. Check gateway, MCP process path, URL, command, and cwd.');
   }
   if (isMissingSessionMessage(msg)) {

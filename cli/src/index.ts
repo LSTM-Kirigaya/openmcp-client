@@ -31,6 +31,7 @@ const program = new Command();
 function enableHelpAfterErrors(command: Command): void {
   command.showHelpAfterError();
   command.showSuggestionAfterError();
+  command.allowExcessArguments(false);
   for (const child of command.commands) {
     enableHelpAfterErrors(child);
   }

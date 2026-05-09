@@ -1,16 +1,10 @@
 import { Command } from 'commander';
 import { printResponse, withGateway, DEFAULT_GATEWAY } from '../../lib/cli-helpers.js';
-import { rememberSession, removeSession, requireClientId } from '../../lib/mcp-session-store.js';
+import { removeSession, resolveClientIdWithGateway } from '../../lib/mcp-session-store.js';
 import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
-}
-
-function resolveClientIdForCommand(options: { clientId?: string; gateway: string }): string {
-  const clientId = requireClientId(options.clientId);
-  rememberSession(clientId, options.gateway);
-  return clientId;
 }
 
 function printThrown(error: unknown): void {
@@ -32,8 +26,8 @@ gw(
     .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
     .action(async (options) => {
       try {
-        const clientId = resolveClientIdForCommand(options);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('resources/list', { clientId });
           printResponse('resources/list', res);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);
@@ -53,8 +47,8 @@ gw(
     .requiredOption('--uri <uri>', 'MCP resource URI')
     .action(async (options) => {
       try {
-        const clientId = resolveClientIdForCommand(options);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('resources/read', { clientId, resourceUri: options.uri });
           printResponse('resources/read', res);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);
@@ -73,8 +67,8 @@ gw(
     .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
     .action(async (options) => {
       try {
-        const clientId = resolveClientIdForCommand(options);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('resources/templates/list', { clientId });
           printResponse('resources/templates/list', res);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);

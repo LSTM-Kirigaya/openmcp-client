@@ -12,8 +12,7 @@ import {
   rememberSession,
   reconcileGatewaySessions,
   removeSession,
-  requireClientId,
-  setCurrentClientId
+  resolveClientIdWithGateway
 } from '../../lib/mcp-session-store.js';
 import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 
@@ -30,6 +29,14 @@ function printThrown(error: unknown): void {
   process.exitCode = 1;
 }
 
+function activeClientIdsFromResponse(msg: unknown): string[] {
+  return Array.isArray(msg)
+    ? msg
+      .map((session: any) => session?.clientId)
+      .filter((clientId: unknown): clientId is string => typeof clientId === 'string')
+    : [];
+}
+
 export const mcpSessionCommand = new Command('session')
   .description('Manage MCP runtime sessions')
   .addHelpText('after', `
@@ -39,6 +46,11 @@ Examples:
   openmcp mcp session disconnect
   openmcp mcp session current
   openmcp mcp session use --client-id <ID>
+
+Notes:
+  session list shows active sessions in Gateway.
+  session current shows the local default session used when --client-id is omitted.
+  session use only accepts a clientId that is currently active in Gateway.
 `);
 
 gw(
@@ -51,13 +63,7 @@ gw(
           const res = await bridge.commandRequest('connect/list', {});
           printResponse('connect/list', res);
           if (res.code === 200) {
-            const sessions = Array.isArray(res.msg) ? res.msg : [];
-            reconcileGatewaySessions(
-              options.gateway,
-              sessions
-                .map((session: any) => session?.clientId)
-                .filter((clientId: unknown): clientId is string => typeof clientId === 'string')
-            );
+            reconcileGatewaySessions(options.gateway, activeClientIdsFromResponse(res.msg));
           }
           if (res.code !== 200) process.exitCode = 1;
         });
@@ -97,11 +103,37 @@ gw(
 gw(
   mcpSessionCommand
     .command('use')
-    .description('Switch default session')
-    .requiredOption('--client-id <id>', 'Target clientId')
-    .action((options) => {
-      setCurrentClientId(options.clientId);
-      printJson({ ok: true, currentClientId: options.clientId });
+    .description('Switch default session to an active Gateway session')
+    .requiredOption('--client-id <id>', 'Target active clientId from `openmcp mcp session list`')
+    .action(async (options) => {
+      try {
+        const clientId = String(options.clientId || '').trim();
+        await withGateway(options.gateway, async (bridge) => {
+          const res = await bridge.commandRequest('connect/list', {});
+          if (res.code !== 200) {
+            printResponse('connect/list', res);
+            process.exitCode = 1;
+            return;
+          }
+
+          const activeClientIds = activeClientIdsFromResponse(res.msg);
+          if (!activeClientIds.includes(clientId)) {
+            console.error(`Session is not active in Gateway: ${clientId}`);
+            if (activeClientIds.length > 0) {
+              console.error(`Active sessions: ${activeClientIds.join(', ')}`);
+            } else {
+              console.error('No active sessions in Gateway. Run `openmcp mcp session connect --id <SERVER_ID>` first.');
+            }
+            process.exitCode = 1;
+            return;
+          }
+
+          rememberSession(clientId, options.gateway);
+          printJson({ ok: true, currentClientId: clientId, gateway: options.gateway });
+        });
+      } catch (error) {
+        printThrown(error);
+      }
     })
 );
 
@@ -142,8 +174,8 @@ gw(
     .option('--client-id <id>', 'clientId; defaults to current session')
     .action(async (options) => {
       try {
-        const clientId = requireClientId(options.clientId);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('disconnect', { clientId });
           printResponse('disconnect', res);
           if (res.code === 200 || isMissingSessionResponse(res as any)) removeSession(clientId);

@@ -18,6 +18,7 @@ export const SERVICE_COMMANDS: { command: string; hint: string }[] = [
   { command: 'llm/chat/completions/sync', hint: 'body: { baseURL, apiKey, model, messages, temperature? }' },
   { command: 'llm/models/dynamic', hint: 'body: { providerId }' },
   { command: 'batch-validation/run', hint: 'body: { messages, testCases, llmConfig, evaluationMode?, customPrompt? }' },
+  { command: 'debug-chat/run-agent', hint: 'body: { clientId, input, llmConfig }' },
   { command: 'servers/list', hint: 'List local MCP Servers' },
   { command: 'servers/get', hint: 'body: { id }' },
   { command: 'servers/save', hint: 'body: { scope?: local|auto, id?, ... }' },

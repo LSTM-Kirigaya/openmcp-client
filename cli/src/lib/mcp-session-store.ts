@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import type { MessageBridge } from './message-bridge.js';
 
 export interface SessionRecord {
   clientId: string;
@@ -69,12 +70,12 @@ export function setCurrentClientId(clientId: string): void {
   writeState(state);
 }
 
-export function rememberSession(
+function upsertSessionInState(
+  state: SessionState,
   clientId: string,
   gateway: string,
   connectPayload?: Record<string, unknown>
 ): SessionRecord {
-  const state = readState();
   const now = new Date().toISOString();
   const existing = state.recent.find((s) => s.clientId === clientId);
   if (existing) {
@@ -95,8 +96,18 @@ export function rememberSession(
     .sort((a, b) => (a.lastUsedAt < b.lastUsedAt ? 1 : -1))
     .slice(0, MAX_RECENT);
   state.currentClientId = clientId;
+  return state.recent.find((s) => s.clientId === clientId) ?? state.recent[0];
+}
+
+export function rememberSession(
+  clientId: string,
+  gateway: string,
+  connectPayload?: Record<string, unknown>
+): SessionRecord {
+  const state = readState();
+  const record = upsertSessionInState(state, clientId, gateway, connectPayload);
   writeState(state);
-  return state.recent[0];
+  return record;
 }
 
 export function removeSession(clientId: string): void {
@@ -118,6 +129,10 @@ export function reconcileGatewaySessions(gateway: string, activeClientIds: strin
     delete state.currentClientId;
     changed = true;
   }
+  if (!state.currentClientId && activeClientIds.length === 1) {
+    upsertSessionInState(state, activeClientIds[0], gateway);
+    changed = true;
+  }
   if (changed) {
     writeState(state);
   }
@@ -127,6 +142,80 @@ export function requireClientId(explicit?: string): string {
   if (explicit && explicit.trim()) return explicit.trim();
   const current = getCurrentClientId();
   if (current) return current;
+  throw new Error('Missing --client-id and there is no current default session. Run `openmcp mcp session connect --id <SERVER_ID>` first, or pass `--client-id` explicitly.');
+}
+
+function activeClientIdsFromResponse(msg: unknown): string[] {
+  return Array.isArray(msg)
+    ? msg
+      .map((session: any) => session?.clientId)
+      .filter((clientId: unknown): clientId is string => typeof clientId === 'string')
+    : [];
+}
+
+export async function resolveClientIdWithGateway(
+  options: { clientId?: string; gateway: string },
+  bridge: Pick<MessageBridge, 'commandRequest'>
+): Promise<string> {
+  const explicit = options.clientId?.trim();
+  const current = getCurrentClientId();
+  const res = await bridge.commandRequest('connect/list', {});
+  if (res.code === 200) {
+    const activeClientIds = activeClientIdsFromResponse(res.msg);
+    reconcileGatewaySessions(options.gateway, activeClientIds);
+
+    if (explicit) {
+      if (activeClientIds.includes(explicit)) {
+        rememberSession(explicit, options.gateway);
+        return explicit;
+      }
+      removeSession(explicit);
+      throw new Error([
+        `MCP session is not active in Gateway: ${explicit}`,
+        activeClientIds.length > 0
+          ? `Active sessions: ${activeClientIds.join(', ')}`
+          : 'Gateway has no active MCP sessions.',
+        'Run `openmcp mcp session connect --id <SERVER_ID>` first, or pass an active `--client-id` from `openmcp mcp session list`.'
+      ].join('\n'));
+    }
+
+    if (current && activeClientIds.includes(current)) {
+      rememberSession(current, options.gateway);
+      return current;
+    }
+
+    const recovered = getCurrentClientId();
+    if (recovered) {
+      return recovered;
+    }
+    if (current && !activeClientIds.includes(current)) {
+      throw new Error([
+        `Stored default session is not active in Gateway: ${current}`,
+        activeClientIds.length > 0
+          ? `Active sessions: ${activeClientIds.join(', ')}`
+          : 'Gateway has no active MCP sessions.',
+        'Run `openmcp mcp session connect --id <SERVER_ID>` first, or use `openmcp mcp session use --client-id <CLIENT_ID>`.'
+      ].join('\n'));
+    }
+    if (activeClientIds.length > 1) {
+      throw new Error([
+        'Missing --client-id and there is no current default session.',
+        `Gateway has multiple active sessions: ${activeClientIds.join(', ')}`,
+        'Run `openmcp mcp session use --client-id <CLIENT_ID>` first, or pass `--client-id` explicitly.'
+      ].join('\n'));
+    }
+  }
+
+  if (explicit) {
+    rememberSession(explicit, options.gateway);
+    return explicit;
+  }
+
+  if (current) {
+    rememberSession(current, options.gateway);
+    return current;
+  }
+
   throw new Error('Missing --client-id and there is no current default session. Run `openmcp mcp session connect --id <SERVER_ID>` first, or pass `--client-id` explicitly.');
 }
 

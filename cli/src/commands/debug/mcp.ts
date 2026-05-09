@@ -17,21 +17,14 @@ import {
 } from '../../lib/mcp-config.js';
 import {
   getSessionByClientId,
-  rememberSession,
   removeSession,
-  requireClientId
+  resolveClientIdWithGateway
 } from '../../lib/mcp-session-store.js';
 import { findRpcHistoryById, getRpcHistoryPath, queryRpcHistory } from '../../lib/rpc-history.js';
 import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 
 function gw(cmd: Command): Command {
   return cmd.option('-g, --gateway <url>', 'Gateway WebSocket URL', DEFAULT_GATEWAY);
-}
-
-function resolveClientIdForCommand(options: { clientId?: string; gateway: string }): string {
-  const clientId = requireClientId(options.clientId);
-  rememberSession(clientId, options.gateway);
-  return clientId;
 }
 
 function printThrown(error: unknown): void {
@@ -90,8 +83,8 @@ gw(
     .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
     .action(async (options) => {
       try {
-        const clientId = resolveClientIdForCommand(options);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('ping', { clientId });
           printResponse('ping', res);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);
@@ -112,8 +105,8 @@ gw(
     .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
     .action(async (options) => {
       try {
-        const clientId = resolveClientIdForCommand(options);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('server/version', { clientId });
           printResponse('server/version', res);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);

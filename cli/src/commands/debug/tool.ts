@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import { DEFAULT_GATEWAY, parseJsonData, printResponse, readJsonObjectFile, withGateway } from '../../lib/cli-helpers.js';
-import { rememberSession, removeSession, requireClientId } from '../../lib/mcp-session-store.js';
+import { removeSession, resolveClientIdWithGateway } from '../../lib/mcp-session-store.js';
 import { diagnoseThrownError, isMissingSessionResponse } from '../../lib/error-diagnose.js';
 import { parseResourceScope, toLocalScopePayload } from '../../lib/storage-scope.js';
 
@@ -16,10 +16,12 @@ function printThrown(error: unknown): void {
   process.exitCode = 1;
 }
 
-function resolveClientId(options: { clientId?: string; gateway: string }): string {
-  const clientId = requireClientId(options.clientId);
-  rememberSession(clientId, options.gateway);
-  return clientId;
+function requireToolName(raw: unknown): string {
+  const name = typeof raw === 'string' ? raw.trim() : '';
+  if (!name || name.startsWith('-')) {
+    throw new Error('Missing tool name. Use `--name <toolName>`, for example: openmcp debug tool call --name echo --args \'{"message":"hi"}\'');
+  }
+  return name;
 }
 
 function loadObjectInput(options: { file?: string; data?: string }): Record<string, unknown> {
@@ -90,8 +92,8 @@ gw(
     .option('--client-id <id>', 'clientId; defaults to current session')
     .action(async (options) => {
       try {
-        const clientId = resolveClientId(options);
         await withGateway(options.gateway, async (bridge) => {
+          const clientId = await resolveClientIdWithGateway(options, bridge);
           const res = await bridge.commandRequest('tools/list', { clientId });
           printResponse('tools/list', res);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);
@@ -128,12 +130,13 @@ Notes:
 `)
     .action(async (options) => {
       try {
-        const clientId = resolveClientId(options);
+        const toolName = requireToolName(options.name);
         const toolArgs = parseJsonData(options.args, '--args');
         await withGateway(options.gateway, async (bridge) => {
-          const res = await bridge.commandRequest('tools/call', { clientId, toolName: options.name, toolArgs });
+          const clientId = await resolveClientIdWithGateway(options, bridge);
+          const res = await bridge.commandRequest('tools/call', { clientId, toolName, toolArgs });
           printResponse('tools/call', res);
-          printToolCallAdvice(options.name, options.args, res.msg);
+          printToolCallAdvice(toolName, options.args, res.msg);
           if (isMissingSessionResponse(res as any)) removeSession(clientId);
           if (res.code !== 200 || (res.msg as any)?.isError) process.exitCode = 1;
         });

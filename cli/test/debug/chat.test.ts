@@ -61,7 +61,7 @@ describe('debug chat', { timeout: 180_000 }, () => {
     assert.match(err, /未找到提供商|provider/i);
   });
 
-  it('runs a smoke chat validation with a fake provider', async () => {
+  it('runs an MCP-aware chat with a fake provider', async () => {
     const r = await cli(
       withGw([
         'debug', 'chat', 'start', '--client-id', clientId,
@@ -72,6 +72,28 @@ describe('debug chat', { timeout: 180_000 }, () => {
     assert.equal(r.exitCode, 0, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
     const j = extractJson(r.stdout);
     assert.equal(j?.code, 200, JSON.stringify(j));
+    assert.equal(j.msg?.response, 'fake chat ok', JSON.stringify(j));
+    assert.ok(Array.isArray(j.msg?.trace), JSON.stringify(j));
+    assert.ok(
+      j.msg.trace.some((m: any) => m?.role === 'assistant' && String(m?.content ?? '').includes('fake chat ok')),
+      JSON.stringify(j),
+    );
+    assert.equal(j.msg?.results, undefined, JSON.stringify(j));
+    assert.equal(j.msg?.validation, undefined, JSON.stringify(j));
+  });
+
+  it('can validate a generated chat trace when requested', async () => {
+    const r = await cli(
+      withGw([
+        'debug', 'chat', 'start', '--client-id', clientId,
+        '--provider', 'debug-chat-fake-e2e', '--model', 'fake-judge', '-m', 'hello', '--validate',
+      ]),
+      120_000,
+    );
+    assert.equal(r.exitCode, 0, `stdout:\n${r.stdout}\nstderr:\n${r.stderr}`);
+    const j = extractJson(r.stdout);
+    assert.equal(j?.code, 200, JSON.stringify(j));
+    assert.equal(j.msg?.response, 'fake chat ok', JSON.stringify(j));
     assert.equal(j.msg?.results?.[0]?.pass, true, JSON.stringify(j));
   });
 });

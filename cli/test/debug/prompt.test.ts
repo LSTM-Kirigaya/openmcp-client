@@ -66,4 +66,26 @@ describe('debug prompt', { timeout: 180_000 }, () => {
     assert.ok(j);
     assert.equal(j.code, 200);
   });
+
+  it('explains missing required prompt arguments', async () => {
+    const r = await cli(
+      withGw([
+        'debug',
+        'prompt',
+        'get',
+        '--client-id',
+        clientId,
+        '--prompt-id',
+        'resource-prompt',
+      ]),
+      120_000,
+    );
+    assert.notEqual(r.exitCode, 0);
+    const output = `${r.stdout}\n${r.stderr}`;
+    assert.match(output, /Prompt arguments were rejected by the MCP server/);
+    assert.match(output, /resourceType/);
+    assert.match(output, /resourceId/);
+    assert.match(output, /--data/);
+    assert.doesNotMatch(output, /Service execution failed/);
+  });
 });
