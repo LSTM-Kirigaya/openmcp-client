@@ -45,10 +45,10 @@ const STATIC_WEB_SERVER_ENTRY = path.join(__dirname, 'static-web-server.js');
 
 function printRendererDistMissingHint(): void {
   if (fs.existsSync(RENDERER_DIR)) {
-    console.error(`   请先构建：cd ${RENDERER_DIR} && npm run build:website`);
+    console.error(`   Please build first: cd ${RENDERER_DIR} && npm run build:website`);
     return;
   }
-  console.error('   发布包缺少 vendor/renderer/dist，请重新安装或重新发布 @agent-ruler/openmcp。');
+  console.error('   The release package is missing vendor/renderer/dist. Please reinstall or republish @agent-ruler/openmcp.');
 }
 
 export function gatewayUserLogDir(): string {
@@ -97,17 +97,17 @@ function isUsingVendoredGateway(): boolean {
 
 function validateGatewayRuntime(): boolean {
   if (!fs.existsSync(GATEWAY_ENTRY)) {
-    console.error(`❌ 找不到 Gateway 构建产物：${GATEWAY_ENTRY}`);
+    console.error(`❌ Gateway build artifact not found: ${GATEWAY_ENTRY}`);
     console.error(
-      '   请确认 CLI 安装完整（推荐 npm install -g @agent-ruler/openmcp）；若从源码开发，请在 gateway 目录执行：npm run build'
+      '   Please ensure the CLI is fully installed (recommended: npm install -g @agent-ruler/openmcp). If developing from source, run: npm run build in the gateway directory'
     );
     return false;
   }
 
   if (isUsingVendoredGateway() && !fs.existsSync(VENDORED_SERVICE_ENTRY)) {
-    console.error(`❌ 发布包缺少 Service 构建产物：${VENDORED_SERVICE_ENTRY}`);
-    console.error('   请重新安装 CLI：npm install -g @agent-ruler/openmcp');
-    console.error('   如果仍然失败，请把此错误和 npm 包版本反馈给 OpenMCP 维护者。');
+    console.error(`❌ Release package missing Service build artifact: ${VENDORED_SERVICE_ENTRY}`);
+    console.error('   Please reinstall the CLI: npm install -g @agent-ruler/openmcp');
+    console.error('   If it still fails, please report this error along with the npm package version to the OpenMCP maintainers.');
     appendGatewayStartupLog(
       `\n[${new Date().toISOString()}] Missing vendored service entry: ${VENDORED_SERVICE_ENTRY}\n`
     );
@@ -142,8 +142,8 @@ function openGatewayStartupLogForChild(port: number): number | undefined {
 
 function printGatewayStartupFailureHint(): void {
   const startupLog = gatewayStartupLogFile();
-  console.log(`   启动日志：${startupLog}`);
-  console.log(`   可运行：openmcp gateway logs -n 200`);
+  console.log(`   Startup log: ${startupLog}`);
+  console.log(`   Run: openmcp gateway logs -n 200`);
 
   const tail = tailGatewayStartupLog(60);
   if (tail) {
@@ -301,11 +301,11 @@ async function isOpenMcpWebReachable(port: number): Promise<boolean> {
 
 function attachSpawnErrorHandler(proc: ChildProcess, label: string): void {
   proc.on('error', (err: NodeJS.ErrnoException) => {
-    console.error(`❌ 无法启动 ${label}：${err.message}`);
+    console.error(`❌ Failed to start ${label}: ${err.message}`);
     if (err.code === 'ENOENT') {
-      console.error(`   当前 Node: ${NODE}`);
-      console.error('   常见原因：可执行文件不存在、工作目录不存在，或发布包缺少 vendor 构建产物。');
-      console.error('   请检查上方命令对应的 cwd、dist/vendor 目录，以及 npm 包是否安装完整。');
+      console.error(`   Current Node: ${NODE}`);
+      console.error('   Common causes: executable does not exist, working directory does not exist, or the release package is missing vendor build artifacts.');
+      console.error('   Please check the cwd, dist/vendor directories for the command above, and ensure the npm package is fully installed.');
     }
   });
 }
@@ -758,7 +758,7 @@ export function startRenderer(port: number = 8283, gatewayPort: number = 8282): 
   const env = {
     ...process.env,
     PORT: String(port),
-    // 让前端使用正确 gateway 端口的 WebSocket（避免读取默认 .env 导致串口）
+    VITE_USE_AUTH: 'false',
     VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
   };
 
@@ -796,6 +796,7 @@ export function startRendererStatic(port: number = 8283, gatewayPort: number = 8
     ...process.env,
     PORT: String(port),
     RENDERER_DIST_DIR,
+    VITE_USE_AUTH: 'false',
     // 提供给前端运行时（若页面中读取）
     VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
   };
@@ -845,7 +846,7 @@ export async function startRendererBackground(port: number = 8283, gatewayPort: 
   const env = {
     ...process.env,
     PORT: String(port),
-    // 让前端使用正确 gateway 端口的 WebSocket
+    VITE_USE_AUTH: 'false',
     VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
   };
   const isWin = process.platform === 'win32';

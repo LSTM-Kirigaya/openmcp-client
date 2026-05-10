@@ -78,7 +78,7 @@ export class MessageBridge {
           err?.message ||
           (err as { code?: string })?.code ||
           String(err) ||
-          '连接被拒绝或网络不可达';
+          'Connection refused or network unreachable';
         this.connectErrorDetail = detail;
         if (this.socketEverOpened) {
           console.error('❌ WebSocket error:', detail);

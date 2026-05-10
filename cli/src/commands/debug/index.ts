@@ -7,7 +7,7 @@ import { batchCommand } from './batch.js';
 import { mcpRawCommand } from './mcp.js';
 
 export const debugCommand = new Command('debug')
-  .description('MCP 调试与测试：资源、Prompt、工具、交互测试、批量验证、协议命令');
+  .description('MCP debugging and testing: resources, prompts, tools, chat, batch validation, protocol commands');
 
 debugCommand.addCommand(resourceCommand);
 debugCommand.addCommand(promptCommand);

@@ -8,7 +8,24 @@
 			</div>
 
 			<div class="about-content">
-				<p class="about-description">{{ t('openmcp-developed-by', { version, author }) }}</p>
+				<p class="about-description">{{ t('openmcp-team') }}</p>
+
+				<div class="contributors-grid">
+					<a
+						v-for="contributor in contributors"
+						:key="contributor.username"
+						:href="contributor.homeUrl"
+						target="_blank"
+						class="contributor-item"
+					>
+						<img
+							:src="contributor.avatarUrl"
+							:alt="contributor.username"
+							class="contributor-avatar"
+						/>
+						<span class="contributor-name">{{ contributor.username }}</span>
+					</a>
+				</div>
 
 				<div class="about-actions">
 					<div class="action-row">
@@ -36,8 +53,6 @@
 				</div>
 			</div>
 		</div>
-
-
 	</div>
 </template>
 
@@ -49,10 +64,56 @@ import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 
 const version = '0.1.13';
-const author = 'LSTM-Kirigaya (锦恢)';
+
+const contributors = [
+	{
+		username: 'LSTM-Kirigaya',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/59416203?v=4',
+		homeUrl: 'https://github.com/LSTM-Kirigaya'
+	},
+	{
+		username: 'li1553770945',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/55867654?v=4',
+		homeUrl: 'https://github.com/li1553770945'
+	},
+	{
+		username: 'STUzhy',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/129645384?v=4',
+		homeUrl: 'https://github.com/STUzhy'
+	},
+	{
+		username: 'appli456',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/8943691?v=4',
+		homeUrl: 'https://github.com/appli456'
+	},
+	{
+		username: 'cybermanhao',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/37235140?v=4',
+		homeUrl: 'https://github.com/cybermanhao'
+	},
+	{
+		username: 'ArcStellars',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/115577936?v=4',
+		homeUrl: 'https://github.com/ArcStellars'
+	},
+	{
+		username: 'superboy-zjc',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/60600792?v=4',
+		homeUrl: 'https://github.com/superboy-zjc'
+	},
+	{
+		username: 'ZYD045692',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/206822796?v=4',
+		homeUrl: 'https://github.com/ZYD045692'
+	},
+	{
+		username: 'Dormiveglia-elf',
+		avatarUrl: 'https://avatars.githubusercontent.com/u/81767213?v=4',
+		homeUrl: 'https://github.com/Dormiveglia-elf'
+	}
+];
 
 defineComponent({ name: 'about' });
-
 </script>
 
 <style scoped>
@@ -127,6 +188,50 @@ defineComponent({ name: 'about' });
 	line-height: 1.6;
 	text-align: center;
 	margin: 0;
+}
+
+/* Contributors Grid */
+.contributors-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+	gap: 12px;
+	width: 100%;
+}
+
+.contributor-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	text-decoration: none;
+	transition: transform 0.2s ease;
+}
+
+.contributor-item:hover {
+	transform: translateY(-2px);
+}
+
+.contributor-avatar {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 2px solid var(--border);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+	transition: border-color 0.2s ease;
+}
+
+.contributor-item:hover .contributor-avatar {
+	border-color: var(--main-color);
+}
+
+.contributor-name {
+	font-size: 11px;
+	font-weight: 500;
+	color: var(--main-color);
+	text-align: center;
+	word-break: break-all;
+	line-height: 1.2;
 }
 
 .about-actions {

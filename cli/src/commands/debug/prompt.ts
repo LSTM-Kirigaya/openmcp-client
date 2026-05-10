@@ -17,7 +17,7 @@ function printThrown(error: unknown): void {
 }
 
 export const promptCommand = new Command('prompt')
-  .description('MCP Prompt 操作');
+  .description('MCP prompt operations');
 
 const PROMPT_GET_HELP = `
 Input format:
@@ -32,8 +32,8 @@ Examples:
 gw(
   promptCommand
     .command('list')
-    .description('列出 prompts')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
+    .description('List prompts')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
     .action(async (options) => {
       try {
         await withGateway(options.gateway, async (bridge) => {
@@ -52,10 +52,10 @@ gw(
 gw(
   promptCommand
     .command('get')
-    .description('获取单个 prompt 内容')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
-    .requiredOption('--prompt-id <id>', 'MCP 中的 prompt 名称/id')
-    .option('-d, --data <json>', '传给 getPrompt 的 args 对象 JSON', '{}')
+    .description('Get a single prompt content')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
+    .requiredOption('--prompt-id <id>', 'MCP prompt name/id')
+    .option('-d, --data <json>', 'JSON args object passed to getPrompt', '{}')
     .addHelpText('after', PROMPT_GET_HELP)
     .action(async (options) => {
       try {

@@ -9,11 +9,11 @@ function isWebDevModeEnabled(): boolean {
 }
 
 export const startCommand = new Command('start')
-  .description('一键启动 Gateway + Web UI，并可选打开浏览器。')
+  .description('Start Gateway + Web UI in one step, with optional browser launch.')
   .addHelpText('after', HELP_START)
-  .option('-p, --port <port>', 'Web UI 端口', '8283')
-  .option('-g, --gateway-port <port>', 'Gateway 端口', '8282')
-  .option('-b, --browser <browser>', '浏览器名称（传给 open 包）')
+  .option('-p, --port <port>', 'Web UI port', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway port', '8282')
+  .option('-b, --browser <browser>', 'Browser name (passed to the open package)')
   .action(async (options) => {
     const webPort = parseInt(options.port, 10);
     const gatewayPort = parseInt(options.gatewayPort, 10);

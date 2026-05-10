@@ -24,32 +24,32 @@ function urlLooksLikeDefaultGateway(url: string): boolean {
  */
 export function buildGatewayUnreachableError(gatewayUrl: string, underlying?: string): Error {
   const lines: string[] = [
-    `无法连接到 OpenMCP Gateway：${gatewayUrl}`,
+    `Unable to connect to OpenMCP Gateway: ${gatewayUrl}`,
     '',
-    '常见原因：本机尚未启动 Gateway 进程，或地址/端口与 Gateway 实际监听不一致。'
+    'Common causes: Gateway process is not running locally, or the address/port does not match what Gateway is actually listening on.'
   ];
 
   if (urlLooksLikeDefaultGateway(gatewayUrl)) {
     lines.push('');
-    lines.push(`默认 WebSocket 为 ws://localhost:${DEFAULT_PORT}。请先启动 Gateway：`);
+    lines.push(`Default WebSocket is ws://localhost:${DEFAULT_PORT}. Please start Gateway first:`);
     lines.push(`  openmcp gateway start`);
-    lines.push(`  # 或前台运行并查看日志：openmcp gateway run -p ${DEFAULT_PORT}`);
+    lines.push(`  # Or run in foreground to view logs: openmcp gateway run -p ${DEFAULT_PORT}`);
     lines.push('');
-    lines.push('如果提示 openmcp 不是可识别命令，请先安装或重新安装 CLI：');
+    lines.push('If "openmcp" is not recognized, please install or reinstall the CLI:');
     lines.push('  npm install -g @agent-ruler/openmcp');
   }
 
   lines.push('');
-  lines.push('若 Gateway 已启动但使用了其它端口，请为子命令指定 -g，例如：');
+  lines.push('If Gateway is already running on a different port, specify -g for subcommands, e.g.:');
   lines.push(`  openmcp mcp server list -g ws://127.0.0.1:9000`);
 
   if (underlying && underlying.trim()) {
     lines.push('');
-    lines.push(`底层错误：${underlying}`);
+    lines.push(`Underlying error: ${underlying}`);
   }
 
   lines.push('');
-  lines.push('如果仍无法解决，请复制本次完整报错（包含堆栈、Node.js 版本与执行命令）反馈给 OpenMCP 维护者。');
+  lines.push('If the issue persists, please copy the full error report (including stack trace, Node.js version, and executed command) and send it to the OpenMCP maintainers.');
 
   return new Error(lines.join('\n'));
 }

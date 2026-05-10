@@ -211,6 +211,7 @@
     "join-discussion": "Join Discussion",
     "comment-for-us": "Write a review for us!",
     "openmcp-developed-by": "OpenMCP Client {version} developed by {author}",
+    "openmcp-team": "OpenMCP Development Team",
     "error-parse-json": "JSON parse error:",
     "enable-xml-wrapper": "Enable XML command wrapper",
     "tool-manage": "Tool Management",
@@ -462,7 +463,6 @@
     "batch-validation-last-run-summary": "Last run",
     "chat-tab": "Chat",
     "add": "Add",
-
     "common": {
         "confirm": "Confirm",
         "cancel": "Cancel",
@@ -500,7 +500,11 @@
         "hasAccount": "Already have an account?",
         "registerNow": "Register now",
         "loginNow": "Login now",
-        "logoutConfirm": "Are you sure you want to logout?"
+        "logoutConfirm": "Are you sure you want to logout?",
+        "confirm": "Confirm",
+        "passwordDialogTitle": "Enter Password",
+        "passwordSuccess": "Password verified successfully",
+        "passwordFailed": "Password verification failed, please try again"
     },
     "backup": {
         "title": "Cloud Backup",
@@ -541,5 +545,37 @@
         "nameRequired": "Please enter backup name",
         "passwordRequired": "Please enter encryption password",
         "passwordMismatch": "Passwords do not match"
-    }
+    },
+    "delete-failed": "Delete failed",
+    "delete-success": "Deleted successfully",
+    "load-servers-failed": "Failed to load server list",
+    "no-active-sessions": "No active sessions",
+    "no-local-servers": "No local server configurations",
+    "unnamed-server": "Unnamed server",
+    "session-tab": "Session",
+    "server-tab": "Server",
+    "no-env-vars": "No environment variables",
+    "load-failed": "Load failed",
+    "save-failed": "Save failed",
+    "save-success": "Saved successfully",
+    "select-server-hint": "Select or configure a server from the left panel",
+    "server-command": "Server Command",
+    "server-command-placeholder": "e.g. python, node, uvx",
+    "server-cwd": "Working Directory",
+    "server-cwd-placeholder": "e.g. /home/user/project",
+    "server-env": "Environment Variables",
+    "server-env-add": "Add environment variable",
+    "server-env-key": "Key",
+    "server-env-value": "Value",
+    "server-name": "Server Name",
+    "server-name-placeholder": "e.g. my-mcp-server",
+    "server-url": "Server URL",
+    "server-url-placeholder": "e.g. http://localhost:3000/sse",
+    "session-disconnect-failed": "Session disconnect failed",
+    "session-list-load-failed": "Failed to load session list",
+    "server-name-required": "Server name is required",
+    "server-command-required": "Server command is required",
+    "server-url-required": "Server URL is required",
+    "connection-log-connect": "Connect",
+    "connection-log-disconnect": "Disconnect"
 }

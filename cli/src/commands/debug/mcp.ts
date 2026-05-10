@@ -72,15 +72,15 @@ function selectEnvPreview(
 }
 
 export const mcpRawCommand = new Command('mcp')
-  .description('MCP 原生协议命令：ping、会话、配置、历史等');
+  .description('MCP native protocol commands: ping, sessions, config, history, etc.');
 
 /* ── ping ── */
 
 gw(
   mcpRawCommand
     .command('ping')
-    .description('检测 MCP 会话是否仍在线')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
+    .description('Check if MCP session is still online')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
     .action(async (options) => {
       try {
         await withGateway(options.gateway, async (bridge) => {
@@ -101,8 +101,8 @@ gw(
 gw(
   mcpRawCommand
     .command('server-version')
-    .description('获取已连接 MCP Server 的实现信息')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
+    .description('Get implementation info of the connected MCP Server')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
     .action(async (options) => {
       try {
         await withGateway(options.gateway, async (bridge) => {
@@ -123,8 +123,8 @@ gw(
 gw(
   mcpRawCommand
     .command('lookup-env')
-    .description('按 key 列表解析当前进程环境')
-    .requiredOption('--keys <keys>', '逗号分隔，如 USER,HOME,PATH')
+    .description('Parse current process environment by key list')
+    .requiredOption('--keys <keys>', 'Comma-separated, e.g. USER,HOME,PATH')
     .action(async (options) => {
       try {
         const keys = String(options.keys)
@@ -146,13 +146,13 @@ gw(
 
 mcpRawCommand
   .command('sessions')
-  .description('[已迁移] 请使用 "mcp session list/current/recent/use"')
+  .description('[Migrated] Use "mcp session list/current/recent/use"')
   .action(() => {
-    console.log('此命令已迁移，请使用:');
-    console.log('  openmcp mcp session list       列出活跃会话');
-    console.log('  openmcp mcp session current     查看当前默认会话');
-    console.log('  openmcp mcp session recent      查看最近连接记录');
-    console.log('  openmcp mcp session use         切换默认会话');
+    console.log('This command has been migrated. Use:');
+    console.log('  openmcp mcp session list       List active sessions');
+    console.log('  openmcp mcp session current     View current default session');
+    console.log('  openmcp mcp session recent      View recent connection records');
+    console.log('  openmcp mcp session use         Switch default session');
   });
 
 /* ── config ── */
@@ -174,13 +174,13 @@ Examples:
 `;
 
 const configCmd = new Command('config')
-  .description('MCP 配置生命周期：校验、模板、导出、env 预览')
+  .description('MCP config lifecycle: validate, template, export, env preview')
   .addHelpText('after', MCP_CONFIG_HELP);
 
 configCmd
   .command('validate')
-  .description('校验配置文件结构与连接字段')
-  .requiredOption('-f, --file <path>', '配置文件路径')
+  .description('Validate config file structure and connection fields')
+  .requiredOption('-f, --file <path>', 'Config file path')
   .addHelpText('after', MCP_CONFIG_HELP)
   .action((options) => {
     try {
@@ -195,13 +195,13 @@ configCmd
 
 configCmd
   .command('init')
-  .description('生成模板配置')
+  .description('Generate template config')
   .option('--template <kind>', 'stdio | sse | http', 'stdio')
-  .requiredOption('-o, --output <path>', '输出文件')
+  .requiredOption('-o, --output <path>', 'Output file')
   .action((options) => {
     const kind = String(options.template).toLowerCase() as 'stdio' | 'sse' | 'http';
     if (!['stdio', 'sse', 'http'].includes(kind)) {
-      printThrown('模板仅支持 stdio|sse|http');
+      printThrown('Template only supports stdio|sse|http');
       return;
     }
     const template = buildTemplate(kind);
@@ -211,14 +211,14 @@ configCmd
 
 configCmd
   .command('export')
-  .description('从本地会话记录导出 mcpServers 配置')
-  .requiredOption('--client-id <id>', '会话 clientId')
-  .requiredOption('-o, --output <path>', '输出文件')
-  .option('--name <name>', 'mcpServers 的 server 名称')
+  .description('Export mcpServers config from local session records')
+  .requiredOption('--client-id <id>', 'Session clientId')
+  .requiredOption('-o, --output <path>', 'Output file')
+  .option('--name <name>', 'mcpServers server name')
   .action((options) => {
     const session = getSessionByClientId(options.clientId);
     if (!session?.connectPayload) {
-      printThrown('该会话没有可导出的 connectPayload，请先重新 connect 一次。');
+      printThrown('This session has no exportable connectPayload. Please reconnect first.');
       return;
     }
     const serverName = options.name || `server-${options.clientId.slice(0, 8)}`;
@@ -234,9 +234,9 @@ configCmd
 
 configCmd
   .command('env-preview')
-  .description('展示配置解析后的 env 注入结果')
-  .requiredOption('-f, --file <path>', '配置文件路径')
-  .option('--mcp-server <name>', '聚合配置时指定 server')
+  .description('Show env injection result after config parsing')
+  .requiredOption('-f, --file <path>', 'Config file path')
+  .option('--mcp-server <name>', 'Specify server when using aggregate config')
   .option('--keys <keys>', 'comma-separated env keys to include in mergedEnv')
   .option('--show-process-env', 'include the full merged process env in output', false)
   .option('--show-secrets', 'do not redact secret-looking env values', false)
@@ -262,14 +262,14 @@ mcpRawCommand.addCommand(configCmd);
 
 /* ── history ── */
 
-const historyCmd = new Command('history').description('CLI 调用历史与回放');
+const historyCmd = new Command('history').description('CLI call history and replay');
 
 historyCmd
   .command('list')
-  .description('列出调用历史')
-  .option('--limit <n>', '数量，默认 20', '20')
-  .option('--command <name>', '按命令过滤，如 tools/call')
-  .option('--failed', '仅失败请求', false)
+  .description('List call history')
+  .option('--limit <n>', 'Count, default 20', '20')
+  .option('--command <name>', 'Filter by command, e.g. tools/call')
+  .option('--failed', 'Only failed requests', false)
   .action((options) => {
     const limit = Number(options.limit || 20);
     const rows = queryRpcHistory({
@@ -283,17 +283,17 @@ historyCmd
 gw(
   historyCmd
     .command('replay')
-    .description('回放历史请求')
-    .option('--id <id>', '按记录 ID 回放单条')
-    .option('--failed', '回放最近失败记录', false)
-    .option('--limit <n>', '失败回放数量，默认 1', '1')
+    .description('Replay historical requests')
+    .option('--id <id>', 'Replay a single record by ID')
+    .option('--failed', 'Replay most recent failed record', false)
+    .option('--limit <n>', 'Failed replay count, default 1', '1')
     .action(async (options) => {
       try {
         const tasks = options.id
           ? [findRpcHistoryById(options.id)].filter(Boolean)
           : queryRpcHistory({ failedOnly: Boolean(options.failed), limit: Number(options.limit || 1) });
         if (tasks.length === 0) {
-          throw new Error('未找到可回放的历史记录');
+          throw new Error('No replayable history records found');
         }
 
         await withGateway(options.gateway, async (bridge) => {

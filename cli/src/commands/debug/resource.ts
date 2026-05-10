@@ -17,13 +17,13 @@ function printThrown(error: unknown): void {
 }
 
 export const resourceCommand = new Command('resource')
-  .description('MCP 资源操作');
+  .description('MCP resource operations');
 
 gw(
   resourceCommand
     .command('list')
-    .description('列出 resources')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
+    .description('List resources')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
     .action(async (options) => {
       try {
         await withGateway(options.gateway, async (bridge) => {
@@ -42,8 +42,8 @@ gw(
 gw(
   resourceCommand
     .command('get')
-    .description('按 URI 读取 resource 内容')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
+    .description('Read resource content by URI')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
     .requiredOption('--uri <uri>', 'MCP resource URI')
     .action(async (options) => {
       try {
@@ -63,8 +63,8 @@ gw(
 gw(
   resourceCommand
     .command('templates')
-    .description('列出 resource templates')
-    .option('--client-id <id>', 'clientId；不传则使用当前默认会话')
+    .description('List resource templates')
+    .option('--client-id <id>', 'clientId; omit to use the current default session')
     .action(async (options) => {
       try {
         await withGateway(options.gateway, async (bridge) => {

@@ -10,7 +10,7 @@
 					:disabled="!connected"
 					@click="$emit('disconnect')"
 				>
-					{{ t('connect.appearance.disconnect') }}
+					{{ t('connection-log-disconnect') }}
 				</el-button>
 				<el-button
 					type="primary"
@@ -18,7 +18,7 @@
 					:loading="loading"
 					@click="$emit('connect')"
 				>
-					{{ t('connect.appearance.connect') }}
+					{{ t('connection-log-connect') }}
 				</el-button>
 			</el-button-group>
 		</div>

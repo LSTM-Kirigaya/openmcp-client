@@ -20,7 +20,7 @@ interface SettingsConfig {
 async function loadSettings(bridge: MessageBridge): Promise<SettingsConfig> {
   const res = await bridge.commandRequest('setting/load', {});
   if (res.code !== 200) {
-    throw new Error(`加载设置失败: ${JSON.stringify(res.msg)}`);
+    throw new Error(`Failed to load settings: ${JSON.stringify(res.msg)}`);
   }
   return res.msg as SettingsConfig;
 }
@@ -33,8 +33,8 @@ async function resolveLlmProvider(
   const llmInfo = settings.LLM_INFO;
   if (!Array.isArray(llmInfo) || llmInfo.length === 0) {
     throw new Error(
-      '当前 settings 中未配置任何 LLM 提供商。\n' +
-      '请先在 Web UI 中添加提供商，或通过 "openmcp setting llm provider add" 命令添加。'
+      'No LLM providers configured in current settings.\n' +
+      'Please add a provider in the Web UI first, or use the "openmcp setting llm provider add" command.'
     );
   }
 
@@ -45,10 +45,10 @@ async function resolveLlmProvider(
   if (!found) {
     const available = llmInfo.map((p) => `  · ${p.id}  (${p.name})`).join('\n');
     throw new Error(
-      `在 settings 中未找到提供商 "${providerId}"。\n\n` +
-      `settings 中已配置的提供商:\n${available}\n\n` +
-      '提示: --provider 的值必须是 settings 中已有的提供商 id 或 name。\n' +
-      '使用 "openmcp setting llm provider list" 查看详情。'
+      `Provider "${providerId}" not found in settings.\n\n` +
+      `Configured providers in settings:\n${available}\n\n` +
+      'Hint: --provider value must be an existing provider id or name in settings.\n' +
+      'Use "openmcp setting llm provider list" for details.'
     );
   }
   return found;
@@ -59,7 +59,7 @@ function gw(cmd: Command): Command {
 }
 
 export const llmCommand = new Command('llm')
-  .description('大模型 API 管理：提供商、模型、测试、对话');
+  .description('LLM API management: providers, models, testing, chat');
 
 const LLM_CHAT_HELP = `
 Input format:
@@ -77,20 +77,20 @@ Examples:
 /* ── provider list ── */
 
 const providerCmd = new Command('provider')
-  .description('LLM 提供商管理')
+  .description('LLM provider management')
   .addHelpText('after', `
-示例:
-  查看所有提供商:     openmcp setting llm provider list
-  设置 DeepSeek Key:  openmcp setting llm provider update --id deepseek --api-key sk-xxx
-  设置 OpenAI Key:    openmcp setting llm provider update --id openai --api-key sk-xxx
-  添加新提供商:       openmcp setting llm provider add --id my-llm --name "My LLM"
-  删除提供商:         openmcp setting llm provider delete --id my-llm
+Examples:
+  List all providers:     openmcp setting llm provider list
+  Set DeepSeek Key:  openmcp setting llm provider update --id deepseek --api-key sk-xxx
+  Set OpenAI Key:    openmcp setting llm provider update --id openai --api-key sk-xxx
+  Add new provider:       openmcp setting llm provider add --id my-llm --name "My LLM"
+  Delete provider:         openmcp setting llm provider delete --id my-llm
 `);
 
 gw(
   providerCmd
     .command('list')
-    .description('列出已配置的 LLM 提供商')
+    .description('List configured LLM providers')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('setting/load', {});
@@ -103,36 +103,36 @@ gw(
         const llmInfo = settings.LLM_INFO ?? [];
 
         if (!Array.isArray(llmInfo) || llmInfo.length === 0) {
-          console.log('当前 settings 中尚未配置任何 LLM 提供商。');
-          console.log('使用 "openmcp setting llm provider add" 添加提供商。');
+          console.log('No LLM providers configured in current settings yet.');
+          console.log('Use "openmcp setting llm provider add" to add a provider.');
           return;
         }
 
-        console.log('已配置的提供商:\n');
+        console.log('Configured providers:\n');
         const needKeyProviders: string[] = [];
         for (const p of llmInfo) {
-          const keyStatus = p.userToken ? '✔ 已配置' : '✘ 未设置';
+          const keyStatus = p.userToken ? '✔ Configured' : '✘ Not set';
           const models: string[] = Array.isArray(p.models) ? p.models : [];
-          const modelsList = models.length > 0 ? models.join(', ') : '(无预置模型)';
+          const modelsList = models.length > 0 ? models.join(', ') : '(no preset models)';
           console.log(`  ${p.id}  (${p.name})`);
           console.log(`    API Key:  ${keyStatus}`);
-          console.log(`    Base URL: ${p.baseUrl || '(未设置)'}`);
-          console.log(`    可选模型: ${modelsList}`);
+          console.log(`    Base URL: ${p.baseUrl || '(not set)'}`);
+          console.log(`    Available models: ${modelsList}`);
           console.log('');
           if (!p.userToken) needKeyProviders.push(p.id);
         }
 
         console.log('─'.repeat(50));
-        console.log('常用操作:');
+        console.log('Common operations:');
         if (needKeyProviders.length > 0) {
-          console.log(`  设置 API Key:    openmcp setting llm provider update --id ${needKeyProviders[0]} --api-key <你的Key>`);
+          console.log(`  Set API Key:    openmcp setting llm provider update --id ${needKeyProviders[0]} --api-key <your-key>`);
         } else {
-          console.log('  设置 API Key:    openmcp setting llm provider update --id <提供商ID> --api-key <你的Key>');
+          console.log('  Set API Key:    openmcp setting llm provider update --id <provider-id> --api-key <your-key>');
         }
-        console.log('  修改 Base URL:   openmcp setting llm provider update --id <提供商ID> --base-url <新地址>');
-        console.log('  添加提供商:      openmcp setting llm provider add --id <ID> --name <名称>');
-        console.log('  删除提供商:      openmcp setting llm provider delete --id <提供商ID>');
-        console.log('  测试连通性:      openmcp setting llm test --provider <提供商ID>');
+        console.log('  Change Base URL:   openmcp setting llm provider update --id <provider-id> --base-url <new-url>');
+        console.log('  Add provider:      openmcp setting llm provider add --id <ID> --name <name>');
+        console.log('  Delete provider:      openmcp setting llm provider delete --id <provider-id>');
+        console.log('  Test connectivity:      openmcp setting llm test --provider <provider-id>');
         console.log('');
       });
     })
@@ -143,10 +143,10 @@ gw(
 gw(
   providerCmd
     .command('add')
-    .description('添加新的 LLM 提供商')
-    .requiredOption('--id <id>', '提供商 ID，如 deepseek, openai')
-    .requiredOption('--name <name>', '提供商显示名称')
-    .option('--base-url <url>', 'API 基础地址')
+    .description('Add a new LLM provider')
+    .requiredOption('--id <id>', 'Provider ID, e.g. deepseek, openai')
+    .requiredOption('--name <name>', 'Provider display name')
+    .option('--base-url <url>', 'API base URL')
     .option('--api-key <key>', 'API Key')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
@@ -155,7 +155,7 @@ gw(
 
         const existing = llmInfo.find(p => p.id?.toLowerCase() === options.id.toLowerCase());
         if (existing) {
-          console.error(`提供商 "${options.id}" 已存在，请使用 "provider update" 修改。`);
+          console.error(`Provider "${options.id}" already exists, use "provider update" to modify.`);
           process.exitCode = 1;
           return;
         }
@@ -176,7 +176,7 @@ gw(
           process.exitCode = 1;
           return;
         }
-        console.log(`已添加提供商: ${options.id} (${options.name})`);
+        console.log(`Added provider: ${options.id} (${options.name})`);
       });
     })
 );
@@ -186,17 +186,17 @@ gw(
 gw(
   providerCmd
     .command('update')
-    .description('更新已有的 LLM 提供商（需指定至少一个修改项）')
-    .requiredOption('--id <id>', '提供商 ID（使用 provider list 查看）')
-    .option('--name <name>', '新的显示名称')
-    .option('--base-url <url>', '新的 API 基础地址')
-    .option('--api-key <key>', '新的 API Key')
+    .description('Update an existing LLM provider (at least one change required)')
+    .requiredOption('--id <id>', 'Provider ID (use provider list to view)')
+    .option('--name <name>', 'New display name')
+    .option('--base-url <url>', 'New API base URL')
+    .option('--api-key <key>', 'New API Key')
     .addHelpText('after', `
-示例:
-  设置 API Key:                 openmcp setting llm provider update --id deepseek --api-key sk-xxx
-  修改 Base URL:                openmcp setting llm provider update --id openai --base-url https://api.openai.com/v1
-  同时修改 Key 和 Base URL:    openmcp setting llm provider update --id qwen --api-key sk-xxx --base-url https://new-url.com/v1
-  修改显示名称:                 openmcp setting llm provider update --id deepseek --name "DeepSeek V3"
+Examples:
+  Set API Key:                 openmcp setting llm provider update --id deepseek --api-key sk-xxx
+  Change Base URL:                openmcp setting llm provider update --id openai --base-url https://api.openai.com/v1
+  Change Key and Base URL together:    openmcp setting llm provider update --id qwen --api-key sk-xxx --base-url https://new-url.com/v1
+  Change display name:                 openmcp setting llm provider update --id deepseek --name "DeepSeek V3"
 `)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
@@ -205,12 +205,12 @@ gw(
         const hasApiKey = options.apiKey !== undefined;
 
         if (!hasName && !hasBaseUrl && !hasApiKey) {
-          console.warn(`⚠ 未指定任何要修改的内容。请至少提供以下选项之一:\n`);
-          console.log(`  --api-key <key>    设置 API Key`);
-          console.log(`  --base-url <url>   设置 API 基础地址`);
-          console.log(`  --name <name>      设置显示名称`);
+          console.warn(`⚠ No changes specified. Please provide at least one of the following options:\n`);
+          console.log(`  --api-key <key>    Set API Key`);
+          console.log(`  --base-url <url>   Set API base URL`);
+          console.log(`  --name <name>      Set display name`);
           console.log('');
-          console.log(`示例:`);
+          console.log(`Examples:`);
           console.log(`  openmcp setting llm provider update --id ${options.id} --api-key sk-xxx`);
           console.log(`  openmcp setting llm provider update --id ${options.id} --base-url https://api.example.com/v1`);
           console.log(`  openmcp setting llm provider update --id ${options.id} --api-key sk-xxx --base-url https://api.example.com/v1`);
@@ -224,9 +224,9 @@ gw(
         const provider = llmInfo.find(p => p.id?.toLowerCase() === options.id.toLowerCase());
         if (!provider) {
           const available = llmInfo.map(p => `  · ${p.id}  (${p.name})`).join('\n');
-          console.error(`未找到提供商 "${options.id}"。`);
-          if (available) console.error(`\n已配置的提供商:\n${available}`);
-          console.error(`\n使用 "openmcp setting llm provider list" 查看所有提供商。`);
+          console.error(`Provider "${options.id}" not found.`);
+          if (available) console.error(`\nConfigured providers:\n${available}`);
+          console.error(`\nUse "openmcp setting llm provider list" to view all providers.`);
           process.exitCode = 1;
           return;
         }
@@ -235,10 +235,10 @@ gw(
         if (hasName) {
           const old = provider.name;
           provider.name = options.name;
-          changes.push(`  显示名称: ${old} → ${provider.name}`);
+          changes.push(`  Display name: ${old} → ${provider.name}`);
         }
         if (hasBaseUrl) {
-          const old = provider.baseUrl || '(未设置)';
+          const old = provider.baseUrl || '(not set)';
           provider.baseUrl = options.baseUrl;
           changes.push(`  Base URL:  ${old} → ${provider.baseUrl}`);
         }
@@ -246,7 +246,7 @@ gw(
           const masked = options.apiKey.length > 8
             ? options.apiKey.slice(0, 4) + '****' + options.apiKey.slice(-4)
             : '****';
-          changes.push(`  API Key:   已更新 (${masked})`);
+          changes.push(`  API Key:   Updated (${masked})`);
           provider.userToken = options.apiKey;
         }
 
@@ -256,8 +256,8 @@ gw(
           process.exitCode = 1;
           return;
         }
-        console.log(`✔ 已更新提供商: ${provider.id} (${provider.name})\n`);
-        console.log('变更内容:');
+        console.log(`✔ Updated provider: ${provider.id} (${provider.name})\n`);
+        console.log('Changes:');
         for (const c of changes) console.log(c);
       });
     })
@@ -268,8 +268,8 @@ gw(
 gw(
   providerCmd
     .command('delete')
-    .description('删除 LLM 提供商')
-    .requiredOption('--id <id>', '提供商 ID')
+    .description('Delete LLM provider')
+    .requiredOption('--id <id>', 'Provider ID')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const settings = await loadSettings(bridge);
@@ -277,7 +277,7 @@ gw(
 
         const idx = llmInfo.findIndex(p => p.id?.toLowerCase() === options.id.toLowerCase());
         if (idx < 0) {
-          console.error(`未找到提供商 "${options.id}"。`);
+          console.error(`Provider "${options.id}" not found.`);
           process.exitCode = 1;
           return;
         }
@@ -291,7 +291,7 @@ gw(
           process.exitCode = 1;
           return;
         }
-        console.log(`已删除提供商: ${removed.id} (${removed.name})`);
+        console.log(`Deleted provider: ${removed.id} (${removed.name})`);
       });
     })
 );
@@ -301,13 +301,13 @@ llmCommand.addCommand(providerCmd);
 /* ── model list ── */
 
 const modelCmd = new Command('model')
-  .description('模型管理');
+  .description('Model management');
 
 gw(
   modelCmd
     .command('list')
-    .description('列出指定提供商的可用模型（从远端 API 拉取）')
-    .requiredOption('--provider <id>', '提供商 id，如 deepseek, openai')
+    .description('List available models for a provider (fetched from remote API)')
+    .requiredOption('--provider <id>', 'Provider id, e.g. deepseek, openai')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         let provider: LlmProviderInfo;
@@ -320,8 +320,8 @@ gw(
         }
 
         if (!provider.userToken) {
-          console.error(`提供商 "${provider.id}" (${provider.name}) 的 API Key 未设置。`);
-          console.error(`请先配置: openmcp setting llm provider update --id ${provider.id} --api-key <你的API Key>`);
+          console.error(`Provider "${provider.id}" (${provider.name}) API Key is not set.`);
+          console.error(`Please configure first: openmcp setting llm provider update --id ${provider.id} --api-key <your-api-key>`);
           process.exitCode = 1;
           return;
         }
@@ -341,8 +341,8 @@ gw(
 gw(
   modelCmd
     .command('refresh')
-    .description('刷新指定提供商的模型列表并保存到设置')
-    .requiredOption('--provider <id>', '提供商 id')
+    .description('Refresh model list for a provider and save to settings')
+    .requiredOption('--provider <id>', 'Provider id')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         let provider: LlmProviderInfo;
@@ -355,7 +355,7 @@ gw(
         }
 
         if (!provider.userToken) {
-          console.error(`提供商 "${provider.id}" 的 API Key 未设置。`);
+          console.error(`Provider "${provider.id}" API Key is not set.`);
           process.exitCode = 1;
           return;
         }
@@ -377,7 +377,7 @@ gw(
           : [];
 
         if (modelIds.length === 0) {
-          console.log('API 未返回任何模型。');
+          console.log('API returned no models.');
           return;
         }
 
@@ -394,7 +394,7 @@ gw(
           process.exitCode = 1;
           return;
         }
-        console.log(`已刷新 ${provider.id} 的模型列表（${modelIds.length} 个模型）`);
+        console.log(`Refreshed ${provider.id} model list (${modelIds.length} models)`);
       });
     })
 );
@@ -406,8 +406,8 @@ llmCommand.addCommand(modelCmd);
 gw(
   llmCommand
     .command('test')
-    .description('测试指定提供商的 API 连通性')
-    .requiredOption('--provider <id>', '提供商 id')
+    .description('Test API connectivity for a provider')
+    .requiredOption('--provider <id>', 'Provider id')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         let provider: LlmProviderInfo;
@@ -420,21 +420,21 @@ gw(
         }
 
         if (!provider.userToken) {
-          console.error(`提供商 "${provider.id}" 的 API Key 未设置。`);
+          console.error(`Provider "${provider.id}" API Key is not set.`);
           process.exitCode = 1;
           return;
         }
 
-        console.log(`测试 ${provider.id} (${provider.name}) ...`);
+        console.log(`Testing ${provider.id} (${provider.name}) ...`);
         const res = await bridge.commandRequest('llm/models', {
           baseURL: provider.baseUrl,
           apiKey: provider.userToken
         });
 
         if (res.code === 200) {
-          console.log(`连接成功！`);
+          console.log(`Connection successful!`);
         } else {
-          console.error(`连接失败。`);
+          console.error(`Connection failed.`);
           printJson(res);
           process.exitCode = 1;
         }
@@ -447,12 +447,12 @@ gw(
 gw(
   llmCommand
     .command('chat')
-    .description('同步聊天补全')
-    .requiredOption('--provider <id>', '提供商 id，如 deepseek, openai, qwen')
-    .requiredOption('--model <name>', '模型名称，如 deepseek-chat, gpt-4, qwen-plus')
-    .option('-m, --message <text>', '快捷发送单条用户消息')
-    .option('-f, --file <path>', '从 JSON 文件读取 messages 数组')
-    .option('--temperature <number>', '温度参数', parseFloat)
+    .description('Synchronous chat completion')
+    .requiredOption('--provider <id>', 'Provider id, e.g. deepseek, openai, qwen')
+    .requiredOption('--model <name>', 'Model name, e.g. deepseek-chat, gpt-4, qwen-plus')
+    .option('-m, --message <text>', 'Quickly send a single user message')
+    .option('-f, --file <path>', 'Read messages array from a JSON file')
+    .option('--temperature <number>', 'Temperature parameter', parseFloat)
     .addHelpText('after', LLM_CHAT_HELP)
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
@@ -466,10 +466,10 @@ gw(
         }
 
         if (!provider.userToken) {
-          console.error(`提供商 "${provider.id}" (${provider.name}) 的 API Key 未设置。`);
+          console.error(`Provider "${provider.id}" (${provider.name}) API Key is not set.`);
           console.error('');
-          console.error('请先配置:');
-          console.error(`  openmcp setting llm provider update --id ${provider.id} --api-key <你的API Key>`);
+          console.error('Please configure first:');
+          console.error(`  openmcp setting llm provider update --id ${provider.id} --api-key <your-api-key>`);
           process.exitCode = 1;
           return;
         }
@@ -478,9 +478,9 @@ gw(
         const models: string[] = Array.isArray((provider as any).models) ? (provider as any).models : [];
 
         if (models.length > 0 && !models.includes(model)) {
-          console.error(`模型 "${model}" 不在 ${provider.id} (${provider.name}) 的可选模型列表中。`);
+          console.error(`Model "${model}" is not in ${provider.id} (${provider.name}) available model list.`);
           console.error('');
-          console.error(`可选模型: ${models.join(', ')}`);
+          console.error(`Available models: ${models.join(', ')}`);
           process.exitCode = 1;
           return;
         }
@@ -496,14 +496,14 @@ gw(
               ? fileContent
               : (fileContent.messages as unknown[]);
           } catch (e: any) {
-            console.error(`读取文件失败: ${e.message}`);
+            console.error(`Failed to read file: ${e.message}`);
             process.exitCode = 1;
             return;
           }
         }
 
         if (!messages || !Array.isArray(messages) || messages.length === 0) {
-          console.error('缺少消息内容，请通过 -m 或 -f 提供。');
+          console.error('Missing message content. Please provide via -m or -f.');
           process.exitCode = 1;
           return;
         }

@@ -78,14 +78,14 @@ async function assertGatewayReachable(gatewayPort: number): Promise<void> {
 
   const reason =
     lastErr instanceof Error ? lastErr.message || String(lastErr) : String(lastErr);
-  throw new Error(`Gateway 不可达: ${wsUrl}。原因: ${reason}`);
+  throw new Error(`Gateway unreachable: ${wsUrl}. Reason: ${reason}`);
 }
 
 function sharedOptions(cmd: Command) {
   return cmd
-    .option('-p, --port <port>', 'Vite 开发服务器端口（Web UI）', '8283')
-    .option('-g, --gateway-port <port>', 'Gateway WebSocket 端口', '8282')
-    .option('-b, --browser <browser>', '用指定浏览器打开，如 chrome、msedge');
+    .option('-p, --port <port>', 'Vite dev server port (Web UI)', '8283')
+    .option('-g, --gateway-port <port>', 'Gateway WebSocket port', '8282')
+    .option('-b, --browser <browser>', 'Open with a specific browser, e.g. chrome, msedge');
 }
 
 function isWebDevModeEnabled(): boolean {
@@ -110,7 +110,7 @@ async function runWebForeground(options: any) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`❌ ${message}`);
-    console.error(`请先启动 Gateway：openmcp gateway start -p ${gatewayPort}`);
+    console.error(`Please start Gateway first: openmcp gateway start -p ${gatewayPort}`);
     process.exit(1);
     return;
   }
@@ -136,7 +136,7 @@ async function runWebForeground(options: any) {
 🌐 Web UI:     ${url}
 🔌 Gateway:    ${wsUrlForPort(gatewayPort)}
 🧩 Mode:       ${devMode ? 'development (vite)' : 'production (static)'}
-📝 Press Ctrl+C 退出（只停止 Web UI）
+📝 Press Ctrl+C to exit (stops Web UI only)
   `);
 
   setTimeout(() => {
@@ -178,7 +178,7 @@ async function startWebBackground(options: any) {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`❌ ${message}`);
-    console.error(`请先启动 Gateway：openmcp gateway start -p ${gatewayPort}`);
+    console.error(`Please start Gateway first: openmcp gateway start -p ${gatewayPort}`);
     process.exit(1);
     return;
   }
@@ -231,7 +231,7 @@ async function restartWebBackground(options: any) {
   const stillThere = await statusRendererService(webPort);
   if (stillThere.running) {
     console.error(
-      '❌ Web UI 仍在运行，重启中止。请检查进程是否无法结束或端口被占用。'
+      '❌ Web UI is still running; restart aborted. Check if the process cannot be terminated or the port is in use.'
     );
     process.exit(1);
     return;
@@ -268,7 +268,7 @@ async function showWebStatus(options: any) {
 }
 
 export const webCommand = new Command('webui')
-  .description('OpenMCP Web UI（Renderer）')
+  .description('OpenMCP Web UI (Renderer)')
   .summary('Web management: run|start|restart|status|stop')
   .addHelpText('after', HELP_WEB);
 
@@ -279,47 +279,47 @@ webCommand.action(() => {
 
 webCommand
   .command('run')
-  .description('前台运行（阻塞，Ctrl+C 退出，只停止 Web UI）')
-  .option('-p, --port <port>', 'Vite 开发服务器端口（Web UI）', '8283')
-  .option('-g, --gateway-port <port>', 'Gateway WebSocket 端口', '8282')
-  .option('-b, --browser <browser>', '用指定浏览器打开，如 chrome、msedge')
+  .description('Run in foreground (blocking, Ctrl+C to exit, stops Web UI only)')
+  .option('-p, --port <port>', 'Vite dev server port (Web UI)', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway WebSocket port', '8282')
+  .option('-b, --browser <browser>', 'Open with a specific browser, e.g. chrome, msedge')
   .action(async (options) => {
     await runWebForeground(options);
   });
 
 webCommand
   .command('start')
-  .description('后台启动（立即返回，只停止 Web UI）')
-  .option('-p, --port <port>', 'Vite 开发服务器端口（Web UI）', '8283')
-  .option('-g, --gateway-port <port>', 'Gateway WebSocket 端口', '8282')
-  .option('-b, --browser <browser>', '用指定浏览器打开，如 chrome、msedge')
+  .description('Start in background (returns immediately, stops Web UI only)')
+  .option('-p, --port <port>', 'Vite dev server port (Web UI)', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway WebSocket port', '8282')
+  .option('-b, --browser <browser>', 'Open with a specific browser, e.g. chrome, msedge')
   .action(async (options) => {
     await startWebBackground(options);
   });
 
 webCommand
   .command('restart')
-  .description('后台重启（先停止再启动，与 start 相同选项）')
-  .option('-p, --port <port>', 'Vite 开发服务器端口（Web UI）', '8283')
-  .option('-g, --gateway-port <port>', 'Gateway WebSocket 端口', '8282')
-  .option('-b, --browser <browser>', '用指定浏览器打开，如 chrome、msedge')
+  .description('Restart in background (stop then start, same options as start)')
+  .option('-p, --port <port>', 'Vite dev server port (Web UI)', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway WebSocket port', '8282')
+  .option('-b, --browser <browser>', 'Open with a specific browser, e.g. chrome, msedge')
   .action(async (options) => {
     await restartWebBackground(options);
   });
 
 webCommand
   .command('status')
-  .description('检查 Gateway 可达性 + Renderer 状态')
-  .option('-p, --port <port>', 'Web UI 端口', '8283')
-  .option('-g, --gateway-port <port>', 'Gateway WebSocket 端口', '8282')
+  .description('Check Gateway reachability + Renderer status')
+  .option('-p, --port <port>', 'Web UI port', '8283')
+  .option('-g, --gateway-port <port>', 'Gateway WebSocket port', '8282')
   .action(async (options) => {
     await showWebStatus(options);
   });
 
 webCommand
   .command('stop')
-  .description('停止后台运行的 Web UI')
-  .option('-p, --port <port>', 'Web UI 端口', '8283')
+  .description('Stop the running Web UI in background')
+  .option('-p, --port <port>', 'Web UI port', '8283')
   .action(async (options) => {
     const webPort = parseInt(options.port ?? '8283', 10);
     console.log(`

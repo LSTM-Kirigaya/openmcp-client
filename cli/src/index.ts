@@ -39,7 +39,7 @@ function enableHelpAfterErrors(command: Command): void {
 
 program
   .name('openmcp')
-  .description('OpenMCP CLI — Gateway 管理与 MCP 全量能力')
+  .description('OpenMCP CLI — Gateway management and full MCP capabilities')
   .version(readPackageVersion())
   .addHelpText('after', HELP_PROGRAM_AFTER)
   .addCommand(settingCommand)

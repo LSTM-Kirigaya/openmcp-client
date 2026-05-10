@@ -17,7 +17,7 @@ function extractValidationPaths(text: string): string[] {
 export function isMissingSessionMessage(text: string): boolean {
   return includesAny(text, [
     'mcp client',
-    '尚未连接',
+    'not connected',
     'not connected',
     'clientid',
     'client id',

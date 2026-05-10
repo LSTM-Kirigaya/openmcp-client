@@ -55,7 +55,7 @@ export function resolvePayloadFromConfig(config: ConnectPayload, serverName?: st
     const servers = mcpServers as Record<string, McpServerEntry>;
     const names = Object.keys(servers);
     if (names.length === 0) {
-      throw new Error('配置文件为 mcpServers 格式，但未包含任何 server。');
+      throw new Error('Config file is in mcpServers format but contains no servers.');
     }
 
     let pickedName = serverName;
@@ -63,19 +63,19 @@ export function resolvePayloadFromConfig(config: ConnectPayload, serverName?: st
       if (names.length === 1) {
         pickedName = names[0];
       } else {
-        throw new Error(`检测到 mcpServers 聚合配置，包含多个 server。请使用 --mcp-server 指定目标。\n可选值: ${names.join(', ')}`);
+        throw new Error(`Detected mcpServers aggregate config with multiple servers. Use --mcp-server to specify a target.\nAvailable: ${names.join(', ')}`);
       }
     }
 
     const server = servers[pickedName];
     if (!server) {
-      throw new Error(`未找到 mcpServer "${pickedName}"。\n可选值: ${names.join(', ')}`);
+      throw new Error(`mcpServer "${pickedName}" not found.\nAvailable: ${names.join(', ')}`);
     }
     return mapMcpServerToPayload(server);
   }
 
   if (serverName) {
-    throw new Error('当前配置文件是扁平 McpOptions 格式，不支持 --mcp-server。');
+    throw new Error('Current config file is in flat McpOptions format, which does not support --mcp-server.');
   }
 
   const normalized = normalizeConnectionType(config.connectionType as string | undefined);
@@ -89,26 +89,26 @@ function validatePayload(payload: ConnectPayload, prefix: string): ConfigValidat
   const warnings: string[] = [];
   const type = normalizeConnectionType(payload.connectionType as string | undefined);
   if (!type) {
-    errors.push(`${prefix} 缺少或无效 connectionType（STDIO/SSE/STREAMABLE_HTTP/http）`);
+    errors.push(`${prefix} missing or invalid connectionType (STDIO/SSE/STREAMABLE_HTTP/http)`);
   }
   if (type === 'STDIO') {
     if (typeof payload.command !== 'string' || payload.command.trim() === '') {
-      errors.push(`${prefix} STDIO 需要 command`);
+      errors.push(`${prefix} STDIO requires command`);
     }
     if (payload.args !== undefined && !Array.isArray(payload.args)) {
-      errors.push(`${prefix} args 必须是数组`);
+      errors.push(`${prefix} args must be an array`);
     }
   }
   if (type === 'SSE' || type === 'STREAMABLE_HTTP') {
     if (typeof payload.url !== 'string' || payload.url.trim() === '') {
-      errors.push(`${prefix} ${type} 需要 url`);
+      errors.push(`${prefix} ${type} requires url`);
     }
   }
   if (payload.env !== undefined && !isPlainObject(payload.env)) {
-    errors.push(`${prefix} env 必须是对象`);
+    errors.push(`${prefix} env must be an object`);
   }
   if (!type && !payload.command && !payload.url) {
-    warnings.push(`${prefix} 无法推断连接方式，建议显式写 connectionType`);
+    warnings.push(`${prefix} unable to infer connection type; explicitly set connectionType`);
   }
   return { ok: errors.length === 0, errors, warnings };
 }
@@ -117,7 +117,7 @@ export function validateConfig(config: ConnectPayload): ConfigValidationResult {
   if (!isPlainObject(config)) {
     return {
       ok: false,
-      errors: ['配置文件根节点必须是 JSON 对象'],
+      errors: ['Config file root must be a JSON object'],
       warnings: []
     };
   }
@@ -128,11 +128,11 @@ export function validateConfig(config: ConnectPayload): ConfigValidationResult {
     const warnings: string[] = [];
     const entries = Object.entries(mcpServers);
     if (entries.length === 0) {
-      errors.push('mcpServers 不能为空对象');
+      errors.push('mcpServers cannot be an empty object');
     }
     for (const [name, server] of entries) {
       if (!isPlainObject(server)) {
-        errors.push(`mcpServers.${name} 必须是对象`);
+        errors.push(`mcpServers.${name} must be an object`);
         continue;
       }
       const r = validatePayload(mapMcpServerToPayload(server), `mcpServers.${name}`);

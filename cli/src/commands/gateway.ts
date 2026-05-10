@@ -16,27 +16,28 @@ export const gatewayCommand = new Command('gateway')
   .description('Manage OpenMCP Gateway (service)')
   .summary('Gateway: run|start|stop|restart|status|logs|logs-dir')
   .description(`
-OpenMCP Gateway 管理命令：
+OpenMCP Gateway management commands:
 
-  run       前台运行 Gateway（阻塞，查看日志）
-  start     后台启动 Gateway（立即返回）
-  stop      停止后台运行的 Gateway
-  restart   重启 Gateway
-  status    查看 Gateway 状态
-  logs      查看最近若干行文件日志（gateway.log 与 gateway-startup.log）
-  logs-dir  仅打印上述日志目录绝对路径（别名: log-dir）
+  run       Run Gateway in foreground (blocking, view logs)
+  start     Start Gateway in background (returns immediately)
+  stop      Stop the running Gateway in background
+  restart   Restart Gateway
+  status    Check Gateway status
+  logs      Print last N lines of log files (gateway.log and gateway-startup.log)
+  logs-dir  Print the absolute path of the log directory (alias: log-dir)
 
-云端后端地址默认由 service/.env.development 与 service/.env.production 提供；也可用 OPENMCP_API_BASE_URL、service/.env.local 或 %USERPROFILE%\\.openmcp\\gateway.env 覆盖。
+The cloud backend address defaults are provided by service/.env.development and service/.env.production;
+you can also override them with OPENMCP_API_BASE_URL, service/.env.local, or %USERPROFILE%\\.openmcp\\gateway.env.
 
-示例：
-  openmcp gateway run           # 前台运行
-  openmcp gateway start         # 后台启动
-  openmcp gateway stop         # 停止
-  openmcp gateway restart      # 重启
-  openmcp gateway status       # 查看状态
-  openmcp gateway logs-dir     # 日志目录路径
-  openmcp gateway logs -n 500  # 最近 500 行
-  openmcp gateway start -p 9000  # 自定义端口
+Examples:
+  openmcp gateway run           # Run in foreground
+  openmcp gateway start         # Start in background
+  openmcp gateway stop          # Stop
+  openmcp gateway restart       # Restart
+  openmcp gateway status        # Check status
+  openmcp gateway logs-dir      # Log directory path
+  openmcp gateway logs -n 500   # Last 500 lines
+  openmcp gateway start -p 9000 # Custom port
   `)
   .addHelpText('after', HELP_GATEWAY);
 
@@ -175,9 +176,9 @@ gatewayCommand
     const existing = logFiles.filter((item) => fs.existsSync(item.file));
 
     if (existing.length === 0) {
-      console.log(`尚无日志文件: ${path.join(dir, 'gateway.log')}`);
-      console.log(`尚无启动日志: ${gatewayStartupLogFile()}`);
-      console.log('（后台 Gateway 会写入此处；可用 gateway logs-dir 查看目录）');
+      console.log(`No log file yet: ${path.join(dir, 'gateway.log')}`);
+      console.log(`No startup log yet: ${gatewayStartupLogFile()}`);
+      console.log('(Background Gateway will write here; use gateway logs-dir to view the directory)');
       return;
     }
 

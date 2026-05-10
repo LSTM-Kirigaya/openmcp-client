@@ -7,13 +7,13 @@ function gw(cmd: Command): Command {
 }
 
 export const skillsCmd = new Command('skills')
-  .description('内置技能包列表与文件读取（SkillController）。')
+  .description('Built-in skill package list and file reading (SkillController).')
   .addHelpText('after', HELP_SKILLS);
 
 gw(
   skillsCmd
     .command('list')
-    .description('列出技能')
+    .description('List skills')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('skills/list', {});
@@ -26,8 +26,8 @@ gw(
 gw(
   skillsCmd
     .command('load')
-    .description('加载技能内容')
-    .option('--skill-name <name>', '技能名')
+    .description('Load skill content')
+    .option('--skill-name <name>', 'Skill name')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('skills/load', {
@@ -42,9 +42,9 @@ gw(
 gw(
   skillsCmd
     .command('read-file')
-    .description('读取技能包内文件')
-    .requiredOption('--skill-name <name>', '技能名')
-    .requiredOption('--file-path <path>', '包内相对路径')
+    .description('Read file inside skill package')
+    .requiredOption('--skill-name <name>', 'Skill name')
+    .requiredOption('--file-path <path>', 'Relative path inside package')
     .action(async (options) => {
       await withGateway(options.gateway, async (bridge) => {
         const res = await bridge.commandRequest('skills/read-file', {
