@@ -12,6 +12,7 @@ import { PostMessageble } from '../hook/adapter.js';
 import chalk from 'chalk';
 import { FORBIDDEN_MONITOR } from '../hook/setting.js';
 import { releaseClientStorageBinding, rememberClientStorageBinding } from '../storage/client-binding.js';
+import { listServers, type McpServerRecord } from '../storage/servers.repository.js';
 
 export const clientMap: Map<string, RequestClientType> = new Map();
 const clientConnectionOptions: Map<string, McpOptions> = new Map();
@@ -23,6 +24,7 @@ export interface ConnectedSessionInfo {
     command?: string;
     args?: string[];
     url?: string;
+    oauth?: unknown;
     cwd?: string;
     env?: Record<string, string>;
     connectionId?: string;
@@ -34,7 +36,7 @@ function normalizeConnectionType(type?: string): ConnectionType | undefined {
     const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
     if (normalized === 'STDIO') return 'STDIO';
     if (normalized === 'SSE') return 'SSE';
-    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP' || normalized === 'HTTP') return 'STREAMABLE_HTTP';
     return undefined;
 }
 
@@ -44,8 +46,10 @@ export function getClient(clientId?: string): RequestClientType | undefined {
 export const clientMonitorMap: Map<string, McpServerConnectMonitor> = new Map();
 export async function updateClientMap(uuid: string, options: McpOptions): Promise<{ res: boolean; error?: any }> {
     try {
-        const client = await connect(options);
+        const normalizedOptions = normalizeConnectionOption(options);
+        const client = await connect(normalizedOptions);
         clientMap.set(uuid, client);
+        clientConnectionOptions.set(uuid, cloneConnectionOption(normalizedOptions));
         const tools = await client.listTools();
         console.log(
             chalk.white('update client tools'),
@@ -315,9 +319,23 @@ function cloneConnectionOption(option: McpOptions): McpOptions {
     return JSON.parse(JSON.stringify(option));
 }
 
+function normalizeConnectionOption(option: Record<string, any>): McpOptions {
+    const next = cloneConnectionOption(option as McpOptions);
+    const normalizedType = normalizeConnectionType(next.connectionType || option.type || option.transport);
+    if (normalizedType) {
+        next.connectionType = normalizedType;
+    } else if (next.url && !next.connectionType) {
+        next.connectionType = 'STREAMABLE_HTTP';
+    }
+    delete (next as any).type;
+    delete (next as any).transport;
+    return next;
+}
+
 function connectionIdentity(option: McpOptions): Record<string, unknown> {
+    const connectionType = normalizeConnectionType(option.connectionType || (option as any).type || (option as any).transport) || option.connectionType;
     return {
-        connectionType: normalizeConnectionType(option.connectionType) || option.connectionType,
+        connectionType,
         command: option.command,
         args: option.args,
         url: option.url,
@@ -350,10 +368,7 @@ export async function connectService(
     webview?: PostMessageble
 ): Promise<RestfulResponse> {
     try {
-        const normalizedType = normalizeConnectionType(option.connectionType);
-        if (normalizedType) {
-            option.connectionType = normalizedType;
-        }
+        option = normalizeConnectionOption(option);
 
         // 预处理字符串
         await preprocessCommand(option, webview);
@@ -494,7 +509,11 @@ export async function listConnectedSessionsService() {
             continue;
         }
         const versionInfo = client.getServerVersion();
-        const option = clientConnectionOptions.get(clientId);
+        const option = clientConnectionOptions.get(clientId)
+            || await resolveSavedConnectionOption(clientId, versionInfo?.name);
+        if (option && !clientConnectionOptions.has(clientId)) {
+            clientConnectionOptions.set(clientId, cloneConnectionOption(option));
+        }
         sessions.push({
             clientId,
             name: versionInfo?.name || 'unknown',
@@ -507,4 +526,49 @@ export async function listConnectedSessionsService() {
         code: 200,
         msg: sessions
     };
+}
+
+async function resolveSavedConnectionOption(clientId: string, serverName?: string): Promise<McpOptions | undefined> {
+    const records = listServers();
+    const candidates = records.map(toConnectionOptionFromServerRecord).filter(Boolean) as McpOptions[];
+
+    for (const option of candidates) {
+        const uuid = await deterministicUUID(stableStringify(connectionIdentity(option)));
+        if (uuid === clientId) {
+            return option;
+        }
+    }
+
+    const normalizedName = normalizeName(serverName);
+    if (normalizedName) {
+        const matched = candidates.find(option => {
+            const infoName = normalizeName(option.serverInfo?.name);
+            const recordName = normalizeName((option as any).name);
+            return infoName === normalizedName || recordName === normalizedName;
+        });
+        if (matched) {
+            return matched;
+        }
+    }
+
+    if (candidates.length === 1) {
+        return candidates[0];
+    }
+
+    return undefined;
+}
+
+function toConnectionOptionFromServerRecord(record: McpServerRecord): McpOptions | undefined {
+    if (!record || typeof record !== 'object') {
+        return undefined;
+    }
+    const option = normalizeConnectionOption(record as Record<string, any>);
+    if (!option.connectionType) {
+        return undefined;
+    }
+    return option;
+}
+
+function normalizeName(value?: string): string {
+    return String(value || '').trim().toLowerCase();
 }

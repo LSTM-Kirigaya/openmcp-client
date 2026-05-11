@@ -32,11 +32,10 @@ jobs:
       run: yarn build
 
     - name: Package VSIX
-      run: npx vsce package --out dist/openmcp.vsix
+      run: npx vsce package --out dist/openmcp.vsix --no-dependencies
 
     - name: Upload VSIX
       uses: actions/upload-artifact@v4
       with:
         name: openmcp-${{ matrix.os }}
         path: dist/openmcp.vsix
-

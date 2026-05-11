@@ -15,7 +15,7 @@ function normalizeConnectionType(type?: string): 'STDIO' | 'SSE' | 'STREAMABLE_H
     const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
     if (normalized === 'STDIO') return 'STDIO';
     if (normalized === 'SSE') return 'SSE';
-    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP') return 'STREAMABLE_HTTP';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP' || normalized === 'HTTP') return 'STREAMABLE_HTTP';
     return undefined;
 }
 

@@ -154,8 +154,8 @@ function chooseDebugMode(index: number) {
 
 .welcome-container {
 	/* 统一使用 Grid 实现栅格与间距 */
-	--gap: 24px;
-	--card-min: 220px;
+	--gap: 16px;
+	--card-min: 180px;
 	display: grid;
 	gap: var(--gap);
 	width: 100%;
@@ -187,13 +187,13 @@ function chooseDebugMode(index: number) {
 	flex-direction: column;
 	align-items: center;
 	font-size: 14px;
-	padding: 24px 20px; 
-	border-radius: 16px;
+	padding: 18px 16px;
+	border-radius: 12px;
 	cursor: pointer;
 	border: 1px solid var(--sidebar-border);
 	transition: var(--animation-3s);
 	height: 100%;
-	min-height: 140px;
+	min-height: 112px;
 	justify-content: center;
 	text-align: center;
 	background-color: var(--sidebar);
@@ -201,7 +201,7 @@ function chooseDebugMode(index: number) {
 }
 
 .debug-option > span:first-child {
-	margin-bottom: 12px;
+	margin-bottom: 8px;
 }
 
 .debug-option:hover {
@@ -210,7 +210,7 @@ function chooseDebugMode(index: number) {
 }
 
 .debug-option .iconfont {
-	font-size: 42px;
+	font-size: 34px;
 }
 
 .debug-welcome {
@@ -238,8 +238,8 @@ function chooseDebugMode(index: number) {
 	}
 
 	.debug-option {
-		font-size: 18px;
-		min-height: 150px;
+		font-size: 14px;
+		min-height: 112px;
 	}
 }
 
@@ -253,16 +253,16 @@ function chooseDebugMode(index: number) {
 	.advance-module {
 		grid-template-columns: 1fr;
 		max-width: var(--card-min);
-		gap: 20px;
+		gap: 14px;
 	}
 	
 	.debug-option {
-		font-size: 18px;
-		min-height: 140px;
+		font-size: 14px;
+		min-height: 108px;
 	}
 	
 	.debug-option .iconfont {
-		font-size: 36px;
+		font-size: 32px;
 	}
 	
 	.module-title {

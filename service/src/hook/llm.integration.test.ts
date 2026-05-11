@@ -120,6 +120,10 @@ async function testToolCalling() {
 	assert(hasToolCall === true, 'response should include a tool call');
 	if (hasToolCall) {
 		const toolCall = msg!.tool_calls![0];
+		if (toolCall.type !== 'function') {
+			assert(false, `tool call should be a function call, got ${toolCall.type}`);
+			return;
+		}
 		assert(toolCall.function.name === 'get_weather', 'tool call should be get_weather');
 		console.log(`  Tool call: ${toolCall.function.name}(${toolCall.function.arguments})`);
 	}

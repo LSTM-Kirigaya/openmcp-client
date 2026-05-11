@@ -5,7 +5,7 @@
 			<span>{{ t('drag-to-fill-connect-parameters') }}</span>
 		</div>
 		<el-splitter layout="vertical" class="connection-panel-splitter">
-			<el-splitter-panel :min="200" :max="500" size="50%" class="splitter-options-panel">
+			<el-splitter-panel :min="200" class="splitter-options-panel">
 				<div class="connect-panel-container top" :ref="el => client.connectionSettingRef = el">
 					<el-scrollbar class="options-scrollbar">
 						<div class="connection-setting-content">
@@ -18,15 +18,24 @@
 					</el-scrollbar>
 				</div>
 			</el-splitter-panel>
-			<el-splitter-panel class="splitter-log-panel" collapsible size="20%">
+			<el-splitter-panel
+				class="splitter-log-panel"
+				:class="{ collapsed: isLogCollapsed }"
+				:size="logPanelSize"
+				:min="collapsedLogPanelSize"
+				:max="520"
+				@update:size="handleLogPanelSizeUpdate"
+			>
 				<div class="connect-panel-container bottom" :ref="el => client.connectionLogRef = el">
 					<ConnectionLog
 						:index="props.index"
 						:loading="isLoading"
 						:disconnecting="isDisconnecting"
 						:connected="!!client.connectionResult.success"
+						:collapsed="isLogCollapsed"
 						@connect="connect"
 						@disconnect="disconnect"
+						@toggle-collapse="toggleLogCollapsed"
 					/>
 				</div>
 			</el-splitter-panel>
@@ -59,6 +68,44 @@ const { t } = useI18n();
 
 const isLoading = ref(false);
 const isDisconnecting = ref(false);
+const collapsedLogPanelSize = 58;
+const minExpandedLogPanelSize = 96;
+const defaultExpandedLogPanelSize = 260;
+const logPanelSize = ref<string | number>(defaultExpandedLogPanelSize);
+const lastExpandedLogPanelSize = ref<string | number>(defaultExpandedLogPanelSize);
+const isLogCollapsed = ref(false);
+
+function getPixelSize(size: string | number) {
+	if (typeof size === 'number') return size;
+	if (size.endsWith('px')) return Number(size.slice(0, -2));
+	const parsed = Number(size);
+	return Number.isNaN(parsed) ? null : parsed;
+}
+
+function handleLogPanelSizeUpdate(size: string | number) {
+	logPanelSize.value = size;
+	const pixelSize = getPixelSize(size);
+	if (pixelSize === null) return;
+	if (pixelSize <= collapsedLogPanelSize + 4) {
+		isLogCollapsed.value = true;
+		return;
+	}
+	lastExpandedLogPanelSize.value = size;
+	isLogCollapsed.value = false;
+}
+
+function toggleLogCollapsed() {
+	if (isLogCollapsed.value) {
+		isLogCollapsed.value = false;
+		logPanelSize.value = lastExpandedLogPanelSize.value || defaultExpandedLogPanelSize;
+		return;
+	}
+	if ((getPixelSize(logPanelSize.value) || 0) >= minExpandedLogPanelSize) {
+		lastExpandedLogPanelSize.value = logPanelSize.value;
+	}
+	isLogCollapsed.value = true;
+	logPanelSize.value = collapsedLogPanelSize;
+}
 
 async function connect() {
 	isLoading.value = true;
@@ -128,6 +175,22 @@ function handleDrop(event: DragEvent) {
 
 .connection-panel-splitter :deep(.el-splitter__panel) {
 	overflow: hidden;
+}
+
+.connection-panel-splitter :deep(.el-splitter-bar) {
+	z-index: 2;
+}
+
+.connection-panel-splitter :deep(.el-splitter-bar__dragger-vertical)::before {
+	height: 3px;
+	background-color: var(--el-border-color);
+	transition: background-color var(--el-transition-duration-fast), height var(--el-transition-duration-fast);
+}
+
+.connection-panel-splitter :deep(.el-splitter-bar__dragger-vertical:hover)::before,
+.connection-panel-splitter :deep(.el-splitter-bar__dragger-active)::before {
+	height: 4px;
+	background-color: var(--main-light-color-60);
 }
 
 .splitter-options-panel {

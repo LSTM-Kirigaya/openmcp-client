@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { runTests } from '@vscode/test-electron';
+import { downloadAndUnzipVSCode, resolveCliPathFromVSCodeExecutablePath, runTests } from '@vscode/test-electron';
 
 async function main() {
 	try {
@@ -12,10 +12,14 @@ async function main() {
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './suite/index.js');
 
+		const downloadedVSCodePath = await downloadAndUnzipVSCode({ version: '1.95.0' });
+		const vscodeExecutablePath = resolveCliPathFromVSCodeExecutablePath(downloadedVSCodePath);
+
 		// Download VS Code, unzip it and run the integration test
 		await runTests({ 
             extensionDevelopmentPath:  extensionDevelopmentPath,
             extensionTestsPath: extensionTestsPath,
+            vscodeExecutablePath,
         });
 	} catch (err) {
 		console.error('Failed to run tests');

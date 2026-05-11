@@ -8,6 +8,8 @@ export interface GatewaySessionItem {
 	name: string;
 	version: string;
 	connectionType?: ConnectionType;
+	type?: string;
+	transport?: string;
 	command?: string;
 	args?: string[];
 	commandString?: string;
@@ -28,7 +30,7 @@ export function normalizeConnectListPayload(res: { msg?: unknown; data?: unknown
 }
 
 function hasConnectionSignature(item: GatewaySessionItem): boolean {
-	return Boolean(item.connectionType || item.url || item.command || item.commandString);
+	return Boolean(item.connectionType || item.type || item.transport || item.url || item.command || item.commandString);
 }
 
 function getSavedServerName(item: any): string {
@@ -53,7 +55,7 @@ function applySavedServerFallback(
 
 	return {
 		...session,
-		connectionType: matched.connectionType,
+		connectionType: normalizeConnectionType(matched.connectionType || matched.type || matched.transport),
 		command: matched.command,
 		args: matched.args,
 		commandString: matched.commandString,
@@ -63,6 +65,24 @@ function applySavedServerFallback(
 		connectionId: matched.connectionId || matched.id,
 		storageScope: matched.storageScope,
 		workspacePath: matched.workspacePath
+	};
+}
+
+function normalizeConnectionType(type?: string): ConnectionType | undefined {
+	if (!type) return undefined;
+	const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+	if (normalized === 'STDIO') return 'STDIO';
+	if (normalized === 'SSE') return 'SSE';
+	if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP' || normalized === 'HTTP') return 'STREAMABLE_HTTP';
+	return undefined;
+}
+
+function normalizeSessionSignature(session: GatewaySessionItem): GatewaySessionItem {
+	const connectionType = normalizeConnectionType(session.connectionType || session.type || session.transport)
+		|| (session.url ? 'STREAMABLE_HTTP' : undefined);
+	return {
+		...session,
+		...(connectionType ? { connectionType } : {})
 	};
 }
 
@@ -92,7 +112,9 @@ export async function fetchAndApplyGatewaySessions(previousSelectedId: string): 
 	} catch {
 		savedServers = [];
 	}
-	const list = rawList.map(session => applySavedServerFallback(session, savedServers, rawList.length));
+	const list = rawList
+		.map(session => applySavedServerFallback(session, savedServers, rawList.length))
+		.map(normalizeSessionSignature);
 	const ids = new Set(list.map(s => s.clientId));
 
 	for (let i = mcpClientAdapter.clients.length - 1; i >= 0; i--) {
@@ -107,9 +129,7 @@ export async function fetchAndApplyGatewaySessions(previousSelectedId: string): 
 	}
 
 	for (const s of list) {
-		if (!mcpClientAdapter.clients.some(c => c.clientId === s.clientId)) {
-			await mcpClientAdapter.attachExistingGatewaySession(s);
-		}
+		await mcpClientAdapter.attachExistingGatewaySession(s);
 	}
 
 	const finalOrdered: typeof mcpClientAdapter.clients = [];

@@ -28,6 +28,28 @@ export const connectionSelectDataViewOption: ConnectionTypeOptionItem[] = [
     }
 ]
 
+function normalizeConnectionType(type?: string): IConnectionArgs['connectionType'] | undefined {
+    if (!type) return undefined;
+    const normalized = type.trim().toUpperCase().replace(/[-\s]/g, '_');
+    if (normalized === 'STDIO') return 'STDIO';
+    if (normalized === 'SSE') return 'SSE';
+    if (normalized === 'STREAMABLE_HTTP' || normalized === 'STREAMABLEHTTP' || normalized === 'HTTP') return 'STREAMABLE_HTTP';
+    return undefined;
+}
+
+function normalizeConnectionArgsRecord<T extends Record<string, any>>(record: T): T & { connectionType?: IConnectionArgs['connectionType'] } {
+    const item: any = { ...record };
+    const connectionType = normalizeConnectionType(item.connectionType || item.type || item.transport);
+    if (connectionType) {
+        item.connectionType = connectionType;
+    } else if (item.url && !item.connectionType) {
+        item.connectionType = 'STREAMABLE_HTTP';
+    }
+    delete item.type;
+    delete item.transport;
+    return item;
+}
+
 function prettifyMapKeys(keys: MapIterator<string>) {
     const result: string[] = [];
     for (const key of keys) {
@@ -601,7 +623,7 @@ class McpClientAdapter {
             if (res.code === 200 && payload?.servers) {
                 const locals = payload.servers.filter((s: any) => s.source === 'local');
                 return locals.map((s: any) => {
-                    const item: any = { ...s };
+                    const item = normalizeConnectionArgsRecord(s);
                     if (item.connectionType === 'STDIO' && item.command) {
                         item.commandString = [item.command, ...(item.args || [])].join(' ');
                     }
@@ -619,9 +641,9 @@ class McpClientAdapter {
             return [];
         }
         if (Array.isArray(msg)) {
-            return msg;
+            return msg.map((item: any) => normalizeConnectionArgsRecord(item));
         }
-        return [msg];
+        return [normalizeConnectionArgsRecord(msg as any)];
     }
 
     get masterNode() {
@@ -747,6 +769,8 @@ class McpClientAdapter {
         name: string;
         version: string;
         connectionType?: IConnectionArgs['connectionType'];
+        type?: string;
+        transport?: string;
         command?: string;
         args?: string[];
         commandString?: string;
@@ -792,6 +816,8 @@ class McpClientAdapter {
 
     private toConnectionArgs(session: {
         connectionType?: IConnectionArgs['connectionType'];
+        type?: string;
+        transport?: string;
         command?: string;
         args?: string[];
         commandString?: string;
@@ -804,9 +830,11 @@ class McpClientAdapter {
     }): IConnectionArgs {
         const commandString = session.commandString
             || [session.command, ...(session.args || [])].filter(Boolean).join(' ');
+        const connectionType = normalizeConnectionType(session.connectionType || session.type || session.transport)
+            || (session.url ? 'STREAMABLE_HTTP' : 'STDIO');
 
         return {
-            connectionType: session.connectionType || (session.url ? 'STREAMABLE_HTTP' : 'STDIO'),
+            connectionType,
             commandString,
             cwd: session.cwd || '',
             url: session.url || '',

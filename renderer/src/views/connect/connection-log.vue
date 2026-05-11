@@ -1,8 +1,23 @@
 <template>
 	<div class="connection-log-wrap">
-		<div class="connection-log-header">
+		<div class="connection-log-header" :class="{ collapsed }">
+			<button
+				type="button"
+				class="connection-log-toggle"
+				:class="{ collapsed }"
+				:title="collapsed ? t('expand') : t('collapse')"
+				:aria-label="collapsed ? t('expand') : t('collapse')"
+				@click="$emit('toggle-collapse')"
+			>
+				<el-icon><ArrowDown /></el-icon>
+			</button>
 			<span class="connection-log-header-title">{{ t('log') }}</span>
-			<span class="iconfont icon-delete connection-log-clear" @click="clearLogs" :title="t('clear')"></span>
+			<span
+				v-if="!collapsed"
+				class="iconfont icon-delete connection-log-clear"
+				@click="clearLogs"
+				:title="t('clear')"
+			></span>
 			<el-button-group class="connection-actions-group">
 				<el-button
 					class="btn-disconnect"
@@ -22,7 +37,7 @@
 				</el-button>
 			</el-button-group>
 		</div>
-		<el-scrollbar class="connection-log-scroll">
+		<el-scrollbar v-if="!collapsed" class="connection-log-scroll">
 			<div class="output-content">
 				<el-collapse :expand-icon-position="'left'">
 					<el-collapse-item v-for="(log, index) in logString" :name="index" :class="['item', log.type]">
@@ -46,6 +61,7 @@
 <script setup lang="ts">
 import { computed, defineComponent } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { ArrowDown } from '@element-plus/icons-vue';
 import { mcpClientAdapter } from './core';
 
 defineComponent({ name: 'connection-log' });
@@ -55,11 +71,13 @@ const props = defineProps({
 	loading: { type: Boolean, default: false },
 	disconnecting: { type: Boolean, default: false },
 	connected: { type: Boolean, default: false },
+	collapsed: { type: Boolean, default: false },
 });
 
 defineEmits<{
 	(e: 'connect'): void;
 	(e: 'disconnect'): void;
+	(e: 'toggle-collapse'): void;
 }>();
 
 const logString = computed(() => {
@@ -84,25 +102,64 @@ function clearLogs() {
 }
 
 .connection-log-header {
-	padding: 12px 16px;
+	padding: 10px 16px;
 	font-weight: 600;
 	font-size: 15px;
 	flex-shrink: 0;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	gap: 12px;
+	gap: 10px;
+	min-height: 58px;
+	box-sizing: border-box;
+	border-bottom: 1px solid var(--el-border-color-lighter);
+	background-color: var(--el-bg-color);
+}
+
+.connection-log-header.collapsed {
+	border-bottom: 0;
 }
 
 .connection-log-header-title {
 	flex-shrink: 0;
+	margin-right: auto;
+}
+
+.connection-log-toggle {
+	width: 28px;
+	height: 28px;
+	border: 1px solid var(--el-border-color-light);
+	border-radius: 6px;
+	background-color: var(--el-fill-color-blank);
+	color: var(--el-text-color-secondary);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	cursor: pointer;
+	transition: var(--animation-3s);
+	flex-shrink: 0;
+}
+
+.connection-log-toggle:hover {
+	color: var(--el-text-color-primary);
+	border-color: var(--main-light-color-60);
+	background-color: var(--main-light-color-20);
+}
+
+.connection-log-toggle .el-icon {
+	font-size: 15px;
+	transform: rotate(180deg);
+	transition: transform var(--el-transition-duration-fast);
+}
+
+.connection-log-toggle.collapsed .el-icon {
+	transform: rotate(0deg);
 }
 
 .connection-log-clear {
 	cursor: pointer;
 	color: var(--el-text-color-secondary);
 	font-size: 16px;
-	margin-left: auto;
 }
 .connection-log-clear:hover {
 	color: var(--el-color-error);

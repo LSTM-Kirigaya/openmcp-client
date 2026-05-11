@@ -31,11 +31,19 @@ export interface McpOptions {
     args?: string[];
     // SSE 特定选项
     url?: string;
+    oauth?: unknown;
     cwd?: string;
     env?: Record<string, string>;
     // 通用客户端选项
     clientName?: string;
     clientVersion?: string;
+    serverInfo?: {
+        name?: string;
+        version?: string;
+    };
+    name?: string;
+    type?: string;
+    transport?: string;
     // 本地存储上下文
     connectionId?: string;
     storageScope?: 'user' | 'workspace';

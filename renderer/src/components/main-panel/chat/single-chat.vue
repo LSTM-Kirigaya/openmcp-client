@@ -215,10 +215,13 @@ defineExpose({
     color: var(--el-text-color-regular);
 }
 
+.message-list .message-item:last-child {
+    margin-bottom: 100px;
+}
+
 .message-text {
     font-size: var(--chat-font-size);
     line-height: 1.5;
-    margin-bottom: 200px;
 }
 
 .user .message-text {

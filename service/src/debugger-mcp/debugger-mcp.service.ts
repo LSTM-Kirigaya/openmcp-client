@@ -1,8 +1,9 @@
 import type { Server as HttpServer } from 'node:http';
 import express, { Request, Response } from 'express';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { ZodRawShapeCompat } from '@modelcontextprotocol/sdk/server/zod-compat.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { z } from 'zod';
+import { z } from 'zod/v3';
 import { clientMap, getClient } from '../mcp/connect.service.js';
 import { loadSetting } from '../setting/setting.service.js';
 import { runBatchValidation } from '../batch-validation/batch-validation.service.js';
@@ -25,6 +26,19 @@ interface BatchTestCase {
     input?: string;
     criteria?: string[];
 }
+
+const EMPTY_INPUT_SCHEMA = {} as ZodRawShapeCompat;
+
+const EXECUTE_TOOL_INPUT_SCHEMA = {
+    clientId: z.string().describe('The MCP client ID'),
+    toolName: z.string().describe('Tool name to call'),
+    toolArgs: z.record(z.string(), z.unknown()).optional().describe('Tool arguments as JSON object')
+} as unknown as ZodRawShapeCompat;
+
+const EXECUTE_BATCH_TEST_SAMPLE_INPUT_SCHEMA = {
+    serverName: z.string().describe('MCP server name'),
+    testCaseIndex: z.number().int().min(0).describe('0-based index of the test case')
+} as unknown as ZodRawShapeCompat;
 
 let httpServer: HttpServer | null = null;
 let currentPort: number | null = null;
@@ -153,7 +167,7 @@ async function createMcpServerInstance(config: DebuggerMcpConfig) {
         server.registerTool(TOOL_NAMES.list_all_tools, {
             title: 'List All Tools',
             description: 'List all tools from all connected MCP servers',
-            inputSchema: z.object({}) as unknown as z.ZodRawShape
+            inputSchema: EMPTY_INPUT_SCHEMA
         }, async () => {
             const items: Array<{ clientId: string; serverName: string; serverVersion: string; name: string; description?: string }> = [];
             for (const [clientId, client] of clientMap) {
@@ -186,11 +200,7 @@ async function createMcpServerInstance(config: DebuggerMcpConfig) {
         server.registerTool(TOOL_NAMES.execute_tool, {
             title: 'Execute Tool',
             description: 'Execute a tool from a connected MCP server. Provide clientId, toolName, and toolArgs (JSON object).',
-            inputSchema: z.object({
-                clientId: z.string().describe('The MCP client ID'),
-                toolName: z.string().describe('Tool name to call'),
-                toolArgs: z.record(z.string(), z.unknown()).optional().describe('Tool arguments as JSON object')
-            }) as unknown as z.ZodRawShape
+            inputSchema: EXECUTE_TOOL_INPUT_SCHEMA
         },
             async (args: Record<string, unknown>) => {
                 const { clientId, toolName, toolArgs } = args as { clientId: string; toolName: string; toolArgs?: Record<string, unknown> };
@@ -221,7 +231,7 @@ async function createMcpServerInstance(config: DebuggerMcpConfig) {
         server.registerTool(TOOL_NAMES.list_batch_test_samples, {
             title: 'List Batch Test Samples',
             description: 'List all batch validation test samples from all servers',
-            inputSchema: z.object({}) as unknown as z.ZodRawShape
+            inputSchema: EMPTY_INPUT_SCHEMA
         }, async () => {
             const result: Array<{ serverName: string; testCases: Array<{ id: string; name?: string; input: string; criteria: string[] }> }> = [];
             const seenServers = new Set<string>();
@@ -256,10 +266,7 @@ async function createMcpServerInstance(config: DebuggerMcpConfig) {
         server.registerTool(TOOL_NAMES.execute_batch_test_sample, {
             title: 'Execute Batch Test Sample',
             description: 'Execute a batch validation test sample. Provide serverName and testCaseIndex (0-based).',
-            inputSchema: z.object({
-                serverName: z.string().describe('MCP server name'),
-                testCaseIndex: z.number().int().min(0).describe('0-based index of the test case')
-            }) as unknown as z.ZodRawShape
+            inputSchema: EXECUTE_BATCH_TEST_SAMPLE_INPUT_SCHEMA
         },
             async (args: Record<string, unknown>) => {
                 const { serverName, testCaseIndex } = args as { serverName: string; testCaseIndex: number };
