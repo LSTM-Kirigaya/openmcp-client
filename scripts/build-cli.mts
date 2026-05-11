@@ -48,15 +48,15 @@ async function main() {
     error('Failed to install workspace dependencies');
   }
 
-  // Step 3: Build CLI TypeScript
-  log('\nStep 2/4: Building CLI TypeScript...');
+  // Step 3: Build the complete publish payload, including service, gateway, renderer, and CLI.
+  log('\nStep 2/4: Building complete CLI publish payload...');
   try {
-    execSync('yarn workspace @agent-ruler/openmcp build', {
+    execSync('npm --prefix cli run build:publish', {
       cwd: rootDir,
       stdio: 'inherit'
     });
   } catch (err) {
-    error('Failed to build CLI TypeScript');
+    error('Failed to build complete CLI publish payload');
   }
 
   // Step 4: Make entry script executable
@@ -73,7 +73,9 @@ async function main() {
   log('\nStep 4/4: Verifying build...');
   try {
     const distPath = join(cliDir, 'dist', 'index.js');
+    const rendererIndexPath = join(cliDir, 'vendor', 'renderer', 'dist', 'index.html');
     await fs.access(distPath);
+    await fs.access(rendererIndexPath);
     log('  ✓ Build output verified');
   } catch {
     error('Build output not found. Build may have failed.');

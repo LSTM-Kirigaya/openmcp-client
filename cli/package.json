@@ -12,7 +12,7 @@
   "bin": "bin/openmcp.js",
   "scripts": {
     "build": "tsc",
-    "build:publish": "node scripts/clean-publish.mjs && npm --prefix ../service run build && npm --prefix ../gateway run build && npm --prefix ../renderer run build && npm run build && node scripts/prepare-publish.mjs",
+    "build:publish": "node scripts/clean-publish.mjs && npm --prefix ../service run build && npm --prefix ../gateway run build && npm --prefix ../renderer run type-check && npm --prefix ../renderer run build:website && npm run build && node scripts/prepare-publish.mjs",
     "dev": "tsc --watch",
     "prepack": "npm run build:publish",
     "test": "tsx --test --test-concurrency=1 test/cli/surface.test.ts test/gateway/start.test.ts test/gateway/stop.test.ts test/gateway/restart.test.ts test/gateway/status.test.ts test/gateway/run.test.ts test/gateway/logs-dir.test.ts test/gateway/logs.test.ts test/setting/general.test.ts test/setting/llm.test.ts test/setting/skills.test.ts test/mcp/server.test.ts test/mcp/session.test.ts test/debug/resource.test.ts test/debug/prompt.test.ts test/debug/tool.test.ts test/debug/mcp.test.ts test/debug/batch.test.ts test/debug/chat.test.ts test/webui/start.test.ts test/webui/stop.test.ts test/webui/status.test.ts test/webui/restart.test.ts test/webui/run.test.ts test/start/start.test.ts",
