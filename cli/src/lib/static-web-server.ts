@@ -82,9 +82,15 @@ function createStaticWebServer(distDir: string) {
 
     try {
       const body = fs.readFileSync(filePath);
+      const cacheControl = filePath.endsWith('index.html')
+        ? 'no-cache'
+        : relative.startsWith('assets/')
+          ? 'public, max-age=31536000, immutable'
+          : 'no-cache';
+
       res.writeHead(200, {
         'Content-Type': contentTypeByExt(filePath),
-        'Cache-Control': filePath.endsWith('index.html') ? 'no-cache' : 'public, max-age=31536000, immutable'
+        'Cache-Control': cacheControl
       });
       res.end(body);
     } catch (err) {
@@ -106,4 +112,3 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const port = parseInt(process.env.PORT || '8283', 10);
   runStaticWebServer(distDir, port);
 }
-
