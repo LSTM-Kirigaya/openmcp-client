@@ -37,22 +37,22 @@ async function main() {
     error(`CLI directory not found: ${cliDir}`);
   }
 
-  // Step 2: Install CLI dependencies
-  log('Step 1/4: Installing CLI dependencies...');
+  // Step 2: Install workspace dependencies
+  log('Step 1/4: Installing workspace dependencies...');
   try {
-    execSync('npm install', {
-      cwd: cliDir,
+    execSync('yarn install --immutable', {
+      cwd: rootDir,
       stdio: 'inherit'
     });
   } catch (err) {
-    error('Failed to install CLI dependencies');
+    error('Failed to install workspace dependencies');
   }
 
   // Step 3: Build CLI TypeScript
   log('\nStep 2/4: Building CLI TypeScript...');
   try {
-    execSync('npm run build', {
-      cwd: cliDir,
+    execSync('yarn workspace @agent-ruler/openmcp build', {
+      cwd: rootDir,
       stdio: 'inherit'
     });
   } catch (err) {
@@ -62,9 +62,9 @@ async function main() {
   // Step 4: Make entry script executable
   log('\nStep 3/4: Setting up executable permissions...');
   try {
-    const binPath = join(cliDir, 'bin', 'omc');
+    const binPath = join(cliDir, 'bin', 'openmcp.js');
     await fs.chmod(binPath, 0o755);
-    log('  ✓ Made bin/omc executable');
+    log('  ✓ Made bin/openmcp.js executable');
   } catch (err) {
     log('  ⚠ Warning: Could not set executable permissions');
   }
@@ -82,7 +82,7 @@ async function main() {
   // Step 6: Create a test link (optional)
   log('\nOptional: Testing CLI locally...');
   try {
-    const version = execSync('node bin/omc --version', {
+    const version = execSync('node bin/openmcp.js --version', {
       cwd: cliDir,
       encoding: 'utf-8'
     }).trim();
