@@ -19,6 +19,17 @@ function normalizeConnectionType(type?: string): 'STDIO' | 'SSE' | 'STREAMABLE_H
     return undefined;
 }
 
+function normalizeHeaders(value?: Record<string, any>): Record<string, string> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    const headers: Record<string, string> = {};
+    for (const [key, item] of Object.entries(value)) {
+        const headerName = key.trim();
+        if (!headerName || item === undefined || item === null) continue;
+        headers[headerName] = String(item);
+    }
+    return Object.keys(headers).length > 0 ? headers : undefined;
+}
+
 // 增强的客户端类
 export class McpClient {
     private client: Client;
@@ -57,6 +68,7 @@ export class McpClient {
 
         const env = { ...process.env, ...this.options.env } as Record<string, string>;        
         const connectionType = normalizeConnectionType(this.options.connectionType);
+        const headers = normalizeHeaders(this.options.headers);
 
         // 根据连接类型创建传输层
         switch (connectionType) {
@@ -77,7 +89,8 @@ export class McpClient {
                 this.transport = new SSEClientTransport(
                     new URL(this.options.url),
                     {
-                        authProvider: this.oauthPovider
+                        authProvider: this.oauthPovider,
+                        ...(headers ? { requestInit: { headers } } : {})
                     }
                 );
 
@@ -91,6 +104,7 @@ export class McpClient {
                     new URL(this.options.url),
                     {
                         authProvider: this.oauthPovider,
+                        ...(headers ? { requestInit: { headers } } : {})
                     }
                 );
                 break;

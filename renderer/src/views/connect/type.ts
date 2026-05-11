@@ -36,6 +36,7 @@ export interface McpOptions {
     // SSE 特定选项
     url?: string;
     oauth?: any;
+    headers?: Record<string, string>;
 
     // 通用客户端选项
     clientName?: string;
@@ -71,6 +72,7 @@ export interface IConnectionArgs {
     cwd?: string;
     url?: string;
     oauth?: string;
+    headers?: Record<string, string>;
     env?: Record<string, string>;
     enableDatasetReflux?: boolean;
     datasetName?: string;

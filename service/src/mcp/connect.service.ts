@@ -24,6 +24,7 @@ export interface ConnectedSessionInfo {
     command?: string;
     args?: string[];
     url?: string;
+    headers?: Record<string, string>;
     oauth?: unknown;
     cwd?: string;
     env?: Record<string, string>;
@@ -327,6 +328,12 @@ function normalizeConnectionOption(option: Record<string, any>): McpOptions {
     } else if (next.url && !next.connectionType) {
         next.connectionType = 'STREAMABLE_HTTP';
     }
+    const headers = normalizeHeaders(option.headers);
+    if (headers) {
+        next.headers = headers;
+    } else {
+        delete (next as any).headers;
+    }
     delete (next as any).type;
     delete (next as any).transport;
     return next;
@@ -339,11 +346,23 @@ function connectionIdentity(option: McpOptions): Record<string, unknown> {
         command: option.command,
         args: option.args,
         url: option.url,
+        headers: normalizeHeaders(option.headers),
         cwd: option.cwd,
         env: option.env,
         clientName: option.clientName,
         clientVersion: option.clientVersion
     };
+}
+
+function normalizeHeaders(value?: Record<string, any>): Record<string, string> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    const headers: Record<string, string> = {};
+    for (const [key, item] of Object.entries(value)) {
+        const headerName = key.trim();
+        if (!headerName || item === undefined || item === null) continue;
+        headers[headerName] = String(item);
+    }
+    return Object.keys(headers).length > 0 ? headers : undefined;
 }
 
 async function deterministicUUID(input: string) {

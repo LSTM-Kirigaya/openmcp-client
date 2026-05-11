@@ -14,6 +14,7 @@ export interface GatewaySessionItem {
 	args?: string[];
 	commandString?: string;
 	url?: string;
+	headers?: Record<string, string>;
 	cwd?: string;
 	env?: Record<string, string>;
 	connectionId?: string;
@@ -60,6 +61,7 @@ function applySavedServerFallback(
 		args: matched.args,
 		commandString: matched.commandString,
 		url: matched.url,
+		headers: normalizeHeaders(matched.headers),
 		cwd: matched.cwd,
 		env: matched.env,
 		connectionId: matched.connectionId || matched.id,
@@ -77,11 +79,23 @@ function normalizeConnectionType(type?: string): ConnectionType | undefined {
 	return undefined;
 }
 
+function normalizeHeaders(value?: Record<string, any>): Record<string, string> | undefined {
+	if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+	const headers: Record<string, string> = {};
+	for (const [key, item] of Object.entries(value)) {
+		const headerName = key.trim();
+		if (!headerName || item === undefined || item === null) continue;
+		headers[headerName] = String(item);
+	}
+	return Object.keys(headers).length > 0 ? headers : undefined;
+}
+
 function normalizeSessionSignature(session: GatewaySessionItem): GatewaySessionItem {
 	const connectionType = normalizeConnectionType(session.connectionType || session.type || session.transport)
 		|| (session.url ? 'STREAMABLE_HTTP' : undefined);
 	return {
 		...session,
+		headers: normalizeHeaders(session.headers),
 		...(connectionType ? { connectionType } : {})
 	};
 }

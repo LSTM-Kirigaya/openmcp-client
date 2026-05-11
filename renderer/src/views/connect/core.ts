@@ -50,6 +50,17 @@ function normalizeConnectionArgsRecord<T extends Record<string, any>>(record: T)
     return item;
 }
 
+function normalizeHeaders(value?: Record<string, any>): Record<string, string> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
+    const headers: Record<string, string> = {};
+    for (const [key, item] of Object.entries(value)) {
+        const headerName = key.trim();
+        if (!headerName || item === undefined || item === null) continue;
+        headers[headerName] = String(item);
+    }
+    return Object.keys(headers).length > 0 ? headers : undefined;
+}
+
 function prettifyMapKeys(keys: MapIterator<string>) {
     const result: string[] = [];
     for (const key of keys) {
@@ -153,7 +164,8 @@ export class McpClient {
             commandString: '',
             cwd: '',
             url: '',
-            oauth: ''
+            oauth: '',
+            headers: {}
         };
 
         // 连接出参
@@ -181,6 +193,7 @@ export class McpClient {
         this.connectionArgs.cwd = args.cwd || '';
         this.connectionArgs.url = args.url || '';
         this.connectionArgs.oauth = args.oauth || '';
+        this.connectionArgs.headers = normalizeHeaders(args.headers) || {};
         this.connectionArgs.env = args.env || {};
         this.connectionArgs.enableDatasetReflux = args.enableDatasetReflux || false;
         this.connectionArgs.datasetName = args.datasetName || '';
@@ -336,6 +349,7 @@ export class McpClient {
         const url = this.connectionArgs.url;
         const cwd = this.connectionArgs.cwd;
         const oauth = this.connectionArgs.oauth;
+        const headers = normalizeHeaders(this.connectionArgs.headers);
         const connectionType = this.connectionArgs.connectionType;
         const enableDatasetReflux = this.connectionArgs.enableDatasetReflux;
         const datasetName = this.connectionArgs.datasetName;
@@ -361,6 +375,7 @@ export class McpClient {
             url,
             cwd,
             oauth,
+            ...(headers ? { headers } : {}),
             clientName,
             clientVersion,
             env,
@@ -775,6 +790,7 @@ class McpClientAdapter {
         args?: string[];
         commandString?: string;
         url?: string;
+        headers?: Record<string, string>;
         cwd?: string;
         env?: Record<string, string>;
         connectionId?: string;
@@ -822,6 +838,7 @@ class McpClientAdapter {
         args?: string[];
         commandString?: string;
         url?: string;
+        headers?: Record<string, string>;
         cwd?: string;
         env?: Record<string, string>;
         connectionId?: string;
@@ -838,6 +855,7 @@ class McpClientAdapter {
             commandString,
             cwd: session.cwd || '',
             url: session.url || '',
+            headers: normalizeHeaders(session.headers) || {},
             env: session.env || {},
             connectionId: session.connectionId || '',
             storageScope: session.storageScope,

@@ -6,6 +6,7 @@ export interface McpConnectionFormState {
 	cwd: string;
 	url: string;
 	oauth: string;
+	headers: Record<string, string>;
 	envList: { key: string; value: string }[];
 	description: string;
 }
@@ -18,6 +19,7 @@ export function createEmptyMcpConnectionForm(): McpConnectionFormState {
 		cwd: '',
 		url: '',
 		oauth: '',
+		headers: {},
 		envList: [],
 		description: ''
 	};

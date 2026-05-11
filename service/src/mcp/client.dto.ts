@@ -32,6 +32,7 @@ export interface McpOptions {
     // SSE 特定选项
     url?: string;
     oauth?: unknown;
+    headers?: Record<string, string>;
     cwd?: string;
     env?: Record<string, string>;
     // 通用客户端选项
