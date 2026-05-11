@@ -18,7 +18,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "form-data": "^4.0.5",
     "openai": "^6.15.0",
     "undici-types": "^7.18.1",

@@ -365,29 +365,36 @@ async function updateChatRenderMessages(chat: ParallelChatInstance & { renderMes
     if (streamingToolCalls !== undefined) {
         console.log(`[DEBUG] 模型 ${chat.modelId} 进行流式工具调用更新`);
         // 移除之前的流式工具调用（如果存在）
-        const lastIndex = chat.renderMessages.length - 1;
-        if (lastIndex >= 0 && 
-            chat.renderMessages[lastIndex].extraInfo?.serverName === chat.modelId &&
-            chat.renderMessages[lastIndex].extraInfo?.state === MessageState.Unknown &&
-            !chat.renderMessages[lastIndex].content) {
-            chat.renderMessages.splice(lastIndex, 1);
+        while (chat.renderMessages.length > 0) {
+            const lastMessage = chat.renderMessages[chat.renderMessages.length - 1];
+            if (
+                lastMessage.role === 'assistant/tool_calls' &&
+                lastMessage.extraInfo?.serverName === chat.modelId &&
+                lastMessage.extraInfo?.state === MessageState.Unknown &&
+                !lastMessage.content
+            ) {
+                chat.renderMessages.pop();
+            } else {
+                break;
+            }
         }
         
-        // 如果有新的流式工具调用，添加到末尾
-        if (streamingToolCalls.length > 0) {
+        streamingToolCalls.forEach((call, index) => {
+            const normalisedCall = {
+                id: call.id || `streaming_${index}`,
+                type: call.type || 'function',
+                index,
+                function: {
+                    name: call.function?.name || '',
+                    arguments: call.function?.arguments || '{}'
+                }
+            };
             chat.renderMessages.push({
                 role: 'assistant/tool_calls',
                 content: '',
-                toolResults: Array(streamingToolCalls.length).fill([]),
-                tool_calls: streamingToolCalls.map((call, index) => ({
-                    id: call.id || `streaming_${index}`,
-                    type: call.type || 'function',
-                    index,
-                    function: {
-                        name: call.function?.name || '',
-                        arguments: call.function?.arguments || '{}'
-                    }
-                })),
+                toolResults: [[]],
+                tool_calls: [normalisedCall],
+                toolIndex: index,
                 showJson: ref(false),
                 extraInfo: {
                     created: Date.now(),
@@ -396,7 +403,7 @@ async function updateChatRenderMessages(chat: ParallelChatInstance & { renderMes
                     enableXmlWrapper: false
                 }
             });
-        }
+        });
         return;
     }
     
@@ -417,15 +424,7 @@ async function updateChatRenderMessages(chat: ParallelChatInstance & { renderMes
                         const toolResult = await getToolResultFromXmlString(xml);
                         if (toolResult) {
                             const index = indexAdapter(toolResult.callId);
-                            lastAssistantMessage.toolResults[index] = toolResult.toolcallContent;
-                            if (lastAssistantMessage.extraInfo.state === MessageState.Unknown) {
-                                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                            } else if (lastAssistantMessage.extraInfo.state === MessageState.Success
-                                || message.extraInfo.state !== MessageState.Success
-                            ) {
-                                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                            }
-                            lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
+                            updateToolRenderMessage(newRenderMessages, index, toolResult.toolcallContent, message.extraInfo);
                         }
                     }
                 }
@@ -439,17 +438,8 @@ async function updateChatRenderMessages(chat: ParallelChatInstance & { renderMes
             }
         } else if (message.role === 'assistant') {
             if (message.tool_calls) {
-                newRenderMessages.push({
-                    role: 'assistant/tool_calls',
-                    content: message.content,
-                    toolResults: Array(message.tool_calls.length).fill([]),
-                    tool_calls: message.tool_calls,
-                    showJson: ref(false),
-                    extraInfo: {
-                        ...message.extraInfo,
-                        state: MessageState.Unknown
-                    }
-                });
+                pushAssistantContentMessage(newRenderMessages, message.content, message.extraInfo);
+                pushToolRenderMessages(newRenderMessages, message.tool_calls, message.extraInfo);
             } else {
                 if (xmls.length > 0 && message.extraInfo.enableXmlWrapper) {
                     const toolCalls = [];
@@ -463,17 +453,8 @@ async function updateChatRenderMessages(chat: ParallelChatInstance & { renderMes
                     }
                     const renderAssistantMessage = message.content.replace(/```xml[\s\S]*?```/g, '');
 
-                    newRenderMessages.push({
-                        role: 'assistant/tool_calls',
-                        content: renderAssistantMessage,
-                        toolResults: Array(toolCalls.length).fill([]),
-                        tool_calls: toolCalls,
-                        showJson: ref(false),
-                        extraInfo: {
-                            ...message.extraInfo,
-                            state: MessageState.Unknown
-                        }
-                    });
+                    pushAssistantContentMessage(newRenderMessages, renderAssistantMessage, message.extraInfo);
+                    pushToolRenderMessages(newRenderMessages, toolCalls, message.extraInfo);
                 } else {
                     newRenderMessages.push({
                         role: 'assistant/content',
@@ -483,20 +464,7 @@ async function updateChatRenderMessages(chat: ParallelChatInstance & { renderMes
                 }
             }
         } else if (message.role === 'tool') {
-            const lastAssistantMessage = newRenderMessages[newRenderMessages.length - 1];
-            if (lastAssistantMessage && lastAssistantMessage.role === 'assistant/tool_calls') {
-                lastAssistantMessage.toolResults[message.index] = message.content;
-
-                if (lastAssistantMessage.extraInfo.state === MessageState.Unknown) {
-                    lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                } else if (lastAssistantMessage.extraInfo.state === MessageState.Success
-                    || message.extraInfo.state !== MessageState.Success
-                ) {
-                    lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                }
-
-                lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
-            }
+            updateToolRenderMessage(newRenderMessages, message.index, message.content, message.extraInfo);
         }
     }
     
@@ -523,6 +491,73 @@ function getXmlToolCalls(message: ChatMessage) {
 
 const renderMessages = ref<IRenderMessage[]>([]);
 
+function pushAssistantContentMessage(messages: IRenderMessage[], content: string, extraInfo: ChatMessage['extraInfo']) {
+    const normalizedContent = content?.trim();
+    if (!normalizedContent) {
+        return;
+    }
+
+    messages.push({
+        role: 'assistant/content',
+        content,
+        extraInfo
+    });
+}
+
+function pushToolRenderMessages(messages: IRenderMessage[], toolCalls: ToolCall[], extraInfo: ChatMessage['extraInfo']) {
+    toolCalls.forEach((toolCall, index) => {
+        const toolIndex = typeof toolCall.index === 'number' ? toolCall.index : index;
+        messages.push({
+            role: 'assistant/tool_calls',
+            content: '',
+            toolResults: [[]],
+            tool_calls: [toolCall],
+            toolIndex,
+            showJson: ref(false),
+            extraInfo: {
+                ...extraInfo,
+                state: MessageState.Unknown
+            }
+        });
+    });
+}
+
+function findToolRenderMessage(messages: IRenderMessage[], toolIndex: number) {
+    for (let i = messages.length - 1; i >= 0; i--) {
+        const message = messages[i];
+        if (message.role !== 'assistant/tool_calls') {
+            continue;
+        }
+        const currentToolIndex = message.toolIndex ?? message.tool_calls[0]?.index ?? 0;
+        if (currentToolIndex === toolIndex) {
+            return message;
+        }
+    }
+    return undefined;
+}
+
+function updateToolRenderMessage(
+    messages: IRenderMessage[],
+    toolIndex: number,
+    content: any,
+    extraInfo: ChatMessage['extraInfo']
+) {
+    const toolMessage = findToolRenderMessage(messages, toolIndex);
+    if (!toolMessage) {
+        return;
+    }
+
+    toolMessage.toolResults[0] = content;
+
+    if (toolMessage.extraInfo.state === MessageState.Unknown) {
+        toolMessage.extraInfo.state = extraInfo.state;
+    } else if (toolMessage.extraInfo.state === MessageState.Success || extraInfo.state !== MessageState.Success) {
+        toolMessage.extraInfo.state = extraInfo.state;
+    }
+
+    toolMessage.extraInfo.usage = toolMessage.extraInfo.usage || extraInfo.usage;
+}
+
 onMounted(() => {
     initParallelChats();
     
@@ -542,7 +577,7 @@ watchEffect(async () => {
                 // 判断是否是 xml 模式，如果是 xml 模式且存在有效的 xml，则按照工具来判定
                 // 往前寻找 assistant/tool_calls 并自动加入其中
                 const lastAssistantMessage = renderMessages.value[renderMessages.value.length - 1];
-                if (lastAssistantMessage.role === 'assistant/tool_calls') {
+                if (lastAssistantMessage && lastAssistantMessage.role === 'assistant/tool_calls') {
 
                     const toolCallResultXmls = getXmlsFromString(message.content);
 
@@ -550,18 +585,7 @@ watchEffect(async () => {
                         const toolResult = await getToolResultFromXmlString(xml);
                         if (toolResult) {
                             const index = indexAdapter(toolResult.callId);
-
-                            lastAssistantMessage.toolResults[index] = toolResult.toolcallContent;
-
-                            if (lastAssistantMessage.extraInfo.state === MessageState.Unknown) {
-                                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                            } else if (lastAssistantMessage.extraInfo.state === MessageState.Success
-                                || message.extraInfo.state !== MessageState.Success
-                            ) {
-                                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                            }
-
-                            lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
+                            updateToolRenderMessage(renderMessages.value, index, toolResult.toolcallContent, message.extraInfo);
                         }
                     }
                 }
@@ -577,17 +601,8 @@ watchEffect(async () => {
 
         } else if (message.role === 'assistant') {
             if (message.tool_calls) {
-                renderMessages.value.push({
-                    role: 'assistant/tool_calls',
-                    content: message.content,
-                    toolResults: Array(message.tool_calls.length).fill([]),
-                    tool_calls: message.tool_calls,
-                    showJson: ref(false),
-                    extraInfo: {
-                        ...message.extraInfo,
-                        state: MessageState.Unknown
-                    }
-                });
+                pushAssistantContentMessage(renderMessages.value, message.content, message.extraInfo);
+                pushToolRenderMessages(renderMessages.value, message.tool_calls, message.extraInfo);
             } else {
                 if (xmls.length > 0 && message.extraInfo.enableXmlWrapper) {
                     // 判断是否是 xml 模式，如果是 xml 模式且存在有效的 xml，则按照工具来判定
@@ -602,17 +617,8 @@ watchEffect(async () => {
                     }
                     const renderAssistantMessage = message.content.replace(/```xml[\s\S]*?```/g, '');
 
-                    renderMessages.value.push({
-                        role: 'assistant/tool_calls',
-                        content: renderAssistantMessage,
-                        toolResults: Array(toolCalls.length).fill([]),
-                        tool_calls: toolCalls,
-                        showJson: ref(false),
-                        extraInfo: {
-                            ...message.extraInfo,
-                            state: MessageState.Unknown
-                        }
-                    });
+                    pushAssistantContentMessage(renderMessages.value, renderAssistantMessage, message.extraInfo);
+                    pushToolRenderMessages(renderMessages.value, toolCalls, message.extraInfo);
                 } else {
                     renderMessages.value.push({
                         role: 'assistant/content',
@@ -625,20 +631,7 @@ watchEffect(async () => {
 
         } else if (message.role === 'tool') {
             // 如果是工具，则合并进入 之前 assistant 一起渲染
-            const lastAssistantMessage = renderMessages.value[renderMessages.value.length - 1];
-            if (lastAssistantMessage.role === 'assistant/tool_calls') {
-                lastAssistantMessage.toolResults[message.index] = message.content;
-
-                if (lastAssistantMessage.extraInfo.state === MessageState.Unknown) {
-                    lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                } else if (lastAssistantMessage.extraInfo.state === MessageState.Success
-                    || message.extraInfo.state !== MessageState.Success
-                ) {
-                    lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                }
-
-                lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
-            }
+            updateToolRenderMessage(renderMessages.value, message.index, message.content, message.extraInfo);
         }
     }
 });

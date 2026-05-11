@@ -18,13 +18,13 @@
 				<div class="setting-option">
 					<span class="option-title">{{ t('command') }}</span>
 					<div class="setting-option-input">
-						<el-input v-model="client.connectionArgs.commandString" placeholder="mcp run &lt;your script&gt;" />
+						<el-input v-model="client.connectionArgs.commandString" placeholder="mcp run <your script>" />
 					</div>
 				</div>
 				<div class="setting-option">
 					<span class="option-title">{{ t('cwd') }}</span>
 					<div class="setting-option-input">
-						<el-input v-model="client.connectionArgs.cwd" placeholder="cwd, 可为空" />
+						<el-input v-model="client.connectionArgs.cwd" :placeholder="t('server-cwd-placeholder')" />
 					</div>
 				</div>
 			</template>
@@ -32,13 +32,7 @@
 				<div class="setting-option">
 					<span class="option-title">URL</span>
 					<div class="setting-option-input">
-						<el-input v-model="client.connectionArgs.url" placeholder="http://" />
-					</div>
-				</div>
-				<div class="setting-option">
-					<span class="option-title">OAuth</span>
-					<div class="setting-option-input">
-						<el-input v-model="client.connectionArgs.oauth" placeholder="认证签名, 可为空" />
+						<el-input v-model="client.connectionArgs.url" :placeholder="t('server-url-placeholder')" />
 					</div>
 				</div>
 			</template>

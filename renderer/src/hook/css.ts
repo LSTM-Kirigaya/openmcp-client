@@ -1,6 +1,11 @@
 import { isLightColorTheme, parseColor } from "./color";
+import { getEffectiveTheme } from "./theme";
 
 export function setDefaultCss() {
+    // Ensure light-theme class is set from saved preference
+    const effective = getEffectiveTheme();
+    document.documentElement.classList.toggle('light-theme', effective === 'light');
+
     // 改变默认颜色
     document?.body.style.setProperty('--el-color-primary', 'var(--main-light-color-70)');
     document?.body.style.setProperty('--el-color-primary-light-9', 'var(--main-color)');
@@ -32,7 +37,7 @@ export function setDefaultCss() {
     // 设置全局宏
     document?.body.style.setProperty('--time-scale-height', '30px');
     document?.body.style.setProperty('--vcd-render-padding', '30px');
-    document?.body.style.setProperty('--sidebar-width', '52px');
+    document?.body.style.setProperty('--sidebar-width', '56px');
     document?.body.style.setProperty('--toolbar-height', '60px');
 
     // 下面是 get style
@@ -69,16 +74,8 @@ export function getThemeColor(): 'light' | 'dark' {
     if (themeColor) {
         return themeColor;
     }
-    const rootStyles = getComputedStyle(document?.documentElement);
-    const backgroundColorString = rootStyles.getPropertyValue('--background');
-    const backgroundColor = parseColor(backgroundColorString);
-    if (backgroundColor) {
-        const isLight = isLightColorTheme(backgroundColor.r, backgroundColor.g, backgroundColor.b);
-        themeColor = isLight ? 'light' : 'dark';
-        return themeColor;
-    }
-
-    return 'dark';
+    themeColor = getEffectiveTheme();
+    return themeColor;
 }
 
 function setExtraLightColorCss() {

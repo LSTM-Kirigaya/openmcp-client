@@ -511,5 +511,10 @@
     "server-command-required": "Server-Befehl ist erforderlich",
     "server-url-required": "Server-URL ist erforderlich",
     "connection-log-connect": "Verbinden",
-    "connection-log-disconnect": "Trennen"
+    "connection-log-disconnect": "Trennen",
+    "sidebar-mcp-hub": "MCP Hub",
+    "theme-light": "Hell",
+    "theme-dark": "Dunkel",
+    "theme-system": "System",
+    "theme-label": "Design"
 }

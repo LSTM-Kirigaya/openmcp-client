@@ -30,7 +30,7 @@
 import { ref, defineProps, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { tabs } from '../../panel';
-import type { ChatStorage, IRenderMessage } from '../chat-box/chat';
+import type { ChatMessage, ChatStorage, IRenderMessage, ToolCall } from '../chat-box/chat';
 
 import TraceTable from './trace-table.vue';
 import TraceDiagram from './trace-diagram.vue';
@@ -73,6 +73,70 @@ const traceModeItems = ref([
 // 渲染消息
 const renderMessages = ref<IRenderMessage[]>([]);
 
+function pushAssistantContentMessage(messages: IRenderMessage[], content: string, extraInfo: ChatMessage['extraInfo']) {
+    if (!content?.trim()) {
+        return;
+    }
+
+    messages.push({
+        role: 'assistant/content',
+        content,
+        extraInfo
+    });
+}
+
+function pushToolRenderMessages(messages: IRenderMessage[], toolCalls: ToolCall[], extraInfo: ChatMessage['extraInfo']) {
+    toolCalls.forEach((toolCall, index) => {
+        const toolIndex = typeof toolCall.index === 'number' ? toolCall.index : index;
+        messages.push({
+            role: 'assistant/tool_calls',
+            content: '',
+            toolResults: [[]],
+            tool_calls: [toolCall],
+            toolIndex,
+            showJson: ref(false),
+            extraInfo: {
+                ...extraInfo,
+                state: MessageState.Unknown
+            }
+        });
+    });
+}
+
+function findToolRenderMessage(messages: IRenderMessage[], toolIndex: number) {
+    for (let i = messages.length - 1; i >= 0; i--) {
+        const message = messages[i];
+        if (message.role !== 'assistant/tool_calls') {
+            continue;
+        }
+        const currentToolIndex = message.toolIndex ?? message.tool_calls[0]?.index ?? 0;
+        if (currentToolIndex === toolIndex) {
+            return message;
+        }
+    }
+    return undefined;
+}
+
+function updateToolRenderMessage(
+    messages: IRenderMessage[],
+    toolIndex: number,
+    content: any,
+    extraInfo: ChatMessage['extraInfo']
+) {
+    const toolMessage = findToolRenderMessage(messages, toolIndex);
+    if (!toolMessage) {
+        return;
+    }
+
+    toolMessage.toolResults[0] = content;
+    if (toolMessage.extraInfo.state === MessageState.Unknown) {
+        toolMessage.extraInfo.state = extraInfo.state;
+    } else if (toolMessage.extraInfo.state === MessageState.Success || extraInfo.state !== MessageState.Success) {
+        toolMessage.extraInfo.state = extraInfo.state;
+    }
+    toolMessage.extraInfo.usage = toolMessage.extraInfo.usage || extraInfo.usage;
+}
+
 // 监听消息变化并更新渲染消息
 watch(() => tabStorage.messages, async () => {
     renderMessages.value = [];
@@ -93,18 +157,7 @@ watch(() => tabStorage.messages, async () => {
                         const toolResult = await getToolResultFromXmlString(xml);
                         if (toolResult) {
                             const index = indexAdapter(toolResult.callId);
-
-                            lastAssistantMessage.toolResults[index] = toolResult.toolcallContent;
-
-                            if (lastAssistantMessage.extraInfo.state === MessageState.Unknown) {
-                                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                            } else if (lastAssistantMessage.extraInfo.state === MessageState.Success
-                                || message.extraInfo.state !== MessageState.Success
-                            ) {
-                                lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                            }
-
-                            lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
+                            updateToolRenderMessage(renderMessages.value, index, toolResult.toolcallContent, message.extraInfo);
                         }
                     }
                 }
@@ -120,17 +173,8 @@ watch(() => tabStorage.messages, async () => {
 
         } else if (message.role === 'assistant') {
             if (message.tool_calls) {
-                renderMessages.value.push({
-                    role: 'assistant/tool_calls',
-                    content: message.content,
-                    toolResults: Array(message.tool_calls.length).fill([]),
-                    tool_calls: message.tool_calls,
-                    showJson: ref(false),
-                    extraInfo: {
-                        ...message.extraInfo,
-                        state: MessageState.Unknown
-                    }
-                });
+                pushAssistantContentMessage(renderMessages.value, message.content, message.extraInfo);
+                pushToolRenderMessages(renderMessages.value, message.tool_calls, message.extraInfo);
             } else {
                 if (xmls.length > 0 && message.extraInfo.enableXmlWrapper) {
                     // 判断是否是 xml 模式，如果是 xml 模式且存在有效的 xml，则按照工具来判定
@@ -145,17 +189,8 @@ watch(() => tabStorage.messages, async () => {
                     }
                     const renderAssistantMessage = message.content.replace(/```xml[\s\S]*?```/g, '');
 
-                    renderMessages.value.push({
-                        role: 'assistant/tool_calls',
-                        content: renderAssistantMessage,
-                        toolResults: Array(toolCalls.length).fill([]),
-                        tool_calls: toolCalls,
-                        showJson: ref(false),
-                        extraInfo: {
-                            ...message.extraInfo,
-                            state: MessageState.Unknown
-                        }
-                    });
+                    pushAssistantContentMessage(renderMessages.value, renderAssistantMessage, message.extraInfo);
+                    pushToolRenderMessages(renderMessages.value, toolCalls, message.extraInfo);
                 } else {
                     renderMessages.value.push({
                         role: 'assistant/content',
@@ -168,20 +203,7 @@ watch(() => tabStorage.messages, async () => {
 
         } else if (message.role === 'tool') {
             // 如果是工具，则合并进入 之前 assistant 一起渲染
-            const lastAssistantMessage = renderMessages.value[renderMessages.value.length - 1];
-            if (lastAssistantMessage && lastAssistantMessage.role === 'assistant/tool_calls') {
-                lastAssistantMessage.toolResults[message.index] = message.content;
-
-                if (lastAssistantMessage.extraInfo.state === MessageState.Unknown) {
-                    lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                } else if (lastAssistantMessage.extraInfo.state === MessageState.Success
-                    || message.extraInfo.state !== MessageState.Success
-                ) {
-                    lastAssistantMessage.extraInfo.state = message.extraInfo.state;
-                }
-
-                lastAssistantMessage.extraInfo.usage = lastAssistantMessage.extraInfo.usage || message.extraInfo.usage;
-            }
+            updateToolRenderMessage(renderMessages.value, message.index, message.content, message.extraInfo);
         }
     }
 }, { immediate: true, deep: true });

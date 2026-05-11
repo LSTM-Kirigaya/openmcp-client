@@ -6,6 +6,9 @@ const md = new MarkdownIt({
     highlight: MarkdownHighlight({ needTools: true }),
 });
 
+md.renderer.rules.table_open = () => '<div class="openmcp-markdown-table"><table>';
+md.renderer.rules.table_close = () => '</table></div>';
+
 md.use(MarkdownKatex, {
     delimiters: [
         { left: '\\[', right: '\\]', display: true },

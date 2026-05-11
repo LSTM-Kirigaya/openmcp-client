@@ -1,11 +1,22 @@
 import { useMessageBridge } from '@/api/message-bridge';
 import { mcpClientAdapter } from './core';
 import { panelLoaded } from '@/hook/panel';
+import type { ConnectionType } from './type';
 
 export interface GatewaySessionItem {
 	clientId: string;
 	name: string;
 	version: string;
+	connectionType?: ConnectionType;
+	command?: string;
+	args?: string[];
+	commandString?: string;
+	url?: string;
+	cwd?: string;
+	env?: Record<string, string>;
+	connectionId?: string;
+	storageScope?: 'user' | 'workspace';
+	workspacePath?: string;
 }
 
 export function normalizeConnectListPayload(res: { msg?: unknown; data?: unknown }): GatewaySessionItem[] {
@@ -14,6 +25,45 @@ export function normalizeConnectListPayload(res: { msg?: unknown; data?: unknown
 		return payload as GatewaySessionItem[];
 	}
 	return [];
+}
+
+function hasConnectionSignature(item: GatewaySessionItem): boolean {
+	return Boolean(item.connectionType || item.url || item.command || item.commandString);
+}
+
+function getSavedServerName(item: any): string {
+	return String(item?.serverInfo?.name || item?.name || '').trim();
+}
+
+function applySavedServerFallback(
+	session: GatewaySessionItem,
+	savedServers: any[],
+	sessionCount: number
+): GatewaySessionItem {
+	if (hasConnectionSignature(session)) {
+		return session;
+	}
+
+	const matched = savedServers.find(item => getSavedServerName(item) === session.name)
+		|| (sessionCount === 1 && savedServers.length === 1 ? savedServers[0] : undefined);
+
+	if (!matched) {
+		return session;
+	}
+
+	return {
+		...session,
+		connectionType: matched.connectionType,
+		command: matched.command,
+		args: matched.args,
+		commandString: matched.commandString,
+		url: matched.url,
+		cwd: matched.cwd,
+		env: matched.env,
+		connectionId: matched.connectionId || matched.id,
+		storageScope: matched.storageScope,
+		workspacePath: matched.workspacePath
+	};
 }
 
 /**
@@ -35,7 +85,14 @@ export async function fetchAndApplyGatewaySessions(previousSelectedId: string): 
 			error: msg || 'connect/list failed'
 		};
 	}
-	const list = normalizeConnectListPayload(res);
+	const rawList = normalizeConnectListPayload(res);
+	let savedServers: any[] = [];
+	try {
+		savedServers = await mcpClientAdapter.getLaunchSignature();
+	} catch {
+		savedServers = [];
+	}
+	const list = rawList.map(session => applySavedServerFallback(session, savedServers, rawList.length));
 	const ids = new Set(list.map(s => s.clientId));
 
 	for (let i = mcpClientAdapter.clients.length - 1; i >= 0; i--) {

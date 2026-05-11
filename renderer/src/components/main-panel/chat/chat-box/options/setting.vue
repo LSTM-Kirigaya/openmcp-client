@@ -160,7 +160,6 @@ if (tabStorage) {
 
 .tool-name {
 	font-weight: 500;
-	margin-bottom: 4px;
 }
 
 .tool-description {

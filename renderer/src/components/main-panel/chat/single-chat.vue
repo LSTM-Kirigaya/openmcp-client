@@ -9,6 +9,9 @@
                 </div>
                 <div class="message-avatar" v-else-if="message.role === 'assistant/tool_calls'">
                 </div>
+                <div class="message-avatar user-avatar" v-else-if="message.role === 'user'">
+                    <span class="user-avatar-mark">U</span>
+                </div>
 
                 <!-- 用户输入的部分 -->
                 <div class="message-content" v-if="message.role === 'user'">
@@ -98,10 +101,10 @@ const pendingQuestion = computed(() => {
 
 // 检查最后一个渲染消息是否是正在等待 tool results 的 assistant/tool_calls
 const hasPendingToolCalls = computed(() => {
-    const lastMessage = props.renderMessages[props.renderMessages.length - 1];
-    return lastMessage && 
-           lastMessage.role === 'assistant/tool_calls' && 
-           lastMessage.extraInfo.state === MessageState.Unknown;
+    return props.renderMessages.some(message =>
+        message.role === 'assistant/tool_calls' &&
+        message.extraInfo.state === MessageState.Unknown
+    );
 });
 
 const chatContainerRef = ref<any>(null);
@@ -186,13 +189,13 @@ defineExpose({
 .message-list {
     max-width: 800px;
     margin: 0 auto;
-    padding: 16px;
-    padding-bottom: 100px;
+    padding: 12px;
+    padding-bottom: 40px;
 }
 
 .message-item {
     display: flex;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .message-avatar {
@@ -215,6 +218,7 @@ defineExpose({
 .message-text {
     font-size: var(--chat-font-size);
     line-height: 1.5;
+    margin-bottom: 200px;
 }
 
 .user .message-text {
@@ -233,6 +237,7 @@ defineExpose({
 .user {
     flex-direction: row-reverse;
     text-align: right;
+    align-items: center;
 }
 
 .user .message-avatar {
@@ -246,7 +251,7 @@ defineExpose({
 
 .assistant {
     text-align: left;
-    margin-top: 20px;
+    margin-top: 12px;
 }
 
 .assistant.tool_calls {

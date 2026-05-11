@@ -511,5 +511,10 @@
     "server-command-required": "サーバーコマンドは必須です",
     "server-url-required": "サーバーURLは必須です",
     "connection-log-connect": "接続",
-    "connection-log-disconnect": "切断"
+    "connection-log-disconnect": "切断",
+    "sidebar-mcp-hub": "MCP ハブ",
+    "theme-light": "ライト",
+    "theme-dark": "ダーク",
+    "theme-system": "システム",
+    "theme-label": "テーマ"
 }

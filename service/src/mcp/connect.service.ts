@@ -14,10 +14,20 @@ import { FORBIDDEN_MONITOR } from '../hook/setting.js';
 import { releaseClientStorageBinding, rememberClientStorageBinding } from '../storage/client-binding.js';
 
 export const clientMap: Map<string, RequestClientType> = new Map();
+const clientConnectionOptions: Map<string, McpOptions> = new Map();
 export interface ConnectedSessionInfo {
     clientId: string;
     name: string;
     version: string;
+    connectionType?: ConnectionType;
+    command?: string;
+    args?: string[];
+    url?: string;
+    cwd?: string;
+    env?: Record<string, string>;
+    connectionId?: string;
+    storageScope?: 'user' | 'workspace';
+    workspacePath?: string;
 }
 function normalizeConnectionType(type?: string): ConnectionType | undefined {
     if (!type) return undefined;
@@ -301,6 +311,10 @@ function stableStringify(value: unknown): string {
     return JSON.stringify(normalizeForStableStringify(value)) ?? '';
 }
 
+function cloneConnectionOption(option: McpOptions): McpOptions {
+    return JSON.parse(JSON.stringify(option));
+}
+
 function connectionIdentity(option: McpOptions): Record<string, unknown> {
     return {
         connectionType: normalizeConnectionType(option.connectionType) || option.connectionType,
@@ -347,6 +361,9 @@ export async function connectService(
         const uuid = await deterministicUUID(stableStringify(connectionIdentity(option)));
         const existingClient = clientMap.get(uuid);
         if (existingClient) {
+            if (!clientConnectionOptions.has(uuid)) {
+                clientConnectionOptions.set(uuid, cloneConnectionOption(option));
+            }
             const versionInfo = existingClient.getServerVersion();
             rememberClientStorageBinding({
                 clientId: uuid,
@@ -371,6 +388,7 @@ export async function connectService(
 
         const client = await connect(option);
         clientMap.set(uuid, client);
+        clientConnectionOptions.set(uuid, cloneConnectionOption(option));
         
         // 只有 stdio 才需要监听        
         if (normalizeConnectionType(option.connectionType) === 'STDIO' && !FORBIDDEN_MONITOR) {
@@ -452,6 +470,7 @@ export async function disconnectService(data: RequestData) {
 
         // Remove from maps
         clientMap.delete(clientId);
+        clientConnectionOptions.delete(clientId);
         clientMonitorMap.get(clientId)?.close();
         clientMonitorMap.delete(clientId);
         releaseClientStorageBinding(clientId);
@@ -475,10 +494,12 @@ export async function listConnectedSessionsService() {
             continue;
         }
         const versionInfo = client.getServerVersion();
+        const option = clientConnectionOptions.get(clientId);
         sessions.push({
             clientId,
             name: versionInfo?.name || 'unknown',
-            version: versionInfo?.version || 'unknown'
+            version: versionInfo?.version || 'unknown',
+            ...(option ? cloneConnectionOption(option) : {})
         });
     }
 

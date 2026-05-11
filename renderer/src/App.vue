@@ -89,6 +89,70 @@ onMounted(async () => {
     max-width: 300px;
 }
 
+.user-avatar {
+    display: flex;
+    align-items: flex-start;
+}
+
+.user-avatar-mark {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: var(--main-light-color-20, rgba(99, 102, 241, 0.2));
+    border: 1px solid var(--main-light-color-40, rgba(99, 102, 241, 0.4));
+    color: var(--main-color, var(--foreground));
+    font-family: var(--font-monospace-family, var(--code-font-family, monospace));
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.message-text .openmcp-markdown-table {
+    margin: 8px 0;
+    overflow-x: auto;
+}
+
+.message-text table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+}
+
+.message-text > table {
+    display: block;
+    max-width: 100%;
+    margin: 8px 0;
+    overflow-x: auto;
+    border: 1px solid var(--sidebar-item-border, var(--el-border-color, rgba(127, 127, 127, 0.35)));
+    border-radius: 6px;
+}
+
+.message-text th,
+.message-text td {
+    padding: 6px 10px;
+    border: 1px solid var(--sidebar-item-border, var(--el-border-color, rgba(127, 127, 127, 0.35)));
+    vertical-align: top;
+    text-align: left;
+    word-break: break-word;
+}
+
+.message-text th {
+    background: var(--sidebar-item-selected, var(--el-fill-color-light, rgba(127, 127, 127, 0.12)));
+    color: var(--foreground, var(--el-text-color-primary));
+    font-weight: 700;
+}
+
+.message-text td {
+    background: var(--el-input-bg-color, var(--el-fill-color-blank));
+}
+
+.message-text tr:nth-child(even) td {
+    background: var(--sidebar-item-hover, rgba(127, 127, 127, 0.06));
+}
 
 .icon-chat:before {
 	font-weight: 1000;

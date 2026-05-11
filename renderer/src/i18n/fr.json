@@ -511,5 +511,10 @@
     "server-command-required": "La commande du serveur est requise",
     "server-url-required": "L'URL du serveur est requise",
     "connection-log-connect": "Connecter",
-    "connection-log-disconnect": "Déconnecter"
+    "connection-log-disconnect": "Déconnecter",
+    "sidebar-mcp-hub": "Hub MCP",
+    "theme-light": "Clair",
+    "theme-dark": "Sombre",
+    "theme-system": "Système",
+    "theme-label": "Thème"
 }

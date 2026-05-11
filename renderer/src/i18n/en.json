@@ -577,5 +577,10 @@
     "server-command-required": "Server command is required",
     "server-url-required": "Server URL is required",
     "connection-log-connect": "Connect",
-    "connection-log-disconnect": "Disconnect"
+    "connection-log-disconnect": "Disconnect",
+    "sidebar-mcp-hub": "MCP Hub",
+    "theme-light": "Light",
+    "theme-dark": "Dark",
+    "theme-system": "System",
+    "theme-label": "Theme"
 }

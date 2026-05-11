@@ -511,5 +511,10 @@
     "server-command-required": "서버 명령은 필수입니다",
     "server-url-required": "서버 URL은 필수입니다",
     "connection-log-connect": "연결",
-    "connection-log-disconnect": "연결 해제"
+    "connection-log-disconnect": "연결 해제",
+    "sidebar-mcp-hub": "MCP 허브",
+    "theme-light": "라이트",
+    "theme-dark": "다크",
+    "theme-system": "시스템",
+    "theme-label": "테마"
 }

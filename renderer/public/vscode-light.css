@@ -1,0 +1,124 @@
+:root.light-theme {
+    --link-foreground: #4f46e5;
+    --link-active: #4338ca;
+
+    /* UI & Control */
+    --input-active-background: #e8e8e8;
+    --input-active-border: #6366f1;
+    --input-active-foreground: #1a1a1a;
+
+    --input-error-background: rgba(244, 67, 54, 0.08);
+    --input-error-border: #f44336;
+    --input-error-foreground: #d32f2f;
+
+    --input-foreground: #1a1a1a;
+    --input-background: #ffffff;
+    --input-border: rgba(99, 102, 241, 0.3);
+    --input-hover: #f0f0f0;
+    --input-placeholder: rgba(0, 0, 0, 0.45);
+    --input-radius: 0px;
+
+    --scrollbar-background: rgba(99, 102, 241, 0.15);
+    --scrollbar-hover: rgba(99, 102, 241, 0.3);
+    --scrollbar-active: rgba(99, 102, 241, 0.4);
+
+    /* Window */
+    --title-bar: #f5f5f5;
+    --title-color: #1a1a1a;
+    --foreground: #1a1a1a;
+    --foreground-muted: rgba(0, 0, 0, 0.55);
+    --background: #f8f8fa;
+    --label: rgba(0, 0, 0, 0.75);
+    --shadow: rgba(0, 0, 0, 0.1);
+    --border: rgba(99, 102, 241, 0.15);
+    --window-button-hover: rgba(99, 102, 241, 0.1);
+    --window-button-active: rgba(0, 0, 0, 0.06);
+    --window-blur-background: rgba(0, 0, 0, 0.15);
+
+    --window-title-foreground: var(--foreground);
+    --window-background: var(--sidebar);
+    --window-border: transparent;
+    --window-radius: 0px;
+
+    /* Sidebar */
+    --sidebar: #f0f0f3;
+    --sidebar-border: rgba(99, 102, 241, 0.1);
+    --sidebar-min-width: 280px;
+
+    --sidebar-item-text: rgba(0, 0, 0, 0.7);
+    --sidebar-item-border: rgba(99, 102, 241, 0.25);
+    --sidebar-item-background: transparent;
+    --sidebar-item-selected: rgba(99, 102, 241, 0.12);
+    --sidebar-item-hover: rgba(99, 102, 241, 0.08);
+    --sidebar-item-max-height: 40px;
+    --sidebar-item-radix-background: #f0f0f3;
+
+    --sidebar-group-text: rgba(0, 0, 0, 0.6);
+    --sidebar-group-border: rgba(0, 0, 0, 0.06);
+    --sidebar-group-background: transparent;
+    --sidebar-hover: rgba(99, 102, 241, 0.08);
+
+    /* Labels */
+    --signalSize-background: rgba(0,0,0,0.05);
+    --signalSize-border: rgba(0,0,0,0.15);
+    --signalSize-color: var(--foreground);
+
+    /* Color Picker */
+    --picker-background: #ffffff;
+    --picker-border: rgba(0, 0, 0, 0.1);
+
+    /* Search */
+    --search-background: #ffffff;
+    --search-border: var(--border);
+    --search-panel-background: transparent;
+    --search-panel-border: rgba(99, 102, 241, 0.25);
+    --search-panel-text: #1a1a1a;
+    --search-label: var(--foreground);
+    --search-selected-background: rgba(99, 102, 241, 0.1);
+
+    /* Properties */
+    --properties-background: #ffffff;
+    --properties-border: var(--border);
+
+    /* Navbar */
+    --navBar-background: var(--sidebar);
+    --navBar-height: 32px;
+    --navBar-button: transparent;
+    --navBar-button-text: var(--foreground);
+    --navBar-group-background: var(--background);
+    --navBar-preview-background: rgba(99, 102, 241, 0.15);
+    --navBar-slider-border: var(--foreground);
+
+    /* Buttons */
+    --button: #6366f1;
+    --button-text: #ffffff;
+    --button-hover: #4f46e5;
+    --button-active: #4f46e5;
+    --button-disabled: #e0e0e0;
+    --button-disabled-text: rgba(0, 0, 0, 0.3);
+
+    /* Grid Lines */
+    --grid-line: rgba(0, 0, 0, 0.08);
+    --grid-tick: rgba(99, 102, 241, 0.4);
+
+    /* Cursor */
+    --cursor: #1a1a1a;
+    --cursor-ghost: rgba(0, 0, 0, 0.15);
+
+    /* X-Axis */
+    --axis-background: #f0f0f3;
+    --axis-line: var(--border);
+    --axis-foreground: var(--foreground);
+
+    /* Signals */
+    --signal-highlight: rgba(99, 102, 241, 0.12);
+
+    /* Colors */
+    --accent: #6366f1;
+    --accent-dim: rgba(99, 102, 241, 0.25);
+    --accent-bright: #4f46e5;
+    --accent-hover: #4338ca;
+
+    /* Settings */
+    --settings-action-background: var(--background);
+}

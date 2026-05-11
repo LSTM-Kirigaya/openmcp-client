@@ -511,5 +511,10 @@
     "server-command-required": "伺服器命令為必填",
     "server-url-required": "伺服器位址為必填",
     "connection-log-connect": "連線",
-    "connection-log-disconnect": "斷開"
+    "connection-log-disconnect": "斷開",
+    "sidebar-mcp-hub": "MCP 中心",
+    "theme-light": "淺色",
+    "theme-dark": "深色",
+    "theme-system": "跟隨系統",
+    "theme-label": "主題"
 }

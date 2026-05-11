@@ -1,354 +1,354 @@
 {
-    "name": "openmcp",
-    "displayName": "OpenMCP",
-    "description": "An all in one MCP Client/TestTool",
-    "version": "0.1.14",
-    "publisher": "kirigaya",
-    "private": true,
-    "author": {
-        "name": "kirigaya",
-        "email": "1193466151@qq.com"
+  "name": "openmcp",
+  "displayName": "OpenMCP",
+  "description": "An all in one MCP Client/TestTool",
+  "version": "0.1.14",
+  "publisher": "kirigaya",
+  "private": true,
+  "author": {
+    "name": "kirigaya",
+    "email": "1193466151@qq.com"
+  },
+  "repository": {
+    "url": "https://github.com/LSTM-Kirigaya/openmcp-client",
+    "type": "git"
+  },
+  "engines": {
+    "vscode": "^1.95.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.cjs.js",
+  "icon": "icons/openmcp.png",
+  "contributes": {
+    "configuration": {
+      "properties": {}
     },
-    "repository": {
-        "url": "https://github.com/LSTM-Kirigaya/openmcp-client",
-        "type": "git"
-    },
-    "engines": {
-        "vscode": "^1.95.0"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [],
-    "main": "./dist/extension.cjs.js",
-    "icon": "icons/openmcp.png",
-    "contributes": {
-        "configuration": {
-            "properties": {}
-        },
-        "commands": [
-            {
-                "command": "openmcp.showOpenMCP",
-                "title": "%openmcp.showOpenMCP.title%",
-                "category": "openmcp",
-                "icon": {
-                    "light": "./icons/light/protocol.svg",
-                    "dark": "./icons/dark/protocol.svg"
-                }
-            },
-            {
-                "command": "openmcp.sidebar.workspace-connection.revealWebviewPanel",
-                "title": "%openmcp.sidebar.workspace-connection.revealWebviewPanel.title%",
-                "category": "openmcp",
-                "icon": {
-                    "light": "./icons/light/protocol.svg",
-                    "dark": "./icons/dark/protocol.svg"
-                }
-            },
-            {
-                "command": "openmcp.sidebar.workspace-connection.deleteConnection",
-                "title": "%openmcp.sidebar.workspace-connection.deleteConnection.title%",
-                "category": "openmcp",
-                "icon": "$(trash)"
-            },
-            {
-                "command": "openmcp.sidebar.workspace-connection.refresh",
-                "title": "%openmcp.sidebar.workspace-connection.refresh.title%",
-                "category": "openmcp",
-                "icon": "$(refresh)"
-            },
-            {
-                "command": "openmcp.sidebar.workspace-connection.addConnection",
-                "title": "%openmcp.sidebar.workspace-connection.addConnection.title%",
-                "category": "openmcp",
-                "icon": "$(add)"
-            },
-            {
-                "command": "openmcp.sidebar.workspace-connection.openConfiguration",
-                "title": "%openmcp.sidebar.workspace-connection.openConfiguration.title%",
-                "category": "openmcp",
-                "icon": "$(gear)"
-            },
-            {
-                "command": "openmcp.sidebar.installed-connection.revealWebviewPanel",
-                "title": "%openmcp.sidebar.installed-connection.revealWebviewPanel.title%",
-                "category": "openmcp",
-                "icon": {
-                    "light": "./icons/light/protocol.svg",
-                    "dark": "./icons/dark/protocol.svg"
-                }
-            },
-            {
-                "command": "openmcp.sidebar.installed-connection.deleteConnection",
-                "title": "%openmcp.sidebar.installed-connection.deleteConnection.title%",
-                "category": "openmcp",
-                "icon": "$(trash)"
-            },
-            {
-                "command": "openmcp.sidebar.installed-connection.refresh",
-                "title": "%openmcp.sidebar.installed-connection.refresh.title%",
-                "category": "openmcp",
-                "icon": "$(refresh)"
-            },
-            {
-                "command": "openmcp.sidebar.installed-connection.addConnection",
-                "title": "%openmcp.sidebar.installed-connection.addConnection.title%",
-                "category": "openmcp",
-                "icon": "$(add)"
-            },
-            {
-                "command": "openmcp.sidebar.installed-connection.openConfiguration",
-                "title": "%openmcp.sidebar.installed-connection.openConfiguration.title%",
-                "category": "openmcp",
-                "icon": "$(gear)"
-            },
-            {
-                "command": "openmcp.hook.test-ocr",
-                "title": "%openmcp.hook.test-ocr.title%",
-                "category": "openmcp",
-                "icon": "$(test)"
-            },
-            {
-                "command": "openmcp.hook.test-news",
-                "title": "%openmcp.hook.test-news.title%",
-                "category": "openmcp",
-                "icon": "$(test)"
-            },
-            {
-                "command": "openmcp.sidebar.installed-connection.changeConnectionName",
-                "title": "%openmcp.sidebar.installed-connection.changeConnectionName.title%"
-            },
-            {
-                "command": "openmcp.sidebar.workspace-connection.changeConnectionName",
-                "title": "%openmcp.sidebar.workspace-connection.changeConnectionName.title%"
-            }
-        ],
-        "menus": {
-            "editor/title": [
-                {
-                    "command": "openmcp.showOpenMCP",
-                    "group": "navigation",
-                    "when": "editorLangId == python || editorLangId == javascript || editorLangId == typescript || editorLangId == java || editorLangId == csharp"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "openmcp.sidebar.workspace-connection.refresh",
-                    "group": "navigation",
-                    "when": "view == openmcp.sidebar.workspace-connection"
-                },
-                {
-                    "command": "openmcp.sidebar.workspace-connection.addConnection",
-                    "group": "navigation",
-                    "when": "view == openmcp.sidebar.workspace-connection"
-                },
-                {
-                    "command": "openmcp.sidebar.workspace-connection.openConfiguration",
-                    "group": "navigation",
-                    "when": "view == openmcp.sidebar.workspace-connection"
-                },
-                {
-                    "command": "openmcp.sidebar.installed-connection.refresh",
-                    "group": "navigation",
-                    "when": "view == openmcp.sidebar.installed-connection"
-                },
-                {
-                    "command": "openmcp.sidebar.installed-connection.addConnection",
-                    "group": "navigation",
-                    "when": "view == openmcp.sidebar.installed-connection"
-                },
-                {
-                    "command": "openmcp.sidebar.installed-connection.openConfiguration",
-                    "group": "navigation",
-                    "when": "view == openmcp.sidebar.installed-connection"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "openmcp.sidebar.workspace-connection.revealWebviewPanel",
-                    "group": "inline@1",
-                    "when": "view == openmcp.sidebar.workspace-connection",
-                    "args": {
-                        "view": "${viewItem}"
-                    }
-                },
-                {
-                    "command": "openmcp.sidebar.workspace-connection.deleteConnection",
-                    "group": "inline@2",
-                    "when": "view == openmcp.sidebar.workspace-connection",
-                    "args": {
-                        "view": "${viewItem}"
-                    }
-                },
-                {
-                    "command": "openmcp.sidebar.workspace-connection.changeConnectionName",
-                    "group": "navigation@1",
-                    "when": "view == openmcp.sidebar.workspace-connection && viewItem == workspace-item",
-                    "args": {
-                        "view": "${viewItem}"
-                    }
-                },
-                {
-                    "command": "openmcp.sidebar.installed-connection.revealWebviewPanel",
-                    "group": "inline@1",
-                    "when": "view == openmcp.sidebar.installed-connection",
-                    "args": {
-                        "view": "${viewItem}"
-                    }
-                },
-                {
-                    "command": "openmcp.sidebar.installed-connection.deleteConnection",
-                    "group": "inline@2",
-                    "when": "view == openmcp.sidebar.installed-connection",
-                    "args": {
-                        "view": "${viewItem}"
-                    }
-                },
-                {
-                    "command": "openmcp.sidebar.installed-connection.changeConnectionName",
-                    "group": "navigation@1",
-                    "when": "view == openmcp.sidebar.workspace-connection && viewItem == installed-item",
-                    "args": {
-                        "view": "${viewItem}"
-                    }
-                }
-            ]
-        },
-        "viewsContainers": {
-            "activitybar": [
-                {
-                    "id": "openmcp-sidebar",
-                    "title": "OpenMCP",
-                    "icon": "./icons/protocol.svg"
-                }
-            ]
-        },
-        "views": {
-            "openmcp-sidebar": [
-                {
-                    "id": "openmcp.sidebar.workspace-connection",
-                    "icon": "./icons/protocol.svg",
-                    "name": "%openmcp.sidebar.workspace-connection.view.title%",
-                    "type": "tree"
-                },
-                {
-                    "id": "openmcp.sidebar.installed-connection",
-                    "icon": "./icons/protocol.svg",
-                    "name": "%openmcp.sidebar.installed-connection.view.title%",
-                    "type": "tree"
-                },
-                {
-                    "id": "openmcp.sidebar.help",
-                    "icon": "./icons/protocol.svg",
-                    "name": "%openmcp.sidebar.help.view.title%",
-                    "type": "tree"
-                }
-            ]
+    "commands": [
+      {
+        "command": "openmcp.showOpenMCP",
+        "title": "%openmcp.showOpenMCP.title%",
+        "category": "openmcp",
+        "icon": {
+          "light": "./icons/light/protocol.svg",
+          "dark": "./icons/dark/protocol.svg"
         }
-    },
-    "workspaces": [
-        "cli",
-        "gateway",
-        "sdk",
-        "service",
-        "renderer",
-        "cli"
+      },
+      {
+        "command": "openmcp.sidebar.workspace-connection.revealWebviewPanel",
+        "title": "%openmcp.sidebar.workspace-connection.revealWebviewPanel.title%",
+        "category": "openmcp",
+        "icon": {
+          "light": "./icons/light/protocol.svg",
+          "dark": "./icons/dark/protocol.svg"
+        }
+      },
+      {
+        "command": "openmcp.sidebar.workspace-connection.deleteConnection",
+        "title": "%openmcp.sidebar.workspace-connection.deleteConnection.title%",
+        "category": "openmcp",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "openmcp.sidebar.workspace-connection.refresh",
+        "title": "%openmcp.sidebar.workspace-connection.refresh.title%",
+        "category": "openmcp",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "openmcp.sidebar.workspace-connection.addConnection",
+        "title": "%openmcp.sidebar.workspace-connection.addConnection.title%",
+        "category": "openmcp",
+        "icon": "$(add)"
+      },
+      {
+        "command": "openmcp.sidebar.workspace-connection.openConfiguration",
+        "title": "%openmcp.sidebar.workspace-connection.openConfiguration.title%",
+        "category": "openmcp",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "openmcp.sidebar.installed-connection.revealWebviewPanel",
+        "title": "%openmcp.sidebar.installed-connection.revealWebviewPanel.title%",
+        "category": "openmcp",
+        "icon": {
+          "light": "./icons/light/protocol.svg",
+          "dark": "./icons/dark/protocol.svg"
+        }
+      },
+      {
+        "command": "openmcp.sidebar.installed-connection.deleteConnection",
+        "title": "%openmcp.sidebar.installed-connection.deleteConnection.title%",
+        "category": "openmcp",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "openmcp.sidebar.installed-connection.refresh",
+        "title": "%openmcp.sidebar.installed-connection.refresh.title%",
+        "category": "openmcp",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "openmcp.sidebar.installed-connection.addConnection",
+        "title": "%openmcp.sidebar.installed-connection.addConnection.title%",
+        "category": "openmcp",
+        "icon": "$(add)"
+      },
+      {
+        "command": "openmcp.sidebar.installed-connection.openConfiguration",
+        "title": "%openmcp.sidebar.installed-connection.openConfiguration.title%",
+        "category": "openmcp",
+        "icon": "$(gear)"
+      },
+      {
+        "command": "openmcp.hook.test-ocr",
+        "title": "%openmcp.hook.test-ocr.title%",
+        "category": "openmcp",
+        "icon": "$(test)"
+      },
+      {
+        "command": "openmcp.hook.test-news",
+        "title": "%openmcp.hook.test-news.title%",
+        "category": "openmcp",
+        "icon": "$(test)"
+      },
+      {
+        "command": "openmcp.sidebar.installed-connection.changeConnectionName",
+        "title": "%openmcp.sidebar.installed-connection.changeConnectionName.title%"
+      },
+      {
+        "command": "openmcp.sidebar.workspace-connection.changeConnectionName",
+        "title": "%openmcp.sidebar.workspace-connection.changeConnectionName.title%"
+      }
     ],
-    "scripts": {
-        "setup": "yarn install && yarn prepare:ocr",
-        "serve": "turbo serve",
-        "dev": "turbo dev",
-        "build": "turbo build && node esbuild.config.js",
-        "build:plugin": "yarn build && vsce package --allow-package-all-secrets",
-        "vscode:prepublish": "node esbuild.config.js",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "pretest": "yarn build",
-        "lint": "eslint src --ext ts",
-        "test": "node ./dist/test/e2e/runTest.js",
-        "prepare:ocr": "rollup -c rollup.tesseract.js --bundleConfigAsCjs",
-        "prepare:resources": "npx tsx scripts/prepare-resource.mts",
-        "build:news": "npx tsx scripts/update-news-data.mts",
-        "build:task-loop": "npx vite build --config renderer/vite.config.task-loop.mjs && node renderer/scripts/task-loop.build.mjs",
-        "build:sdk": "npm run build && npm run build:task-loop && node -e \"require('fs').cpSync('sdk/dist/index.js', 'openmcp-sdk/index.js'); require('fs').cpSync('sdk/dist/index.d.ts', 'openmcp-sdk/index.d.ts'); console.log('Copied SDK to openmcp-sdk/')\" ",
-        "publish": "npx tsx scripts/publish.mts",
-        "publish:check": "npx tsx scripts/publish.mts --check-only",
-        "publish:quick": "npx tsx scripts/publish.mts --skip-news",
-        "publish:update": "npx tsx scripts/publish.mts --update",
-        "publish:vsce": "npx tsx scripts/publish.mts --publish-vsce",
-        "publish:github": "npx tsx scripts/publish.mts --publish-github",
-        "publish:all": "npx tsx scripts/publish.mts --all",
-        "build:cli": "cd cli && npm run build",
-        "publish:cli": "npx tsx scripts/publish-cli.mts",
-        "publish:cli:check": "npx tsx scripts/publish-cli.mts --check-only",
-        "publish:sdk": "npx tsx scripts/publish-sdk.mts",
-        "publish:sdk:check": "npx tsx scripts/publish-sdk.mts --check-only",
-        "build:cli:full": "npx tsx scripts/build-cli.mts",
-        "test:cli": "npx tsx scripts/test-cli.mts",
-        "software:dev": "npm --prefix software run dev",
-        "software:build": "npm --prefix software run build",
-        "pack:npm-test": "node scripts/pack-npm-test.mjs"
+    "menus": {
+      "editor/title": [
+        {
+          "command": "openmcp.showOpenMCP",
+          "group": "navigation",
+          "when": "editorLangId == python || editorLangId == javascript || editorLangId == typescript || editorLangId == java || editorLangId == csharp"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "openmcp.sidebar.workspace-connection.refresh",
+          "group": "navigation",
+          "when": "view == openmcp.sidebar.workspace-connection"
+        },
+        {
+          "command": "openmcp.sidebar.workspace-connection.addConnection",
+          "group": "navigation",
+          "when": "view == openmcp.sidebar.workspace-connection"
+        },
+        {
+          "command": "openmcp.sidebar.workspace-connection.openConfiguration",
+          "group": "navigation",
+          "when": "view == openmcp.sidebar.workspace-connection"
+        },
+        {
+          "command": "openmcp.sidebar.installed-connection.refresh",
+          "group": "navigation",
+          "when": "view == openmcp.sidebar.installed-connection"
+        },
+        {
+          "command": "openmcp.sidebar.installed-connection.addConnection",
+          "group": "navigation",
+          "when": "view == openmcp.sidebar.installed-connection"
+        },
+        {
+          "command": "openmcp.sidebar.installed-connection.openConfiguration",
+          "group": "navigation",
+          "when": "view == openmcp.sidebar.installed-connection"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "openmcp.sidebar.workspace-connection.revealWebviewPanel",
+          "group": "inline@1",
+          "when": "view == openmcp.sidebar.workspace-connection",
+          "args": {
+            "view": "${viewItem}"
+          }
+        },
+        {
+          "command": "openmcp.sidebar.workspace-connection.deleteConnection",
+          "group": "inline@2",
+          "when": "view == openmcp.sidebar.workspace-connection",
+          "args": {
+            "view": "${viewItem}"
+          }
+        },
+        {
+          "command": "openmcp.sidebar.workspace-connection.changeConnectionName",
+          "group": "navigation@1",
+          "when": "view == openmcp.sidebar.workspace-connection && viewItem == workspace-item",
+          "args": {
+            "view": "${viewItem}"
+          }
+        },
+        {
+          "command": "openmcp.sidebar.installed-connection.revealWebviewPanel",
+          "group": "inline@1",
+          "when": "view == openmcp.sidebar.installed-connection",
+          "args": {
+            "view": "${viewItem}"
+          }
+        },
+        {
+          "command": "openmcp.sidebar.installed-connection.deleteConnection",
+          "group": "inline@2",
+          "when": "view == openmcp.sidebar.installed-connection",
+          "args": {
+            "view": "${viewItem}"
+          }
+        },
+        {
+          "command": "openmcp.sidebar.installed-connection.changeConnectionName",
+          "group": "navigation@1",
+          "when": "view == openmcp.sidebar.workspace-connection && viewItem == installed-item",
+          "args": {
+            "view": "${viewItem}"
+          }
+        }
+      ]
     },
-    "dependencies": {
-        "@modelcontextprotocol/sdk": "^1.18.2",
-        "@openmcp/service": "file:./service",
-        "@seald-io/nedb": "^4.1.1",
-        "@types/glob": "^7.2.0",
-        "@types/node-fetch": "^2.6.4",
-        "abort-controller": "^3.0.0",
-        "agentkeepalive": "^4.2.1",
-        "axios": "^1.9.0",
-        "bson": "^6.8.0",
-        "form-data-encoder": "^1.7.2",
-        "formdata-node": "^4.3.2",
-        "glob": "^7.2.3",
-        "https-proxy-agent": "^7.0.6",
-        "mocha": "^10.8.2",
-        "openai": "^5.0.1",
-        "pako": "^2.1.0",
-        "pkce-challenge": "^5.0.0",
-        "strict-url-sanitise": "^0.0.1",
-        "tesseract.js": "^6.0.1",
-        "tslib": "^2.8.1",
-        "uuid": "^11.1.0",
-        "ws": "^8.18.1"
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "openmcp-sidebar",
+          "title": "OpenMCP",
+          "icon": "./icons/protocol.svg"
+        }
+      ]
     },
-    "devDependencies": {
-        "@rollup/plugin-babel": "^6.0.4",
-        "@rollup/plugin-commonjs": "^28.0.5",
-        "@rollup/plugin-inject": "^5.0.5",
-        "@rollup/plugin-json": "^6.1.0",
-        "@rollup/plugin-node-resolve": "^16.0.1",
-        "@rollup/plugin-typescript": "^12.1.2",
-        "@types/debug": "^4.1.12",
-        "@types/express": "^5.0.6",
-        "@types/node": "^22.15.29",
-        "@types/pako": "^2.0.3",
-        "@types/showdown": "^2.0.0",
-        "@types/sinon": "^17.0.4",
-        "@types/vscode": "^1.72.0",
-        "@vscode/test-cli": "^0.0.11",
-        "@vscode/test-electron": "^2.5.2",
-        "@vscode/vsce": "^3.5.0",
-        "copy-webpack-plugin": "^13.0.0",
-        "esbuild": "^0.25.5",
-        "fork-ts-checker-webpack-plugin": "^9.1.0",
-        "null-loader": "^4.0.1",
-        "ompipe": "^1.0.2",
-        "rollup": "^4.43.0",
-        "rollup-plugin-copy": "^3.5.0",
-        "rollup-plugin-visualizer": "^6.0.1",
-        "sinon": "^21.0.0",
-        "ts-loader": "^9.5.1",
-        "turbo": "^2.5.3",
-        "typescript": "^5.4.2",
-        "vite": "^6.3.5",
-        "vite-plugin-dts": "^4.5.4",
-        "vite-plugin-static-copy": "^3.0.0",
-        "vite-plugin-vue-devtools": "^7.7.6",
-        "vue-tsc": "^2.2.10",
-        "webpack": "^5.99.5",
-        "webpack-cli": "^5.1.4"
-    },
-    "packageManager": "yarn@4.13.0"
+    "views": {
+      "openmcp-sidebar": [
+        {
+          "id": "openmcp.sidebar.workspace-connection",
+          "icon": "./icons/protocol.svg",
+          "name": "%openmcp.sidebar.workspace-connection.view.title%",
+          "type": "tree"
+        },
+        {
+          "id": "openmcp.sidebar.installed-connection",
+          "icon": "./icons/protocol.svg",
+          "name": "%openmcp.sidebar.installed-connection.view.title%",
+          "type": "tree"
+        },
+        {
+          "id": "openmcp.sidebar.help",
+          "icon": "./icons/protocol.svg",
+          "name": "%openmcp.sidebar.help.view.title%",
+          "type": "tree"
+        }
+      ]
+    }
+  },
+  "workspaces": [
+    "cli",
+    "gateway",
+    "sdk",
+    "service",
+    "renderer",
+    "cli"
+  ],
+  "scripts": {
+    "setup": "yarn install && yarn prepare:ocr",
+    "serve": "turbo serve",
+    "dev": "turbo dev",
+    "build": "turbo build && node esbuild.config.js",
+    "build:plugin": "yarn build && vsce package --allow-package-all-secrets",
+    "vscode:prepublish": "node esbuild.config.js",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn build",
+    "lint": "eslint src --ext ts",
+    "test": "node ./dist/test/e2e/runTest.js",
+    "prepare:ocr": "rollup -c rollup.tesseract.js --bundleConfigAsCjs",
+    "prepare:resources": "npx tsx scripts/prepare-resource.mts",
+    "build:news": "npx tsx scripts/update-news-data.mts",
+    "build:task-loop": "npx vite build --config renderer/vite.config.task-loop.mjs && node renderer/scripts/task-loop.build.mjs",
+    "build:sdk": "npm run build && npm run build:task-loop && node -e \"require('fs').cpSync('sdk/dist/index.js', 'openmcp-sdk/index.js'); require('fs').cpSync('sdk/dist/index.d.ts', 'openmcp-sdk/index.d.ts'); console.log('Copied SDK to openmcp-sdk/')\" ",
+    "publish": "npx tsx scripts/publish.mts",
+    "publish:check": "npx tsx scripts/publish.mts --check-only",
+    "publish:quick": "npx tsx scripts/publish.mts --skip-news",
+    "publish:update": "npx tsx scripts/publish.mts --update",
+    "publish:vsce": "npx tsx scripts/publish.mts --publish-vsce",
+    "publish:github": "npx tsx scripts/publish.mts --publish-github",
+    "publish:all": "npx tsx scripts/publish.mts --all",
+    "build:cli": "cd cli && npm run build",
+    "publish:cli": "npx tsx scripts/publish-cli.mts",
+    "publish:cli:check": "npx tsx scripts/publish-cli.mts --check-only",
+    "publish:sdk": "npx tsx scripts/publish-sdk.mts",
+    "publish:sdk:check": "npx tsx scripts/publish-sdk.mts --check-only",
+    "build:cli:full": "npx tsx scripts/build-cli.mts",
+    "test:cli": "npx tsx scripts/test-cli.mts",
+    "software:dev": "npm --prefix software run dev",
+    "software:build": "npm --prefix software run build",
+    "pack:npm-test": "node scripts/pack-npm-test.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@openmcp/service": "file:./service",
+    "@seald-io/nedb": "^4.1.1",
+    "@types/glob": "^7.2.0",
+    "@types/node-fetch": "^2.6.4",
+    "abort-controller": "^3.0.0",
+    "agentkeepalive": "^4.2.1",
+    "axios": "^1.9.0",
+    "bson": "^6.8.0",
+    "form-data-encoder": "^1.7.2",
+    "formdata-node": "^4.3.2",
+    "glob": "^7.2.3",
+    "https-proxy-agent": "^7.0.6",
+    "mocha": "^10.8.2",
+    "openai": "^5.0.1",
+    "pako": "^2.1.0",
+    "pkce-challenge": "^5.0.0",
+    "strict-url-sanitise": "^0.0.1",
+    "tesseract.js": "^6.0.1",
+    "tslib": "^2.8.1",
+    "uuid": "^11.1.0",
+    "ws": "^8.18.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^28.0.5",
+    "@rollup/plugin-inject": "^5.0.5",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@types/debug": "^4.1.12",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.29",
+    "@types/pako": "^2.0.3",
+    "@types/showdown": "^2.0.0",
+    "@types/sinon": "^17.0.4",
+    "@types/vscode": "^1.72.0",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.5.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "esbuild": "^0.25.5",
+    "fork-ts-checker-webpack-plugin": "^9.1.0",
+    "null-loader": "^4.0.1",
+    "ompipe": "^1.0.2",
+    "rollup": "^4.43.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-visualizer": "^6.0.1",
+    "sinon": "^21.0.0",
+    "ts-loader": "^9.5.1",
+    "turbo": "^2.5.3",
+    "typescript": "^5.4.2",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-static-copy": "^3.0.0",
+    "vite-plugin-vue-devtools": "^7.7.6",
+    "vue-tsc": "^2.2.10",
+    "webpack": "^5.99.5",
+    "webpack-cli": "^5.1.4"
+  },
+  "packageManager": "yarn@4.13.0"
 }

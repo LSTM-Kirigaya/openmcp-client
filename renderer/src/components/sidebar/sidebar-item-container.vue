@@ -51,14 +51,14 @@ function gotoOption(ident: string) {
 
 .sidebar-option-item {
 	margin: 0;
-	height: 32px;
-	width: 36px;
-	min-width: 36px;
+	height: 40px;
+	width: 42px;
+	min-width: 42px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	padding: 0;
-	border-radius: 8px;
+	border-radius: 10px;
 	transition: var(--animation-3s);
 	cursor: pointer;
 	border: 1px solid transparent;
@@ -74,11 +74,11 @@ function gotoOption(ident: string) {
 }
 
 .sidebar-option-item .iconfont {
-	width: 14px;
+	width: 16px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 16px;
+	font-size: 20px;
 }
 
 /* 优化高亮效果：使用品牌色替代白色 */

@@ -10,7 +10,7 @@
 					<el-scrollbar class="options-scrollbar">
 						<div class="connection-setting-content">
 							<ConnectionMethodAndArgs :index="props.index" />
-							<div class="setting-section connection-env-section">
+							<div v-if="client.connectionArgs.connectionType === 'STDIO'" class="setting-section connection-env-section">
 								<h2>{{ t('env-var') }}</h2>
 								<ConnectionEnvironment :index="props.index" />
 							</div>
@@ -51,7 +51,6 @@ const props = defineProps({
 		type: Number,
 		required: true
 	}
-
 });
 
 const client = computed(() => mcpClientAdapter.clients[props.index]);
@@ -63,13 +62,8 @@ const isDisconnecting = ref(false);
 
 async function connect() {
 	isLoading.value = true;
-
 	const ok = await client.value.connect();
-
-	if (ok) {
-		mcpClientAdapter.saveLaunchSignature();
-	}
-
+	if (ok) mcpClientAdapter.saveLaunchSignature();
 	isLoading.value = false;
 }
 
@@ -141,7 +135,6 @@ function handleDrop(event: DragEvent) {
 	flex-direction: column;
 }
 
-
 .connect-panel-container.top {
 	display: flex;
 	flex-direction: column;
@@ -153,8 +146,6 @@ function handleDrop(event: DragEvent) {
 	flex: 1;
 	min-height: 0;
 }
-
-/* 连接参数/环境变量区块样式已迁移至 connection-setting-styles.css，在 connect/index.vue 入口引入 */
 
 .connect-panel-container.bottom {
 	display: flex;

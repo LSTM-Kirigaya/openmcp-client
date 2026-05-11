@@ -576,5 +576,10 @@
     "server-command-required": "服务器命令不能为空",
     "server-url-required": "服务器地址不能为空",
     "connection-log-connect": "连接",
-    "connection-log-disconnect": "断开"
+    "connection-log-disconnect": "断开",
+    "sidebar-mcp-hub": "MCP 中心",
+    "theme-light": "浅色",
+    "theme-dark": "深色",
+    "theme-system": "跟随系统",
+    "theme-label": "主题"
 }

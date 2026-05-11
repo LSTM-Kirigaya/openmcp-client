@@ -41,6 +41,9 @@
                         </div>
                         <div class="message-avatar" v-else-if="message.role === 'assistant/tool_calls'">
                         </div>
+                        <div class="message-avatar user-avatar" v-else-if="message.role === 'user'">
+                            <span class="user-avatar-mark">U</span>
+                        </div>
 
                         <div class="message-content" v-if="message.role === 'user'">
                             <Message.User :message="message" :tab-id="props.tabId" />

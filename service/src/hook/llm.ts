@@ -3,13 +3,13 @@ export const llms = [
 		id: 'deepseek',
 		name: 'DeepSeek',
 		baseUrl: 'https://api.deepseek.com/v1',
-		models: ['deepseek-chat', 'deepseek-reasoner'],
+		models: ['deepseek-v4-flash', 'deepseek-v4-pro'],
 		provider: 'DeepSeek',
 		isOpenAICompatible: true,
 		description: '深度求索推出的大模型，擅长中文和代码',
 		website: 'https://www.deepseek.com',
 		userToken: '',
-		userModel: 'deepseek-chat'
+		userModel: 'deepseek-v4-pro'
 	},
 	{
 		id: 'openai',

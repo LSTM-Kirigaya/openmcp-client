@@ -1,0 +1,22 @@
+{
+  "tabs": {
+    "clientId": "",
+    "currentIndex": 0,
+    "tabs": [
+      {
+        "name": "空白测试",
+        "icon": "icon-blank",
+        "type": "blank",
+        "componentIndex": -1,
+        "storage": {
+          "activeNames": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "variables": [],
+  "extractionRules": {},
+  "testCases": []
+}

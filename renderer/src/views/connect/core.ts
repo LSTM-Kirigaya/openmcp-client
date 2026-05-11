@@ -16,15 +16,15 @@ const { t } = I18n.global;
 export const connectionSelectDataViewOption: ConnectionTypeOptionItem[] = [
     {
         value: 'STDIO',
-        label: 'STDIO'
+        label: 'stdio'
     },
     {
         value: 'SSE',
-        label: 'SSE'
+        label: 'sse'
     },
     {
         value: 'STREAMABLE_HTTP',
-        label: 'STREAMABLE_HTTP'
+        label: 'http'
     }
 ]
 
@@ -597,8 +597,9 @@ class McpClientAdapter {
         // 先尝试新 RPC
         try {
             const res = await bridge.commandRequest<{ servers: any[] }>('servers/list', {});
-            if (res.code === 200 && res.msg?.servers) {
-                const locals = res.msg.servers.filter((s: any) => s.source === 'local');
+            const payload = (res.data as any) || res.msg;
+            if (res.code === 200 && payload?.servers) {
+                const locals = payload.servers.filter((s: any) => s.source === 'local');
                 return locals.map((s: any) => {
                     const item: any = { ...s };
                     if (item.connectionType === 'STDIO' && item.command) {
@@ -741,10 +742,28 @@ class McpClientAdapter {
      * 将 Gateway 上已存在的会话挂到本机 UI（例如 CLI 或其它客户端已 connect）。
      * 不发起新的 connect RPC，仅用 clientId 拉取 tools 等元数据。
      */
-    public async attachExistingGatewaySession(session: { clientId: string; name: string; version: string }): Promise<number> {
+    public async attachExistingGatewaySession(session: {
+        clientId: string;
+        name: string;
+        version: string;
+        connectionType?: IConnectionArgs['connectionType'];
+        command?: string;
+        args?: string[];
+        commandString?: string;
+        url?: string;
+        cwd?: string;
+        env?: Record<string, string>;
+        connectionId?: string;
+        storageScope?: 'user' | 'workspace';
+        workspacePath?: string;
+    }): Promise<number> {
         const existing = this.findClientIndexByUuid(session.clientId);
         if (existing >= 0) {
             const c = this.clients[existing];
+            await c.acquireConnectionSignature(this.toConnectionArgs(session));
+            if (session.env) {
+                c.connectionEnvironment.data = Object.entries(session.env).map(([key, value]) => ({ key, value }));
+            }
             c.connectionResult.success = true;
             c.connectionResult.status = 'connected';
             c.connectionResult.name = session.name;
@@ -757,6 +776,10 @@ class McpClientAdapter {
         rawClient.connectionResult.clientId = session.clientId;
         rawClient.connectionResult.name = session.name;
         rawClient.connectionResult.version = session.version;
+        await rawClient.acquireConnectionSignature(this.toConnectionArgs(session));
+        if (session.env) {
+            rawClient.connectionEnvironment.data = Object.entries(session.env).map(([key, value]) => ({ key, value }));
+        }
         this.clients.push(rawClient);
         const idx = this.clients.length - 1;
         try {
@@ -765,6 +788,33 @@ class McpClientAdapter {
             console.error('[attachExistingGatewaySession] getTools', e);
         }
         return idx;
+    }
+
+    private toConnectionArgs(session: {
+        connectionType?: IConnectionArgs['connectionType'];
+        command?: string;
+        args?: string[];
+        commandString?: string;
+        url?: string;
+        cwd?: string;
+        env?: Record<string, string>;
+        connectionId?: string;
+        storageScope?: 'user' | 'workspace';
+        workspacePath?: string;
+    }): IConnectionArgs {
+        const commandString = session.commandString
+            || [session.command, ...(session.args || [])].filter(Boolean).join(' ');
+
+        return {
+            connectionType: session.connectionType || (session.url ? 'STREAMABLE_HTTP' : 'STDIO'),
+            commandString,
+            cwd: session.cwd || '',
+            url: session.url || '',
+            env: session.env || {},
+            connectionId: session.connectionId || '',
+            storageScope: session.storageScope,
+            workspacePath: session.workspacePath || ''
+        };
     }
 
     /**

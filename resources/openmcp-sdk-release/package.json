@@ -10,7 +10,14 @@
     "type": "git",
     "url": "https://github.com/LSTM-Kirigaya/openmcp-client"
   },
-  "keywords": ["mcp", "openmcp", "openmcp-sdk", "llm framework", "agent", "ai agent"],
+  "keywords": [
+    "mcp",
+    "openmcp",
+    "openmcp-sdk",
+    "llm framework",
+    "agent",
+    "ai agent"
+  ],
   "author": "kirigaya",
   "license": "Apache-2.0",
   "bugs": {
@@ -18,7 +25,7 @@
   },
   "homepage": "https://document.kirigaya.cn/blogs/openmcp/main.html",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.18.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@seald-io/nedb": "^4.1.1",
     "axios": "^1.9.0",
     "bson": "^6.8.0",

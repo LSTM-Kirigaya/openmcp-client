@@ -511,5 +511,10 @@
     "server-command-required": "أمر الخادم مطلوب",
     "server-url-required": "رابط الخادم مطلوب",
     "connection-log-connect": "اتصال",
-    "connection-log-disconnect": "قطع الاتصال"
+    "connection-log-disconnect": "قطع الاتصال",
+    "sidebar-mcp-hub": "مركز MCP",
+    "theme-light": "فاتح",
+    "theme-dark": "داكن",
+    "theme-system": "النظام",
+    "theme-label": "المظهر"
 }

@@ -9,7 +9,7 @@
         <div v-else-if="props.item.type === 'image'" class="tool-image">
             <div class="media-item" @click="showFullImage">
                 <img :src="thumbnail" alt="screenshot" />
-                <span class="float-container">
+                <span class="float-container" :class="{ 'is-processing': !finishProcess }">
                     
                     <!-- 后处理结束后显示的部分 -->
                     <span class="iconfont icon-image" v-if="finishProcess"></span>
@@ -199,7 +199,8 @@ const showFullImage = () => {
     width: 100px;
     height: 100px;
     background-color: var(--el-input-bg-color, var(--el-fill-color-blank));
-    border-radius: .5em;
+    border: 1px solid var(--sidebar-item-border, var(--el-border-color, rgba(127, 127, 127, 0.35)));
+    border-radius: 6px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -229,8 +230,8 @@ const showFullImage = () => {
     top: 0;
     width: 100px;
     height: 100px;
-    background-color: rgba(0, 0, 0, 0.6);
-    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.45);
+    opacity: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -260,7 +261,8 @@ const showFullImage = () => {
     color: var(--background);
 }
 
-.tool-image .media-item:hover .float-container {
+.tool-image .media-item:hover .float-container,
+.tool-image .media-item .float-container.is-processing {
     opacity: 1;
 }
 
@@ -275,38 +277,40 @@ const showFullImage = () => {
 /* 文本类型结果：以“打印”形式展示 value（JSON/代码块），便于调试 */
 .tool-text--print {
     font-family: var(--font-monospace-family, var(--code-font-family, monospace));
-    font-size: 13px;
+    font-size: var(--chat-font-size);
     line-height: 1.6;
 }
 
 .tool-text--print .tool-text-body {
-    padding: 10px 12px;
-    background: var(--sidebar-item-selected);
-    border: 1px solid var(--sidebar-item-border);
-    border-radius: 8px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     overflow: auto;
 }
 
 /* 响应文本使用 JsonRender，与参数区一致，支持含 \n 等转义字符串的悬停高亮与点击展开 */
-.tool-text-body--json :deep(.json-render) {
+.tool-text-body--json .json-render {
     border: none;
     border-radius: 0;
     background: transparent;
 }
-.tool-text-body--json :deep(.json-render .json-render-scrollbar) {
+
+.tool-text-body--json .json-render .json-render-scrollbar {
     max-height: 300px;
 }
-.tool-text-body--json :deep(.json-render .json-render-body) {
+
+.tool-text-body--json .json-render .json-render-body {
     padding: 0;
 }
 
-.tool-text--print .tool-text-body :deep(pre) {
+.tool-text--print .tool-text-body pre {
     margin: 0;
     padding: 0;
     background: transparent !important;
 }
 
-.tool-text--print .tool-text-body :deep(code) {
+.tool-text--print .tool-text-body code {
     font-family: inherit;
     font-size: inherit;
     white-space: pre;
@@ -326,8 +330,8 @@ const showFullImage = () => {
     white-space: pre;
     display: inline-block;
     min-width: 100%;
-    background: var(--el-input-bg-color, var(--el-fill-color-blank));
-    border: 1px solid var(--sidebar-item-border);
-    border-radius: 8px;
+    background: var(--background, transparent);
+    border: 1px solid var(--sidebar-item-border, var(--el-border-color, rgba(127, 127, 127, 0.35)));
+    border-radius: 6px;
 }
 </style>

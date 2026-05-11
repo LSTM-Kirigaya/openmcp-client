@@ -123,7 +123,7 @@ defineComponent({ name: 'about' });
 	align-items: center;
 	justify-content: center;
 	min-height: 100%;
-	padding: 40px 20px;
+	padding: 0px 20px;
 	background-color: var(--background);
 	gap: 32px;
 }

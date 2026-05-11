@@ -511,5 +511,10 @@
     "server-command-required": "Команда сервера обязательна",
     "server-url-required": "URL сервера обязателен",
     "connection-log-connect": "Подключить",
-    "connection-log-disconnect": "Отключить"
+    "connection-log-disconnect": "Отключить",
+    "sidebar-mcp-hub": "MCP Hub",
+    "theme-light": "Светлая",
+    "theme-dark": "Тёмная",
+    "theme-system": "Система",
+    "theme-label": "Тема"
 }

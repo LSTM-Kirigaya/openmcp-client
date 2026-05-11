@@ -137,6 +137,7 @@ export interface IToolRenderMessage {
     content: string;
     toolResults: ToolCallContent[][];
     tool_calls: ToolCall[];
+    toolIndex?: number;
     showJson?: any;
     extraInfo: IExtraInfo;
 }
