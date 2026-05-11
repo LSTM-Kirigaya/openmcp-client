@@ -291,7 +291,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@openmcp/service": "file:./service",
+    "@openmcp/service": "workspace:*",
     "@seald-io/nedb": "^4.1.1",
     "@types/glob": "^7.2.0",
     "@types/node-fetch": "^2.6.4",

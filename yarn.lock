@@ -1462,7 +1462,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@openmcp/sdk@workspace:sdk"
   dependencies:
-    "@openmcp/service": "file:../service"
+    "@openmcp/service": "workspace:*"
     "@rollup/plugin-commonjs": "npm:^29.0.2"
     "@rollup/plugin-node-resolve": "npm:^16.0.3"
     "@rollup/plugin-typescript": "npm:^12.3.0"
@@ -1471,61 +1471,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@openmcp/service@file:../service::locator=%40openmcp%2Fsdk%40workspace%3Asdk":
-  version: 0.0.1
-  resolution: "@openmcp/service@file:../service#../service::hash=9856ed&locator=%40openmcp%2Fsdk%40workspace%3Asdk"
-  dependencies:
-    "@modelcontextprotocol/sdk": "npm:^1.29.0"
-    "@seald-io/nedb": "npm:^4.1.1"
-    "@supabase/supabase-js": "npm:^2.99.0"
-    axios: "npm:^1.9.0"
-    chalk: "npm:^5.4.1"
-    cli-table3: "npm:^0.6.5"
-    express: "npm:^5.2.1"
-    https-proxy-agent: "npm:^7.0.6"
-    open: "npm:^10.1.2"
-    openai: "npm:^5.0.1"
-    pako: "npm:^2.1.0"
-    pino: "npm:^9.6.0"
-    pino-pretty: "npm:^13.0.0"
-    rotating-file-stream: "npm:^3.2.0"
-    strict-url-sanitise: "npm:^0.0.1"
-    tesseract.js: "npm:^6.0.1"
-    uuid: "npm:^11.1.0"
-    vue: "npm:^3.5.13"
-    zod: "npm:^3.23.8"
-  checksum: 10c0/389168aee2330062374038b596cc98cc839457e385c29e587cafaba786476983cd84f83b7b7eae94648c97894e0b68be93cc2f3ab9e7208a3ba1b0afc8258550
-  languageName: node
-  linkType: hard
-
-"@openmcp/service@file:./service::locator=openmcp%40workspace%3A.":
-  version: 0.0.1
-  resolution: "@openmcp/service@file:./service#./service::hash=9856ed&locator=openmcp%40workspace%3A."
-  dependencies:
-    "@modelcontextprotocol/sdk": "npm:^1.29.0"
-    "@seald-io/nedb": "npm:^4.1.1"
-    "@supabase/supabase-js": "npm:^2.99.0"
-    axios: "npm:^1.9.0"
-    chalk: "npm:^5.4.1"
-    cli-table3: "npm:^0.6.5"
-    express: "npm:^5.2.1"
-    https-proxy-agent: "npm:^7.0.6"
-    open: "npm:^10.1.2"
-    openai: "npm:^5.0.1"
-    pako: "npm:^2.1.0"
-    pino: "npm:^9.6.0"
-    pino-pretty: "npm:^13.0.0"
-    rotating-file-stream: "npm:^3.2.0"
-    strict-url-sanitise: "npm:^0.0.1"
-    tesseract.js: "npm:^6.0.1"
-    uuid: "npm:^11.1.0"
-    vue: "npm:^3.5.13"
-    zod: "npm:^3.23.8"
-  checksum: 10c0/389168aee2330062374038b596cc98cc839457e385c29e587cafaba786476983cd84f83b7b7eae94648c97894e0b68be93cc2f3ab9e7208a3ba1b0afc8258550
-  languageName: node
-  linkType: hard
-
-"@openmcp/service@npm:^0.0.1, @openmcp/service@workspace:service":
+"@openmcp/service@npm:^0.0.1, @openmcp/service@workspace:*, @openmcp/service@workspace:service":
   version: 0.0.0-use.local
   resolution: "@openmcp/service@workspace:service"
   dependencies:
@@ -8744,7 +8690,7 @@ __metadata:
   resolution: "openmcp@workspace:."
   dependencies:
     "@modelcontextprotocol/sdk": "npm:^1.29.0"
-    "@openmcp/service": "file:./service"
+    "@openmcp/service": "workspace:*"
     "@rollup/plugin-babel": "npm:^6.0.4"
     "@rollup/plugin-commonjs": "npm:^28.0.5"
     "@rollup/plugin-inject": "npm:^5.0.5"

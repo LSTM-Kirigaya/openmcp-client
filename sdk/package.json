@@ -20,7 +20,7 @@
 	"author": "LSTM-Kirigaya",
 	"license": "MIT",
 	"dependencies": {
-		"@openmcp/service": "file:../service"
+		"@openmcp/service": "workspace:*"
 	},
 	"devDependencies": {
 		"@rollup/plugin-commonjs": "^29.0.2",
