@@ -5,17 +5,17 @@
     /* UI & Control */
     --input-active-background: #e8e8e8;
     --input-active-border: #6366f1;
-    --input-active-foreground: #1a1a1a;
+    --input-active-foreground: #171717;
 
     --input-error-background: rgba(244, 67, 54, 0.08);
     --input-error-border: #f44336;
     --input-error-foreground: #d32f2f;
 
-    --input-foreground: #1a1a1a;
+    --input-foreground: #171717;
     --input-background: #ffffff;
     --input-border: rgba(99, 102, 241, 0.3);
     --input-hover: #f0f0f0;
-    --input-placeholder: rgba(0, 0, 0, 0.45);
+    --input-placeholder: #525252;
     --input-radius: 0px;
 
     --scrollbar-background: rgba(99, 102, 241, 0.15);
@@ -24,11 +24,11 @@
 
     /* Window */
     --title-bar: #f5f5f5;
-    --title-color: #1a1a1a;
-    --foreground: #1a1a1a;
-    --foreground-muted: rgba(0, 0, 0, 0.55);
+    --title-color: #171717;
+    --foreground: #171717;
+    --foreground-muted: #525252;
     --background: #f8f8fa;
-    --label: rgba(0, 0, 0, 0.75);
+    --label: #525252;
     --shadow: rgba(0, 0, 0, 0.1);
     --border: rgba(99, 102, 241, 0.15);
     --window-button-hover: rgba(99, 102, 241, 0.1);
@@ -45,7 +45,7 @@
     --sidebar-border: rgba(99, 102, 241, 0.1);
     --sidebar-min-width: 280px;
 
-    --sidebar-item-text: rgba(0, 0, 0, 0.7);
+    --sidebar-item-text: #171717;
     --sidebar-item-border: rgba(99, 102, 241, 0.25);
     --sidebar-item-background: transparent;
     --sidebar-item-selected: rgba(99, 102, 241, 0.12);
@@ -53,7 +53,7 @@
     --sidebar-item-max-height: 40px;
     --sidebar-item-radix-background: #f0f0f3;
 
-    --sidebar-group-text: rgba(0, 0, 0, 0.6);
+    --sidebar-group-text: #525252;
     --sidebar-group-border: rgba(0, 0, 0, 0.06);
     --sidebar-group-background: transparent;
     --sidebar-hover: rgba(99, 102, 241, 0.08);
@@ -72,7 +72,7 @@
     --search-border: var(--border);
     --search-panel-background: transparent;
     --search-panel-border: rgba(99, 102, 241, 0.25);
-    --search-panel-text: #1a1a1a;
+    --search-panel-text: #171717;
     --search-label: var(--foreground);
     --search-selected-background: rgba(99, 102, 241, 0.1);
 
@@ -102,7 +102,7 @@
     --grid-tick: rgba(99, 102, 241, 0.4);
 
     /* Cursor */
-    --cursor: #1a1a1a;
+    --cursor: #171717;
     --cursor-ghost: rgba(0, 0, 0, 0.15);
 
     /* X-Axis */

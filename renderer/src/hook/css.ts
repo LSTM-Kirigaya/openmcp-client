@@ -10,7 +10,7 @@ export function setDefaultCss() {
     document?.body.style.setProperty('--el-color-primary', 'var(--main-light-color-70)');
     document?.body.style.setProperty('--el-color-primary-light-9', 'var(--main-color)');
     document?.body.style.setProperty('--el-color-primary-light-3', 'var(--main-color)');
-    document?.body.style.setProperty('--el-text-color-secondary', 'var(--foreground)');
+    document?.body.style.setProperty('--el-text-color-secondary', 'var(--foreground-muted, var(--foreground))');
     document?.body.style.setProperty('--el-text-color-regular', 'var(--foreground)');
     document?.body.style.setProperty('--el-border-color', 'var(--vscode-input-border)');
     document?.body.style.setProperty('--el-fill-color-blank', 'var(--sidebar)');

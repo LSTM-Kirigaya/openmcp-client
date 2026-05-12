@@ -220,7 +220,14 @@ function chooseDebugMode(index: number) {
 
 .debug-option.disable {
 	cursor: not-allowed;
-	opacity: 0.5;
+	opacity: 1;
+	border-color: var(--sidebar-group-border);
+	background-color: var(--sidebar);
+	color: var(--foreground);
+}
+
+.debug-option.disable .iconfont {
+	color: var(--foreground-muted);
 }
 
 /* 响应式设计 */
