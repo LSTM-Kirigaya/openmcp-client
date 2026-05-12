@@ -614,8 +614,8 @@ export async function startService(port: number = 8282): Promise<{ pid: number }
   console.log(`🚀 Starting OpenMCP Gateway on port ${port}...`);
   
   // 检查是否已经在运行
-  const { pid: existingPid } = readPidMeta(port);
-  if (existingPid && await isProcessRunning(existingPid)) {
+  const { pid: existingPid, port: existingPort } = readPidMeta(port);
+  if (existingPid && existingPort === port && await isProcessRunning(existingPid)) {
     console.log(`⚠️  Gateway is already running (PID: ${existingPid})`);
     return { pid: existingPid };
   }
@@ -670,9 +670,10 @@ async function stopGatewayByPortLookup(port: number): Promise<boolean> {
  * 停止 Gateway
  */
 export async function stopService(port: number = 8282): Promise<boolean> {
-  const { pid } = readPidMeta(port);
+  const { pid, port: recordedPort } = readPidMeta(port);
+  const targetPid = recordedPort === port ? pid : null;
 
-  if (!pid) {
+  if (!targetPid) {
     if (await isGatewayReachable(port)) {
       return stopGatewayByPortLookup(port);
     }
@@ -680,8 +681,8 @@ export async function stopService(port: number = 8282): Promise<boolean> {
     return false;
   }
 
-  if (!(await isProcessRunning(pid))) {
-    console.log(`ℹ️  Gateway process (PID: ${pid}) is not running`);
+  if (!(await isProcessRunning(targetPid))) {
+    console.log(`ℹ️  Gateway process (PID: ${targetPid}) is not running`);
     removePidFile();
     if (await isGatewayReachable(port)) {
       return stopGatewayByPortLookup(port);
@@ -689,9 +690,9 @@ export async function stopService(port: number = 8282): Promise<boolean> {
     return false;
   }
 
-  console.log(`🛑 Stopping Gateway (PID: ${pid})...`);
+  console.log(`🛑 Stopping Gateway (PID: ${targetPid})...`);
 
-  const success = await killProcess(pid);
+  const success = await killProcess(targetPid);
 
   if (success) {
     console.log(`✅ Gateway stopped`);
@@ -723,9 +724,9 @@ export async function restartService(port: number = 8282): Promise<boolean> {
  * 检查 Gateway 状态
  */
 export async function statusService(port: number = 8282): Promise<{ running: boolean; pid: number | null; port: number }> {
-  const { pid } = readPidMeta(port);
+  const { pid, port: recordedPort } = readPidMeta(port);
   
-  if (pid && await isProcessRunning(pid)) {
+  if (pid && recordedPort === port && await isProcessRunning(pid)) {
     return {
       running: true,
       pid,
@@ -909,6 +910,7 @@ export async function startRendererStaticBackground(port: number = 8283, gateway
     ...process.env,
     PORT: String(port),
     RENDERER_DIST_DIR,
+    VITE_USE_AUTH: 'false',
     VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
   };
 

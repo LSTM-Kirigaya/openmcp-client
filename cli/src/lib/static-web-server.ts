@@ -29,9 +29,10 @@ function sanitizeRelativePath(urlPathname: string): string {
 
 function injectRuntimeConfig(html: string): string {
   const websocketUrl = process.env.VITE_WEBSOCKET_URL;
+  const useAuth = process.env.VITE_USE_AUTH === 'true';
   const configScript = [
     '<script>',
-    `window.__OPENMCP_RUNTIME_CONFIG__ = ${JSON.stringify({ websocketUrl })};`,
+    `window.__OPENMCP_RUNTIME_CONFIG__ = ${JSON.stringify({ websocketUrl, useAuth })};`,
     '</script>'
   ].join('');
 

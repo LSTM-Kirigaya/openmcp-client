@@ -1,5 +1,6 @@
 import { pinkLog, redLog } from '@/views/setting/util';
 import { acquireVsCodeApi, electronApi, getPlatform } from './platform';
+import { getRuntimeWebSocketUrl } from './runtime-config';
 import { isReactive } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -28,22 +29,8 @@ export interface ICommandRequestData {
 	[key: string]: any;
 }
 
-interface OpenMcpRuntimeConfig {
-	websocketUrl?: unknown;
-}
-
 export function getWebSocketSetupSignature(): string | undefined {
-	const runtimeConfig = (window as any).__OPENMCP_RUNTIME_CONFIG__ as OpenMcpRuntimeConfig | undefined;
-	if (typeof runtimeConfig?.websocketUrl === 'string' && runtimeConfig.websocketUrl.trim()) {
-		return runtimeConfig.websocketUrl;
-	}
-
-	const viteWebSocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
-	if (typeof viteWebSocketUrl === 'string' && viteWebSocketUrl.trim()) {
-		return viteWebSocketUrl;
-	}
-
-	return undefined;
+	return getRuntimeWebSocketUrl();
 }
 
 export class MessageBridge {
