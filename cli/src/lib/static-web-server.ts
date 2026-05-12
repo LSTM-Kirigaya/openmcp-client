@@ -27,6 +27,25 @@ function sanitizeRelativePath(urlPathname: string): string {
   return normalized.startsWith('/') ? normalized.slice(1) : normalized;
 }
 
+function injectRuntimeConfig(html: string): string {
+  const websocketUrl = process.env.VITE_WEBSOCKET_URL;
+  const configScript = [
+    '<script>',
+    `window.__OPENMCP_RUNTIME_CONFIG__ = ${JSON.stringify({ websocketUrl })};`,
+    '</script>'
+  ].join('');
+
+  if (html.includes('__OPENMCP_RUNTIME_CONFIG__')) {
+    return html;
+  }
+
+  if (html.includes('<head>')) {
+    return html.replace('<head>', `<head>\n    ${configScript}`);
+  }
+
+  return html.replace('</head>', `    ${configScript}\n  </head>`);
+}
+
 function createStaticWebServer(distDir: string) {
   return http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://localhost');
@@ -81,12 +100,15 @@ function createStaticWebServer(distDir: string) {
     }
 
     try {
-      const body = fs.readFileSync(filePath);
+      let body: string | Buffer = fs.readFileSync(filePath);
       const cacheControl = filePath.endsWith('index.html')
         ? 'no-cache'
         : relative.startsWith('assets/')
           ? 'public, max-age=31536000, immutable'
           : 'no-cache';
+      if (filePath.endsWith('index.html')) {
+        body = injectRuntimeConfig(body.toString('utf-8'));
+      }
 
       res.writeHead(200, {
         'Content-Type': contentTypeByExt(filePath),

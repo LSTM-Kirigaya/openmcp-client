@@ -18,7 +18,7 @@ import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
 import { privilegeStatus } from './status';
-import { useMessageBridge } from '@/api/message-bridge';
+import { getWebSocketSetupSignature, useMessageBridge } from '@/api/message-bridge';
 import { initialise } from '@/views/connect';
 
 const { t } = useI18n();
@@ -27,7 +27,8 @@ const dialogVisible = ref(true);
 const handleSubmit = async () => {
     const bridge = useMessageBridge();
 
-    const ok = await bridge.setupWebSocket(import.meta.env.VITE_WEBSOCKET_URL + '?t=' + privilegeStatus.password);
+    const setupSignature = getWebSocketSetupSignature();
+    const ok = await bridge.setupWebSocket(setupSignature ? setupSignature + '?t=' + privilegeStatus.password : undefined);
 
     if (ok) {
         ElMessage.success(t('auth.passwordSuccess'));

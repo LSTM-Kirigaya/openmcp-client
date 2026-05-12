@@ -28,6 +28,24 @@ export interface ICommandRequestData {
 	[key: string]: any;
 }
 
+interface OpenMcpRuntimeConfig {
+	websocketUrl?: unknown;
+}
+
+export function getWebSocketSetupSignature(): string | undefined {
+	const runtimeConfig = (window as any).__OPENMCP_RUNTIME_CONFIG__ as OpenMcpRuntimeConfig | undefined;
+	if (typeof runtimeConfig?.websocketUrl === 'string' && runtimeConfig.websocketUrl.trim()) {
+		return runtimeConfig.websocketUrl;
+	}
+
+	const viteWebSocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
+	if (typeof viteWebSocketUrl === 'string' && viteWebSocketUrl.trim()) {
+		return viteWebSocketUrl;
+	}
+
+	return undefined;
+}
+
 export class MessageBridge {
 	private ws: WebSocket | null = null;
 	private handlers = new Map<string, Set<CommandHandler>>();
@@ -78,7 +96,7 @@ export class MessageBridge {
 		const wsUrl = setupSignature || this.setupSignature;
 
 		if (typeof wsUrl !== 'string') {
-			throw new Error('setupSignature must be a string');
+			throw new Error('setupSignature must be a string. Static Web UI should inject window.__OPENMCP_RUNTIME_CONFIG__.websocketUrl.');
 		}
 		
 		console.log(wsUrl);
@@ -285,7 +303,7 @@ export function createMessageBridge(setupSignature: any) {
 // 向外暴露一个独立函数，保证 MessageBridge 是单例的
 export function useMessageBridge() {
 	if (!messageBridge && getPlatform() !== 'nodejs') {		
-		messageBridge = new MessageBridge(import.meta.env.VITE_WEBSOCKET_URL);
+		messageBridge = new MessageBridge(getWebSocketSetupSignature());
 	}
 	const bridge = messageBridge;
 

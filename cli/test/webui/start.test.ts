@@ -11,6 +11,7 @@ import {
   killChild,
   waitForWebui,
   webuiArgs,
+  TEST_GATEWAY_PORT,
   TEST_WEBUI_PORT,
 } from './_helpers.js';
 
@@ -44,6 +45,15 @@ describe('webui start', { timeout: 120_000 }, () => {
     const { status, body } = await httpGet(TEST_WEBUI_PORT, '/mcp/');
     assert.equal(status, 200);
     assert.ok(body.includes('<html') || body.includes('<!DOCTYPE'), '/mcp/ 应返回 HTML');
+  });
+
+  it('should inject runtime websocket configuration into the static page', async () => {
+    const { status, body } = await httpGet(TEST_WEBUI_PORT, '/mcp/');
+    assert.equal(status, 200);
+    assert.ok(
+      body.includes(`window.__OPENMCP_RUNTIME_CONFIG__ = {"websocketUrl":"ws://localhost:${TEST_GATEWAY_PORT}"};`),
+      '静态 WebUI 应注入运行时 Gateway WebSocket URL',
+    );
   });
 
   it('should detect duplicate start and report already running', async () => {
