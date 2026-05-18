@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: —
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 
+            - generic [ref=e36]: 空白测试
+          - generic [ref=e37] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e41]:
+        - generic [ref=e53] [cursor=pointer]:
+          - generic [ref=e54]: 
+          - generic [ref=e55]: 添加服务器
+        - generic [ref=e242]:
+          - generic [ref=e243]: 
+          - generic [ref=e244]: 暂无连接选项，点击上方的加号创建
+  - tooltip "MCP 中心 未连接 主题 浅色 深色 跟随系统  项目 GitHub  OpenMCP 官方文档" [ref=e245]:
+    - generic [ref=e246]:
+      - generic [ref=e247]:
+        - generic [ref=e248]: MCP 中心
+        - generic [ref=e249]: 未连接
+      - generic [ref=e251]:
+        - generic [ref=e252]: 主题
+        - generic [ref=e253]:
+          - button "浅色" [ref=e254] [cursor=pointer]
+          - button "深色" [ref=e255] [cursor=pointer]
+          - button "跟随系统" [ref=e256] [cursor=pointer]
+      - generic [ref=e258]:
+        - link " 项目 GitHub" [ref=e259] [cursor=pointer]:
+          - /url: https://github.com/LSTM-Kirigaya/openmcp-client
+          - generic [ref=e260]: 
+          - generic [ref=e261]: 项目 GitHub
+        - link " OpenMCP 官方文档" [ref=e262] [cursor=pointer]:
+          - /url: https://openmcp.kirigaya.cn
+          - generic [ref=e263]: 
+          - generic [ref=e264]: OpenMCP 官方文档

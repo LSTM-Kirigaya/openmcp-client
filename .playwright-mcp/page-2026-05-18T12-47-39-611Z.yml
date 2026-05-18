@@ -1,0 +1,30 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: —
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 
+            - generic [ref=e36]: 空白测试
+          - generic [ref=e37] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e41]:
+        - generic [ref=e49] [cursor=pointer]:
+          - generic [ref=e50]: 
+          - generic [ref=e51]: 添加服务器
+        - generic [ref=e54]:
+          - generic [ref=e55]: 
+          - generic [ref=e56]: 暂无连接选项，点击上方的加号创建
+  - generic:  
+  - generic [ref=e58]:
+    - img [ref=e59]
+    - paragraph [ref=e61]: Loading

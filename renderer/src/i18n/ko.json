@@ -507,7 +507,7 @@
     "server-url-placeholder": "예: http://localhost:3000/sse",
     "http-request-headers": "요청 헤더",
     "http-request-headers-desc": "HTTP 모드에서 모든 MCP 요청과 함께 전송됩니다",
-    "http-request-headers-placeholder": "{\n  \"Authorization\": \"Bearer ...\"\n}",
+    "http-request-headers-placeholder": "\\{\n  \"Authorization\": \"Bearer ...\"\n\\}",
     "session-disconnect-failed": "세션 연결 해제에 실패했습니다",
     "session-list-load-failed": "세션 목록을 불러오지 못했습니다",
     "server-name-required": "서버 이름은 필수입니다",

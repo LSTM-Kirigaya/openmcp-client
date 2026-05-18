@@ -47,20 +47,53 @@ function injectRuntimeConfig(html: string): string {
   return html.replace('</head>', `    ${configScript}\n  </head>`);
 }
 
+function detectBuildBase(distDir: string): string {
+  try {
+    const html = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
+    const match = html.match(/<script[^>]+src="([^"]+)"/);
+    if (match && match[1].startsWith('/mcp/')) {
+      return '/mcp/';
+    }
+  } catch {
+    // ignore
+  }
+  return '/';
+}
+
 function createStaticWebServer(distDir: string) {
+  const buildBase = detectBuildBase(distDir);
+  const isMcpBase = buildBase === '/mcp/';
+
   return http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://localhost');
     const pathname = decodeURIComponent(url.pathname);
 
     if (pathname === '/__openmcp_web_health') {
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-cache' });
-      res.end(JSON.stringify({ app: 'openmcp-web-ui', mode: 'static' }));
+      res.end(JSON.stringify({ app: 'openmcp-web-ui', mode: 'static', base: buildBase }));
       return;
     }
 
     if (pathname === '/' || pathname === '') {
-      res.writeHead(302, { Location: '/mcp/' });
-      res.end();
+      if (isMcpBase) {
+        res.writeHead(302, { Location: '/mcp/' });
+        res.end();
+        return;
+      }
+      // 普通 build：直接返回 index.html，让 Vue Router 接管根路径重定向
+      const filePath = path.join(distDir, 'index.html');
+      try {
+        let body = fs.readFileSync(filePath).toString('utf-8');
+        body = injectRuntimeConfig(body);
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(body);
+      } catch {
+        res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Internal Server Error');
+      }
       return;
     }
 

@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: SUP
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e241]:
+          - generic [ref=e242]:
+            - generic [ref=e243]: 
+            - generic [ref=e244]: 交互测试
+          - generic [ref=e245] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e41]:
+        - generic [ref=e48]:
+          - generic [ref=e49] [cursor=pointer]:
+            - generic [ref=e247]: supabase
+            - generic [ref=e249]: 
+          - generic [ref=e250] [cursor=pointer]:
+            - generic [ref=e253]: 服务器 2
+            - generic [ref=e255]: 
+          - generic [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: 
+            - generic [ref=e55]: 添加服务器
+        - generic [ref=e60]:
+          - generic [ref=e67]:
+            - heading "连接设置" [level=2] [ref=e68]
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - generic [ref=e71]: 类型
+                - radiogroup "radio-group" [ref=e72]:
+                  - generic [ref=e73]:
+                    - radio "stdio" [ref=e74]
+                    - generic [ref=e75] [cursor=pointer]: stdio
+                  - generic [ref=e76]:
+                    - radio "sse" [ref=e77]
+                    - generic [ref=e78] [cursor=pointer]: sse
+                  - generic [ref=e79]:
+                    - radio "http" [checked] [ref=e80]
+                    - generic [ref=e81] [cursor=pointer]: http
+              - generic [ref=e256]:
+                - generic [ref=e257]: URL
+                - 'textbox "例如: http://localhost:3000/sse" [ref=e261]': https://mcp.supabase.com/mcp?project_ref=ocijuywmkalfmfxquzzf
+              - generic [ref=e262]:
+                - generic [ref=e263]:
+                  - generic [ref=e264]: 请求头
+                  - generic [ref=e265]: HTTP 模式下随每次 MCP 请求发送
+                - generic [ref=e270]:
+                  - generic [ref=e273]: "1"
+                  - textbox [ref=e276]:
+                    - generic [ref=e277]: "{}"
+              - generic [ref=e95]:
+                - button "断开" [ref=e96] [cursor=pointer]:
+                  - generic [ref=e97]: 断开
+                - button "连接" [disabled]:
+                  - generic:
+                    - img
+                  - generic: 连接
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - button "收起" [ref=e278] [cursor=pointer]:
+                - img [ref=e232]
+              - generic [ref=e234]: 日志
+              - generic "清空" [ref=e279] [cursor=pointer]: 
+            - generic [ref=e284]:
+              - button "supabase 0.8.1 连接成功" [ref=e286] [cursor=pointer]:
+                - generic [ref=e289]: supabase 0.8.1 连接成功
+                - img [ref=e291]
+              - button "supabase's tools loaded (20)" [ref=e294] [cursor=pointer]:
+                - generic [ref=e297]: supabase's tools loaded (20)
+                - img [ref=e299]
+              - button "supabase's prompts loaded (0)" [ref=e302] [cursor=pointer]:
+                - generic [ref=e305]: supabase's prompts loaded (0)
+                - img [ref=e307]
+  - generic:  

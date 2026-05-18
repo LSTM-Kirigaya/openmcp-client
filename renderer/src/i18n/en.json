@@ -573,7 +573,7 @@
     "server-url-placeholder": "e.g. http://localhost:3000/sse",
     "http-request-headers": "Request headers",
     "http-request-headers-desc": "Sent with every MCP request in HTTP mode",
-    "http-request-headers-placeholder": "{\n  \"Authorization\": \"Bearer ...\"\n}",
+    "http-request-headers-placeholder": "\\{\n  \"Authorization\": \"Bearer ...\"\n\\}",
     "session-disconnect-failed": "Session disconnect failed",
     "session-list-load-failed": "Failed to load session list",
     "server-name-required": "Server name is required",

@@ -1,0 +1,33 @@
+[     803ms] [LOG] ws://localhost:8282 @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     804ms] [LOG] %c[PLATFORM] Web background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     816ms] [LOG] useAuth false @ http://localhost:8283/assets/index-ltF7FkO6.js:280
+[     839ms] [LOG] %cOpenMCP Client 启动 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     941ms] [LOG] %c准备请求设置 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     943ms] [LOG] send {command: lookup-env-var, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     944ms] [LOG] send {command: setting/load, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     944ms] [LOG] send {command: setting/get-tour, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     948ms] [LOG] %c消息桥连接完成 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     948ms] [LOG] %cversion: 0.0.1 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     971ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     971ms] [LOG] %c配置加载成功 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     971ms] [LOG] %c获取引导状态成功 true background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     971ms] [LOG] send {command: connect/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     989ms] [LOG] send {command: servers/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[     997ms] [LOG] send {command: tools/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[    1070ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[    1070ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[    1070ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[    1070ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[    1070ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[    1070ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[    1859ms] [LOG] send {command: panel/load, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[    1871ms] [LOG] %ctabs loaded background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[    1874ms] [LOG] send {command: batch-validation/load, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[    1976ms] [LOG] send {command: panel/save, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[    1986ms] [LOG] %cconfig save status: 200 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[   53529ms] [LOG] send {command: connect, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[   53550ms] [LOG] send {command: tools/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[   54410ms] [LOG] send {command: prompts/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[   55452ms] [LOG] send {command: resources/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[   55708ms] [LOG] send {command: resources/templates/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[   56154ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42

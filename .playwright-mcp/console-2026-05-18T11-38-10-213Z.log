@@ -1,0 +1,13 @@
+[     477ms] [LOG] ws://localhost:8282 @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     479ms] [LOG] %c[PLATFORM] Web background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     486ms] [LOG] useAuth false @ http://localhost:8283/assets/index-DGx57EXi.js:280
+[     516ms] [LOG] %cOpenMCP Client 启动 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     624ms] [LOG] %c准备请求设置 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     625ms] [LOG] send {command: setting/load, data: Object} @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     625ms] [LOG] send {command: setting/get-tour, data: Object} @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     629ms] [LOG] %c消息桥连接完成 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     629ms] [LOG] %cversion: 0.0.1 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     648ms] [LOG] %c配置加载成功 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     648ms] [LOG] %c获取引导状态成功 true background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     649ms] [LOG] send {command: connect/list, data: Object} @ http://localhost:8283/assets/index-DGx57EXi.js:42
+[     674ms] [LOG] send {command: servers/list, data: Object} @ http://localhost:8283/assets/index-DGx57EXi.js:42

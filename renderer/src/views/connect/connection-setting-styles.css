@@ -79,7 +79,6 @@
 }
 
 .connection-setting-content .setting-section .el-button--primary {
-	border-radius: 16px !important;
 	background-color: var(--foreground) !important;
 	color: var(--background) !important;
 	border-color: var(--foreground) !important;

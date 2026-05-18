@@ -49,6 +49,26 @@
 					</div>
 				</div>
 			</template>
+			<div class="connection-actions-row">
+				<el-button-group class="connection-actions-group">
+					<el-button
+						class="btn-disconnect"
+						:loading="props.disconnecting"
+						:disabled="!client.connectionResult.success"
+						@click="$emit('disconnect')"
+					>
+						{{ t('connection-log-disconnect') }}
+					</el-button>
+					<el-button
+						type="primary"
+						class="btn-connect"
+						:loading="props.loading"
+						@click="$emit('connect')"
+					>
+						{{ t('connection-log-connect') }}
+					</el-button>
+				</el-button-group>
+			</div>
 		</div>
 	</div>
 </template>
@@ -62,8 +82,15 @@ import { connectionSelectDataViewOption, mcpClientAdapter } from './core';
 defineComponent({ name: 'connection-method-and-args' });
 
 const props = defineProps({
-	index: { type: Number, required: true }
+	index: { type: Number, required: true },
+	loading: { type: Boolean, default: false },
+	disconnecting: { type: Boolean, default: false }
 });
+
+const emit = defineEmits<{
+	(e: 'connect'): void;
+	(e: 'disconnect'): void;
+}>();
 
 const client = computed(() => mcpClientAdapter.clients[props.index]);
 const { t } = useI18n();
@@ -152,5 +179,65 @@ const headersSchema = {
 
 .http-headers-input :deep(.cm-scroller) {
 	font-family: var(--font-family-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace);
+}
+
+.connection-actions-row {
+	padding: 16px 20px 0;
+	display: flex;
+	justify-content: flex-end;
+}
+
+/* 仿工具测试 executor-actions-group：断开在左、连接在右 */
+.connection-actions-group {
+	display: inline-flex;
+}
+
+.connection-actions-group .el-button {
+	border-radius: 0 !important;
+	border-color: var(--window-button-active) !important;
+	border-top: 1px solid var(--window-button-active);
+	border-left: 1px solid var(--window-button-active);
+	border-bottom: 1px solid var(--window-button-active);
+	border-right: 1px solid var(--window-button-active);
+	background-color: var(--el-fill-color-blank);
+	color: var(--el-text-color-regular);
+	padding: 8px 18px;
+	font-size: 14px;
+	transition: var(--animation-3s);
+}
+
+.connection-actions-group .el-button:first-child {
+	border-top-left-radius: 8px !important;
+	border-bottom-left-radius: 8px !important;
+}
+
+.connection-actions-group .el-button:last-child {
+	border: 1px solid var(--main-light-color-50) !important;
+	border-top-right-radius: 8px !important;
+	border-bottom-right-radius: 8px !important;
+}
+
+.connection-actions-group .btn-disconnect:hover:not(:disabled) {
+	border-color: var(--el-border-color-hover);
+	background-color: var(--main-light-color-50);
+	color: var(--el-text-color-primary);
+}
+
+.connection-actions-group .btn-disconnect:disabled {
+	opacity: 0.5;
+}
+
+.connection-actions-group .el-button.btn-connect {
+	background-color: var(--main-light-color-20) !important;
+	color: var(--el-text-color-primary) !important;
+	border-color: var(--main-light-color-50) !important;
+	font-weight: 600;
+}
+
+.connection-actions-group .el-button.btn-connect:hover:not(:disabled),
+.connection-actions-group .el-button.btn-connect:focus {
+	background-color: var(--main-light-color-50) !important;
+	color: var(--el-text-color-primary) !important;
+	border-color: var(--main-light-color-90) !important;
 }
 </style>

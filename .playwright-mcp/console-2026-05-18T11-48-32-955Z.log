@@ -1,0 +1,14 @@
+[     656ms] [LOG] ws://localhost:8282 @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     659ms] [LOG] %c[PLATFORM] Web background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     667ms] [LOG] useAuth false @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:280
+[     695ms] [LOG] %cOpenMCP Client 启动 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     807ms] [LOG] %c准备请求设置 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     809ms] [LOG] send {command: setting/load, data: Object} @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     811ms] [LOG] send {command: setting/get-tour, data: Object} @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     815ms] [LOG] %c消息桥连接完成 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     815ms] [LOG] %cversion: 0.0.1 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     819ms] [LOG] %c配置加载成功 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     819ms] [LOG] %c获取引导状态成功 true background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     820ms] [LOG] send {command: connect/list, data: Object} @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     825ms] [LOG] send {command: servers/list, data: Object} @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:42
+[     844ms] [LOG] go to /mcp/debug @ http://localhost:8283/mcp/assets/index-Ba0qKF7z.js:280

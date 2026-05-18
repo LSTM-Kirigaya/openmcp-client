@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted } from 'vue';
+import { defineComponent, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import ConnectionPanel from './connection-panel.vue';
 import { McpClient, mcpClientAdapter } from './core';
@@ -89,12 +89,12 @@ function deleteServer(index: number) {
 	mcpClientAdapter.saveLaunchSignature();
 }
 
-onMounted(() => {
-	// Ensure at least one server config is present on load
-	if (mcpClientAdapter.clients.length === 0) {
+watch(() => mcpClientAdapter.clients.length, (len) => {
+	// 只要列表被清空（例如 Gateway 同步后），自动补一个空白表单，避免用户面对空白页面
+	if (len === 0) {
 		addServer();
 	}
-});
+}, { immediate: true });
 </script>
 
 <style scoped>

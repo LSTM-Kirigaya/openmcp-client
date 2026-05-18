@@ -1,0 +1,21 @@
+[     418ms] [LOG] ws://localhost:8282 @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     418ms] [LOG] %c[PLATFORM] Web background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     422ms] [LOG] useAuth false @ http://localhost:8283/assets/index-D6qfWdxz.js:280
+[     430ms] [LOG] %cOpenMCP Client 启动 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     501ms] [LOG] %c准备请求设置 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     502ms] [LOG] send {command: lookup-env-var, data: Object} @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     502ms] [LOG] send {command: setting/load, data: Object} @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     502ms] [LOG] send {command: setting/get-tour, data: Object} @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     504ms] [LOG] %c消息桥连接完成 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     504ms] [LOG] %cversion: 0.0.1 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     515ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     516ms] [LOG] %c配置加载成功 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     516ms] [LOG] %c获取引导状态成功 true background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     517ms] [LOG] send {command: connect/list, data: Object} @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     518ms] [LOG] send {command: servers/list, data: Object} @ http://localhost:8283/assets/index-D6qfWdxz.js:42
+[     613ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[     613ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[     613ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[     613ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[     613ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[     613ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0

@@ -1,0 +1,68 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: —
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 
+            - generic [ref=e36]: 空白测试
+          - generic [ref=e37] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e46]:
+        - generic [ref=e53]:
+          - generic [ref=e56] [cursor=pointer]: 服务
+          - generic [ref=e59] [cursor=pointer]: API
+          - generic [ref=e62] [cursor=pointer]: 通用
+          - generic [ref=e65] [cursor=pointer]: 外观
+        - generic [ref=e73]:
+          - heading "API" [level=2] [ref=e74]
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - generic [ref=e77]: 服务提供者
+              - generic [ref=e80] [cursor=pointer]:
+                - generic:
+                  - combobox [ref=e82]
+                  - generic [ref=e83]: DeepSeek
+                - img [ref=e86]
+            - generic [ref=e88]:
+              - generic [ref=e89]: 模型
+              - generic [ref=e92]:
+                - generic:
+                  - combobox [ref=e94]
+                  - generic [ref=e95]: deepseek-v4-flash
+                - img [ref=e98] [cursor=pointer]
+            - generic [ref=e100]:
+              - generic [ref=e101]: API 根路径
+              - textbox "https://" [ref=e105]: https://api.deepseek.com/v1
+            - generic [ref=e106]:
+              - generic [ref=e107]: API 密钥
+              - generic [ref=e110]:
+                - textbox [ref=e111]: sk-10036f61f37641e69a6f89509d5f24ec
+                - img [ref=e114] [cursor=pointer]
+            - generic [ref=e120]:
+              - button "添加服务" [ref=e121] [cursor=pointer]:
+                - generic [ref=e122]: 添加服务
+              - button "更新模型列表" [ref=e123] [cursor=pointer]:
+                - generic [ref=e124]: 更新模型列表
+              - button "测试 CTRL " [ref=e125] [cursor=pointer]:
+                - generic [ref=e126]:
+                  - generic [ref=e127]: 测试
+                  - generic [ref=e128]: CTRL
+                  - generic [ref=e129]: 
+              - button "保存 CTRL S" [ref=e130] [cursor=pointer]:
+                - generic [ref=e131]:
+                  - generic [ref=e132]: 保存
+                  - generic [ref=e133]: CTRL
+                  - generic [ref=e134]: S
+  - generic:
+    - tooltip "设置" [ref=e135]: 设置
+    - text:                                         

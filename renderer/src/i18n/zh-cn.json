@@ -572,7 +572,7 @@
     "server-url-placeholder": "例如: http://localhost:3000/sse",
     "http-request-headers": "请求头",
     "http-request-headers-desc": "HTTP 模式下随每次 MCP 请求发送",
-    "http-request-headers-placeholder": "{\n  \"Authorization\": \"Bearer ...\"\n}",
+    "http-request-headers-placeholder": "\\{\n  \"Authorization\": \"Bearer ...\"\n\\}",
     "session-disconnect-failed": "会话断开失败",
     "session-list-load-failed": "加载会话列表失败",
     "server-name-required": "服务器名称不能为空",

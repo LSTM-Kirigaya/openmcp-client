@@ -1,0 +1,45 @@
+[     837ms] [LOG] ws://localhost:8282 @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[     839ms] [LOG] %c[PLATFORM] Web background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[     847ms] [LOG] useAuth false @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:280
+[     874ms] [LOG] %cOpenMCP Client 启动 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1025ms] [LOG] %c准备请求设置 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1027ms] [LOG] send {command: lookup-env-var, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1028ms] [LOG] send {command: setting/load, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1028ms] [LOG] send {command: setting/get-tour, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1035ms] [LOG] %c消息桥连接完成 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1035ms] [LOG] %cversion: 0.0.1 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1044ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1054ms] [LOG] %c配置加载成功 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1054ms] [LOG] %c获取引导状态成功 true background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1055ms] [LOG] send {command: connect/list, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1068ms] [LOG] send {command: servers/list, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[    1111ms] [ERROR] TypeError: Cannot set properties of undefined (setting 'connectionSettingRef')
+    at ref (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:819:91761)
+    at Jeu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39)
+    at nuu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:11562)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:38823)
+    at xu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:40056)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39206)
+    at xu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:40056)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39206)
+    at vu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39928)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39021) @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:12
+[    1111ms] [ERROR] TypeError: Cannot set properties of undefined (setting 'connectionLogRef')
+    at ref (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:819:92674)
+    at Jeu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39)
+    at nuu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:11562)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:38823)
+    at xu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:40056)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39206)
+    at xu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:40056)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39206)
+    at vu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39928)
+    at Cu (http://localhost:8283/mcp/assets/index-uRMLmMVG.js:13:39021) @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:12
+[   12198ms] [LOG] send {command: lookup-env-var, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[   12212ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/mcp/assets/index-uRMLmMVG.js:42
+[   12298ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/mcp/connect:0
+[   12298ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/mcp/connect:0
+[   12298ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/mcp/connect:0
+[   12298ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/mcp/connect:0
+[   12298ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/mcp/connect:0
+[   12298ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/mcp/connect:0

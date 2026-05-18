@@ -507,7 +507,7 @@
     "server-url-placeholder": "ex: http://localhost:3000/sse",
     "http-request-headers": "En-têtes de requête",
     "http-request-headers-desc": "Envoyés avec chaque requête MCP en mode HTTP",
-    "http-request-headers-placeholder": "{\n  \"Authorization\": \"Bearer ...\"\n}",
+    "http-request-headers-placeholder": "\\{\n  \"Authorization\": \"Bearer ...\"\n\\}",
     "session-disconnect-failed": "Échec de la déconnexion de la session",
     "session-list-load-failed": "Échec du chargement de la liste des sessions",
     "server-name-required": "Le nom du serveur est requis",

@@ -1,0 +1,46 @@
+[     745ms] [LOG] ws://localhost:8282 @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     747ms] [LOG] %c[PLATFORM] Web background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     758ms] [LOG] useAuth false @ http://localhost:8283/assets/index-CNqQmkd4.js:280
+[     786ms] [LOG] %cOpenMCP Client 启动 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     907ms] [LOG] %c准备请求设置 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     909ms] [LOG] send {command: lookup-env-var, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     910ms] [LOG] send {command: setting/load, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     910ms] [LOG] send {command: setting/get-tour, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     914ms] [LOG] %c消息桥连接完成 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     914ms] [LOG] %cversion: 0.0.1 background-color:rgb(100, 200, 100); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     925ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     929ms] [LOG] %c配置加载成功 background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     929ms] [LOG] %c获取引导状态成功 true background-color: #6366f1; color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     929ms] [LOG] send {command: connect/list, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     934ms] [LOG] send {command: servers/list, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[     936ms] [ERROR] TypeError: Cannot set properties of undefined (setting 'connectionSettingRef')
+    at ref (http://localhost:8283/assets/index-CNqQmkd4.js:819:92375)
+    at Jeu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39)
+    at nuu (http://localhost:8283/assets/index-CNqQmkd4.js:13:11562)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:38823)
+    at xu (http://localhost:8283/assets/index-CNqQmkd4.js:13:40056)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39206)
+    at xu (http://localhost:8283/assets/index-CNqQmkd4.js:13:40056)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39206)
+    at vu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39928)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39021) @ http://localhost:8283/assets/index-CNqQmkd4.js:12
+[     937ms] [ERROR] TypeError: Cannot set properties of undefined (setting 'connectionLogRef')
+    at ref (http://localhost:8283/assets/index-CNqQmkd4.js:819:92958)
+    at Jeu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39)
+    at nuu (http://localhost:8283/assets/index-CNqQmkd4.js:13:11562)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:38823)
+    at xu (http://localhost:8283/assets/index-CNqQmkd4.js:13:40056)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39206)
+    at xu (http://localhost:8283/assets/index-CNqQmkd4.js:13:40056)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39206)
+    at vu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39928)
+    at Cu (http://localhost:8283/assets/index-CNqQmkd4.js:13:39021) @ http://localhost:8283/assets/index-CNqQmkd4.js:12
+[     937ms] [LOG] go to /connect @ http://localhost:8283/assets/index-CNqQmkd4.js:280
+[   64523ms] [LOG] send {command: lookup-env-var, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[   64540ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/assets/index-CNqQmkd4.js:42
+[   64621ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[   64621ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[   64621ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[   64621ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[   64621ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0
+[   64621ms] [VERBOSE] [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) @ http://localhost:8283/connect:0

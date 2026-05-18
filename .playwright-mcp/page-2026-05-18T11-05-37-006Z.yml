@@ -1,0 +1,86 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: —
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 
+            - generic [ref=e36]: 空白测试
+          - generic [ref=e37] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e49]:
+        - generic [ref=e56]:
+          - generic [ref=e60] [cursor=pointer]: 服务器 1
+          - generic [ref=e61] [cursor=pointer]:
+            - generic [ref=e62]: 
+            - generic [ref=e63]: 添加服务器
+        - generic [ref=e68]:
+          - generic [ref=e75]:
+            - heading "连接设置" [level=2] [ref=e76]
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - generic [ref=e79]: 类型
+                - radiogroup "radio-group" [ref=e80]:
+                  - generic [ref=e81]:
+                    - radio "stdio" [ref=e82]
+                    - generic [ref=e83] [cursor=pointer]: stdio
+                  - generic [ref=e84]:
+                    - radio "sse" [ref=e85]
+                    - generic [ref=e86] [cursor=pointer]: sse
+                  - generic [ref=e87]:
+                    - radio "http" [checked] [active] [ref=e88]
+                    - generic [ref=e89] [cursor=pointer]: http
+              - generic [ref=e278]:
+                - generic [ref=e279]: URL
+                - 'textbox "例如: http://localhost:3000/sse" [ref=e283]'
+              - generic [ref=e284]:
+                - generic [ref=e285]:
+                  - generic [ref=e286]: 请求头
+                  - generic [ref=e287]: HTTP 模式下随每次 MCP 请求发送
+                - generic [ref=e292]:
+                  - generic [ref=e295]: "1"
+                  - textbox [ref=e298]:
+                    - generic [ref=e299]: "{}"
+          - generic [ref=e230]:
+            - generic [ref=e231]:
+              - button "收起" [ref=e232] [cursor=pointer]:
+                - img [ref=e234]
+              - generic [ref=e236]: 日志
+              - generic "清空" [ref=e237] [cursor=pointer]: 
+              - generic [ref=e238]:
+                - button "断开" [disabled] [ref=e239]:
+                  - generic [ref=e240]: 断开
+                - button "连接" [ref=e241] [cursor=pointer]:
+                  - generic [ref=e242]: 连接
+            - button "预设环境变量同步完成" [ref=e249] [cursor=pointer]:
+              - generic [ref=e252]: 预设环境变量同步完成
+              - img [ref=e254]
+  - tooltip "MCP 中心 未连接 主题 浅色 深色 跟随系统  项目 GitHub  OpenMCP 官方文档" [ref=e258]:
+    - generic [ref=e259]:
+      - generic [ref=e260]:
+        - generic [ref=e261]: MCP 中心
+        - generic [ref=e262]: 未连接
+      - generic [ref=e264]:
+        - generic [ref=e265]: 主题
+        - generic [ref=e266]:
+          - button "浅色" [ref=e267] [cursor=pointer]
+          - button "深色" [ref=e268] [cursor=pointer]
+          - button "跟随系统" [ref=e269] [cursor=pointer]
+      - generic [ref=e271]:
+        - link " 项目 GitHub" [ref=e272] [cursor=pointer]:
+          - /url: https://github.com/LSTM-Kirigaya/openmcp-client
+          - generic [ref=e273]: 
+          - generic [ref=e274]: 项目 GitHub
+        - link " OpenMCP 官方文档" [ref=e275] [cursor=pointer]:
+          - /url: https://openmcp.kirigaya.cn
+          - generic [ref=e276]: 
+          - generic [ref=e277]: OpenMCP 官方文档

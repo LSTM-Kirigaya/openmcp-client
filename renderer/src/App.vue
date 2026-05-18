@@ -12,6 +12,7 @@
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { Connection } from './components/sidebar/sidebar';
+import { getSavedDefaultRoute, saveDefaultRoute } from './router';
 
 import Sidebar from '@/components/sidebar/index.vue';
 import MainPanel from '@/components/main-panel/index.vue';
@@ -53,17 +54,12 @@ onMounted(async () => {
 
 	pinkLog('OpenMCP Client 启动');
 
-	// 仅当访问根路径时跳转到 debug 页面，其他路由（如 /connect）保持不变
 	const currentPath = window.location.pathname;
 	const base = import.meta.env.BASE_URL.replace(/\/+$/, '');
-	if (currentPath === '/' || currentPath === base || currentPath === base + '/') {
-		const targetRoute = import.meta.env.BASE_URL + 'debug';
-		console.log('go to ' + targetRoute);
-		router.push(targetRoute);
-	}
+	const isRootPath = currentPath === '/' || currentPath === base || currentPath === base + '/';
 
-	// 进行桥接	
-	await bridge.awaitForWebsocket();		
+	// 进行桥接
+	await bridge.awaitForWebsocket();
 
 	// 根据是否需要密码进行后续的选择
 	if (!privilegeStatus.allow) {
@@ -74,7 +70,28 @@ onMounted(async () => {
 		Connection.showPanel = false;
 	});
 
-	await initialise();    
+	await initialise();
+
+	// 根路径智能重定向：根据连接状态决定默认页面
+	if (isRootPath) {
+		const savedRoute = getSavedDefaultRoute();
+		let targetRoute: string;
+		if (savedRoute) {
+			targetRoute = savedRoute;
+		} else {
+			// 动态导入以避免循环依赖
+			const { mcpClientAdapter } = await import('./views/connect/core');
+			targetRoute = mcpClientAdapter.connected
+				? import.meta.env.BASE_URL + 'debug'
+				: import.meta.env.BASE_URL + 'connect';
+		}
+		console.log('go to ' + targetRoute);
+		router.push(targetRoute);
+		// 确保记录这次使用的路径
+		if (!savedRoute) {
+			saveDefaultRoute(targetRoute);
+		}
+	}
 });
 
 </script>

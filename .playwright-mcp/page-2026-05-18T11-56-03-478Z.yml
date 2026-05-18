@@ -1,0 +1,130 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: ...
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 
+            - generic [ref=e36]: 空白测试
+          - generic [ref=e37] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e41]:
+        - generic [ref=e48]:
+          - generic [ref=e52] [cursor=pointer]: 服务器 1
+          - generic [ref=e53] [cursor=pointer]:
+            - generic [ref=e54]: 
+            - generic [ref=e55]: 添加服务器
+        - generic [ref=e60]:
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - heading "连接设置" [level=2] [ref=e68]
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - generic [ref=e71]: 类型
+                  - radiogroup "radio-group" [ref=e72]:
+                    - generic [ref=e73]:
+                      - radio "stdio" [checked] [ref=e74]
+                      - generic [ref=e75] [cursor=pointer]: stdio
+                    - generic [ref=e76]:
+                      - radio "sse" [ref=e77]
+                      - generic [ref=e78] [cursor=pointer]: sse
+                    - generic [ref=e79]:
+                      - radio "http" [ref=e80]
+                      - generic [ref=e81] [cursor=pointer]: http
+                - generic [ref=e82]:
+                  - generic [ref=e83]: 命令
+                  - textbox "mcp run <your script>" [ref=e87]
+                - generic [ref=e88]:
+                  - generic [ref=e89]: 执行目录
+                  - 'textbox "例如: /home/user/project" [ref=e93]'
+            - generic [ref=e94]:
+              - heading "环境变量" [level=2] [ref=e95]
+              - generic [ref=e96]:
+                - generic [ref=e97]:
+                  - generic [ref=e98]: 预设
+                  - generic [ref=e99]:
+                    - switch [checked]
+                    - generic [ref=e103] [cursor=pointer]: 预设
+                - generic [ref=e105]:
+                  - generic [ref=e106]: 添加变量
+                  - generic [ref=e107]:
+                    - textbox "键" [ref=e110]
+                    - textbox "值" [ref=e113]
+                    - button "" [ref=e114] [cursor=pointer]:
+                      - generic [ref=e116]: 
+                - generic [ref=e117]:
+                  - generic [ref=e118]: HOME
+                  - generic [ref=e119]:
+                    - textbox "键" [ref=e122]: HOME
+                    - generic [ref=e124]:
+                      - textbox "值" [ref=e125]: /Users/kirigaya
+                      - img [ref=e128] [cursor=pointer]
+                    - button "" [ref=e131] [cursor=pointer]:
+                      - generic [ref=e133]: 
+                - generic [ref=e134]:
+                  - generic [ref=e135]: LOGNAME
+                  - generic [ref=e136]:
+                    - textbox "键" [ref=e139]: LOGNAME
+                    - generic [ref=e141]:
+                      - textbox "值" [ref=e142]: kirigaya
+                      - img [ref=e145] [cursor=pointer]
+                    - button "" [ref=e148] [cursor=pointer]:
+                      - generic [ref=e150]: 
+                - generic [ref=e151]:
+                  - generic [ref=e152]: PATH
+                  - generic [ref=e153]:
+                    - textbox "键" [ref=e156]: PATH
+                    - generic [ref=e158]:
+                      - textbox "值" [ref=e159]: /opt/homebrew/opt/openjdk@17/bin:/Users/kirigaya/.nvm/versions/node/v24.14.0/bin:/Users/kirigaya/go/bin:/opt/homebrew/opt/go/bin:/opt/homebrew/opt/python@3.12/libexec/bin:/opt/homebrew/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/Library/TeX/texbin:/Users/kirigaya/.cargo/bin:/Users/kirigaya/.local/bin:/Users/kirigaya/Library/Android/sdk/emulator:/Users/kirigaya/Library/Android/sdk/tools:/Users/kirigaya/Library/Android/sdk/platform-tools:/Users/kirigaya/Library/Android/sdk/cmdline-tools/latest/bin:/Users/kirigaya/Library/Android/sdk/platform-tools:/Users/kirigaya/Library/Android/sdk/emulator
+                      - img [ref=e162] [cursor=pointer]
+                    - button "" [ref=e165] [cursor=pointer]:
+                      - generic [ref=e167]: 
+                - generic [ref=e168]:
+                  - generic [ref=e169]: SHELL
+                  - generic [ref=e170]:
+                    - textbox "键" [ref=e173]: SHELL
+                    - generic [ref=e175]:
+                      - textbox "值" [ref=e176]: /bin/zsh
+                      - img [ref=e179] [cursor=pointer]
+                    - button "" [ref=e182] [cursor=pointer]:
+                      - generic [ref=e184]: 
+                - generic [ref=e185]:
+                  - generic [ref=e186]: TERM
+                  - generic [ref=e187]:
+                    - textbox "键" [ref=e190]: TERM
+                    - generic [ref=e192]:
+                      - textbox "值" [ref=e193]: xterm-256color
+                      - img [ref=e196] [cursor=pointer]
+                    - button "" [ref=e199] [cursor=pointer]:
+                      - generic [ref=e201]: 
+                - generic [ref=e202]:
+                  - generic [ref=e203]: USER
+                  - generic [ref=e204]:
+                    - textbox "键" [ref=e207]: USER
+                    - generic [ref=e209]:
+                      - textbox "值" [ref=e210]: kirigaya
+                      - img [ref=e213] [cursor=pointer]
+                    - button "" [ref=e216] [cursor=pointer]:
+                      - generic [ref=e218]: 
+            - generic [ref=e220]:
+              - button "断开" [disabled] [ref=e221]:
+                - generic [ref=e222]: 断开
+              - button "连接" [ref=e223] [cursor=pointer]:
+                - generic [ref=e224]: 连接
+          - generic [ref=e229]:
+            - button "展开" [ref=e230] [cursor=pointer]:
+              - img [ref=e232]
+            - generic [ref=e234]: 日志
+  - generic:  
+  - generic [ref=e236]:
+    - img [ref=e237]
+    - paragraph [ref=e239]: Loading

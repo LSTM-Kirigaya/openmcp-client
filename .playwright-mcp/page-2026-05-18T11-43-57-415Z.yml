@@ -1,0 +1,44 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - img "OpenMCP" [ref=e7] [cursor=pointer]
+        - generic [ref=e9]:
+          - generic [ref=e12] [cursor=pointer]: 
+          - generic [ref=e15] [cursor=pointer]: 
+          - generic [ref=e18] [cursor=pointer]: 
+          - generic [ref=e21] [cursor=pointer]: 
+      - generic [ref=e26] [cursor=pointer]: —
+    - generic [ref=e27]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 
+            - generic [ref=e36]: 空白测试
+          - generic [ref=e37] [cursor=pointer]: 
+        - generic [ref=e38] [cursor=pointer]: 
+      - generic [ref=e49]:
+        - generic [ref=e50]: 选择下方模块开始调试
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e54]: 
+            - generic [ref=e55]: 资源
+          - generic [ref=e56]:
+            - generic [ref=e58]: 
+            - generic [ref=e59]: 提词
+          - generic [ref=e60]:
+            - generic [ref=e62]: 
+            - generic [ref=e63]: 工具
+        - generic [ref=e64]:
+          - generic [ref=e65] [cursor=pointer]:
+            - generic [ref=e67]: 
+            - generic [ref=e68]: 交互测试
+          - generic [ref=e69] [cursor=pointer]:
+            - generic [ref=e71]: 
+            - generic [ref=e72]: 查看回流数据
+          - generic [ref=e73] [cursor=pointer]:
+            - generic [ref=e75]: 
+            - generic [ref=e76]: 批量验证
+  - generic:
+    - tooltip "MCP 中心" [ref=e40]: MCP 中心
+    - text:  

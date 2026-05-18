@@ -9,7 +9,13 @@
 				<div class="connect-panel-container top" :ref="el => client.connectionSettingRef = el">
 					<el-scrollbar class="options-scrollbar">
 						<div class="connection-setting-content">
-							<ConnectionMethodAndArgs :index="props.index" />
+							<ConnectionMethodAndArgs
+								:index="props.index"
+								:loading="isLoading"
+								:disconnecting="isDisconnecting"
+								@connect="connect"
+								@disconnect="disconnect"
+							/>
 							<div v-if="client.connectionArgs.connectionType === 'STDIO'" class="setting-section connection-env-section">
 								<h2>{{ t('env-var') }}</h2>
 								<ConnectionEnvironment :index="props.index" />
@@ -29,12 +35,7 @@
 				<div class="connect-panel-container bottom" :ref="el => client.connectionLogRef = el">
 					<ConnectionLog
 						:index="props.index"
-						:loading="isLoading"
-						:disconnecting="isDisconnecting"
-						:connected="!!client.connectionResult.success"
 						:collapsed="isLogCollapsed"
-						@connect="connect"
-						@disconnect="disconnect"
 						@toggle-collapse="toggleLogCollapsed"
 					/>
 				</div>
@@ -71,9 +72,9 @@ const isDisconnecting = ref(false);
 const collapsedLogPanelSize = 58;
 const minExpandedLogPanelSize = 96;
 const defaultExpandedLogPanelSize = 260;
-const logPanelSize = ref<string | number>(defaultExpandedLogPanelSize);
+const logPanelSize = ref<string | number>(collapsedLogPanelSize);
 const lastExpandedLogPanelSize = ref<string | number>(defaultExpandedLogPanelSize);
-const isLogCollapsed = ref(false);
+const isLogCollapsed = ref(true);
 
 function getPixelSize(size: string | number) {
 	if (typeof size === 'number') return size;
@@ -109,6 +110,10 @@ function toggleLogCollapsed() {
 
 async function connect() {
 	isLoading.value = true;
+	// 点击连接时自动展开日志面板，方便用户实时查看连接过程
+	if (isLogCollapsed.value) {
+		toggleLogCollapsed();
+	}
 	const ok = await client.value.connect();
 	if (ok) mcpClientAdapter.saveLaunchSignature();
 	isLoading.value = false;

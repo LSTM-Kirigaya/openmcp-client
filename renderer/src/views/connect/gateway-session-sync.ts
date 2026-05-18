@@ -132,7 +132,12 @@ export async function fetchAndApplyGatewaySessions(previousSelectedId: string): 
 	const ids = new Set(list.map(s => s.clientId));
 
 	for (let i = mcpClientAdapter.clients.length - 1; i >= 0; i--) {
-		if (!ids.has(mcpClientAdapter.clients[i].clientId)) {
+		const client = mcpClientAdapter.clients[i];
+		// 保留本地未连接的草稿（没有 clientId 的），避免用户正在编辑的新建配置被意外清空
+		if (!client.clientId) {
+			continue;
+		}
+		if (!ids.has(client.clientId)) {
 			mcpClientAdapter.clients.splice(i, 1);
 		}
 	}
@@ -153,7 +158,9 @@ export async function fetchAndApplyGatewaySessions(previousSelectedId: string): 
 			finalOrdered.push(c);
 		}
 	}
-	mcpClientAdapter.clients.splice(0, mcpClientAdapter.clients.length, ...finalOrdered);
+	// 保留本地未连接的草稿，避免用户正在编辑的配置被 Gateway 会话同步覆盖而消失
+	const localDrafts = mcpClientAdapter.clients.filter(c => !c.clientId);
+	mcpClientAdapter.clients.splice(0, mcpClientAdapter.clients.length, ...finalOrdered, ...localDrafts);
 
 	let nextSelected = previousSelectedId;
 	if (!nextSelected || !ids.has(nextSelected)) {

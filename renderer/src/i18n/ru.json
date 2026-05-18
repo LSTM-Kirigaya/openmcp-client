@@ -507,7 +507,7 @@
     "server-url-placeholder": "напр. http://localhost:3000/sse",
     "http-request-headers": "Заголовки запроса",
     "http-request-headers-desc": "Отправляются с каждым MCP-запросом в режиме HTTP",
-    "http-request-headers-placeholder": "{\n  \"Authorization\": \"Bearer ...\"\n}",
+    "http-request-headers-placeholder": "\\{\n  \"Authorization\": \"Bearer ...\"\n\\}",
     "session-disconnect-failed": "Не удалось отключить сеанс",
     "session-list-load-failed": "Не удалось загрузить список сеансов",
     "server-name-required": "Имя сервера обязательно",
