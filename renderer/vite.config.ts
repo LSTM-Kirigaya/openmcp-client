@@ -25,7 +25,7 @@ export default defineConfig(({ mode }) => ({
 			'@': fileURLToPath(new URL('./src', import.meta.url))
 		},
 	},
-	base: mode === 'website' ? '/mcp/' : '/',
+	base: '/',
 	server: {
 		// openmcp 会用 PORT 环境变量指定 Web UI 端口
 		port: process.env.PORT ? Number(process.env.PORT) : undefined,

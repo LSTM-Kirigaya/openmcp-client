@@ -48,21 +48,11 @@ function injectRuntimeConfig(html: string): string {
 }
 
 function detectBuildBase(distDir: string): string {
-  try {
-    const html = fs.readFileSync(path.join(distDir, 'index.html'), 'utf-8');
-    const match = html.match(/<script[^>]+src="([^"]+)"/);
-    if (match && match[1].startsWith('/mcp/')) {
-      return '/mcp/';
-    }
-  } catch {
-    // ignore
-  }
   return '/';
 }
 
 function createStaticWebServer(distDir: string) {
   const buildBase = detectBuildBase(distDir);
-  const isMcpBase = buildBase === '/mcp/';
 
   return http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://localhost');
@@ -75,12 +65,6 @@ function createStaticWebServer(distDir: string) {
     }
 
     if (pathname === '/' || pathname === '') {
-      if (isMcpBase) {
-        res.writeHead(302, { Location: '/mcp/' });
-        res.end();
-        return;
-      }
-      // 普通 build：直接返回 index.html，让 Vue Router 接管根路径重定向
       const filePath = path.join(distDir, 'index.html');
       try {
         let body = fs.readFileSync(filePath).toString('utf-8');
@@ -97,22 +81,11 @@ function createStaticWebServer(distDir: string) {
       return;
     }
 
-    // 兼容两类构建产物：
-    // 1) base=/mcp/ 时资源路径为 /mcp/assets/*
-    // 2) base=/   时资源路径为 /assets/* 或 /default-dark.css
     let relative = '';
     let spaFallback = false;
-    if (pathname === '/mcp/') {
-      relative = 'index.html';
-      spaFallback = true;
-    } else if (pathname.startsWith('/mcp/')) {
-      relative = sanitizeRelativePath(pathname.slice('/mcp/'.length));
-      spaFallback = true;
-    } else {
-      relative = sanitizeRelativePath(pathname);
-      // 对无扩展名路径（如 /debug、/settings）做 SPA 回退，支持手动刷新
-      spaFallback = path.extname(pathname) === '';
-    }
+    relative = sanitizeRelativePath(pathname);
+    // 对无扩展名路径（如 /debug、/settings）做 SPA 回退，支持手动刷新
+    spaFallback = path.extname(pathname) === '';
 
     const target = path.join(distDir, relative);
 
@@ -159,7 +132,7 @@ function createStaticWebServer(distDir: string) {
 export function runStaticWebServer(distDir: string, port: number) {
   const server = createStaticWebServer(distDir);
   server.listen(port, () => {
-    console.log(`Static web server ready at http://localhost:${port}/mcp/`);
+    console.log(`Static web server ready at http://localhost:${port}/`);
   });
 }
 

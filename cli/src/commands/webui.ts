@@ -117,7 +117,7 @@ async function runWebForeground(options: any) {
 
   const uiStatus = await statusRendererService(webPort);
   if (uiStatus.running) {
-    console.log(`⚠️  Web UI is already running at http://localhost:${webPort}/mcp/`);
+    console.log(`⚠️  Web UI is already running at http://localhost:${webPort}/`);
     return;
   }
 
@@ -129,8 +129,7 @@ async function runWebForeground(options: any) {
     return;
   }
 
-  // renderer 在 `mode=website` 时 base 为 `/mcp/`，因此需要打开该路径
-  const url = `http://localhost:${webPort}/mcp/`;
+  const url = `http://localhost:${webPort}/`;
 
   console.log(`
 🌐 Web UI:     ${url}
@@ -185,7 +184,7 @@ async function startWebBackground(options: any) {
 
   const uiStatus = await statusRendererService(webPort);
   if (uiStatus.running) {
-    console.log(`⚠️  Web UI is already running at http://localhost:${webPort}/mcp/`);
+    console.log(`⚠️  Web UI is already running at http://localhost:${webPort}/`);
     return;
   }
 
@@ -198,7 +197,7 @@ async function startWebBackground(options: any) {
     return;
   }
 
-  const url = `http://localhost:${webPort}/mcp/`;
+  const url = `http://localhost:${webPort}/`;
   console.log(`
 🌐 Web UI:     ${url}
 🔌 Gateway:    ${wsUrlForPort(gatewayPort)}

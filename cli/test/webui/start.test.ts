@@ -41,14 +41,14 @@ describe('webui start', { timeout: 120_000 }, () => {
     assert.equal(json.app, 'openmcp-web-ui');
   });
 
-  it('should serve the main page at /mcp/', async () => {
-    const { status, body } = await httpGet(TEST_WEBUI_PORT, '/mcp/');
+  it('should serve the main page at /', async () => {
+    const { status, body } = await httpGet(TEST_WEBUI_PORT, '/');
     assert.equal(status, 200);
-    assert.ok(body.includes('<html') || body.includes('<!DOCTYPE'), '/mcp/ 应返回 HTML');
+    assert.ok(body.includes('<html') || body.includes('<!DOCTYPE'), '/ 应返回 HTML');
   });
 
   it('should inject runtime websocket configuration into the static page', async () => {
-    const { status, body } = await httpGet(TEST_WEBUI_PORT, '/mcp/');
+    const { status, body } = await httpGet(TEST_WEBUI_PORT, '/');
     assert.equal(status, 200);
     assert.ok(
       body.includes(`window.__OPENMCP_RUNTIME_CONFIG__ = {"websocketUrl":"ws://localhost:${TEST_GATEWAY_PORT}","useAuth":false};`),

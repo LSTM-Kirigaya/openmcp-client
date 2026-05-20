@@ -840,7 +840,7 @@ export async function startRendererBackground(port: number = 8283, gatewayPort: 
     return { pid: existingPid };
   }
   if (await isOpenMcpWebReachable(port)) {
-    console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/mcp/ (no local PID record)`);
+    console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/ (no local PID record)`);
     return { pid: 0 };
   }
 
@@ -896,7 +896,7 @@ export async function startRendererStaticBackground(port: number = 8283, gateway
     return { pid: existingPid };
   }
   if (await isOpenMcpWebReachable(port)) {
-    console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/mcp/ (no local PID record)`);
+    console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/ (no local PID record)`);
     return { pid: 0 };
   }
 
@@ -962,7 +962,7 @@ export async function stopRendererService(port: number = 8283): Promise<boolean>
         console.log(`❌ Failed to stop detected process (PID: ${detectedPid}).`);
         return false;
       }
-      console.log(`⚠️  Web UI is reachable at http://localhost:${port}/mcp/, but PID could not be resolved from port.`);
+      console.log(`⚠️  Web UI is reachable at http://localhost:${port}/, but PID could not be resolved from port.`);
       return false;
     }
     console.log(`ℹ️  No Renderer PID found. Is it running?`);

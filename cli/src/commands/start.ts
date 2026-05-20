@@ -35,8 +35,7 @@ export const startCommand = new Command('start')
       return;
     }
 
-    // renderer 在 `mode=website` 时 base 为 `/mcp/`，因此需要打开该路径
-    const url = `http://localhost:${webPort}/mcp/`;
+    const url = `http://localhost:${webPort}/`;
 
     console.log(`
 🌐 Web UI:     ${url}
