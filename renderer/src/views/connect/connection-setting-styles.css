@@ -64,6 +64,11 @@
 	border-bottom-right-radius: 16px;
 }
 
+.connection-setting-content .setting-section .setting-options .connection-actions-row {
+	padding: 16px 20px;
+	justify-content: flex-end;
+}
+
 .connection-setting-content .setting-section .setting-options .option-title {
 	font-size: 14px;
 	min-width: 100px;

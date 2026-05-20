@@ -49,7 +49,7 @@
 					</div>
 				</div>
 			</template>
-			<div class="connection-actions-row">
+			<div class="setting-option connection-actions-row">
 				<el-button-group class="connection-actions-group">
 					<el-button
 						class="btn-disconnect"
@@ -182,7 +182,6 @@ const headersSchema = {
 }
 
 .connection-actions-row {
-	padding: 16px 20px 0;
 	display: flex;
 	justify-content: flex-end;
 }
