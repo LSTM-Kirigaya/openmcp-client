@@ -35,3 +35,5 @@ resources/changelog/**
 test/sdk/.yarn
 _npm_try
 **/.npmrc
+
+.playwright-mcp

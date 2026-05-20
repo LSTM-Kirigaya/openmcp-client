@@ -31,3 +31,4 @@
 [   55452ms] [LOG] send {command: resources/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
 [   55708ms] [LOG] send {command: resources/templates/list, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
 [   56154ms] [LOG] send {command: servers/replace-all, data: Object} @ http://localhost:8283/assets/index-ltF7FkO6.js:42
+[ 3690019ms] [LOG] %cWebSocket connection closed background-color:rgb(227, 91, 49); color: white; padding: 3px; border-radius: 3px; @ http://localhost:8283/assets/index-ltF7FkO6.js:42
