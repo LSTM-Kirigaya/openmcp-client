@@ -610,39 +610,51 @@ export function runService(port: number = 8282): { pid: number } {
 /**
  * 启动 Gateway（后台运行，立即返回）
  */
-export async function startService(port: number = 8282): Promise<{ pid: number }> {
-  console.log(`🚀 Starting OpenMCP Gateway on port ${port}...`);
-  
+export async function startService(port: number = 8282, quiet?: boolean): Promise<{ pid: number; alreadyRunning?: boolean }> {
+  if (!quiet) {
+    console.log(`🚀 Starting OpenMCP Gateway on port ${port}...`);
+  }
+
   // 检查是否已经在运行
   const { pid: existingPid, port: existingPort } = readPidMeta(port);
   if (existingPid && existingPort === port && await isProcessRunning(existingPid)) {
-    console.log(`⚠️  Gateway is already running (PID: ${existingPid})`);
-    return { pid: existingPid };
+    if (!quiet) {
+      console.log(`⚠️  Gateway is already running (PID: ${existingPid})`);
+    }
+    return { pid: existingPid, alreadyRunning: true };
   }
 
   // PID 文件缺失或失效时，仍通过 WebSocket 可达性识别已运行的 Gateway
   if (await isGatewayReachable(port)) {
-    console.log(`⚠️  Gateway is already reachable at ws://localhost:${port} (no local PID record)`);
-    return { pid: 0 };
+    if (!quiet) {
+      console.log(`⚠️  Gateway is already reachable at ws://localhost:${port} (no local PID record)`);
+    }
+    return { pid: 0, alreadyRunning: true };
   }
-  
+
   const result = doStartService(port, true);
-  
+
   // 等待一下让进程启动
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // 检查是否真的启动成功
   const pid = result.pid;
   if (pid && await isProcessRunning(pid)) {
-    console.log(`✅ Gateway started (PID: ${pid})`);
-    console.log(`🌐 WebSocket: ws://localhost:${port}`);
+    if (!quiet) {
+      console.log(`✅ Gateway started (PID: ${pid})`);
+      console.log(`🌐 WebSocket: ws://localhost:${port}`);
+    }
   } else if (await isGatewayReachable(port)) {
-    console.log(`✅ Gateway is reachable at ws://localhost:${port}`);
+    if (!quiet) {
+      console.log(`✅ Gateway is reachable at ws://localhost:${port}`);
+    }
   } else {
-    console.log(`⚠️  Gateway may have failed to start`);
-    printGatewayStartupFailureHint();
+    if (!quiet) {
+      console.log(`⚠️  Gateway may have failed to start`);
+      printGatewayStartupFailureHint();
+    }
   }
-  
+
   return result;
 }
 
@@ -753,8 +765,10 @@ export async function statusService(port: number = 8282): Promise<{ running: boo
 /**
  * 启动 Renderer（前台运行，阻塞）
  */
-export function startRenderer(port: number = 8283, gatewayPort: number = 8282): ChildProcess {
-  console.log(`🚀 Starting OpenMCP Web UI on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+export function startRenderer(port: number = 8283, gatewayPort: number = 8282, quiet?: boolean): ChildProcess {
+  if (!quiet) {
+    console.log(`🚀 Starting OpenMCP Web UI on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+  }
 
   const env = {
     ...process.env,
@@ -784,14 +798,16 @@ export function startRenderer(port: number = 8283, gatewayPort: number = 8282): 
 /**
  * 启动 Renderer（生产模式：静态托管，前台运行）
  */
-export function startRendererStatic(port: number = 8283, gatewayPort: number = 8282): ChildProcess | null {
+export function startRendererStatic(port: number = 8283, gatewayPort: number = 8282, quiet?: boolean): ChildProcess | null {
   if (!fs.existsSync(RENDERER_DIST_DIR)) {
     console.error(`❌ renderer dist not found: ${RENDERER_DIST_DIR}`);
     printRendererDistMissingHint();
     return null;
   }
 
-  console.log(`🚀 Starting OpenMCP Web UI (static) on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+  if (!quiet) {
+    console.log(`🚀 Starting OpenMCP Web UI (static) on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+  }
 
   const env = {
     ...process.env,
@@ -799,7 +815,8 @@ export function startRendererStatic(port: number = 8283, gatewayPort: number = 8
     RENDERER_DIST_DIR,
     VITE_USE_AUTH: 'false',
     // 提供给前端运行时（若页面中读取）
-    VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
+    VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`,
+    OPENMCP_QUIET: quiet ? '1' : undefined
   };
 
   currentRenderer = spawn(NODE, [STATIC_WEB_SERVER_ENTRY], {
@@ -831,16 +848,22 @@ function saveRendererPid(pid: number, port: number): void {
 /**
  * 启动 Renderer（后台运行）
  */
-export async function startRendererBackground(port: number = 8283, gatewayPort: number = 8282): Promise<{ pid: number }> {
-  console.log(`🚀 Starting OpenMCP Web UI (background) on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+export async function startRendererBackground(port: number = 8283, gatewayPort: number = 8282, quiet?: boolean): Promise<{ pid: number }> {
+  if (!quiet) {
+    console.log(`🚀 Starting OpenMCP Web UI (background) on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+  }
 
   const { pid: existingPid, port: existingPort } = readRendererPidMeta(port);
   if (existingPid && existingPort === port && await isProcessRunning(existingPid)) {
-    console.log(`⚠️  Renderer is already running (PID: ${existingPid})`);
+    if (!quiet) {
+      console.log(`⚠️  Renderer is already running (PID: ${existingPid})`);
+    }
     return { pid: existingPid };
   }
   if (await isOpenMcpWebReachable(port)) {
-    console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/ (no local PID record)`);
+    if (!quiet) {
+      console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/ (no local PID record)`);
+    }
     return { pid: 0 };
   }
 
@@ -887,16 +910,22 @@ export async function startRendererBackground(port: number = 8283, gatewayPort: 
 /**
  * 启动 Renderer（生产模式：静态托管，后台运行）
  */
-export async function startRendererStaticBackground(port: number = 8283, gatewayPort: number = 8282): Promise<{ pid: number }> {
-  console.log(`🚀 Starting OpenMCP Web UI (static background) on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+export async function startRendererStaticBackground(port: number = 8283, gatewayPort: number = 8282, quiet?: boolean): Promise<{ pid: number }> {
+  if (!quiet) {
+    console.log(`🚀 Starting OpenMCP Web UI (static background) on port ${port} (gateway ws://localhost:${gatewayPort})...`);
+  }
 
   const { pid: existingPid, port: existingPort } = readRendererPidMeta(port);
   if (existingPid && existingPort === port && await isProcessRunning(existingPid)) {
-    console.log(`⚠️  Renderer is already running (PID: ${existingPid})`);
+    if (!quiet) {
+      console.log(`⚠️  Renderer is already running (PID: ${existingPid})`);
+    }
     return { pid: existingPid };
   }
   if (await isOpenMcpWebReachable(port)) {
-    console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/ (no local PID record)`);
+    if (!quiet) {
+      console.log(`⚠️  Web UI is already reachable at http://localhost:${port}/ (no local PID record)`);
+    }
     return { pid: 0 };
   }
 
@@ -911,7 +940,8 @@ export async function startRendererStaticBackground(port: number = 8283, gateway
     PORT: String(port),
     RENDERER_DIST_DIR,
     VITE_USE_AUTH: 'false',
-    VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`
+    VITE_WEBSOCKET_URL: `ws://localhost:${gatewayPort}`,
+    OPENMCP_QUIET: quiet ? '1' : undefined
   };
 
   const child = spawn(NODE, [STATIC_WEB_SERVER_ENTRY], {

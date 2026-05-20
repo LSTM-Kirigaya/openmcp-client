@@ -1,11 +1,31 @@
 import { Command } from 'commander';
 import open from 'open';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import { startService, startRenderer, startRendererStatic, stopAll } from '../lib/index.js';
 import { HELP_START } from '../lib/help-text.js';
+import { logger } from '../lib/logger.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+function readPackageVersion(): string {
+  try {
+    const pkgPath = path.resolve(__dirname, '..', '..', 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8')) as { version?: string };
+    return pkg.version || '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
 
 function isWebDevModeEnabled(): boolean {
   const value = (process.env.OPENMCP_WEB_DEV || '').toLowerCase();
   return value === '1' || value === 'true' || value === 'yes';
+}
+
+function padEnd(str: string, len: number): string {
+  return str.length >= len ? str : str + ' '.repeat(len - str.length);
 }
 
 export const startCommand = new Command('start')
@@ -17,52 +37,57 @@ export const startCommand = new Command('start')
   .action(async (options) => {
     const webPort = parseInt(options.port, 10);
     const gatewayPort = parseInt(options.gatewayPort, 10);
+    const version = readPackageVersion();
 
-    console.log(`
-╔═══════════════════════════════════════╗
-║      OpenMCP                         ║
-║      Gateway + Web UI                 ║
-╚═══════════════════════════════════════╝
-    `);
+    logger.brand(`▲ OpenMCP  v${version}`);
+    console.log();
 
-    await startService(gatewayPort);
+    const gatewayResult = await startService(gatewayPort, true);
+    const gatewayUrl = `ws://localhost:${gatewayPort}`;
 
     const renderer = isWebDevModeEnabled()
-      ? startRenderer(webPort, gatewayPort)
-      : startRendererStatic(webPort, gatewayPort);
+      ? startRenderer(webPort, gatewayPort, true)
+      : startRendererStatic(webPort, gatewayPort, true);
+
     if (!renderer) {
+      logger.error('Failed to start Web UI.');
       process.exit(1);
       return;
     }
 
-    const url = `http://localhost:${webPort}/`;
+    const webUrl = `http://localhost:${webPort}/`;
 
-    console.log(`
-🌐 Web UI:     ${url}
-🔌 Gateway:    ws://localhost:${gatewayPort}
-🧩 Mode:       ${isWebDevModeEnabled() ? 'development (vite)' : 'production (static)'}
-📝 Press Ctrl+C to stop all services
-    `);
+    console.log(`  ${padEnd('Gateway', 8)} ${logger.url(gatewayUrl)}`);
+    console.log(`  ${padEnd('Web UI', 8)} ${logger.url(webUrl)}`);
+    console.log();
+
+    if (gatewayResult.alreadyRunning) {
+      logger.info('  Gateway was already running.');
+    }
+
+    logger.success('  Ready. Press Ctrl+C to stop.');
 
     // Open browser
     setTimeout(() => {
-      console.log(`\n🚀 Opening browser...`);
+      logger.dim('  Opening browser...');
       if (options.browser) {
-        open(url, { app: { name: options.browser } });
+        open(webUrl, { app: { name: options.browser } });
       } else {
-        open(url);
+        open(webUrl);
       }
     }, 3000);
 
     // Handle graceful shutdown
     process.on('SIGINT', async () => {
-      console.log('\n🛑 Stopping all services...');
+      console.log();
+      logger.info('  Stopping all services...');
       await stopAll();
       process.exit(0);
     });
 
     process.on('SIGTERM', async () => {
-      console.log('\n🛑 Stopping all services...');
+      console.log();
+      logger.info('  Stopping all services...');
       await stopAll();
       process.exit(0);
     });

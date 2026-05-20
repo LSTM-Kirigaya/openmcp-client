@@ -132,7 +132,9 @@ function createStaticWebServer(distDir: string) {
 export function runStaticWebServer(distDir: string, port: number) {
   const server = createStaticWebServer(distDir);
   server.listen(port, () => {
-    console.log(`Static web server ready at http://localhost:${port}/`);
+    if (process.env.OPENMCP_QUIET !== '1') {
+      console.log(`web server ready on http://localhost:${port}/`);
+    }
   });
 }
 
