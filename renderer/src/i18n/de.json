@@ -103,6 +103,7 @@
     "server-provider": "Dienstanbieter",
     "api-root-url": "API-Stamm-URL",
     "api-token": "API-Token",
+    "use-anthropic-protocol": "Anthropic-Protokoll verwenden",
     "connection-method": "Verbindungsmethode",
     "command": "Befehl",
     "env-var": "Umgebungsvariable",

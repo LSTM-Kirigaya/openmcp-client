@@ -26,6 +26,7 @@ export interface BasicLlmDescription {
 	isDynamic?: boolean,
 	modelsEndpoint?: string,
 	supportsPricing?: boolean,
+	useAnthropicProtocol?: boolean,
     pricing?: {
         // 百万tokens输入（缓存命中）
         inputPerMilleHitCache: number,

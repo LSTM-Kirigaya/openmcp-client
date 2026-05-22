@@ -30,6 +30,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.98.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@seald-io/nedb": "^4.1.1",
     "@supabase/supabase-js": "^2.99.0",

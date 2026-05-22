@@ -24,6 +24,7 @@ export interface BatchValidationOptions {
         apiKey: string;
         model: string;
         temperature?: number;
+        useAnthropicProtocol?: boolean;
     };
 }
 
@@ -178,7 +179,8 @@ export async function runBatchValidation(
                 apiKey: llmConfig.apiKey,
                 model: llmConfig.model,
                 messages: judgeMessages,
-                temperature: llmConfig.temperature ?? 0
+                temperature: llmConfig.temperature ?? 0,
+                useAnthropicProtocol: llmConfig.useAnthropicProtocol
             });
 
             const result: ValidationResult = {

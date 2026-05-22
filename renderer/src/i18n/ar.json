@@ -103,6 +103,7 @@
     "server-provider": "مزود الخدمة",
     "api-root-url": "عنوان URL الأساسي لـ API",
     "api-token": "رمز API",
+    "use-anthropic-protocol": "استخدام بروتوكول Anthropic",
     "connection-method": "طريقة الاتصال",
     "command": "أمر",
     "env-var": "متغير البيئة",

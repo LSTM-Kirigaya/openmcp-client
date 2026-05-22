@@ -1,18 +1,34 @@
 <template>
     <div v-if="executor" class="executor-actions-wrapper">
         <el-button-group class="executor-actions-group">
-            <el-button class="btn-secondary btn-reset" @click="onReset">
+            <el-button
+                class="btn-secondary btn-reset"
+                :disabled="executor.loading || executor.aiMockLoading"
+                @click="onReset"
+            >
                 {{ executor.t('reset') }}
             </el-button>
-            <el-button class="btn-secondary" @click="executor.variableExtractionVisible = true">
+            <el-button
+                class="btn-secondary"
+                :disabled="executor.loading || executor.aiMockLoading"
+                @click="executor.variableExtractionVisible = true"
+            >
                 {{ executor.t('variable-extraction') }}
             </el-button>
-            <el-dropdown trigger="hover" class="mock-dropdown" @command="executor.onMockCommand">
+            <el-dropdown
+                trigger="hover"
+                class="mock-dropdown"
+                :class="{ 'is-disabled': executor.loading || executor.mockLoading || executor.aiMockLoading }"
+                @command="executor.onMockCommand"
+            >
                 <span
                     class="el-dropdown-link mock-dropdown-link"
                     :class="{ 'is-disabled': executor.loading || executor.mockLoading || executor.aiMockLoading }"
                 >
-                    Mock
+                    <el-icon v-if="executor.aiMockLoading" class="is-loading mock-loading-icon">
+                        <Loading />
+                    </el-icon>
+                    <span>Mock</span>
                     <el-icon class="el-icon--right">
                         <ArrowDown />
                     </el-icon>
@@ -27,7 +43,7 @@
             <el-button
                 v-if="executor.currentTool"
                 class="btn-secondary"
-                :disabled="executor.loading"
+                :disabled="executor.loading || executor.aiMockLoading"
                 @click="executor.saveAsTestCase"
             >
                 {{ executor.t('save-as-test-case') }}
@@ -35,6 +51,7 @@
             <el-button
                 type="primary"
                 :loading="executor.loading"
+                :disabled="executor.aiMockLoading"
                 @click="executor.handleExecute"
                 class="btn-execute"
             >
@@ -48,7 +65,7 @@
 
 <script setup lang="ts">
 import { inject, computed } from 'vue';
-import { ArrowDown } from '@element-plus/icons-vue';
+import { ArrowDown, Loading } from '@element-plus/icons-vue';
 
 const executorRef = inject<{ value?: any }>('toolExecutorRef', { value: null });
 const executor = computed(() => executorRef?.value ?? null);
@@ -157,6 +174,11 @@ function onReset() {
 
 .mock-dropdown-link .el-icon--right {
     margin-left: 4px;
+}
+
+.mock-loading-icon {
+    margin-right: 6px;
+    font-size: 14px;
 }
 
 /* 执行按钮与设置页「保存」按钮一致：强调色 */

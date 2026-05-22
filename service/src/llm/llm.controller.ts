@@ -1,8 +1,9 @@
 import { Controller } from "../common/index.js";
 import { RequestData } from "../common/index.dto.js";
 import { PostMessageble } from "../hook/adapter.js";
-import { abortMessageService, streamingChatCompletion, chatCompletion } from "./llm.service.js";
+import { abortMessageService, streamingChatCompletion, chatCompletion, jsonSchemaToZod, chatCompletionStructured } from "./llm.service.js";
 import { OpenAI } from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { fetchOpenRouterModels, getSimplifiedModels } from "../hook/openrouter.js";
 export class LlmController {
 
@@ -40,9 +41,28 @@ export class LlmController {
         const {
             baseURL,
             apiKey,
-            proxyServer
+            proxyServer,
+            useAnthropicProtocol
         } = data;
         
+        if (useAnthropicProtocol) {
+            const client = new Anthropic({
+                apiKey,
+                baseURL,
+            });
+            const models = await client.models.list();
+            // Anthropic models.list() returns { data: [{ id, display_name, created_at }, ...] }
+            const standardModels = (models.data || []).map((m: any) => ({
+                id: m.id,
+                object: 'model',
+                name: m.display_name || m.id,
+                created: m.created_at
+            }));
+            return {
+                code: 200,
+                msg: standardModels
+            };
+        }
 
         const client = new OpenAI({
             apiKey,
@@ -86,16 +106,43 @@ export class LlmController {
     @Controller('llm/chat/completions/sync')
     async chatCompletionSync(data: RequestData, webview: PostMessageble) {
         try {
-            const { baseURL, apiKey, model, messages, temperature } = data;
-            const result = await chatCompletion({ baseURL, apiKey, model, messages, temperature });
+            const { baseURL, apiKey, model, messages, temperature, tools, response_format, useAnthropicProtocol } = data;
+            const result = await chatCompletion({ baseURL, apiKey, model, messages, temperature, tools, response_format, useAnthropicProtocol });
             return {
                 code: 200,
-                msg: { content: result.content, usage: result.usage }
+                msg: { content: result.content, usage: result.usage, tool_calls: result.tool_calls }
             };
         } catch (error) {
             return {
                 code: 500,
                 msg: `Chat completion failed: ${error instanceof Error ? error.message : String(error)}`
+            };
+        }
+    }
+
+    @Controller('llm/chat/completions/structured')
+    async chatCompletionStructuredCtrl(data: RequestData, webview: PostMessageble) {
+        try {
+            const { baseURL, apiKey, model, messages, temperature, schema, name, useAnthropicProtocol } = data;
+            const zodSchema = jsonSchemaToZod(schema);
+            const result = await chatCompletionStructured({
+                baseURL,
+                apiKey,
+                model,
+                messages,
+                temperature,
+                schema: zodSchema,
+                name: name || 'structured_output',
+                useAnthropicProtocol
+            });
+            return {
+                code: 200,
+                msg: { data: result.data, usage: result.usage }
+            };
+        } catch (error) {
+            return {
+                code: 500,
+                msg: `Structured completion failed: ${error instanceof Error ? error.message : String(error)}`
             };
         }
     }

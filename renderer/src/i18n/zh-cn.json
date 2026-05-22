@@ -122,6 +122,7 @@
     "server-provider": "服务提供者",
     "api-root-url": "API 根路径",
     "api-token": "API 密钥",
+    "use-anthropic-protocol": "使用 Anthropic 协议",
     "connection-method": "连接方式",
     "connection-type": "类型",
     "connection-settings": "连接设置",

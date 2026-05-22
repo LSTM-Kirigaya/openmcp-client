@@ -122,6 +122,7 @@
     "server-provider": "Service Provider",
     "api-root-url": "API Root URL",
     "api-token": "API Token",
+    "use-anthropic-protocol": "Use Anthropic Protocol",
     "connection-method": "Connection Method",
     "connection-type": "Type",
     "connection-settings": "Connection settings",

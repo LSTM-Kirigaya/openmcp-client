@@ -62,6 +62,21 @@
                 v-model="llms[llmManager.currentModelIndex].userToken" show-password />
         </div>
     </div>
+
+    <div class="setting-option">
+        <span>
+            <span class="option-title">{{ t('use-anthropic-protocol') }}</span>
+        </span>
+        <div style="width: 240px;">
+            <el-switch
+                v-if="llms[llmManager.currentModelIndex]"
+                v-model="llms[llmManager.currentModelIndex].useAnthropicProtocol"
+                @change="onAnthropicChange"
+                active-text="Anthropic"
+                inactive-text="OpenAI"
+            />
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -112,6 +127,11 @@ function saveLlmSetting() {
 
 function onmodelchange() {
 	pinkLog('切换模型到：' + llms[llmManager.currentModelIndex].id);
+	saveLlmSetting();
+}
+
+function onAnthropicChange() {
+	pinkLog('切换 Anthropic 协议：' + llms[llmManager.currentModelIndex].useAnthropicProtocol);
 	saveLlmSetting();
 }
 

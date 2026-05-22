@@ -271,7 +271,8 @@ async function updateModels() {
 		result = await bridge.commandRequest('llm/models', {
 			apiKey,
 			baseURL,
-			proxyServer
+			proxyServer,
+			useAnthropicProtocol: llm.useAnthropicProtocol
 		});
 	}
 

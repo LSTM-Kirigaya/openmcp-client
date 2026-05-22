@@ -103,6 +103,7 @@
     "server-provider": "サービスプロバイダー",
     "api-root-url": "APIルートURL",
     "api-token": "APIトークン",
+    "use-anthropic-protocol": "Anthropic プロトコルを使用",
     "connection-method": "接続方法",
     "command": "コマンド",
     "env-var": "環境変数",

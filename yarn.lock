@@ -47,6 +47,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@anthropic-ai/sdk@npm:^0.98.0":
+  version: 0.98.0
+  resolution: "@anthropic-ai/sdk@npm:0.98.0"
+  dependencies:
+    json-schema-to-ts: "npm:^3.1.1"
+    standardwebhooks: "npm:^1.0.0"
+  peerDependencies:
+    zod: ^3.25.0 || ^4.0.0
+  peerDependenciesMeta:
+    zod:
+      optional: true
+  bin:
+    anthropic-ai-sdk: bin/cli
+  checksum: 10c0/bf4a494814bede2601ede5ae83a8be5b285e69126b2fa45ccbdc78edfd045a4f747c152a8c5cb355a6db4b046678279917870fdff36a504148f187f1412a30e8
+  languageName: node
+  linkType: hard
+
 "@azu/format-text@npm:^1.0.1, @azu/format-text@npm:^1.0.2":
   version: 1.0.2
   resolution: "@azu/format-text@npm:1.0.2"
@@ -482,6 +499,13 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.0.0-0
   checksum: 10c0/72dbfd3e5f71c4e30445e610758ec0eef65347fafd72bd46f4903733df0d537663a72a81c1626f213a0feab7afc68ba83f1648ffece888dd0868115c9cb748f6
+  languageName: node
+  linkType: hard
+
+"@babel/runtime@npm:^7.18.3":
+  version: 7.29.2
+  resolution: "@babel/runtime@npm:7.29.2"
+  checksum: 10c0/30b80a0140d16467792e1bbeb06f655b0dab70407da38dfac7fedae9c859f9ae9d846ef14ad77bd3814c064295fe9b1bc551f1541ea14646ae9f22b71a8bc17a
   languageName: node
   linkType: hard
 
@@ -1475,6 +1499,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@openmcp/service@workspace:service"
   dependencies:
+    "@anthropic-ai/sdk": "npm:^0.98.0"
     "@modelcontextprotocol/sdk": "npm:^1.29.0"
     "@seald-io/nedb": "npm:^4.1.1"
     "@supabase/supabase-js": "npm:^2.99.0"
@@ -2124,6 +2149,13 @@ __metadata:
   version: 2.2.2
   resolution: "@sphinxxxx/color-conversion@npm:2.2.2"
   checksum: 10c0/847d6952aed358d54991b2f9a3c2f76d04d4c70cd014e9c1f86d8b37490768f3a56d077ba8f7ab3355b7616c4b1dcdacdba2e4705ade9b7c6220e4e950ab100f
+  languageName: node
+  linkType: hard
+
+"@stablelib/base64@npm:^1.0.0":
+  version: 1.0.1
+  resolution: "@stablelib/base64@npm:1.0.1"
+  checksum: 10c0/6330720f021819d19cecfe274111b79a256caa81df478d6b0ae7effc8842b96915b6aeed85926ff05b4d48ec1fc78ad043d928b730ee4e6cc6e8cba6aa097bed
   languageName: node
   linkType: hard
 
@@ -6171,6 +6203,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-sha256@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "fast-sha256@npm:1.3.0"
+  checksum: 10c0/87f9e4baa7639576cf60a2b6235c9f436e1a1c52323abbd8a705b5bea8355500acf176f2aed0c14f2ecd6d6007e26151461bab2f27b8953bcca8d9d6b76a86e4
+  languageName: node
+  linkType: hard
+
 "fast-uri@npm:^3.0.1":
   version: 3.1.2
   resolution: "fast-uri@npm:3.1.2"
@@ -7489,6 +7528,16 @@ __metadata:
     js-yaml: "npm:^3.12.1"
     ono: "npm:^4.0.11"
   checksum: 10c0/0814fb564b0e5f6ddeee4b91283febf572ebd19cf3dfbea0f447125046cb60a88fdef70a482179486bde10941f9b65fa640547d75186f390f6022056c8765628
+  languageName: node
+  linkType: hard
+
+"json-schema-to-ts@npm:^3.1.1":
+  version: 3.1.1
+  resolution: "json-schema-to-ts@npm:3.1.1"
+  dependencies:
+    "@babel/runtime": "npm:^7.18.3"
+    ts-algebra: "npm:^2.0.0"
+  checksum: 10c0/609bae04aa5e860a11b6d30ccf41445fae1c7f66fb600c1d170257cf33aa468aa9d03aa046428c3688aff0ff450c2b0c76584b66fa4a5d0da8e33799e4c439a6
   languageName: node
   linkType: hard
 
@@ -10237,6 +10286,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"standardwebhooks@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "standardwebhooks@npm:1.0.0"
+  dependencies:
+    "@stablelib/base64": "npm:^1.0.0"
+    fast-sha256: "npm:^1.3.0"
+  checksum: 10c0/aee097d0f3c05172c19b80df1ed9596a2ce92f8956957650d0bbe47c2ca6d36515796b51d523333cb4a48c889b2ab130d789e7879e14975c4381bc7a61274327
+  languageName: node
+  linkType: hard
+
 "statuses@npm:^2.0.1, statuses@npm:^2.0.2, statuses@npm:~2.0.2":
   version: 2.0.2
   resolution: "statuses@npm:2.0.2"
@@ -10672,6 +10731,13 @@ __metadata:
   version: 0.0.3
   resolution: "tr46@npm:0.0.3"
   checksum: 10c0/047cb209a6b60c742f05c9d3ace8fa510bff609995c129a37ace03476a9b12db4dbf975e74600830ef0796e18882b2381fb5fb1f6b4f96b832c374de3ab91a11
+  languageName: node
+  linkType: hard
+
+"ts-algebra@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "ts-algebra@npm:2.0.0"
+  checksum: 10c0/4ae93bec1bada635bba425854eec323dad50b6ffe86bc04ad2d7f9ce3fb129d673dcf483e19a6e70d07a3a9083e6a0a7f4e004bb8d2164cddc60cc9540ba187f
   languageName: node
   linkType: hard
 

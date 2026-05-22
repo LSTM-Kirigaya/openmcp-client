@@ -103,6 +103,7 @@
     "server-provider": "服務提供者",
     "api-root-url": "API 根路徑",
     "api-token": "API 密鑰",
+    "use-anthropic-protocol": "使用 Anthropic 協議",
     "connection-method": "連接方式",
     "command": "命令",
     "env-var": "環境變量",

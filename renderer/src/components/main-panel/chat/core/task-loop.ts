@@ -269,9 +269,12 @@ export class TaskLoop {
                     return;
                 }
 
+                const errorMsg = typeof data.msg === 'string'
+                    ? data.msg
+                    : (data.msg && typeof data.msg === 'object' ? JSON.stringify(data.msg) : '请求模型服务时发生错误');
                 this.consumeErrors({
                     state: MessageState.ReceiveChunkError,
-                    msg: data.msg || '请求模型服务时发生错误'
+                    msg: errorMsg
                 });
 
                 chunkHandler();
@@ -414,6 +417,7 @@ export class TaskLoop {
             messages: userMessages,
             proxyServer,
             enableXmlWrapper,
+            useAnthropicProtocol: this.getLlmConfig().useAnthropicProtocol || false,
         } as ChatCompletionCreateParamsBase;
 
         return chatData;

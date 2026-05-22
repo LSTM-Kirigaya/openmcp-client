@@ -103,6 +103,7 @@
     "server-provider": "Провайдер сервиса",
     "api-root-url": "Корневой URL API",
     "api-token": "API-токен",
+    "use-anthropic-protocol": "Использовать протокол Anthropic",
     "connection-method": "Способ подключения",
     "command": "Команда",
     "env-var": "Переменная окружения",
