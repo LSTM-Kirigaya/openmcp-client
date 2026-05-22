@@ -683,10 +683,13 @@ context.resetDataView = resetDataView;
 
 <style>
 .diagram-container {
-    width: 600px;
+    flex: 1;
+    min-width: 420px;
+    width: 100%;
+    max-width: calc(100% - 340px);
     min-height: 200px;
-    border-radius: 8px;
-    padding: 24px 0;
+    border-radius: 12px;
+    padding: 24px 16px;
     display: flex;
     justify-content: flex-start;
     overflow-x: auto;
@@ -716,12 +719,15 @@ context.resetDataView = resetDataView;
 }
 
 .diagram-container {
-    width: 600px;
+    flex: 1;
+    min-width: 420px;
+    width: 100%;
+    max-width: calc(100% - 340px);
     min-height: 200px;
     display: flex;
     align-items: flex-start;
-    border-radius: 8px;
-    padding: 24px 0;
+    border-radius: 12px;
+    padding: 24px 16px;
     overflow-x: auto;
 }
 

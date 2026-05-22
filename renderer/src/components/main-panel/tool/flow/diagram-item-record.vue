@@ -233,9 +233,9 @@ const toolcallPercent = computed(() => {
     height: 12px;
     border-radius: 6px;
     overflow: hidden;
-    background: #f0eaff;
+    background: var(--main-light-color-20, rgba(99, 102, 241, 0.2));
     margin-bottom: 4px;
-    box-shadow: 0 1px 2px rgba(185,136,209,0.08);
+    box-shadow: 0 1px 2px rgba(99, 102, 241, 0.08);
 }
 
 .timecost-segment {
@@ -244,7 +244,7 @@ const toolcallPercent = computed(() => {
 }
 
 .llm {
-    background: #B988D1;
+    background: var(--main-color, #6366f1);
 }
 
 .toolcall {
@@ -259,7 +259,7 @@ const toolcallPercent = computed(() => {
 }
 
 .llm-label b {
-    color: #B988D1;
+    color: var(--main-color, #6366f1);
 }
 
 .toolcall-label b {
