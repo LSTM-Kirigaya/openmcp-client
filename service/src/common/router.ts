@@ -15,6 +15,7 @@ import { CloudBackupController } from "../cloud-backup/cloud-backup.controller.j
 import { PlanModeController } from "../plan-mode/plan-mode.controller.js";
 import { LocalStorageController } from "../storage/storage.controller.js";
 import { ServerConfigController } from "../mcp/server-config.controller.js";
+import { WorkspaceController } from "../workspace/workspace.controller.js";
 export { disconnectService } from "../mcp/connect.service.js";
 
 export const ModuleControllers = [
@@ -32,7 +33,8 @@ export const ModuleControllers = [
     CloudBackupController,
     PlanModeController,
     LocalStorageController,
-    ServerConfigController
+    ServerConfigController,
+    WorkspaceController
 ];
 
 export async function routeMessage(command: string, data: any, webview: PostMessageble) {

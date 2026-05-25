@@ -5,6 +5,7 @@ import { mcpClientAdapter } from "./core";
 import { fetchAndApplyGatewaySessions } from "./gateway-session-sync";
 import { isConnecting } from "@/components/sidebar/connected";
 import { ref } from "vue";
+import { workspaceManager } from "@/views/workspace/core";
 
 export const mcpServerAddRef = ref<any>(null);
 
@@ -30,11 +31,20 @@ export async function initialise() {
 	// 注册消息监听器（不再自动连接 Server）
 	await mcpClientAdapter.launch();
 
-	// WebSocket 已在 App 中 await 过；此处同步 Gateway 已有会话并必要时加载面板，避免仅打开 Debug 时「工具」白屏
+	// 加载工作区列表并尝试自动恢复上次的工作区
 	try {
-		await fetchAndApplyGatewaySessions('');
+		const autoConnected = await workspaceManager.autoConnectLastWorkspace();
+		if (!autoConnected) {
+			// 若未自动连接，同步 Gateway 已有会话
+			await fetchAndApplyGatewaySessions('');
+		}
 	} catch (e) {
-		pinkLog(`Gateway 会话同步跳过: ${e}`);
+		pinkLog(`工作区自动恢复跳过: ${e}`);
+		try {
+			await fetchAndApplyGatewaySessions('');
+		} catch (gatewayErr) {
+			pinkLog(`Gateway 会话同步跳过: ${gatewayErr}`);
+		}
 	}
 
 	isConnecting.value = false;

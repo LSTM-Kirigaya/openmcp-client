@@ -806,9 +806,10 @@ async function runValidation(comprehensive = false) {
     runningCaseIndices.value = new Set(casesToRun.map((c) => c.caseIndex));
     taskLoopRefsByCase.clear();
 
+    let allResults: ValidationResult[] = [];
+    let groupsWithStats: ResultGroup[] = [];
+
     try {
-        const allResults: ValidationResult[] = [];
-        const groupsWithStats: ResultGroup[] = [];
 
         /** 与交互测试隔离：使用 MCP 已连接客户端的工具列表（与交互测试一致，默认全部启用） */
         const tempLoop = new TaskLoop({ maxEpochs: 50, verbose: 0 });

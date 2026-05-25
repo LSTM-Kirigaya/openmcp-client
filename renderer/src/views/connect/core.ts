@@ -87,7 +87,15 @@ function _processSchemaNode(node: any, defs: Record<string, any> = {}): any {
 
     // Copy the basic properties
     if ('type' in node) {
-        result.type = node.type;
+        const type = node.type;
+        if (Array.isArray(type)) {
+            const nonNullType = type.find((t: any) => t !== 'null');
+            if (nonNullType) {
+                result.type = nonNullType;
+            }
+        } else {
+            result.type = type;
+        }
     }
 
     // Handle anyOf (often used for optional fields with None)
@@ -103,6 +111,11 @@ function _processSchemaNode(node: any, defs: Record<string, any> = {}): any {
     // Handle description
     if ('description' in node) {
         result.description = node.description;
+    }
+
+    // Handle default value
+    if ('default' in node) {
+        result.default = node.default;
     }
 
     // Handle object properties recursively
@@ -249,8 +262,8 @@ export class McpClient {
 
         this.tools = new Map<string, ToolItem>();
         msg.tools.forEach(tool => {
-            // const standardSchema = _processSchemaNode(tool.inputSchema, tool.inputSchema.$defs || {});
-            // tool.inputSchema = standardSchema;
+            const standardSchema = _processSchemaNode(tool.inputSchema, tool.inputSchema.$defs || {});
+            tool.inputSchema = standardSchema;
 
             this.tools!.set(tool.name, tool);
         });
@@ -900,6 +913,26 @@ class McpClientAdapter {
             }
 
             this.saveLaunchSignature();
+
+            // 连接成功后更新工作区状态（动态导入避免循环依赖）
+            try {
+                const { workspaceManager } = await import('@/views/workspace/core');
+                await workspaceManager.loadWorkspaces();
+                const matched = workspaceManager.workspaces.find(w => {
+                    const cfg = w.serverConfig;
+                    const args = client.connectionArgs;
+                    if (cfg.connectionType !== args.connectionType) return false;
+                    if (cfg.connectionType === 'STDIO') {
+                        return cfg.commandString === args.commandString && cfg.cwd === args.cwd;
+                    }
+                    return cfg.url === args.url;
+                });
+                if (matched) {
+                    await workspaceManager.markWorkspaceOpened(matched.id);
+                }
+            } catch (e) {
+                console.error('[workspace] mark opened failed:', e);
+            }
         } else {
             console.log(
                 wrapperChalk.gray(`${logTimeStampString()} |`),

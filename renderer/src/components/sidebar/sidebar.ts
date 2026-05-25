@@ -12,6 +12,11 @@ export const sidebarItems = reactive<SidebarNavItem[]>([
 		ident: 'debug'
 	},
 	{
+		icon: 'icon-workspace',
+		ident: 'workspace',
+		labelKey: 'sidebar-workspace'
+	},
+	{
 		icon: 'icon-connect',
 		ident: 'connect',
 		labelKey: 'sidebar-mcp-hub'

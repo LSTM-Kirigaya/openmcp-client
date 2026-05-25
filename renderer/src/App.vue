@@ -81,9 +81,11 @@ onMounted(async () => {
 		} else {
 			// 动态导入以避免循环依赖
 			const { mcpClientAdapter } = await import('./views/connect/core');
-			targetRoute = mcpClientAdapter.connected
-				? import.meta.env.BASE_URL + 'debug'
-				: import.meta.env.BASE_URL + 'connect';
+			if (mcpClientAdapter.connected) {
+				targetRoute = import.meta.env.BASE_URL + 'debug';
+				} else {
+				targetRoute = import.meta.env.BASE_URL + 'workspace';
+				}
 		}
 		console.log('go to ' + targetRoute);
 		router.push(targetRoute);

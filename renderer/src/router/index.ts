@@ -45,6 +45,12 @@ const routes: Array<RouteRecordRaw> = [
 		meta: { title: "Connect" }
 	},
 	{
+		path: baseURL + "workspace",
+		name: "workspace",
+		component: () => import( /* webpackMode: "eager" */ "@/views/workspace/index.vue"),
+		meta: { title: "Workspace" }
+	},
+	{
 		path: baseURL + "setting",
 		name: "setting",
 		component: () => import( /* webpackMode: "eager" */ "@/views/setting/index.vue"),
