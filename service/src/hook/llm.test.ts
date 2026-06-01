@@ -47,15 +47,15 @@ if (minimax) {
 	assert(minimax.name === 'MiniMax', 'minimax name should be "MiniMax"');
 	assert(minimax.baseUrl === 'https://api.minimax.io/v1', 'minimax baseUrl should be https://api.minimax.io/v1');
 	assert(minimax.isOpenAICompatible === true, 'minimax should be OpenAI compatible');
-	assert(minimax.userModel === 'MiniMax-M2.7', 'minimax default model should be MiniMax-M2.7');
+	assert(minimax.userModel === 'MiniMax-M3', 'minimax default model should be MiniMax-M3');
 
 	// Model list checks
 	const models: string[] = minimax.models;
+	assert(models.includes('MiniMax-M3'), 'minimax should include MiniMax-M3');
 	assert(models.includes('MiniMax-M2.7'), 'minimax should include MiniMax-M2.7');
 	assert(models.includes('MiniMax-M2.7-highspeed'), 'minimax should include MiniMax-M2.7-highspeed');
-	assert(models.includes('MiniMax-M2.5'), 'minimax should include MiniMax-M2.5');
-	assert(models.includes('MiniMax-M2.5-highspeed'), 'minimax should include MiniMax-M2.5-highspeed');
-	assert(models.length === 4, 'minimax should have exactly 4 models');
+	assert(models.length === 3, 'minimax should have exactly 3 models');
+	assert(models[0] === 'MiniMax-M3', 'MiniMax-M3 should be first in the model list');
 
 	// Website
 	assert(minimax.website === 'https://www.minimaxi.com', 'minimax website should be correct');
