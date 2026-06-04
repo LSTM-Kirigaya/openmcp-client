@@ -20,10 +20,10 @@ Input format:
   --data and --file must contain a JSON object. A file uses the same JSON shape as --data.
 
 Example request:
-  {"messages":[{"role":"assistant","content":"The result is correct."}],"testCases":[{"id":"case-1","expectedCriteria":"The answer should be correct."}],"evaluationMode":"pass-fail","llmConfig":{"baseURL":"http://127.0.0.1:11434/v1","apiKey":"sk-xxx","model":"judge-model"}}
+  {"messages":[{"role":"assistant","content":"The result is correct."}],"testCases":[{"id":"case-1","expectedCriteria":"The answer should be correct."}],"evaluationMode":"pass-fail","llmConfig":{"baseURL":"http://127.0.0.1:11434/v1","apiKey":"sk-xxx","model":"judge-model","useAnthropicProtocol":false}}
 
 Examples:
-  openmcp debug batch run --data '{"messages":[{"role":"assistant","content":"ok"}],"testCases":[{"id":"case-1","expectedCriteria":"should be ok"}],"evaluationMode":"pass-fail","llmConfig":{"baseURL":"http://127.0.0.1:11434/v1","apiKey":"sk-xxx","model":"judge-model"}}'
+  openmcp debug batch run --data '{"messages":[{"role":"assistant","content":"ok"}],"testCases":[{"id":"case-1","expectedCriteria":"should be ok"}],"evaluationMode":"pass-fail","llmConfig":{"baseURL":"http://127.0.0.1:11434/v1","apiKey":"sk-xxx","model":"judge-model","useAnthropicProtocol":false}}'
   openmcp debug batch run --file ./batch-run.json
 `;
 

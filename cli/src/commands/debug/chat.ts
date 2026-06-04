@@ -170,7 +170,8 @@ gw(
             baseURL: provider.baseUrl,
             apiKey: provider.userToken,
             model: options.model,
-            temperature: 0
+            temperature: 0,
+            useAnthropicProtocol: provider.useAnthropicProtocol || false
           };
 
           console.log(`Interactive test: ${provider.name} | ${options.model}`);
