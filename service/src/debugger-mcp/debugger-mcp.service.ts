@@ -8,7 +8,7 @@ import { clientMap, getClient } from '../mcp/connect.service.js';
 import { loadSetting } from '../setting/setting.service.js';
 import { runBatchValidation } from '../batch-validation/batch-validation.service.js';
 import { getBatchValidationRepository } from '../panel/batch-validation.repository.js';
-import { OpenAI } from 'openai';
+import { chatCompletion } from '../llm/llm.service.js';
 import type { DebuggerMcpConfig } from './debugger-mcp.dto.js';
 import { loadDebuggerMcpConfig, saveDebuggerMcpConfig } from './debugger-mcp-storage.service.js';
 
@@ -70,7 +70,7 @@ function messagesToTrace(messages: Array<{ role: string; content: string }>): Ar
 export async function runSimpleAgent(
     clientId: string,
     userInput: string,
-    llmConfig: { baseURL: string; apiKey: string; model: string }
+    llmConfig: { baseURL: string; apiKey: string; model: string; useAnthropicProtocol?: boolean }
 ): Promise<Array<{ role: string; content: string }>> {
     const client = getClient(clientId);
     if (!client) throw new Error(`MCP client ${clientId} not found`);
@@ -85,17 +85,18 @@ export async function runSimpleAgent(
         }
     }));
 
-    const openai = new OpenAI({ baseURL: llmConfig.baseURL, apiKey: llmConfig.apiKey });
     type MsgItem =
         | { role: 'user' | 'system'; content: string }
-        | { role: 'assistant'; content: string; tool_calls?: OpenAI.Chat.ChatCompletionMessageToolCall[] }
+        | { role: 'assistant'; content: string; tool_calls?: any[] }
         | { role: 'tool'; content: string; tool_call_id: string };
     const messages: MsgItem[] = [
         { role: 'user', content: userInput }
     ];
     const maxIterations = 20;
     for (let i = 0; i < maxIterations; i++) {
-        const response = await openai.chat.completions.create({
+        const response = await chatCompletion({
+            baseURL: llmConfig.baseURL,
+            apiKey: llmConfig.apiKey,
             model: llmConfig.model,
             messages: messages.map(m => {
                 if (m.role === 'tool') {
@@ -107,13 +108,11 @@ export async function runSimpleAgent(
                 return { role: m.role, content: m.content };
             }),
             tools: toolsSchema,
-            tool_choice: 'auto',
             temperature: 0,
-            stream: false
+            useAnthropicProtocol: llmConfig.useAnthropicProtocol
         });
-        const message = response.choices?.[0]?.message;
-        const toolCalls = message?.tool_calls;
-        const assistantContent = typeof message?.content === 'string' ? message.content : (message?.content ?? '') || '';
+        const toolCalls = response.tool_calls;
+        const assistantContent = typeof response.content === 'string' ? response.content : '';
         messages.push({
             role: 'assistant',
             content: assistantContent,
@@ -295,7 +294,8 @@ async function createMcpServerInstance(config: DebuggerMcpConfig) {
                 const llmConfig = {
                     baseURL: llmInfo.baseUrl || 'https://api.openai.com/v1',
                     apiKey: llmInfo.userToken || '',
-                    model: llmInfo.userModel || llmInfo.models?.[0] || ''
+                    model: llmInfo.userModel || llmInfo.models?.[0] || '',
+                    useAnthropicProtocol: llmInfo.useAnthropicProtocol || false
                 };
                 try {
                     const trace = await runSimpleAgent(clientId, tc.input.trim(), llmConfig);

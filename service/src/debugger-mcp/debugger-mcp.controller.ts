@@ -34,7 +34,8 @@ export class DebuggerMcpController {
             const trace = await runSimpleAgent(clientId, input, {
                 baseURL: String(llmConfig.baseURL),
                 apiKey: String(llmConfig.apiKey),
-                model: String(llmConfig.model)
+                model: String(llmConfig.model),
+                useAnthropicProtocol: !!llmConfig.useAnthropicProtocol
             });
             return { code: 200, msg: { trace } };
         } catch (error) {

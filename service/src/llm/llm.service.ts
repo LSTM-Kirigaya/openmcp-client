@@ -32,26 +32,38 @@ function convertOpenAIMessagesToAnthropic(messages: any[]): { system?: string; m
             continue;
         }
 
-        if (msg.role === 'assistant' && msg.tool_calls?.length) {
+        if (msg.role === 'assistant') {
             const content: any[] = [];
+
+            if (msg.reasoning_content) {
+                content.push({
+                    type: 'thinking',
+                    thinking: msg.reasoning_content,
+                });
+            }
+
             if (msg.content) {
                 content.push({ type: 'text', text: msg.content });
             }
-            for (const tc of msg.tool_calls) {
-                content.push({
-                    type: 'tool_use',
-                    id: tc.id,
-                    name: tc.function.name,
-                    input: (() => {
-                        try {
-                            return JSON.parse(tc.function.arguments || '{}');
-                        } catch {
-                            return {};
-                        }
-                    })()
-                });
+
+            if (msg.tool_calls?.length) {
+                for (const tc of msg.tool_calls) {
+                    content.push({
+                        type: 'tool_use',
+                        id: tc.id,
+                        name: tc.function.name,
+                        input: (() => {
+                            try {
+                                return JSON.parse(tc.function.arguments || '{}');
+                            } catch {
+                                return {};
+                            }
+                        })()
+                    });
+                }
             }
-            anthropicMessages.push({ role: 'assistant', content });
+
+            anthropicMessages.push({ role: 'assistant', content: content.length > 0 ? content : '' });
             continue;
         }
 
@@ -79,16 +91,24 @@ async function* anthropicStreamToOpenAIChunks(
     let promptTokens = 0;
     let nextToolCallIndex = 0;
     const toolCallState = new Map<number, { id: string; name: string; arguments: string; toolCallIndex: number }>();
+    let thinkingContent = '';
 
     for await (const event of stream) {
+        console.log('[LLM Anthropic] event type:', event.type, 'sessionId:', sessionId);
         switch (event.type) {
+            case 'message_stop': {
+                break;
+            }
+
             case 'message_start': {
                 promptTokens = event.message?.usage?.input_tokens || 0;
                 break;
             }
 
             case 'content_block_start': {
-                if (event.content_block?.type === 'tool_use') {
+                if (event.content_block?.type === 'thinking') {
+                    thinkingContent = '';
+                } else if (event.content_block?.type === 'tool_use') {
                     const toolCallIndex = nextToolCallIndex++;
                     toolCallState.set(event.index, {
                         id: event.content_block.id,
@@ -127,6 +147,18 @@ async function* anthropicStreamToOpenAIChunks(
                             index: 0,
                             delta: {
                                 content: event.delta.text
+                            }
+                        }]
+                    };
+                } else if (event.delta?.type === 'thinking_delta') {
+                    thinkingContent += event.delta.thinking || '';
+                    yield {
+                        id: sessionId,
+                        object: 'chat.completion.chunk',
+                        choices: [{
+                            index: 0,
+                            delta: {
+                                reasoning_content: event.delta.thinking
                             }
                         }]
                     };
@@ -223,7 +255,7 @@ export async function chatCompletion(
         response_format?: any;
         useAnthropicProtocol?: boolean;
     }
-): Promise<{ content: string; usage?: ChatCompletionUsage; tool_calls?: any[] }> {
+): Promise<{ content: string; usage?: ChatCompletionUsage; reasoning_content?: string; tool_calls?: any[] }> {
     const {
         baseURL,
         apiKey,
@@ -235,13 +267,16 @@ export async function chatCompletion(
         useAnthropicProtocol
     } = data;
 
+    console.log('[chatCompletion] START model=', model, 'baseURL=', baseURL, 'msgCount=', messages.length, 'anthropic=', useAnthropicProtocol);
+
     if (useAnthropicProtocol) {
         const { system, messages: anthropicMessages } = convertOpenAIMessagesToAnthropic(messages);
         const anthropicTools = tools?.length ? convertOpenAIToolsToAnthropic(tools) : undefined;
 
         const client = new Anthropic({
             baseURL,
-            apiKey,
+            authToken: apiKey,
+            timeout: 60000,
         });
 
         const createParams: any = {
@@ -255,10 +290,15 @@ export async function chatCompletion(
             createParams.tools = anthropicTools;
         }
 
+        console.log('[chatCompletion] Anthropic request BEGIN');
         const response = await client.messages.create(createParams);
+        console.log('[chatCompletion] Anthropic request DONE');
 
         const textBlocks = (response.content || []).filter((c: any) => c.type === 'text');
         const text = textBlocks.map((c: any) => c.text).join('');
+
+        const thinkingBlocks = (response.content || []).filter((c: any) => c.type === 'thinking');
+        const reasoningContent = thinkingBlocks.map((c: any) => c.thinking).join('');
 
         const toolUseBlocks = (response.content || []).filter((c: any) => c.type === 'tool_use');
         const toolCalls = toolUseBlocks.map((c: any, index: number) => ({
@@ -279,7 +319,12 @@ export async function chatCompletion(
             }
             : undefined;
 
-        return { content: text, usage, tool_calls: toolCalls.length > 0 ? toolCalls : undefined };
+        return {
+            content: text,
+            usage,
+            reasoning_content: reasoningContent || undefined,
+            tool_calls: toolCalls.length > 0 ? toolCalls : undefined
+        };
     }
 
     const defaultHeaders: Record<string, string> = {};
@@ -291,8 +336,13 @@ export async function chatCompletion(
     const client = new OpenAI({
         baseURL,
         apiKey,
-        defaultHeaders: Object.keys(defaultHeaders).length > 0 ? defaultHeaders : undefined
+        defaultHeaders: Object.keys(defaultHeaders).length > 0 ? defaultHeaders : undefined,
+        timeout: 60000,
     });
+
+    if (!model || model.trim() === '') {
+        throw new Error('Model name is empty. Please configure a valid model in settings.');
+    }
 
     const createParams: any = {
         model,
@@ -307,7 +357,9 @@ export async function chatCompletion(
         createParams.response_format = response_format;
     }
 
+    console.log('[chatCompletion] OpenAI request BEGIN model=', model);
     const response = await client.chat.completions.create(createParams);
+    console.log('[chatCompletion] OpenAI request DONE');
 
     const content = response.choices?.[0]?.message?.content;
     const text = typeof content === 'string' ? content : '';
@@ -319,6 +371,7 @@ export async function chatCompletion(
         }
         : undefined;
     const toolCalls = response.choices?.[0]?.message?.tool_calls;
+    console.log('[chatCompletion] RETURN contentLength=', text.length, 'usage=', usage);
     return { content: text, usage, tool_calls: toolCalls };
 }
 
@@ -510,8 +563,13 @@ export async function streamingChatCompletion(
 
         const client = new Anthropic({
             baseURL,
-            apiKey,
+            authToken: apiKey,
+            timeout: 120000,
         });
+
+        if (!model || model.trim() === '') {
+            throw new Error('Model name is empty. Please configure a valid model in settings.');
+        }
 
         const createParams: any = {
             model,
@@ -541,6 +599,9 @@ export async function streamingChatCompletion(
             } as any);
         }
 
+        let lastChunkTime = Date.now();
+        const STREAM_IDLE_TIMEOUT_MS = 30000;
+
         try {
             for await (const chunk of anthropicStreamToOpenAIChunks(stream, sessionId)) {
                 if (!chatStreams.has(sessionId)) {
@@ -558,6 +619,25 @@ export async function streamingChatCompletion(
                     });
                     return;
                 }
+
+                if (Date.now() - lastChunkTime > STREAM_IDLE_TIMEOUT_MS) {
+                    console.warn(`[LLM] Anthropic stream idle timeout for sessionId=${sessionId}`);
+                    stream.abort();
+                    webview.postMessage({
+                        command: 'llm/chat/completions/done',
+                        data: {
+                            sessionId,
+                            code: 200,
+                            msg: {
+                                success: true,
+                                stage: 'done'
+                            }
+                        }
+                    });
+                    if (sessionId) chatStreams.delete(sessionId);
+                    return;
+                }
+                lastChunkTime = Date.now();
 
                 if (chunk.choices) {
                     webview.postMessage({
@@ -620,8 +700,13 @@ export async function streamingChatCompletion(
     const client = new OpenAI({
         baseURL,
         apiKey,
-        defaultHeaders: Object.keys(defaultHeaders).length > 0 ? defaultHeaders : undefined
+        defaultHeaders: Object.keys(defaultHeaders).length > 0 ? defaultHeaders : undefined,
+        timeout: 120000,
     });
+
+    if (!model || model.trim() === '') {
+        throw new Error('Model name is empty. Please configure a valid model in settings.');
+    }
 
     const seriableTools = (tools.length === 0) ? undefined : tools;
     const seriableParallelToolCalls = (tools.length === 0) ?
@@ -642,6 +727,9 @@ export async function streamingChatCompletion(
     }
 
     // 流式传输结果
+    let lastChunkTime = Date.now();
+    const STREAM_IDLE_TIMEOUT_MS = 30000;
+
     for await (const chunk of stream) {        
         if (!chatStreams.has(sessionId)) {            
             // 如果流被中止，则停止循环
@@ -659,6 +747,24 @@ export async function streamingChatCompletion(
             });
             break;
         }
+
+        if (Date.now() - lastChunkTime > STREAM_IDLE_TIMEOUT_MS) {
+            console.warn(`[LLM] OpenAI stream idle timeout for sessionId=${sessionId}`);
+            stream.controller.abort();
+            webview.postMessage({
+                command: 'llm/chat/completions/done',
+                data: {
+                    sessionId,
+                    code: 200,
+                    msg: {
+                        success: true,
+                        stage: 'done'
+                    }
+                }
+            });
+            break;
+        }
+        lastChunkTime = Date.now();
 
         if (chunk.choices) {
             webview.postMessage({

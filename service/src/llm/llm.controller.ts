@@ -110,7 +110,7 @@ export class LlmController {
             const result = await chatCompletion({ baseURL, apiKey, model, messages, temperature, tools, response_format, useAnthropicProtocol });
             return {
                 code: 200,
-                msg: { content: result.content, usage: result.usage, tool_calls: result.tool_calls }
+                msg: { content: result.content, usage: result.usage, reasoning_content: result.reasoning_content, tool_calls: result.tool_calls }
             };
         } catch (error) {
             return {

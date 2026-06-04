@@ -164,9 +164,11 @@ export async function runBatchValidation(
     options: BatchValidationOptions
 ): Promise<ValidationResult[]> {
     const { messages, testCases, evaluationMode, customPrompt, llmConfig } = options;
+    console.log('[BatchValidationService] runBatchValidation START, testCases=', testCases.length, 'mode=', evaluationMode, 'model=', llmConfig.model);
     const messagesText = formatMessagesForPrompt(messages);
 
-    const tasks = testCases.map(async (tc) => {
+    const tasks = testCases.map(async (tc, idx) => {
+        console.log('[BatchValidationService] evaluating testCase', idx, 'id=', tc.id);
         const systemContent = buildEvaluationPrompt(tc, messagesText, evaluationMode, customPrompt);
         const judgeMessages = [
             { role: 'system' as const, content: systemContent },
@@ -174,7 +176,9 @@ export async function runBatchValidation(
         ];
 
         try {
-            const { content, usage } = await chatCompletion({
+            console.log('[BatchValidationService] testCase', idx, 'calling chatCompletion...');
+            const EVAL_TIMEOUT_MS = 90000; // 90 seconds per criterion
+            const evalPromise = chatCompletion({
                 baseURL: llmConfig.baseURL,
                 apiKey: llmConfig.apiKey,
                 model: llmConfig.model,
@@ -182,6 +186,11 @@ export async function runBatchValidation(
                 temperature: llmConfig.temperature ?? 0,
                 useAnthropicProtocol: llmConfig.useAnthropicProtocol
             });
+            const timeoutPromise = new Promise<never>((_, reject) => {
+                setTimeout(() => reject(new Error('Evaluation request timed out after ' + (EVAL_TIMEOUT_MS / 1000) + ' seconds')), EVAL_TIMEOUT_MS);
+            });
+            const { content, usage } = await Promise.race([evalPromise, timeoutPromise]);
+            console.log('[BatchValidationService] testCase', idx, 'chatCompletion done, contentLength=', content?.length);
 
             const result: ValidationResult = {
                 testCaseId: tc.id,
@@ -202,8 +211,10 @@ export async function runBatchValidation(
                 result.score = score ?? undefined;
             }
 
+            console.log('[BatchValidationService] testCase', idx, 'result pass=', result.pass, 'score=', result.score);
             return result;
         } catch (err) {
+            console.error('[BatchValidationService] testCase', idx, 'error:', err);
             return {
                 testCaseId: tc.id,
                 testCaseCriteria: tc.expectedCriteria,
@@ -213,5 +224,7 @@ export async function runBatchValidation(
         }
     });
 
-    return Promise.all(tasks);
+    const results = await Promise.all(tasks);
+    console.log('[BatchValidationService] runBatchValidation DONE, results=', results.length);
+    return results;
 }
