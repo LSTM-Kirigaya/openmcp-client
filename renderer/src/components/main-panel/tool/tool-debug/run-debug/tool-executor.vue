@@ -95,6 +95,8 @@ import { getDefaultValue, normaliseJavascriptType } from '@/hook/mcp';
 
 import KInputObject from '@/components/k-input-object/index.vue';
 import { mcpClientAdapter } from '@/views/connect/core';
+import { useMessageBridge } from '@/api/message-bridge';
+import { llms, llmManager } from '@/views/setting/llm';
 import { JSONSchemaFaker } from 'json-schema-faker';
 
 import { faker } from '@faker-js/faker';
@@ -363,9 +365,6 @@ const resetForm = () => {
     formRef.value?.clearValidate();
 };
 
-import { TaskLoop } from '@/components/main-panel/chat/core/task-loop';
-import type { ChatStorage } from '../../../chat/chat-box/chat';
-
 const onAIMookConfirm = async () => {
     aiPromptVisible.value = false;
     await generateAIMockData(aiMookPrompt.value);
@@ -375,60 +374,50 @@ const generateAIMockData = async (prompt?: string) => {
     if (!currentTool.value?.inputSchema) return;
     aiMockLoading.value = true;
     try {
-        const loop = new TaskLoop({ maxEpochs: 1 });
         const usePrompt = prompt || `please call the tool ${currentTool.value.name} to make some test`;
-        const chatStorage = {
-            id: '',
-            messages: [],
-            settings: {
-                temperature: 0.6,
-                systemPrompt: '',
-                enableTools: [{
-                    name: currentTool.value.name,
-                    description: currentTool.value.description,
-                    inputSchema: currentTool.value.inputSchema,
-                    enabled: true
-                }],
-                enableWebSearch: false,
-                contextLength: 5,
-                enableXmlWrapper: enableXmlWrapper.value,
-                parallelToolCalls: false
-            }
-        } as ChatStorage;
+        const llmConfig = llms[llmManager.currentModelIndex];
 
-        loop.setMaxEpochs(1);
+        if (!llmConfig?.userToken) {
+            ElMessage.error('请先配置 API Key');
+            return;
+        }
 
-        let aiMockJson: any = undefined;
+        const messages = [
+            { role: 'user', content: usePrompt }
+        ];
 
-        loop.registerOnToolCall(toolCall => {
-            console.log(toolCall);
-
-            if (toolCall.function?.name === currentTool.value?.name) {
-                try {
-                    const toolArgs = JSON.parse(toolCall.function?.arguments || '{}');
-                    aiMockJson = toolArgs;
-                } catch (e) {
-                    ElMessage.error('AI 生成的 JSON 解析错误');
-                }
-            } else {
-                ElMessage.error('AI 调用了未知的工具');
-            }
-            loop.abort();
-            return toolCall;
+        const bridge = useMessageBridge();
+        const res = await bridge.commandRequest('llm/chat/completions/structured', {
+            baseURL: llmConfig.baseUrl,
+            apiKey: llmConfig.userToken,
+            model: llmConfig.userModel,
+            messages,
+            temperature: 0.6,
+            schema: currentTool.value.inputSchema,
+            name: currentTool.value.name,
+            useAnthropicProtocol: llmConfig.useAnthropicProtocol || false
         });
 
-        loop.registerOnError(error => {
-            ElMessage.error(error + '');
-        });
+        if (res.code !== 200) {
+            const errorText = typeof res.msg === 'string' ? res.msg : JSON.stringify(res.msg);
+            console.error('AI Mock structured error:', res);
+            ElMessage.error(errorText);
+            return;
+        }
 
-        await loop.start(chatStorage, usePrompt);
-
-        if (aiMockJson && typeof aiMockJson === 'object') {
-            Object.keys(aiMockJson).forEach(key => {
-                tabStorage.formData[key] = aiMockJson[key];
+        const toolArgs = res.msg?.data;
+        if (toolArgs && typeof toolArgs === 'object') {
+            Object.keys(toolArgs).forEach(key => {
+                tabStorage.formData[key] = toolArgs[key];
             });
             formRef.value?.clearValidate?.();
+        } else {
+            console.warn('AI Mock: 未返回有效参数', res.msg);
+            ElMessage.warning('AI 未返回有效的参数');
         }
+    } catch (e) {
+        console.error('AI Mock generate failed:', e);
+        ElMessage.error(e instanceof Error ? e.message : String(e));
     } finally {
         aiMockLoading.value = false;
     }

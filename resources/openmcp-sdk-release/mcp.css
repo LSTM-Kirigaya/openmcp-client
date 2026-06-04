@@ -106,7 +106,6 @@ body::-webkit-scrollbar {
 
 .el-select-dropdown {
     background-color: var(--sidebar);
-    border: 1.0px solid var(--main-color);
 }
 
 .el-checkbox-button__inner {

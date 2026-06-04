@@ -19,7 +19,7 @@
 												<span class="item-title name">{{ item.connectionResult.name }}</span>
 											</span>
 											<span v-else>
-												<span class="item-title">{{ t('server') }} {{ index + 1 }}</span>
+												<span class="item-title">{{ t('server') }}</span>
 											</span>
 										</span>
 									</div>
@@ -77,16 +77,20 @@ function addServer() {
 	mcpClientAdapter.clients.at(-1)!.handleEnvSwitch(true);
 }
 
-function deleteServer(index: number) {
+async function deleteServer(index: number) {
 	if (mcpClientAdapter.clients.length <= 1) {
 		ElMessage.warning(t('at-least-one-server'));
 		return;
+	}
+	const client = mcpClientAdapter.clients[index];
+	if (client.connectionResult.success && client.connectionResult.clientId) {
+		await client.disconnect();
 	}
 	mcpClientAdapter.clients.splice(index, 1);
 	if (mcpClientAdapter.currentClientIndex >= mcpClientAdapter.clients.length) {
 		mcpClientAdapter.currentClientIndex = mcpClientAdapter.clients.length - 1;
 	}
-	mcpClientAdapter.saveLaunchSignature();
+	await mcpClientAdapter.saveLaunchSignature();
 }
 
 watch(() => mcpClientAdapter.clients.length, (len) => {

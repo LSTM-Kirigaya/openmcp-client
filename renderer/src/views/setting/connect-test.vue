@@ -49,11 +49,13 @@ console.log(llms[llmManager.currentModelIndex]);
 
 .result-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     color: var(--main-color);
     padding: 8px 14px;
     border-radius: 12px;
+    word-break: break-all;
+    overflow-wrap: break-word;
 }
 
 .connect-test .tps {
@@ -66,6 +68,7 @@ console.log(llms[llmManager.currentModelIndex]);
 
 .result-item.error {
     color: var(--el-color-danger);
+    white-space: pre-wrap;
 }
 
 .result-item .iconfont {

@@ -120,6 +120,9 @@ export class MessageBridge {
 				if (this.ws?.readyState === WebSocket.OPEN) {
 					console.log('send', message);
 					this.ws.send(JSON.stringify(message));
+				} else {
+					console.error('WebSocket not open, message dropped:', message.command);
+					throw new Error(`WebSocket is not open (readyState=${this.ws?.readyState}), cannot send ${message.command}`);
 				}
 			};
 		});

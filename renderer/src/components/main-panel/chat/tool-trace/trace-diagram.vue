@@ -754,8 +754,6 @@ onMounted(() => {
     word-break: break-all;
     margin: 0;
     padding: 8px;
-    background-color: var(--el-fill-color-light);
-    border-radius: 4px;
     max-height: 200px;
     overflow-y: auto;
 }

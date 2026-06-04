@@ -115,7 +115,10 @@ async function connect() {
 		toggleLogCollapsed();
 	}
 	const ok = await client.value.connect();
-	if (ok) mcpClientAdapter.saveLaunchSignature();
+	if (ok) {
+		mcpClientAdapter.saveLaunchSignature();
+		await mcpClientAdapter.loadPanels();
+	}
 	isLoading.value = false;
 }
 

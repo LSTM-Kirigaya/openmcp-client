@@ -708,8 +708,14 @@ export class TaskLoop {
             const llm = this.getLlmConfig();
             const toolcallIndexAdapter = getToolCallIndexAdapter(llm, chatData);
 
-            // 发送请求
-            const doConverationResult = await this.doConversation(chatData, toolcallIndexAdapter);
+            // 发送请求（添加超时保护，防止后端未发送 done/error 时永远挂起）
+            const CONVERSATION_TIMEOUT_MS = 30000; // 30 秒
+            const doConverationResult = await Promise.race([
+                this.doConversation(chatData, toolcallIndexAdapter),
+                new Promise<IDoConversationResult>((_, reject) => {
+                    setTimeout(() => reject(new Error('LLM conversation timed out after 120s')), CONVERSATION_TIMEOUT_MS);
+                })
+            ]);
 
             // 如果在调用过程中出发了 abort，则直接中断
             if (this.aborted) {

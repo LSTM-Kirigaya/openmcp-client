@@ -36,11 +36,13 @@
 					</div>
 				</div>
 				<div v-if="client.connectionArgs.connectionType === 'STREAMABLE_HTTP'" class="setting-option setting-option--vertical">
-					<div class="option-heading">
+					<div class="option-heading option-heading--collapsible" @click="headersCollapsed = !headersCollapsed">
 						<span class="option-title">{{ t('http-request-headers') }}</span>
-						<span class="option-description">{{ t('http-request-headers-desc') }}</span>
+						<el-icon class="collapse-icon" :class="{ collapsed: headersCollapsed }">
+							<ArrowDown />
+						</el-icon>
 					</div>
-					<div class="setting-option-input http-headers-input">
+					<div v-show="!headersCollapsed" class="setting-option-input http-headers-input">
 						<KInputObject
 							v-model="client.connectionArgs.headers"
 							:placeholder="t('http-request-headers-placeholder')"
@@ -74,8 +76,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { ArrowDown } from '@element-plus/icons-vue';
 import KInputObject from '@/components/k-input-object/index.vue';
 import { connectionSelectDataViewOption, mcpClientAdapter } from './core';
 
@@ -94,6 +97,7 @@ const emit = defineEmits<{
 
 const client = computed(() => mcpClientAdapter.clients[props.index]);
 const { t } = useI18n();
+const headersCollapsed = ref(true);
 
 const headersSchema = {
 	type: 'object',
@@ -145,7 +149,7 @@ const headersSchema = {
 }
 
 .setting-option--vertical {
-	align-items: stretch;
+	align-items: unset !important;
 	flex-direction: column;
 	gap: 8px;
 }
@@ -160,6 +164,22 @@ const headersSchema = {
 	font-size: 12px;
 	color: var(--el-text-color-secondary);
 	line-height: 1.5;
+}
+
+.option-heading--collapsible {
+	cursor: pointer;
+	user-select: none;
+	justify-content: flex-start;
+}
+
+.collapse-icon {
+	transition: transform 0.2s;
+	font-size: 14px;
+	color: var(--el-text-color-secondary);
+}
+
+.collapse-icon.collapsed {
+	transform: rotate(-90deg);
 }
 
 .http-headers-input {
