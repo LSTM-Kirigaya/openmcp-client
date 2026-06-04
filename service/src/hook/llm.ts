@@ -135,13 +135,13 @@ export const llms = [
 		id: 'minimax',
 		name: 'MiniMax',
 		baseUrl: 'https://api.minimax.io/v1',
-		models: ['MiniMax-M2.7', 'MiniMax-M2.7-highspeed', 'MiniMax-M2.5', 'MiniMax-M2.5-highspeed'],
+		models: ['MiniMax-M3', 'MiniMax-M2.7', 'MiniMax-M2.7-highspeed'],
 		provider: 'MiniMax',
 		isOpenAICompatible: true,
 		description: 'MiniMax large language models with 204K context window',
 		website: 'https://www.minimaxi.com',
 		userToken: '',
-		userModel: 'MiniMax-M2.7'
+		userModel: 'MiniMax-M3'
 	},
 	{
 		id: 'openrouter',

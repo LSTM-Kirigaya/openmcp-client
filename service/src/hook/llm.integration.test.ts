@@ -43,7 +43,7 @@ const client = new OpenAI({
 async function testNonStreaming() {
 	console.log('Test 1: Non-streaming chat completion...');
 	const response = await client.chat.completions.create({
-		model: 'MiniMax-M2.7-highspeed',
+		model: 'MiniMax-M3',
 		messages: [
 			{ role: 'user', content: 'Say "hello" and nothing else.' }
 		],
@@ -62,7 +62,7 @@ async function testNonStreaming() {
 async function testStreaming() {
 	console.log('Test 2: Streaming chat completion...');
 	const stream = await client.chat.completions.create({
-		model: 'MiniMax-M2.7-highspeed',
+		model: 'MiniMax-M3',
 		messages: [
 			{ role: 'user', content: 'Count from 1 to 3.' }
 		],
@@ -88,7 +88,7 @@ async function testStreaming() {
 async function testToolCalling() {
 	console.log('Test 3: Tool calling support...');
 	const response = await client.chat.completions.create({
-		model: 'MiniMax-M2.7-highspeed',
+		model: 'MiniMax-M3',
 		messages: [
 			{ role: 'user', content: 'What is the weather in Tokyo?' }
 		],
